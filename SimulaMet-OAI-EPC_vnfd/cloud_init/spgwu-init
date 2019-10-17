@@ -1,0 +1,5 @@
+#cloud-config
+hostname: spgw-u
+password: {{ password }}
+chpasswd: { expire: False }
+ssh_pwauth: True

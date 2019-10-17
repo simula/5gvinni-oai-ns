@@ -50,10 +50,11 @@ vnfd:vnfd-catalog:
 
             # ====== VDU VM Configuration ===================================
             vm-flavor:
-                vcpu-count: 2
-                memory-mb: 4096
+                vcpu-count: 1
+                memory-mb: 2048
                 storage-gb: 24
             image: 'Template-Ubuntu-5gVINNI-Development-Bionic'
+            cloud-init-file: mme-init
 
             # ====== Interfaces =============================================
             interface:
@@ -98,10 +99,11 @@ vnfd:vnfd-catalog:
 
             # ====== VDU VM Configuration ===================================
             vm-flavor:
-                vcpu-count: 2
-                memory-mb: 4096
+                vcpu-count: 1
+                memory-mb: 2048
                 storage-gb: 24
             image: 'Template-Ubuntu-5gVINNI-Development-Bionic'
+            cloud-init-file: hss-init
 
             # ====== Interfaces =============================================
             interface:
@@ -134,10 +136,11 @@ vnfd:vnfd-catalog:
 
             # ====== VDU VM Configuration ===================================
             vm-flavor:
-                vcpu-count: 2
-                memory-mb: 4096
+                vcpu-count: 1
+                memory-mb: 2048
                 storage-gb: 24
             image: 'Template-Ubuntu-5gVINNI-Development-Bionic'
+            cloud-init-file: spgwc-init
 
             # ====== Interfaces =============================================
             interface:
@@ -178,10 +181,11 @@ vnfd:vnfd-catalog:
 
             # ====== VDU VM Configuration ===================================
             vm-flavor:
-                vcpu-count: 2
-                memory-mb: 4096
+                vcpu-count: 1
+                memory-mb: 2048
                 storage-gb: 24
             image: 'Template-Ubuntu-5gVINNI-Development-Bionic'
+            cloud-init-file: spgwu-init
             # guest-epa:
             #     cpu-pinning-policy: DEDICATED
             #     mempage-size: LARGE
