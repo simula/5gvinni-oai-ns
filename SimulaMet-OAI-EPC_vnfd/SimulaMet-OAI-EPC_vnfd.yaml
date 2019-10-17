@@ -73,20 +73,20 @@ vnfd:vnfd-catalog:
                 type: INTERNAL
                 virtual-interface:
                     type: PARAVIRT
-                internal-connection-point-ref: mme-s1u
+                internal-connection-point-ref: mme-s11
             -   name: eth3
-                type: INTERNAL
+                type: EXTERNAL
                 virtual-interface:
                     type: PARAVIRT
-                internal-connection-point-ref: mme-s1c
+                external-connection-point-ref: mme-s1c
 
             # ====== Internal Connection Points =============================
             internal-connection-point:
             - id: mme-s6a
               name: mme-s6a
               type: VPORT
-            - id: mme-s1u
-              name: mme-s1u
+            - id: mme-s11
+              name: mme-s11
               type: VPORT
 
 
@@ -117,20 +117,12 @@ vnfd:vnfd-catalog:
                 virtual-interface:
                     type: PARAVIRT
                 internal-connection-point-ref: hss-s6a
-            -   name: eth2
-                type: INTERNAL
-                virtual-interface:
-                    type: PARAVIRT
-                internal-connection-point-ref: hss-s11
 
 
             # ====== Internal Connection Points =============================
             internal-connection-point:
             - id: hss-s6a
               name: hss-s6a
-              type: VPORT
-            - id: hss-s11
-              name: hss-s11
               type: VPORT
 
 
@@ -190,6 +182,9 @@ vnfd:vnfd-catalog:
                 memory-mb: 4096
                 storage-gb: 24
             image: 'Template-Ubuntu-5gVINNI-Development-Bionic'
+            # guest-epa:
+            #     cpu-pinning-policy: DEDICATED
+            #     mempage-size: LARGE
 
             # ====== Interfaces =============================================
             interface:
@@ -206,10 +201,10 @@ vnfd:vnfd-catalog:
                     type: PARAVIRT
                 internal-connection-point-ref: spgwu-sxab
             -   name: eth2
-                type: INTERNAL
+                type: EXTERNAL
                 virtual-interface:
                     type: PARAVIRT
-                internal-connection-point-ref: spgwu-s1u
+                external-connection-point-ref: spgwu-s1u
             -   name: eth3
                 type: EXTERNAL
                 virtual-interface:
@@ -222,31 +217,51 @@ vnfd:vnfd-catalog:
             - id: spgwu-sxab
               name: spgwu-sxab
               type: VPORT
-            - id: spgwu-s1u
-              name: spgwu-s1u
-              type: VPORT
 
 
         # ###### Internal VLDs ##############################################
-        internal-vld:
+
+        # ====== Network Address Ranges of the Internal Networks ============
+        ip-profiles:
+        - name: S6a
+          description: S6a Network
+          ip-profile-params:
+              ip-version: ipv4
+              subnet-address: 172.16.6.0/24
+              dhcp-params:
+                  enabled: true
+        - name: S11
+          description: S11 Network
+          ip-profile-params:
+              ip-version: ipv4
+              subnet-address: 172.16.1.0/24
+              dhcp-params:
+                  enabled: true
+        - name: SXab
+          description: SXab Network
+          ip-profile-params:
+              ip-version: ipv4
+              subnet-address: 172.55.55.0/24
+              dhcp-params:
+                  enabled: true
+
+        # ====== Internal Connections =======================================
         - id: s6a
+          ip-profile-ref: S6a
           name: S6a
-          internal -connection-point:
+          internal-connection-point:
           - id-ref: mme-s6a
           - id-ref: hss-s6a
         - id: s11
           name: S11
-          internal -connection-point:
-          - id-ref: hss-s11
+          ip-profile-ref: S11
+          internal-connection-point:
+          - id-ref: mme-s11
           - id-ref: spgwc-s11
-        - id: s1u
-          name: S1-U
-          internal -connection-point:
-          - id-ref: hss-s1u
-          - id-ref: spgwu-s1u
         - id: sxab
           name: SXab
-          internal -connection-point:
+          ip-profile-ref: SXab
+          internal-connection-point:
           - id-ref: spgwu-sxab
           - id-ref: spgwc-sxab
 
@@ -258,6 +273,7 @@ vnfd:vnfd-catalog:
         -   name: hss-mgmt
         -   name: spgwc-mgmt
         -   name: spgwu-mgmt
+        -   name: spgwu-s1u
         -   name: spgwu-sgi
 
 
