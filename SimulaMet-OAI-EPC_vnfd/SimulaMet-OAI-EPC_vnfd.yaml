@@ -1,0 +1,290 @@
+# =====================================================================
+#     #######  #####          #     #   ###   #     # #     #   ###
+#     #       #     #         #     #    #    ##    # ##    #    #
+#     #       #               #     #    #    # #   # # #   #    #
+#      #####  #  ####  #####  #     #    #    #  #  # #  #  #    #
+#           # #     #          #   #     #    #   # # #   # #    #
+#     #     # #     #           # #      #    #    ## #    ##    #
+#      #####   #####             #      ###   #     # #     #   ###
+# =====================================================================
+#
+# SimulaMet OpenAirInterface Evolved Packet Core VNF
+# Copyright (C) 2019 by Thomas Dreibholz
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Contact: dreibh@simula.no
+
+vnfd:vnfd-catalog:
+    vnfd:
+    -   id: SimulaMet-OAI-EPC_vnfd
+        name: SimulaMet-OAI-EPC_vnfd
+        short-name: SimulaMet-OAI-EPC_vnfd
+        description: SimulaMet OpenAirInterface Evolved Packet Core VNF
+        vendor: Thomas Dreibholz
+        version: '1.0'
+        logo: NorNet.png
+
+        # ###### Management Interface #######################################
+        mgmt-interface:
+            cp: mme-mgmt
+
+        vdu:
+
+        # ###### VDU: MME (Mobility Management Entity) ######################
+        -   id: MME
+            name: MME
+            description: MME
+            count: 1
+
+            # ====== VDU VM Configuration ===================================
+            vm-flavor:
+                vcpu-count: 2
+                memory-mb: 4096
+                storage-gb: 24
+            image: 'Template-Ubuntu-5gVINNI-Development-Bionic'
+
+            # ====== Interfaces =============================================
+            interface:
+            # Specify the external interfaces
+            # There can be multiple interfaces defined
+            -   name: eth0
+                type: EXTERNAL
+                virtual-interface:
+                    type: PARAVIRT
+                external-connection-point-ref: mme-mgmt
+            -   name: eth1
+                type: INTERNAL
+                virtual-interface:
+                    type: PARAVIRT
+                internal-connection-point-ref: mme-s6a
+            -   name: eth2
+                type: INTERNAL
+                virtual-interface:
+                    type: PARAVIRT
+                internal-connection-point-ref: mme-s1u
+            -   name: eth3
+                type: INTERNAL
+                virtual-interface:
+                    type: PARAVIRT
+                internal-connection-point-ref: mme-s1c
+
+            # ====== Internal Connection Points =============================
+            internal-connection-point:
+            - id: mme-s6a
+              name: mme-s6a
+              type: VPORT
+            - id: mme-s1u
+              name: mme-s1u
+              type: VPORT
+
+
+        # ###### VDU: HSS (Home Subscriber Server) ##########################
+        -   id: HSS
+            name: HSS
+            description: HSS
+            count: 1
+
+            # ====== VDU VM Configuration ===================================
+            vm-flavor:
+                vcpu-count: 2
+                memory-mb: 4096
+                storage-gb: 24
+            image: 'Template-Ubuntu-5gVINNI-Development-Bionic'
+
+            # ====== Interfaces =============================================
+            interface:
+            # Specify the external interfaces
+            # There can be multiple interfaces defined
+            -   name: eth0
+                type: EXTERNAL
+                virtual-interface:
+                    type: PARAVIRT
+                external-connection-point-ref: hss-mgmt
+            -   name: eth1
+                type: INTERNAL
+                virtual-interface:
+                    type: PARAVIRT
+                internal-connection-point-ref: hss-s6a
+            -   name: eth2
+                type: INTERNAL
+                virtual-interface:
+                    type: PARAVIRT
+                internal-connection-point-ref: hss-s11
+
+
+            # ====== Internal Connection Points =============================
+            internal-connection-point:
+            - id: hss-s6a
+              name: hss-s6a
+              type: VPORT
+            - id: hss-s11
+              name: hss-s11
+              type: VPORT
+
+
+        # ###### VDU: SPGW-U (Serving & Packet Data Network Gateway - Control Plane) #####
+        -   id: SPGW-C
+            name: SPGW-C
+            description: SPGW-C
+            count: 1
+
+            # ====== VDU VM Configuration ===================================
+            vm-flavor:
+                vcpu-count: 2
+                memory-mb: 4096
+                storage-gb: 24
+            image: 'Template-Ubuntu-5gVINNI-Development-Bionic'
+
+            # ====== Interfaces =============================================
+            interface:
+            # Specify the external interfaces
+            # There can be multiple interfaces defined
+            -   name: eth0
+                type: EXTERNAL
+                virtual-interface:
+                    type: PARAVIRT
+                external-connection-point-ref: spgwc-mgmt
+            -   name: eth1
+                type: INTERNAL
+                virtual-interface:
+                    type: PARAVIRT
+                internal-connection-point-ref: spgwc-sxab
+            -   name: eth2
+                type: INTERNAL
+                virtual-interface:
+                    type: PARAVIRT
+                internal-connection-point-ref: spgwc-s11
+
+
+            # ====== Internal Connection Points =============================
+            internal-connection-point:
+            - id: spgwc-sxab
+              name: spgwc-sxab
+              type: VPORT
+            - id: spgwc-s11
+              name: spgwc-s11
+              type: VPORT
+
+
+        # ###### VDU: SPGW-U (Serving & Packet Data Network Gateway - User Plane) #####
+        -   id: SPGW-U
+            name: SPGW-U
+            description: SPGW-U
+            count: 1
+
+            # ====== VDU VM Configuration ===================================
+            vm-flavor:
+                vcpu-count: 2
+                memory-mb: 4096
+                storage-gb: 24
+            image: 'Template-Ubuntu-5gVINNI-Development-Bionic'
+
+            # ====== Interfaces =============================================
+            interface:
+            # Specify the external interfaces
+            # There can be multiple interfaces defined
+            -   name: eth0
+                type: EXTERNAL
+                virtual-interface:
+                    type: PARAVIRT
+                external-connection-point-ref: spgwu-mgmt
+            -   name: eth1
+                type: INTERNAL
+                virtual-interface:
+                    type: PARAVIRT
+                internal-connection-point-ref: spgwu-sxab
+            -   name: eth2
+                type: INTERNAL
+                virtual-interface:
+                    type: PARAVIRT
+                internal-connection-point-ref: spgwu-s1u
+            -   name: eth3
+                type: EXTERNAL
+                virtual-interface:
+                    type: PARAVIRT
+                external-connection-point-ref: spgwu-sgi
+
+
+            # ====== Internal Connection Points =============================
+            internal-connection-point:
+            - id: spgwu-sxab
+              name: spgwu-sxab
+              type: VPORT
+            - id: spgwu-s1u
+              name: spgwu-s1u
+              type: VPORT
+
+
+        # ###### Internal VLDs ##############################################
+        internal-vld:
+        - id: s6a
+          name: S6a
+          internal -connection-point:
+          - id-ref: mme-s6a
+          - id-ref: hss-s6a
+        - id: s11
+          name: S11
+          internal -connection-point:
+          - id-ref: hss-s11
+          - id-ref: spgwc-s11
+        - id: s1u
+          name: S1-U
+          internal -connection-point:
+          - id-ref: hss-s1u
+          - id-ref: spgwu-s1u
+        - id: sxab
+          name: SXab
+          internal -connection-point:
+          - id-ref: spgwu-sxab
+          - id-ref: spgwc-sxab
+
+
+        # ###### External Connection Points #################################
+        connection-point:
+        -   name: mme-mgmt
+        -   name: mme-s1c
+        -   name: hss-mgmt
+        -   name: spgwc-mgmt
+        -   name: spgwu-mgmt
+        -   name: spgwu-sgi
+
+
+        # Uncomment and update below to enable juju
+        # charm configuration for the VNF
+        # vnf-configuration:
+        #     juju:
+        #         charm: <charm name>
+        #     service-primitive:
+        #     -   name: config
+        #         parameter:
+        #         -   name: <config parameter>
+        #             data-type: [STRING|INTEGER]
+        #             mandatory: [true|false]
+        #             default-value: <value>
+        #     -   name: <action name>
+        #         parameter:
+        #         -   name: <action parameter>
+        #             data-type: [STRING|INTEGER]
+        #             mandatory: [true|false]
+        #             default-value: <value>
+        #     initial-config-primitive:
+        #     -   name: config
+        #         parameter:
+        #         -   name: <config name>
+        #             value: <value>
+        #     -   name: <action name>
+        #         parameter:
+        #         -   name: <action parameter>
+        #             value: <value>
