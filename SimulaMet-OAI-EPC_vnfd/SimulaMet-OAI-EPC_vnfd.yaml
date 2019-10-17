@@ -246,6 +246,7 @@ vnfd:vnfd-catalog:
                   enabled: true
 
         # ====== Internal Connections =======================================
+        internal-vld:
         - id: s6a
           ip-profile-ref: S6a
           name: S6a
