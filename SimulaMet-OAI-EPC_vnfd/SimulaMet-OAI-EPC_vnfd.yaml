@@ -111,6 +111,7 @@ vnfd:vnfd-catalog:
             # There can be multiple interfaces defined
             -   name: eth0
                 type: EXTERNAL
+                mgmt-interface: true
                 virtual-interface:
                     type: PARAVIRT
                 external-connection-point-ref: hss-mgmt
@@ -120,12 +121,52 @@ vnfd:vnfd-catalog:
                     type: PARAVIRT
                 internal-connection-point-ref: hss-s6a
 
-
             # ====== Internal Connection Points =============================
             internal-connection-point:
             - id: hss-s6a
               name: hss-s6a
               type: VPORT
+
+            # ====== Juju Charm =============================================
+            vdu-configuration:
+                juju:
+                    charm: hsscharm
+                initial-config-primitive:
+                -   seq: '1'
+                    name: config
+                    parameter:
+                    -   name: ssh-hostname
+                        value: <rw_mgmt_ip>
+                    -   name: ssh-username
+                        value: nornetpp
+                    -   name: ssh-password
+                        value: <password>
+                -   seq: '2'
+                    name: configure-hss
+                    parameter:
+                    -   name: mme-mgmt-ip
+                        data-type: STRING
+                        value: <mme-mgmt_ip>
+                    -   name: mme-s1c-ip
+                        data-type: STRING
+                        value: <mme-s1c_ip>
+                    -   name: hss-mgmt-ip
+                        data-type: STRING
+                        value: <hss-mgmt_ip>
+                    -   name: spgwc-mgmt-ip
+                        data-type: STRING
+                        value: <spgwc-mgmt_ip>
+                    -   name: spgwu-mgmt-ip
+                        data-type: STRING
+                        value: <spgwu-mgmt_ip>
+                    -   name: spgwu-s1u-ip
+                        data-type: STRING
+                        value: <spgwu-s1u_ip>
+                    -   name: spgwu-sgi-ip
+                        data-type: STRING
+                        value: <spgwu-sgi_ip>
+                -   seq: '3'
+                    name: restart-hss
 
 
         # ###### VDU: SPGW-U (Serving & Packet Data Network Gateway - Control Plane) #####
@@ -162,7 +203,6 @@ vnfd:vnfd-catalog:
                     type: PARAVIRT
                 internal-connection-point-ref: spgwc-s11
 
-
             # ====== Internal Connection Points =============================
             internal-connection-point:
             - id: spgwc-sxab
@@ -171,6 +211,48 @@ vnfd:vnfd-catalog:
             - id: spgwc-s11
               name: spgwc-s11
               type: VPORT
+
+            # ====== Juju Charm =============================================
+            vdu-configuration:
+                juju:
+                    charm: spgwccharm
+                initial-config-primitive:
+                -   seq: '1'
+                    name: config
+                    parameter:
+                    -   name: ssh-hostname
+                        value: <rw_mgmt_ip>
+                    -   name: ssh-username
+                        value: nornetpp
+                    -   name: ssh-password
+                        value: <password>
+                -   seq: '2'
+                    name: configure-spgwc
+                    parameter:
+                    -   name: mme-mgmt-ip
+                        data-type: STRING
+                        value: <mme-mgmt_ip>
+                    -   name: mme-s1c-ip
+                        data-type: STRING
+                        value: <mme-s1c_ip>
+                    -   name: hss-mgmt-ip
+                        data-type: STRING
+                        value: <hss-mgmt_ip>
+                    -   name: spgwc-mgmt-ip
+                        data-type: STRING
+                        value: <spgwc-mgmt_ip>
+                    -   name: spgwu-mgmt-ip
+                        data-type: STRING
+                        value: <spgwu-mgmt_ip>
+                    -   name: spgwu-s1u-ip
+                        data-type: STRING
+                        value: <spgwu-s1u_ip>
+                    -   name: spgwu-sgi-ip
+                        data-type: STRING
+                        value: <spgwu-sgi_ip>
+                -   seq: '3'
+                    name: restart-spgwc
+
 
 
         # ###### VDU: SPGW-U (Serving & Packet Data Network Gateway - User Plane) #####
@@ -215,12 +297,52 @@ vnfd:vnfd-catalog:
                     type: PARAVIRT
                 external-connection-point-ref: spgwu-sgi
 
-
             # ====== Internal Connection Points =============================
             internal-connection-point:
             - id: spgwu-sxab
               name: spgwu-sxab
               type: VPORT
+
+            # ====== Juju Charm =============================================
+            vdu-configuration:
+                juju:
+                    charm: spgwucharm
+                initial-config-primitive:
+                -   seq: '1'
+                    name: config
+                    parameter:
+                    -   name: ssh-hostname
+                        value: <rw_mgmt_ip>
+                    -   name: ssh-username
+                        value: nornetpp
+                    -   name: ssh-password
+                        value: <password>
+                -   seq: '2'
+                    name: configure-spgwu
+                    parameter:
+                    -   name: mme-mgmt-ip
+                        data-type: STRING
+                        value: <mme-mgmt_ip>
+                    -   name: mme-s1c-ip
+                        data-type: STRING
+                        value: <mme-s1c_ip>
+                    -   name: hss-mgmt-ip
+                        data-type: STRING
+                        value: <hss-mgmt_ip>
+                    -   name: spgwc-mgmt-ip
+                        data-type: STRING
+                        value: <spgwc-mgmt_ip>
+                    -   name: spgwu-mgmt-ip
+                        data-type: STRING
+                        value: <spgwu-mgmt_ip>
+                    -   name: spgwu-s1u-ip
+                        data-type: STRING
+                        value: <spgwu-s1u_ip>
+                    -   name: spgwu-sgi-ip
+                        data-type: STRING
+                        value: <spgwu-sgi_ip>
+                -   seq: '3'
+                    name: restart-spgwu
 
 
         # ###### Internal VLDs ##############################################
@@ -299,25 +421,25 @@ vnfd:vnfd-catalog:
             -   seq: '2'
                 name: configure-epc
                 parameter:
-                -   name: mme-mgmt
+                -   name: mme-mgmt-ip
                     data-type: STRING
                     value: <mme-mgmt_ip>
-                -   name: mme-s1c
+                -   name: mme-s1c-ip
                     data-type: STRING
                     value: <mme-s1c_ip>
-                -   name: hss-mgmt
+                -   name: hss-mgmt-ip
                     data-type: STRING
                     value: <hss-mgmt_ip>
-                -   name: spgwc-mgmt
+                -   name: spgwc-mgmt-ip
                     data-type: STRING
                     value: <spgwc-mgmt_ip>
-                -   name: spgwu-mgmt
+                -   name: spgwu-mgmt-ip
                     data-type: STRING
                     value: <spgwu-mgmt_ip>
-                -   name: spgwu-s1u
+                -   name: spgwu-s1u-ip
                     data-type: STRING
                     value: <spgwu-s1u_ip>
-                -   name: spgwu-sgi
+                -   name: spgwu-sgi-ip
                     data-type: STRING
                     value: <spgwu-sgi_ip>
             -   seq: '3'

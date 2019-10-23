@@ -1,0 +1,12 @@
+name: hsscharm
+summary:  SimulaMet-OAI MME Charm
+maintainer: Thomas Dreibholz <dreibh@simula.no>
+description: |
+  This charm configures the MME.
+tags:
+  - nfv
+subordinate: false
+series:
+  - xenial
+  - bionic
+  - focal

@@ -1,0 +1,12 @@
+name: hsscharm
+summary:  SimulaMet-OAI SPGW-U Charm
+maintainer: Thomas Dreibholz <dreibh@simula.no>
+description: |
+  This charm configures the SPGW-U.
+tags:
+  - nfv
+subordinate: false
+series:
+  - xenial
+  - bionic
+  - focal
