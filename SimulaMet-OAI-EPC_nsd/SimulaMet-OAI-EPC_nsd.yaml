@@ -36,82 +36,65 @@ nsd:nsd-catalog:
         version: '1.0'
         logo: NorNet.png
 
-        # Specify the VNFDs that are part of this NSD
+        # ###### VNFDs that are part of this NSD ############################
         constituent-vnfd:
-            # The member-vnf-index needs to be unique, starting from 1
-            # vnfd-id-ref is the id of the VNFD
-            # Multiple constituent VNFDs can be specified
         -   member-vnf-index: 1
             vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
 
+        # ###### VLDs #######################################################
         vld:
-        # Networks for the VNFs
-        -   id: SimulaMet-OAI-EPC_nsd_vld0
+        # ====== Management =================================================
+        -   id: SimulaMet-OAI-EPC_nsd-mgmt
             name: management
             short-name: management
-            type: ELAN
             mgmt-network: 'true'
-            # vim-network-name: <update>
-            # provider-network:
-            #     overlay-type: VLAN
-            #     segmentation_id: <update>
-            vnfd-connection-point-ref:
-            # Specify the constituent VNFs
-            # member-vnf-index-ref - entry from constituent vnf
-            # vnfd-id-ref - VNFD id
-            # vnfd-connection-point-ref - connection point name in the VNFD
-            -   member-vnf-index-ref: 1
-                vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
-                # NOTE: Validate the entry below
-                vnfd-connection-point-ref: vnf-cp0
-        -   id: SimulaMet-OAI-EPC_nsd_vld1
-            name: SimulaMet-OAI-EPC_nsd_vld1
-            short-name: SimulaMet-OAI-EPC_nsd_vld1
             type: ELAN
-            # vim-network-name: <update>
-            # provider-network:
-            #     overlay-type: VLAN
-            #     segmentation_id: <update>
+            vim-network-name: management
             vnfd-connection-point-ref:
-            # Specify the constituent VNFs
-            # member-vnf-index-ref - entry from constituent vnf
-            # vnfd-id-ref - VNFD id
-            # vnfd-connection-point-ref - connection point name in the VNFD
             -   member-vnf-index-ref: 1
                 vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
-                # NOTE: Validate the entry below
-                vnfd-connection-point-ref: vnf-cp1
-        -   id: SimulaMet-OAI-EPC_nsd_vld2
-            name: SimulaMet-OAI-EPC_nsd_vld2
-            short-name: SimulaMet-OAI-EPC_nsd_vld2
+                vnfd-connection-point-ref: mme-mgmt
+            -   member-vnf-index-ref: 1
+                vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
+                vnfd-connection-point-ref: hss-mgmt
+            -   member-vnf-index-ref: 1
+                vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
+                vnfd-connection-point-ref: spgwc-mgmt
+            -   member-vnf-index-ref: 1
+                vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
+                vnfd-connection-point-ref: spgwu-mgmt
+
+        # ====== S1-C =======================================================
+        -   id: SimulaMet-OAI-EPC_nsd-S1C
+            name: SimulaMet-OAI-EPC_nsd-S1C
+            short-name: SimulaMet-OAI-EPC_nsd-S1C
             type: ELAN
-            # vim-network-name: <update>
-            # provider-network:
-            #     overlay-type: VLAN
-            #     segmentation_id: <update>
+            vim-network-name: osm-ext
             vnfd-connection-point-ref:
-            # Specify the constituent VNFs
-            # member-vnf-index-ref - entry from constituent vnf
-            # vnfd-id-ref - VNFD id
-            # vnfd-connection-point-ref - connection point name in the VNFD
             -   member-vnf-index-ref: 1
                 vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
-                # NOTE: Validate the entry below
-                vnfd-connection-point-ref: vnf-cp2
-        -   id: SimulaMet-OAI-EPC_nsd_vld3
-            name: SimulaMet-OAI-EPC_nsd_vld3
-            short-name: SimulaMet-OAI-EPC_nsd_vld3
+                vnfd-connection-point-ref: vnf-s1c
+                ip-address: 192.168.247.102
+
+        # ====== S1-U =======================================================
+        -   id: SimulaMet-OAI-EPC_nsd-S1U
+            name: SimulaMet-OAI-EPC_nsd-S1U
+            short-name: SimulaMet-OAI-EPC_nsd-S1U
             type: ELAN
-            # vim-network-name: <update>
-            # provider-network:
-            #     overlay-type: VLAN
-            #     segmentation_id: <update>
+            vim-network-name: osm-ext
             vnfd-connection-point-ref:
-            # Specify the constituent VNFs
-            # member-vnf-index-ref - entry from constituent vnf
-            # vnfd-id-ref - VNFD id
-            # vnfd-connection-point-ref - connection point name in the VNFD
             -   member-vnf-index-ref: 1
                 vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
-                # NOTE: Validate the entry below
-                vnfd-connection-point-ref: vnf-cp3
+                vnfd-connection-point-ref: vnf-s1u
+                ip-address: 192.168.248.159
+
+        # ====== SGi ========================================================
+        -   id: SimulaMet-OAI-EPC_nsd-SGi
+            name: SimulaMet-OAI-EPC_nsd-SGi
+            short-name: SimulaMet-OAI-EPC_nsd-SGi
+            type: ELAN
+            vim-network-name: osm-ext
+            vnfd-connection-point-ref:
+            -   member-vnf-index-ref: 1
+                vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
+                vnfd-connection-point-ref: vnf-sgi
