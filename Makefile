@@ -41,17 +41,23 @@ VALIDATE_DESCRIPTOR = ../devops/descriptor-packages/tools/validate_descriptor.py
 GENERATE_DESCRIPTOR = ../devops/descriptor-packages/tools/generate_descriptor_pkg.sh
 
 
+.PHONY:	all
 all:	SimulaMet-OAI-EPC_vnfd.tar.gz SimulaMet-OAI-EPC_nsd.tar.gz
 
 
+.PHONY:	SimulaMet-OAI-EPC_vnfd.tar.gz
 SimulaMet-OAI-EPC_vnfd.tar.gz:
 	$(VALIDATE_DESCRIPTOR) SimulaMet-OAI-EPC_vnfd/SimulaMet-OAI-EPC_vnfd.yaml
 	$(GENERATE_DESCRIPTOR) -t vnfd -N SimulaMet-OAI-EPC_vnfd/
+	du -k SimulaMet-OAI-EPC_vnfd.tar.gz
 
+.PHONY:	SimulaMet-OAI-EPC_nsd.tar.gz
 SimulaMet-OAI-EPC_nsd.tar.gz:
 	$(VALIDATE_DESCRIPTOR) SimulaMet-OAI-EPC_nsd/SimulaMet-OAI-EPC_nsd.yaml
 	$(GENERATE_DESCRIPTOR) -t nsd -N SimulaMet-OAI-EPC_nsd/
+	du -k SimulaMet-OAI-EPC_nsd.tar.gz
 
 
+.PHONY:	clean
 clean:
 	rm -f *.tar.gz
