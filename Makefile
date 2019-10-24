@@ -45,14 +45,14 @@ GENERATE_DESCRIPTOR = ../devops/descriptor-packages/tools/generate_descriptor_pk
 all:	SimulaMet-OAI-EPC_vnfd.tar.gz SimulaMet-OAI-EPC_nsd.tar.gz
 
 
-.PHONY:	SimulaMet-OAI-EPC_vnfd.tar.gz
-SimulaMet-OAI-EPC_vnfd.tar.gz:
+VNFD_FILES := $(shell git ls-tree -r --name-only HEAD SimulaMet-OAI-EPC_vnfd)
+SimulaMet-OAI-EPC_vnfd.tar.gz:	 $(VNFD_FILES)
 	$(VALIDATE_DESCRIPTOR) SimulaMet-OAI-EPC_vnfd/SimulaMet-OAI-EPC_vnfd.yaml
 	$(GENERATE_DESCRIPTOR) -t vnfd -N SimulaMet-OAI-EPC_vnfd/
 	du -k SimulaMet-OAI-EPC_vnfd.tar.gz
 
-.PHONY:	SimulaMet-OAI-EPC_nsd.tar.gz
-SimulaMet-OAI-EPC_nsd.tar.gz:
+NSD_FILES := $(shell git ls-tree -r --name-only HEAD SimulaMet-OAI-EPC_nsd)
+SimulaMet-OAI-EPC_nsd.tar.gz:	$(NSD_FILES)
 	$(VALIDATE_DESCRIPTOR) SimulaMet-OAI-EPC_nsd/SimulaMet-OAI-EPC_nsd.yaml
 	$(GENERATE_DESCRIPTOR) -t nsd -N SimulaMet-OAI-EPC_nsd/
 	du -k SimulaMet-OAI-EPC_nsd.tar.gz
