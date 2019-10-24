@@ -25,10 +25,10 @@ configure-epc:
        description: "SPGW-U S1-U IP"
        data-type: string
        default: "0.0.0.0"
-    spgwu-sgi-ip:
-       description: "SPGW-U SGi IP"
-       data-type: string
-       default: "0.0.0.0"
+    #spgwu-sgi-ip:
+       #description: "SPGW-U SGi IP"
+       #data-type: string
+       #default: "0.0.0.0"
 
 restart-epc:
   description: "Restarts the EPC"
