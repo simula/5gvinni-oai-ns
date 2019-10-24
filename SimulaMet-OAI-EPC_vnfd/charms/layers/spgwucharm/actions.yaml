@@ -1,5 +1,5 @@
-configure-epc:
-  description: "Configures the EPC"
+configure-spgwu:
+  description: "Configures the SPGW-U"
   params:
     #mme-mgmt-ip:
        #description: "MME Management IP"
@@ -30,6 +30,6 @@ configure-epc:
        data-type: string
        default: "0.0.0.0"
 
-restart-epc:
-  description: "Restarts the EPC"
+restart-spgwu:
+  description: "Restarts the SPGW-U"
   params:
