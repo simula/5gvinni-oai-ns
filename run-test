@@ -53,6 +53,7 @@ echo -e "\x1b[34m`date +%FT%H:%M:%S`: Instantiating ...\x1b[0m"
 osm ns-create \
    --ns_name SimulaMet-OAI-EPC \
    --nsd_name SimulaMet-OAI-EPC_nsd \
+   --config_file params.yaml \
    --vim_account openstack-site \
    --ssh_keys ~/.ssh/id_rsa.pub
 # --config '{vld: [ {name: mgmtnet, vim-network-name: osm-ext} ] }'
