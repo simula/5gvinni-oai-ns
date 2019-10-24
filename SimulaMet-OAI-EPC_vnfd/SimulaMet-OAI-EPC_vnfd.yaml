@@ -146,25 +146,25 @@ vnfd:vnfd-catalog:
                     parameter:
                     -   name: mme-mgmt-ip
                         data-type: STRING
-                        value: <mme-mgmt_ip>
+                        value: <mme_mgmt_ip>
                     -   name: mme-s1c-ip
                         data-type: STRING
-                        value: <mme-s1c_ip>
+                        value: <mme_s1c_ip>
                     -   name: hss-mgmt-ip
                         data-type: STRING
-                        value: <hss-mgmt_ip>
+                        value: <hss_mgmt_ip>
                     -   name: spgwc-mgmt-ip
                         data-type: STRING
-                        value: <spgwc-mgmt_ip>
+                        value: <spgwc_mgmt_ip>
                     -   name: spgwu-mgmt-ip
                         data-type: STRING
-                        value: <spgwu-mgmt_ip>
+                        value: <spgwu_mgmt_ip>
                     -   name: spgwu-s1u-ip
                         data-type: STRING
-                        value: <spgwu-s1u_ip>
+                        value: <spgwu_s1u_ip>
                     -   name: spgwu-sgi-ip
                         data-type: STRING
-                        value: <spgwu-sgi_ip>
+                        value: <spgwu_sgi_ip>
                 -   seq: '3'
                     name: restart-hss
 
@@ -231,25 +231,25 @@ vnfd:vnfd-catalog:
                     parameter:
                     -   name: mme-mgmt-ip
                         data-type: STRING
-                        value: <mme-mgmt_ip>
+                        value: <mme_mgmt_ip>
                     -   name: mme-s1c-ip
                         data-type: STRING
-                        value: <mme-s1c_ip>
+                        value: <mme_s1c_ip>
                     -   name: hss-mgmt-ip
                         data-type: STRING
-                        value: <hss-mgmt_ip>
+                        value: <hss_mgmt_ip>
                     -   name: spgwc-mgmt-ip
                         data-type: STRING
-                        value: <spgwc-mgmt_ip>
+                        value: <spgwc_mgmt_ip>
                     -   name: spgwu-mgmt-ip
                         data-type: STRING
-                        value: <spgwu-mgmt_ip>
+                        value: <spgwu_mgmt_ip>
                     -   name: spgwu-s1u-ip
                         data-type: STRING
-                        value: <spgwu-s1u_ip>
+                        value: <spgwu_s1u_ip>
                     -   name: spgwu-sgi-ip
                         data-type: STRING
-                        value: <spgwu-sgi_ip>
+                        value: <spgwu_sgi_ip>
                 -   seq: '3'
                     name: restart-spgwc
 
@@ -322,25 +322,25 @@ vnfd:vnfd-catalog:
                     parameter:
                     -   name: mme-mgmt-ip
                         data-type: STRING
-                        value: <mme-mgmt_ip>
+                        value: <mme_mgmt_ip>
                     -   name: mme-s1c-ip
                         data-type: STRING
-                        value: <mme-s1c_ip>
+                        value: <mme_s1c_ip>
                     -   name: hss-mgmt-ip
                         data-type: STRING
-                        value: <hss-mgmt_ip>
+                        value: <hss_mgmt_ip>
                     -   name: spgwc-mgmt-ip
                         data-type: STRING
-                        value: <spgwc-mgmt_ip>
+                        value: <spgwc_mgmt_ip>
                     -   name: spgwu-mgmt-ip
                         data-type: STRING
-                        value: <spgwu-mgmt_ip>
+                        value: <spgwu_mgmt_ip>
                     -   name: spgwu-s1u-ip
                         data-type: STRING
-                        value: <spgwu-s1u_ip>
+                        value: <spgwu_s1u_ip>
                     -   name: spgwu-sgi-ip
                         data-type: STRING
-                        value: <spgwu-sgi_ip>
+                        value: <spgwu_sgi_ip>
                 -   seq: '3'
                     name: restart-spgwu
 
@@ -423,25 +423,25 @@ vnfd:vnfd-catalog:
                 parameter:
                 -   name: mme-mgmt-ip
                     data-type: STRING
-                    value: <mme-mgmt_ip>
+                    value: <mme_mgmt_ip>
                 -   name: mme-s1c-ip
                     data-type: STRING
-                    value: <mme-s1c_ip>
+                    value: <mme_s1c_ip>
                 -   name: hss-mgmt-ip
                     data-type: STRING
-                    value: <hss-mgmt_ip>
+                    value: <hss_mgmt_ip>
                 -   name: spgwc-mgmt-ip
                     data-type: STRING
-                    value: <spgwc-mgmt_ip>
+                    value: <spgwc_mgmt_ip>
                 -   name: spgwu-mgmt-ip
                     data-type: STRING
-                    value: <spgwu-mgmt_ip>
+                    value: <spgwu_mgmt_ip>
                 -   name: spgwu-s1u-ip
                     data-type: STRING
-                    value: <spgwu-s1u_ip>
+                    value: <spgwu_s1u_ip>
                 -   name: spgwu-sgi-ip
                     data-type: STRING
-                    value: <spgwu-sgi_ip>
+                    value: <spgwu_sgi_ip>
             -   seq: '3'
                 name: restart-epc
 
