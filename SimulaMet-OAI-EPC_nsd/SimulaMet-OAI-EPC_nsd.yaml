@@ -49,7 +49,7 @@ nsd:nsd-catalog:
             short-name: management
             mgmt-network: 'true'
             type: ELAN
-            vim-network-name: management
+            vim-network-name: mgmt
             vnfd-connection-point-ref:
             -   member-vnf-index-ref: 1
                 vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
@@ -69,7 +69,7 @@ nsd:nsd-catalog:
             name: SimulaMet-OAI-EPC_nsd-S1C
             short-name: SimulaMet-OAI-EPC_nsd-S1C
             type: ELAN
-            vim-network-name: osm-ext
+            vim-network-name: mgmt
             vnfd-connection-point-ref:
             -   member-vnf-index-ref: 1
                 vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
@@ -81,7 +81,7 @@ nsd:nsd-catalog:
             name: SimulaMet-OAI-EPC_nsd-S1U
             short-name: SimulaMet-OAI-EPC_nsd-S1U
             type: ELAN
-            vim-network-name: osm-ext
+            vim-network-name: mgmt
             vnfd-connection-point-ref:
             -   member-vnf-index-ref: 1
                 vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
@@ -93,7 +93,7 @@ nsd:nsd-catalog:
             name: SimulaMet-OAI-EPC_nsd-SGi
             short-name: SimulaMet-OAI-EPC_nsd-SGi
             type: ELAN
-            vim-network-name: osm-ext
+            vim-network-name: nornet-simula
             vnfd-connection-point-ref:
             -   member-vnf-index-ref: 1
                 vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
