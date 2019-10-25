@@ -38,6 +38,7 @@ make
 
 # ====== Clean up ===========================================================
 echo -e "\x1b[34m`date +%FT%H:%M:%S`: Deleting existing setup ...\x1b[0m"
+osm ns-delete --wait SimulaMet-OAI-EPC || true
 osm nsd-delete SimulaMet-OAI-EPC_nsd || true
 osm vnfd-delete SimulaMet-OAI-EPC_vnfd || true
 
