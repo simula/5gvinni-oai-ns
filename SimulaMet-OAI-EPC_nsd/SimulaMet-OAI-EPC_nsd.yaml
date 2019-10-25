@@ -74,7 +74,6 @@ nsd:nsd-catalog:
             -   member-vnf-index-ref: 1
                 vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
                 vnfd-connection-point-ref: mme-s1c
-                ip-address: 192.168.247.102
 
         # ====== S1-U =======================================================
         -   id: SimulaMet-OAI-EPC_nsd-S1U
@@ -86,7 +85,6 @@ nsd:nsd-catalog:
             -   member-vnf-index-ref: 1
                 vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
                 vnfd-connection-point-ref: spgwu-s1u
-                ip-address: 192.168.248.159
 
         # ====== SGi ========================================================
         -   id: SimulaMet-OAI-EPC_nsd-SGi
