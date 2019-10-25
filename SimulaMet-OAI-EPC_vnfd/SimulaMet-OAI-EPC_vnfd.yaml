@@ -90,46 +90,46 @@ vnfd:vnfd-catalog:
               name: mme-s11
               type: VPORT
 
-            # ====== Juju Charm =============================================
-            vdu-configuration:
-                juju:
-                    charm: mmecharm
-                initial-config-primitive:
-                -   seq: '1'
-                    name: config
-                    parameter:
-                    -   name: ssh-hostname
-                        value: <rw_mgmt_ip>
-                    -   name: ssh-username
-                        value: nornetpp
-                    -   name: ssh-password
-                        value: <password>
-                -   seq: '2'
-                    name: configure-mme
-                    parameter:
-                    #-   name: mme-mgmt-ip
+            ## ====== Juju Charm =============================================
+            #vdu-configuration:
+                #juju:
+                    #charm: mmecharm
+                #initial-config-primitive:
+                #-   seq: '1'
+                    #name: config
+                    #parameter:
+                    #-   name: ssh-hostname
+                        #value: <rw_mgmt_ip>
+                    #-   name: ssh-username
+                        #value: nornetpp
+                    #-   name: ssh-password
+                        #value: <password>
+                #-   seq: '2'
+                    #name: configure-mme
+                    #parameter:
+                    ##-   name: mme-mgmt-ip
+                        ##data-type: STRING
+                        ##value: <mme_mgmt_ip>
+                    #-   name: mme-s1c-ip
                         #data-type: STRING
-                        #value: <mme_mgmt_ip>
-                    -   name: mme-s1c-ip
-                        data-type: STRING
-                        value: <mme_s1c_ip>
-                    #-   name: hss-mgmt-ip
+                        #value: <mme_s1c_ip>
+                    ##-   name: hss-mgmt-ip
+                        ##data-type: STRING
+                        ##value: <hss_mgmt_ip>
+                    ##-   name: spgwc-mgmt-ip
+                        ##data-type: STRING
+                        ##value: <spgwc_mgmt_ip>
+                    ##-   name: spgwu-mgmt-ip
+                        ##data-type: STRING
+                        ##value: <spgwu_mgmt_ip>
+                    #-   name: spgwu-s1u-ip
                         #data-type: STRING
-                        #value: <hss_mgmt_ip>
-                    #-   name: spgwc-mgmt-ip
-                        #data-type: STRING
-                        #value: <spgwc_mgmt_ip>
-                    #-   name: spgwu-mgmt-ip
-                        #data-type: STRING
-                        #value: <spgwu_mgmt_ip>
-                    -   name: spgwu-s1u-ip
-                        data-type: STRING
-                        value: <spgwu_s1u_ip>
-                    #-   name: spgwu-sgi-ip
-                        #data-type: STRING
-                        #value: <spgwu_sgi_ip>
-                -   seq: '3'
-                    name: restart-mme
+                        #value: <spgwu_s1u_ip>
+                    ##-   name: spgwu-sgi-ip
+                        ##data-type: STRING
+                        ##value: <spgwu_sgi_ip>
+                #-   seq: '3'
+                    #name: restart-mme
 
 
         # ###### VDU: HSS (Home Subscriber Server) ##########################
@@ -168,46 +168,46 @@ vnfd:vnfd-catalog:
               name: hss-s6a
               type: VPORT
 
-            # ====== Juju Charm =============================================
-            vdu-configuration:
-                juju:
-                    charm: hsscharm
-                initial-config-primitive:
-                -   seq: '1'
-                    name: config
-                    parameter:
-                    -   name: ssh-hostname
-                        value: <rw_mgmt_ip>
-                    -   name: ssh-username
-                        value: nornetpp
-                    -   name: ssh-password
-                        value: <password>
-                -   seq: '2'
-                    name: configure-hss
-                    parameter:
-                    #-   name: mme-mgmt-ip
+            ## ====== Juju Charm =============================================
+            #vdu-configuration:
+                #juju:
+                    #charm: hsscharm
+                #initial-config-primitive:
+                #-   seq: '1'
+                    #name: config
+                    #parameter:
+                    #-   name: ssh-hostname
+                        #value: <rw_mgmt_ip>
+                    #-   name: ssh-username
+                        #value: nornetpp
+                    #-   name: ssh-password
+                        #value: <password>
+                #-   seq: '2'
+                    #name: configure-hss
+                    #parameter:
+                    ##-   name: mme-mgmt-ip
+                        ##data-type: STRING
+                        ##value: <mme_mgmt_ip>
+                    #-   name: mme-s1c-ip
                         #data-type: STRING
-                        #value: <mme_mgmt_ip>
-                    -   name: mme-s1c-ip
-                        data-type: STRING
-                        value: <mme_s1c_ip>
-                    #-   name: hss-mgmt-ip
+                        #value: <mme_s1c_ip>
+                    ##-   name: hss-mgmt-ip
+                        ##data-type: STRING
+                        ##value: <hss_mgmt_ip>
+                    ##-   name: spgwc-mgmt-ip
+                        ##data-type: STRING
+                        ##value: <spgwc_mgmt_ip>
+                    ##-   name: spgwu-mgmt-ip
+                        ##data-type: STRING
+                        ##value: <spgwu_mgmt_ip>
+                    #-   name: spgwu-s1u-ip
                         #data-type: STRING
-                        #value: <hss_mgmt_ip>
-                    #-   name: spgwc-mgmt-ip
-                        #data-type: STRING
-                        #value: <spgwc_mgmt_ip>
-                    #-   name: spgwu-mgmt-ip
-                        #data-type: STRING
-                        #value: <spgwu_mgmt_ip>
-                    -   name: spgwu-s1u-ip
-                        data-type: STRING
-                        value: <spgwu_s1u_ip>
-                    #-   name: spgwu-sgi-ip
-                        #data-type: STRING
-                        #value: <spgwu_sgi_ip>
-                -   seq: '3'
-                    name: restart-hss
+                        #value: <spgwu_s1u_ip>
+                    ##-   name: spgwu-sgi-ip
+                        ##data-type: STRING
+                        ##value: <spgwu_sgi_ip>
+                #-   seq: '3'
+                    #name: restart-hss
 
 
         # ###### VDU: SPGW-U (Serving & Packet Data Network Gateway - Control Plane) #####
@@ -253,46 +253,46 @@ vnfd:vnfd-catalog:
               name: spgwc-s11
               type: VPORT
 
-            # ====== Juju Charm =============================================
-            vdu-configuration:
-                juju:
-                    charm: spgwccharm
-                initial-config-primitive:
-                -   seq: '1'
-                    name: config
-                    parameter:
-                    -   name: ssh-hostname
-                        value: <rw_mgmt_ip>
-                    -   name: ssh-username
-                        value: nornetpp
-                    -   name: ssh-password
-                        value: <password>
-                -   seq: '2'
-                    name: configure-spgwc
-                    parameter:
-                    #-   name: mme-mgmt-ip
+            ## ====== Juju Charm =============================================
+            #vdu-configuration:
+                #juju:
+                    #charm: spgwccharm
+                #initial-config-primitive:
+                #-   seq: '1'
+                    #name: config
+                    #parameter:
+                    #-   name: ssh-hostname
+                        #value: <rw_mgmt_ip>
+                    #-   name: ssh-username
+                        #value: nornetpp
+                    #-   name: ssh-password
+                        #value: <password>
+                #-   seq: '2'
+                    #name: configure-spgwc
+                    #parameter:
+                    ##-   name: mme-mgmt-ip
+                        ##data-type: STRING
+                        ##value: <mme_mgmt_ip>
+                    #-   name: mme-s1c-ip
                         #data-type: STRING
-                        #value: <mme_mgmt_ip>
-                    -   name: mme-s1c-ip
-                        data-type: STRING
-                        value: <mme_s1c_ip>
-                    #-   name: hss-mgmt-ip
+                        #value: <mme_s1c_ip>
+                    ##-   name: hss-mgmt-ip
+                        ##data-type: STRING
+                        ##value: <hss_mgmt_ip>
+                    ##-   name: spgwc-mgmt-ip
+                        ##data-type: STRING
+                        ##value: <spgwc_mgmt_ip>
+                    ##-   name: spgwu-mgmt-ip
+                        ##data-type: STRING
+                        ##value: <spgwu_mgmt_ip>
+                    #-   name: spgwu-s1u-ip
                         #data-type: STRING
-                        #value: <hss_mgmt_ip>
-                    #-   name: spgwc-mgmt-ip
-                        #data-type: STRING
-                        #value: <spgwc_mgmt_ip>
-                    #-   name: spgwu-mgmt-ip
-                        #data-type: STRING
-                        #value: <spgwu_mgmt_ip>
-                    -   name: spgwu-s1u-ip
-                        data-type: STRING
-                        value: <spgwu_s1u_ip>
-                    #-   name: spgwu-sgi-ip
-                        #data-type: STRING
-                        #value: <spgwu_sgi_ip>
-                -   seq: '3'
-                    name: restart-spgwc
+                        #value: <spgwu_s1u_ip>
+                    ##-   name: spgwu-sgi-ip
+                        ##data-type: STRING
+                        ##value: <spgwu_sgi_ip>
+                #-   seq: '3'
+                    #name: restart-spgwc
 
 
 
@@ -344,46 +344,46 @@ vnfd:vnfd-catalog:
               name: spgwu-sxab
               type: VPORT
 
-            # ====== Juju Charm =============================================
-            vdu-configuration:
-                juju:
-                    charm: spgwucharm
-                initial-config-primitive:
-                -   seq: '1'
-                    name: config
-                    parameter:
-                    -   name: ssh-hostname
-                        value: <rw_mgmt_ip>
-                    -   name: ssh-username
-                        value: nornetpp
-                    -   name: ssh-password
-                        value: <password>
-                -   seq: '2'
-                    name: configure-spgwu
-                    parameter:
-                    #-   name: mme-mgmt-ip
+            ## ====== Juju Charm =============================================
+            #vdu-configuration:
+                #juju:
+                    #charm: spgwucharm
+                #initial-config-primitive:
+                #-   seq: '1'
+                    #name: config
+                    #parameter:
+                    #-   name: ssh-hostname
+                        #value: <rw_mgmt_ip>
+                    #-   name: ssh-username
+                        #value: nornetpp
+                    #-   name: ssh-password
+                        #value: <password>
+                #-   seq: '2'
+                    #name: configure-spgwu
+                    #parameter:
+                    ##-   name: mme-mgmt-ip
+                        ##data-type: STRING
+                        ##value: <mme_mgmt_ip>
+                    #-   name: mme-s1c-ip
                         #data-type: STRING
-                        #value: <mme_mgmt_ip>
-                    -   name: mme-s1c-ip
-                        data-type: STRING
-                        value: <mme_s1c_ip>
-                    #-   name: hss-mgmt-ip
+                        #value: <mme_s1c_ip>
+                    ##-   name: hss-mgmt-ip
+                        ##data-type: STRING
+                        ##value: <hss_mgmt_ip>
+                    ##-   name: spgwc-mgmt-ip
+                        ##data-type: STRING
+                        ##value: <spgwc_mgmt_ip>
+                    ##-   name: spgwu-mgmt-ip
+                        ##data-type: STRING
+                        ##value: <spgwu_mgmt_ip>
+                    #-   name: spgwu-s1u-ip
                         #data-type: STRING
-                        #value: <hss_mgmt_ip>
-                    #-   name: spgwc-mgmt-ip
-                        #data-type: STRING
-                        #value: <spgwc_mgmt_ip>
-                    #-   name: spgwu-mgmt-ip
-                        #data-type: STRING
-                        #value: <spgwu_mgmt_ip>
-                    -   name: spgwu-s1u-ip
-                        data-type: STRING
-                        value: <spgwu_s1u_ip>
-                    #-   name: spgwu-sgi-ip
-                        #data-type: STRING
-                        #value: <spgwu_sgi_ip>
-                -   seq: '3'
-                    name: restart-spgwu
+                        #value: <spgwu_s1u_ip>
+                    ##-   name: spgwu-sgi-ip
+                        ##data-type: STRING
+                        ##value: <spgwu_sgi_ip>
+                #-   seq: '3'
+                    #name: restart-spgwu
 
 
         # ###### Internal VLDs ##############################################
@@ -445,57 +445,57 @@ vnfd:vnfd-catalog:
         -   name: spgwu-sgi
 
 
-        # ###### Juju Charm #################################################
-        vnf-configuration:
-            juju:
-                charm: epccharm
-            initial-config-primitive:
-            -   seq: '1'
-                name: config
-                parameter:
-                -   name: ssh-hostname
-                    value: <rw_mgmt_ip>
-                -   name: ssh-username
-                    value: nornetpp
-                -   name: ssh-password
-                    value: <password>
-            -   seq: '2'
-                name: configure-epc
-                parameter:
-                #-   name: mme-mgmt-ip
+        ## ###### Juju Charm #################################################
+        #vnf-configuration:
+            #juju:
+                #charm: epccharm
+            #initial-config-primitive:
+            #-   seq: '1'
+                #name: config
+                #parameter:
+                #-   name: ssh-hostname
+                    #value: <rw_mgmt_ip>
+                #-   name: ssh-username
+                    #value: nornetpp
+                #-   name: ssh-password
+                    #value: <password>
+            #-   seq: '2'
+                #name: configure-epc
+                #parameter:
+                ##-   name: mme-mgmt-ip
+                    ##data-type: STRING
+                    ##value: <mme_mgmt_ip>
+                #-   name: mme-s1c-ip
                     #data-type: STRING
-                    #value: <mme_mgmt_ip>
-                -   name: mme-s1c-ip
-                    data-type: STRING
-                    value: <mme_s1c_ip>
-                #-   name: hss-mgmt-ip
+                    #value: <mme_s1c_ip>
+                ##-   name: hss-mgmt-ip
+                    ##data-type: STRING
+                    ##value: <hss_mgmt_ip>
+                ##-   name: spgwc-mgmt-ip
+                    ##data-type: STRING
+                    ##value: <spgwc_mgmt_ip>
+                ##-   name: spgwu-mgmt-ip
+                    ##data-type: STRING
+                    ##value: <spgwu_mgmt_ip>
+                #-   name: spgwu-s1u-ip
                     #data-type: STRING
-                    #value: <hss_mgmt_ip>
-                #-   name: spgwc-mgmt-ip
-                    #data-type: STRING
-                    #value: <spgwc_mgmt_ip>
-                #-   name: spgwu-mgmt-ip
-                    #data-type: STRING
-                    #value: <spgwu_mgmt_ip>
-                -   name: spgwu-s1u-ip
-                    data-type: STRING
-                    value: <spgwu_s1u_ip>
-                #-   name: spgwu-sgi-ip
-                    #data-type: STRING
-                    #value: <spgwu_sgi_ip>
-            -   seq: '3'
-                name: restart-epc
+                    #value: <spgwu_s1u_ip>
+                ##-   name: spgwu-sgi-ip
+                    ##data-type: STRING
+                    ##value: <spgwu_sgi_ip>
+            #-   seq: '3'
+                #name: restart-epc
 
-            #service-primitive:
-            #-   name: config
-                #parameter:
-                #-   name: <config parameter>
-                    #data-type: [STRING|INTEGER]
-                    #mandatory: [true|false]
-                    #default-value: <value>
-            #-   name: <action name>
-                #parameter:
-                #-   name: <action parameter>
-                    #data-type: [STRING|INTEGER]
-                    #mandatory: [true|false]
-                    #default-value: <value>
+            ##service-primitive:
+            ##-   name: config
+                ##parameter:
+                ##-   name: <config parameter>
+                    ##data-type: [STRING|INTEGER]
+                    ##mandatory: [true|false]
+                    ##default-value: <value>
+            ##-   name: <action name>
+                ##parameter:
+                ##-   name: <action parameter>
+                    ##data-type: [STRING|INTEGER]
+                    ##mandatory: [true|false]
+                    ##default-value: <value>
