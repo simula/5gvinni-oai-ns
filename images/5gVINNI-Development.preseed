@@ -65,7 +65,7 @@ d-i passwd/root-login                   boolean false
 d-i passwd/make-user                    boolean true
 d-i passwd/user-fullname                string  NorNet Praesum Presum
 d-i passwd/username                     string  nornetpp
-d-i passwd/user-password-crypted        password $6$rounds=7466$SiAs9eNkQiq84Vj$Kz4tNjeR5Bb9Uk6GHu.4Y.rF4qqRyh9zkV4Bwrx./MVmtBThjnZMNjoAvj7TWDevzDVF8xmXL.to9ImJGDlca1
+d-i passwd/user-password-crypted        password $6$rounds=7466$A3Q6oec3wn$wvX6SW1zXgKIiJ/MUGLVJDuN0ROuP33GLNs4n4ug6qFqadlMs1iavItAdEev/FVswWwbUaHQklFNYYZr.dUPG1
 # NOTE: Example to add crypted password: echo "my password" | mkpasswd -s -m sha-512 -R 7466
 d-i passwd/user-uid                     string  1000
 d-i passwd/user-default-groups          string  adm cdrom sudo dip plugdev lpadmin sambashare
