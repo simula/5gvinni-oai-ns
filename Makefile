@@ -40,22 +40,26 @@
 VALIDATE_DESCRIPTOR = ../devops/descriptor-packages/tools/validate_descriptor.py
 GENERATE_DESCRIPTOR = ../devops/descriptor-packages/tools/generate_descriptor_pkg.sh
 
+NS="SimulaMet-OAI-EPC"
+VNFD="${NS}_vnfd"
+NSD="${NS}_nsd"
+
 
 .PHONY:	all
-all:	SimulaMet-OAI-EPC_vnfd.tar.gz SimulaMet-OAI-EPC_nsd.tar.gz
+all:	${VNFD}.tar.gz ${NSD}.tar.gz
 
 
-VNFD_FILES := $(shell git ls-tree -r --name-only HEAD SimulaMet-OAI-EPC_vnfd)
-SimulaMet-OAI-EPC_vnfd.tar.gz:	 $(VNFD_FILES)
-	$(VALIDATE_DESCRIPTOR) SimulaMet-OAI-EPC_vnfd/SimulaMet-OAI-EPC_vnfd.yaml
-	$(GENERATE_DESCRIPTOR) -t vnfd -N SimulaMet-OAI-EPC_vnfd/
-	du -k SimulaMet-OAI-EPC_vnfd.tar.gz
+VNFD_FILES := $(shell git ls-tree -r --name-only HEAD ${VNFD})
+${VNFD}.tar.gz:	 $(VNFD_FILES)
+	$(VALIDATE_DESCRIPTOR) ${VNFD}/${VNFD}.yaml
+	$(GENERATE_DESCRIPTOR) -t vnfd -N ${VNFD}/
+	du -k ${VNFD}.tar.gz
 
-NSD_FILES := $(shell git ls-tree -r --name-only HEAD SimulaMet-OAI-EPC_nsd)
-SimulaMet-OAI-EPC_nsd.tar.gz:	$(NSD_FILES)
-	$(VALIDATE_DESCRIPTOR) SimulaMet-OAI-EPC_nsd/SimulaMet-OAI-EPC_nsd.yaml
-	$(GENERATE_DESCRIPTOR) -t nsd -N SimulaMet-OAI-EPC_nsd/
-	du -k SimulaMet-OAI-EPC_nsd.tar.gz
+NSD_FILES := $(shell git ls-tree -r --name-only HEAD ${NSD})
+${NSD}.tar.gz:	$(NSD_FILES)
+	$(VALIDATE_DESCRIPTOR) ${NSD}/${NSD}.yaml
+	$(GENERATE_DESCRIPTOR) -t nsd -N ${NSD}/
+	du -k ${NSD}.tar.gz
 
 
 .PHONY:	clean
