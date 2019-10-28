@@ -1,0 +1,33 @@
+nsd:nsd-catalog:
+    nsd:
+    -   id: hackfest_proxycharm_nsd
+        name: hackfest_proxycharm_nsd
+        short-name: hackfest_proxycharm_nsd
+        description: NS with 2 VNFs with cloudinit connected by datanet and mgmtnet VLs
+        version: '1.0'
+        logo: osm.png
+        constituent-vnfd:
+        -   vnfd-id-ref: hackfest_proxycharm_vnfd
+            member-vnf-index: '1'
+        vld:
+        -   id: mgmtnet
+            name: mgmtnet
+            short-name: mgmt
+            type: ELAN
+            mgmt-network: 'true'
+            vim-network-name: mgmt
+            vnfd-connection-point-ref:
+            -   vnfd-id-ref: hackfest_proxycharm_vnfd
+                member-vnf-index-ref: '1'
+                vnfd-connection-point-ref: vnf-mgmt
+                vnfd-connection-point-ref: vnf-mgmt
+        -   id: datanet
+            name: datanet
+            short-name: nornet-simula
+            type: ELAN
+            vnfd-connection-point-ref:
+            -   vnfd-id-ref: hackfest_proxycharm_vnfd
+                member-vnf-index-ref: '1'
+                vnfd-connection-point-ref: vnf-data
+                vnfd-connection-point-ref: vnf-data
+

@@ -1,0 +1,2 @@
+d68abbbfe214f0f9aa75450d20ece68b  hackfest_proxycharm_nsd.yaml
+bc681c5a4c3cdc09c013df2d2239f3d2  icons/osm.png
