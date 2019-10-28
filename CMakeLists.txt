@@ -45,6 +45,11 @@ SET(GENERATE_DESCRIPTOR "../devops/descriptor-packages/tools/generate_descriptor
 SET(VNFD_LIST SimulaMet-OAI-EPC_vnfd)
 SET(NSD_LIST  SimulaMet-OAI-EPC_nsd)
 
+# Automatically obtain list of charms:
+EXECUTE_PROCESS(COMMAND git ls-tree --name-only HEAD juju/
+                COMMAND tr " \n" ";;"
+                OUTPUT_VARIABLE CHARM_LIST OUTPUT_STRIP_TRAILING_WHITESPACE)
+
 
 #############################################################################
 # Build VNFDs
@@ -75,6 +80,14 @@ FUNCTION(makeUniqueTarget target fileName)
    STRING(REGEX REPLACE "[^a-zA-Z0-9\\.@_+-]" "_X_" result ${result})
    SET(${target} ${result} PARENT_SCOPE)
 ENDFUNCTION()
+
+
+SET(allCharms "")
+FOREACH(charm IN LISTS CHARM_LIST)
+   MESSAGE("Charm: ${charm}")
+
+
+ENDFOREACH()
 
 
 FOREACH(vnfd IN LISTS VNFD_LIST)
