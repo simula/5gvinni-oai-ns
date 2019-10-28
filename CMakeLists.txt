@@ -82,11 +82,23 @@ FUNCTION(makeUniqueTarget target fileName)
 ENDFUNCTION()
 
 
+FILE(MAKE_DIRECTORY juju/.build)
 SET(allCharms "")
-FOREACH(charm IN LISTS CHARM_LIST)
-   MESSAGE("Charm: ${charm}")
+FOREACH(charmSource IN LISTS CHARM_LIST)
+   STRING(REGEX REPLACE "^juju/(.*)$" "juju/.build/\1" charmBuild ${charmSource})
+   EXECUTE_PROCESS(COMMAND git ls-tree -r --name-only HEAD ${charmSource}
+                   COMMAND tr " \n" ";;"
+                   OUTPUT_VARIABLE charmFiles OUTPUT_STRIP_TRAILING_WHITESPACE)
 
+   MESSAGE("Charm: ${charmSource} -> ${charmBuild} ")
 
+   makeUniqueTarget(generate_charm "generate_${charmSource}")
+   ADD_CUSTOM_COMMAND(OUTPUT  ${charmBuild}/version
+                      COMMAND charm build --build-dir juju/.build
+                      DEPENDS ${charmFiles})
+   ADD_CUSTOM_TARGET(${generate_charm} ALL DEPENDS ${charmBuild}/version)
+
+   APPEND(allCharms ${generate_charm})
 ENDFOREACH()
 
 
@@ -104,7 +116,8 @@ FOREACH(vnfd IN LISTS VNFD_LIST)
                       COMMAND ${GENERATE_DESCRIPTOR} -t vnfd -N ${vnfd}/
                       COMMAND du -k ${vnfdPackage}
                       DEPENDS ${vnfdFiles})
-   ADD_CUSTOM_TARGET(${generate_vnfdPackage} ALL DEPENDS ${vnfdPackage})
+   ADD_CUSTOM_TARGET(${generate_vnfdPackage}
+                     ALL DEPENDS ${vnfdPackage} ${allCharms})
 ENDFOREACH()
 
 
@@ -122,5 +135,6 @@ FOREACH(nsd IN LISTS NSD_LIST)
                       COMMAND ${GENERATE_DESCRIPTOR} -t nsd -N ${nsd}/
                       COMMAND du -k ${nsdPackage}
                       DEPENDS ${nsdFiles})
-   ADD_CUSTOM_TARGET(${generate_nsdPackage} ALL DEPENDS ${nsdPackage})
+   ADD_CUSTOM_TARGET(${generate_nsdPackage}
+                     ALL DEPENDS ${nsdPackage})
 ENDFOREACH()
