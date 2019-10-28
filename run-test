@@ -52,6 +52,12 @@ osm nsd-create ${NSD}.tar.gz
 
 # ====== Instantiate ========================================================
 echo -e "\x1b[34m`date +%FT%H:%M:%S`: Instantiating ...\x1b[0m"
+if [ -e params.yaml ] ; then
+   config_file_option=" --config_file params.yaml"
+else
+   echo >&2 "WARNING: No configuration file params.yaml found!"
+   config_file_option=""
+fi
 osm ns-create \
    --ns_name ${NS} \
    --nsd_name ${NSD} \
