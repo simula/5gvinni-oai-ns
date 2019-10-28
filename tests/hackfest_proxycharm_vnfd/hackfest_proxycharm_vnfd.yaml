@@ -1,0 +1,67 @@
+vnfd:vnfd-catalog:
+    vnfd:
+    -   id: hackfest_proxycharm_vnfd
+        name: hackfest_proxycharm_vnfd
+        short-name: hackfest_proxycharm_vnfd
+        version: '1.0'
+        description: A VNF consisting of 1 VDU connected to two external VL, and one for data and another one for management
+        logo: osm.png
+        connection-point:
+        -   id: vnf-mgmt
+            name: vnf-mgmt
+            short-name: vnf-mgmt
+            type: VPORT
+        -   id: vnf-data
+            name: vnf-data
+            short-name: vnf-data
+            type: VPORT
+        mgmt-interface:
+            cp: vnf-mgmt
+        vdu:
+        -   id: mgmtVM
+            name: mgmtVM
+            image: "Template-Ubuntu-5gVINNI-Development-Bionic"
+            count: '1'
+            vm-flavor:
+                vcpu-count: '1'
+                memory-mb: '1024'
+                storage-gb: '10'
+            interface:
+            -   name: mgmtVM-eth0
+                position: '1'
+                type: EXTERNAL
+                virtual-interface:
+                    type: VIRTIO
+                external-connection-point-ref: vnf-mgmt
+            -   name: dataVM-xe0
+                position: '2'
+                type: EXTERNAL
+                virtual-interface:
+                    type: VIRTIO
+                external-connection-point-ref: vnf-data
+            cloud-init-file: cloud-config.txt
+        # vnf-configuration:
+        #     juju:
+        #         charm: simple
+        #     initial-config-primitive:
+        #     -   seq: '1'
+        #         name: config
+        #         parameter:
+        #         -   name: ssh-hostname
+        #             value: <rw_mgmt_ip>
+        #         -   name: ssh-username
+        #             value: ubuntu
+        #         -   name: ssh-password
+        #             value: osm4u
+        #     -   seq: '2'
+        #         name: touch
+        #         parameter:
+        #         -   name: filename
+        #             data-type: STRING
+        #             value: '/home/ubuntu/first-touch'
+        #     config-primitive:
+        #     -   name: touch
+        #         parameter:
+        #         -   name: filename
+        #             data-type: STRING
+        #             default-value: '/home/ubuntu/touched'

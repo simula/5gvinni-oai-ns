@@ -1,0 +1,12 @@
+#cloud-config
+password: osm4u
+chpasswd: { expire: False }
+ssh_pwauth: True
+
+write_files:
+-   content: |
+        # My new helloworld file
+
+    owner: root:root
+    permissions: '0644'
+    path: /root/helloworld.txt
