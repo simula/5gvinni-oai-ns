@@ -4,7 +4,12 @@ maintainer: Thomas Dreibholz <dreibh@simula.no>
 description: |
   This charm configures the EPC.
 tags:
-  - nfv
-subordinate: false
+  # Replace "misc" with one or more whitelisted tags from this list:
+  # https://jujucharms.com/docs/stable/authors-charm-metadata
+  - "misc"
+  - "osm"
+  - "vnf"
 series:
-  - xenial
+- "xenial"
+- "trusty"
+subordinate: !!bool "false"
