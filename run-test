@@ -73,5 +73,6 @@ echo -e "\x1b[34m`date +%FT%H:%M:%S`: Done!\x1b[0m"
 # osm ns-list --filter=name=${NS}
 id=`osm ns-list --filter=name=${NS} | grep "| ${NS}" | awk '{ print $4 }'`
 echo "ID=${id}"
+sleep 10
 echo "juju switch ${id}"
 juju switch ${id}

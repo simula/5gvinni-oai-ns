@@ -48,6 +48,8 @@ NSD="${NS}_nsd"
 .PHONY:	all
 all:	${VNFD}.tar.gz ${NSD}.tar.gz
 
+CHARMS := $(shell git ls-tree --name-only HEAD juju/)
+
 
 VNFD_FILES := $(shell git ls-tree -r --name-only HEAD ${VNFD})
 ${VNFD}.tar.gz:	 $(VNFD_FILES)
