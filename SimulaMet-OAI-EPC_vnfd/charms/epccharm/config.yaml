@@ -11,4 +11,3 @@ options:
     type: int
     default: 9001
     description: "A short description of the configuration option"
-
