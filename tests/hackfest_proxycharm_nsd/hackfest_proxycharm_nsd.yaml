@@ -20,14 +20,13 @@ nsd:nsd-catalog:
             -   vnfd-id-ref: hackfest_proxycharm_vnfd
                 member-vnf-index-ref: '1'
                 vnfd-connection-point-ref: vnf-mgmt
-                vnfd-connection-point-ref: vnf-mgmt
         -   id: datanet
             name: datanet
-            short-name: nornet-simula
+            short-name: datanet
             type: ELAN
+            vim-network-name: nornet-simula
             vnfd-connection-point-ref:
             -   vnfd-id-ref: hackfest_proxycharm_vnfd
                 member-vnf-index-ref: '1'
                 vnfd-connection-point-ref: vnf-data
-                vnfd-connection-point-ref: vnf-data
-
+                ip-address: 10.254.1.120

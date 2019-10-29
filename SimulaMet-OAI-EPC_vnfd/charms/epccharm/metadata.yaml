@@ -1,0 +1,15 @@
+name: epccharm
+summary:  SimulaMet-OAI EPC Charm
+maintainer: Thomas Dreibholz <dreibh@simula.no>
+description: |
+  This charm configures the EPC.
+tags:
+  # Replace "misc" with one or more whitelisted tags from this list:
+  # https://jujucharms.com/docs/stable/authors-charm-metadata
+  - "misc"
+  - "osm"
+  - "vnf"
+series:
+- "xenial"
+- "trusty"
+subordinate: !!bool "false"
