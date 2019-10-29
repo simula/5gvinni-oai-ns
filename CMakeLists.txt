@@ -46,9 +46,12 @@ SET(VNFD_LIST SimulaMet-OAI-EPC_vnfd)
 SET(NSD_LIST  SimulaMet-OAI-EPC_nsd)
 
 # Automatically obtain list of charms:
-EXECUTE_PROCESS(COMMAND git ls-tree --name-only HEAD juju/
+SET(CHARMS_SOURCE_DIRECTORY "juju/")
+SET(CHARMS_BUILD_DIRECTORY  ".build/")
+EXECUTE_PROCESS(COMMAND git ls-tree --name-only HEAD .
                 COMMAND tr " \n" ";;"
-                OUTPUT_VARIABLE CHARM_LIST OUTPUT_STRIP_TRAILING_WHITESPACE)
+                WORKING_DIRECTORY ${CHARMS_SOURCE_DIRECTORY}
+                OUTPUT_VARIABLE CHARM_SOURCE_LIST OUTPUT_STRIP_TRAILING_WHITESPACE)
 
 
 #############################################################################
@@ -82,21 +85,22 @@ FUNCTION(makeUniqueTarget target fileName)
 ENDFUNCTION()
 
 
-FILE(MAKE_DIRECTORY juju/.build)
+FILE(MAKE_DIRECTORY ${CHARMS_BUILD_DIRECTORY})
 SET(allCharms "")
-FOREACH(charmSource IN LISTS CHARM_LIST)
-   STRING(REGEX REPLACE "^juju/(.*)$" "juju/.build/\1" charmBuild ${charmSource})
-   EXECUTE_PROCESS(COMMAND git ls-tree -r --name-only HEAD ${charmSource}
+FOREACH(charmName IN LISTS CHARM_SOURCE_LIST)
+   SET(charmInputDirectory  ${CHARMS_SOURCE_DIRECTORY}/${charmName})
+   SET(charmOutputDirectory ${CHARMS_BUILD_DIRECTORY}/${charmName})
+   EXECUTE_PROCESS(COMMAND git ls-tree -r --name-only HEAD ${charmInputDirectory}
                    COMMAND tr " \n" ";;"
-                   OUTPUT_VARIABLE charmFiles OUTPUT_STRIP_TRAILING_WHITESPACE)
+                   OUTPUT_VARIABLE charmInputFiles OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-   MESSAGE("Charm: ${charmSource} -> ${charmBuild} ")
+   MESSAGE("Charm: ${charmInputDirectory} -> ${charmOutputDirectory} ; ${charmInputFiles}")
 
-   makeUniqueTarget(generate_charm "generate_${charmSource}")
-   ADD_CUSTOM_COMMAND(OUTPUT  ${charmBuild}/version
-                      COMMAND charm build --build-dir juju/.build
-                      DEPENDS ${charmFiles})
-   ADD_CUSTOM_TARGET(${generate_charm} ALL DEPENDS ${charmBuild}/version)
+   makeUniqueTarget(generate_charm "generate_${charmName}")
+   ADD_CUSTOM_COMMAND(OUTPUT  ${charmOutputDirectory}/version
+                      COMMAND charm build --build-dir ${CHARMS_BUILD_DIRECTORY}
+                      DEPENDS ${charmInputFiles})
+   ADD_CUSTOM_TARGET(${generate_charm} ALL DEPENDS ${charmOutputDirectory}/version)
 
    APPEND(allCharms ${generate_charm})
 ENDFOREACH()

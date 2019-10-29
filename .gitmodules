@@ -1,0 +1,3 @@
+[submodule "devlops"]
+	path = devops
+	url = https://osm.etsi.org/gerrit/osm/devops.git
