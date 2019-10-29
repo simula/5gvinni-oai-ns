@@ -2,7 +2,7 @@
   "ssh-hostname":
     "type": "string"
     "default": ""
-    "description": "The hostname or IP address of the machine to"
+    "description": "The hostname or IP address of the machine to connect to."
   "ssh-username":
     "type": "string"
     "default": ""
@@ -11,10 +11,6 @@
     "type": "string"
     "default": ""
     "description": "The password used to authenticate."
-  "ssh-private-key":
-    "type": "string"
-    "default": ""
-    "description": "DEPRECATED. The private ssh key to be used to authenticate."
   "ssh-public-key":
     "type": "string"
     "default": ""
