@@ -88,8 +88,6 @@ ENDFUNCTION()
 
 # ###### Generate Juju Charms ###############################################
 FILE(MAKE_DIRECTORY ${CHARMS_BUILD_DIRECTORY})
-SET(allCharms "")
-MESSAGE("CHARM_SOURCE_LIST=${CHARM_SOURCE_LIST}")
 FOREACH(charmName IN LISTS CHARM_SOURCE_LIST)
    GET_FILENAME_COMPONENT(charmInputDirectory  ${CHARMS_SOURCE_DIRECTORY}/${charmName} ABSOLUTE)
    GET_FILENAME_COMPONENT(charmBuildDirectory  ${CHARMS_BUILD_DIRECTORY}               ABSOLUTE)
@@ -101,16 +99,11 @@ FOREACH(charmName IN LISTS CHARM_SOURCE_LIST)
 
    makeUniqueTarget(generate_charm "generate_${charmName}")
    SET(timestampFile ${charmOutputDirectory}/version)
-   MESSAGE("Charm: ${charmInputDirectory} -> ${charmOutputDirectory}  ; TS=${generate_charm}")
-   MESSAGE("charm build --build-dir ${charmBuildDirectory}")
-   MESSAGE("DEP= ${charmInputFiles}")
    ADD_CUSTOM_COMMAND(OUTPUT  ${timestampFile}
                       COMMAND charm build --build-dir ${charmBuildDirectory}
                       WORKING_DIRECTORY ${charmInputDirectory}
                       DEPENDS ${charmInputFiles})
    ADD_CUSTOM_TARGET(${generate_charm} DEPENDS ${timestampFile})
-
-   LIST(APPEND allCharms ${generate_charm})
 ENDFOREACH()
 
 
@@ -122,6 +115,22 @@ FOREACH(vnfd IN LISTS VNFD_LIST)
                    OUTPUT_VARIABLE vnfdFiles OUTPUT_STRIP_TRAILING_WHITESPACE)
    LIST(FILTER vnfdFiles EXCLUDE REGEX "^$")   # Remove empty item at end of list
 
+   # ====== Copy the built Juju Charms ======================================
+   SET(allCharmsInVNFD "")
+   FOREACH(charmName IN LISTS CHARM_SOURCE_LIST)
+      makeUniqueTarget(generate_charm      "generate_${charmName}")
+      makeUniqueTarget(generate_vnfd_charm "generate_${vnfd}_${charmName}")
+      GET_FILENAME_COMPONENT(charmOutputDirectory ${CHARMS_BUILD_DIRECTORY}/${charmName} ABSOLUTE)
+      GET_FILENAME_COMPONENT(charmCopyDirectory   ${vnfd}/charms/${charmName}            ABSOLUTE)
+      ADD_CUSTOM_COMMAND(OUTPUT  ${charmCopyDirectory}/version
+                         COMMAND rm -rf ${charmCopyDirectory}
+                         COMMAND cp -a ${charmOutputDirectory} ${charmCopyDirectory}
+                         DEPENDS ${charmOutputDirectory}/version)
+      ADD_CUSTOM_TARGET(${generate_vnfd_charm} DEPENDS ${charmCopyDirectory}/version ${generate_charm})
+      LIST(APPEND allCharmsInVNFD ${generate_vnfd_charm})
+   ENDFOREACH()
+
+   # ====== Generate the VNFD ===============================================
    SET(vnfdDefinition "${vnfd}/${vnfd}.yaml")
    SET(vnfdPackage    "${vnfd}.tar.gz")
    makeUniqueTarget(generate_vnfdPackage "generate_${vnfdPackage}")
@@ -132,7 +141,7 @@ FOREACH(vnfd IN LISTS VNFD_LIST)
                       COMMAND du -k ${vnfdPackage}
                       DEPENDS ${vnfdFiles})
    ADD_CUSTOM_TARGET(${generate_vnfdPackage}
-                     DEPENDS ${vnfdPackage} ${allCharms})
+                     DEPENDS ${vnfdPackage} ${allCharmsInVNFD})
 
    LIST(APPEND allVNFDs ${generate_vnfdPackage})
 ENDFOREACH()
@@ -143,7 +152,9 @@ FOREACH(nsd IN LISTS NSD_LIST)
    EXECUTE_PROCESS(COMMAND git ls-tree -r --name-only HEAD ${nsd}
                    COMMAND tr " \n" ";;"
                    OUTPUT_VARIABLE nsdFiles OUTPUT_STRIP_TRAILING_WHITESPACE)
+   LIST(FILTER nsdFiles EXCLUDE REGEX "^$")   # Remove empty item at end of list
 
+   # ====== Generate the NSD ================================================
    SET(nsdDefinition "${nsd}/${nsd}.yaml")
    SET(nsdPackage    "${nsd}.tar.gz")
    makeUniqueTarget(generate_nsdPackage "generate_${nsdPackage}")
