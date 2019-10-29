@@ -39,8 +39,8 @@ PROJECT(SimulaMet-OAI-EPC C)
 # OPTIONS
 #############################################################################
 
-SET(VALIDATE_DESCRIPTOR "../devops/descriptor-packages/tools/validate_descriptor.py")
-SET(GENERATE_DESCRIPTOR "../devops/descriptor-packages/tools/generate_descriptor_pkg.sh")
+SET(VALIDATE_DESCRIPTOR "devops/descriptor-packages/tools/validate_descriptor.py")
+SET(GENERATE_DESCRIPTOR "devops/descriptor-packages/tools/generate_descriptor_pkg.sh")
 
 SET(VNFD_LIST SimulaMet-OAI-EPC_vnfd)
 SET(NSD_LIST  SimulaMet-OAI-EPC_nsd)
