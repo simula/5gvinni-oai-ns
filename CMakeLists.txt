@@ -99,14 +99,13 @@ FOREACH(charmName IN LISTS CHARM_SOURCE_LIST)
                    OUTPUT_VARIABLE charmInputFiles OUTPUT_STRIP_TRAILING_WHITESPACE)
    LIST(FILTER charmInputFiles EXCLUDE REGEX "^$")   # Remove empty item at end of list
 
-
    makeUniqueTarget(generate_charm "generate_${charmName}")
-   SET(timestampFile ${charmOutputDirectory}/.stamp)
+   SET(timestampFile ${charmOutputDirectory}/version)
    MESSAGE("Charm: ${charmInputDirectory} -> ${charmOutputDirectory}  ; TS=${generate_charm}")
    MESSAGE("charm build --build-dir ${charmBuildDirectory}")
+   MESSAGE("DEP= ${charmInputFiles}")
    ADD_CUSTOM_COMMAND(OUTPUT  ${timestampFile}
                       COMMAND charm build --build-dir ${charmBuildDirectory}
-                      COMMAND touch ${timestampFile}
                       WORKING_DIRECTORY ${charmInputDirectory}
                       DEPENDS ${charmInputFiles})
    ADD_CUSTOM_TARGET(${generate_charm} DEPENDS ${timestampFile})
@@ -116,6 +115,7 @@ ENDFOREACH()
 
 
 # ###### Generate VNFDs #####################################################
+SET(allVNFDs "")
 FOREACH(vnfd IN LISTS VNFD_LIST)
    EXECUTE_PROCESS(COMMAND git ls-tree -r --name-only HEAD ${vnfd}
                    COMMAND tr " \n" ";;"
@@ -132,7 +132,9 @@ FOREACH(vnfd IN LISTS VNFD_LIST)
                       COMMAND du -k ${vnfdPackage}
                       DEPENDS ${vnfdFiles})
    ADD_CUSTOM_TARGET(${generate_vnfdPackage}
-                     ALL DEPENDS ${vnfdPackage} ${allCharms})
+                     DEPENDS ${vnfdPackage} ${allCharms})
+
+   LIST(APPEND allVNFDs ${generate_vnfdPackage})
 ENDFOREACH()
 
 
@@ -152,5 +154,5 @@ FOREACH(nsd IN LISTS NSD_LIST)
                       COMMAND du -k ${nsdPackage}
                       DEPENDS ${nsdFiles})
    ADD_CUSTOM_TARGET(${generate_nsdPackage}
-                     ALL DEPENDS ${nsdPackage})
+                     ALL DEPENDS ${nsdPackage} ${allVNFDs})
 ENDFOREACH()
