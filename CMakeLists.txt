@@ -103,6 +103,7 @@ FOREACH(charmName IN LISTS CHARM_SOURCE_LIST)
    makeUniqueTarget(generate_charm "generate_${charmName}")
    SET(timestampFile ${charmOutputDirectory}/.stamp)
    MESSAGE("Charm: ${charmInputDirectory} -> ${charmOutputDirectory}  ; TS=${generate_charm}")
+   MESSAGE("charm build --build-dir ${charmBuildDirectory}")
    ADD_CUSTOM_COMMAND(OUTPUT  ${timestampFile}
                       COMMAND charm build --build-dir ${charmBuildDirectory}
                       COMMAND touch ${timestampFile}
