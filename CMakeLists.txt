@@ -49,9 +49,10 @@ SET(NSD_LIST  SimulaMet-OAI-EPC_nsd)
 SET(CHARMS_SOURCE_DIRECTORY "juju/")
 SET(CHARMS_BUILD_DIRECTORY  ".build/")
 EXECUTE_PROCESS(COMMAND git ls-tree --name-only HEAD .
-                COMMAND tr " \n" ";;"
+                COMMAND tr "\n" ";"
                 WORKING_DIRECTORY ${CHARMS_SOURCE_DIRECTORY}
                 OUTPUT_VARIABLE CHARM_SOURCE_LIST OUTPUT_STRIP_TRAILING_WHITESPACE)
+LIST(FILTER CHARM_SOURCE_LIST EXCLUDE REGEX "^$")   # Remove empty item at end of list
 
 
 #############################################################################
@@ -85,31 +86,40 @@ FUNCTION(makeUniqueTarget target fileName)
 ENDFUNCTION()
 
 
+# ###### Generate Juju Charms ###############################################
 FILE(MAKE_DIRECTORY ${CHARMS_BUILD_DIRECTORY})
 SET(allCharms "")
+MESSAGE("CHARM_SOURCE_LIST=${CHARM_SOURCE_LIST}")
 FOREACH(charmName IN LISTS CHARM_SOURCE_LIST)
-   SET(charmInputDirectory  ${CHARMS_SOURCE_DIRECTORY}/${charmName})
-   SET(charmOutputDirectory ${CHARMS_BUILD_DIRECTORY}/${charmName})
+   GET_FILENAME_COMPONENT(charmInputDirectory  ${CHARMS_SOURCE_DIRECTORY}/${charmName} ABSOLUTE)
+   GET_FILENAME_COMPONENT(charmBuildDirectory  ${CHARMS_BUILD_DIRECTORY}               ABSOLUTE)
+   GET_FILENAME_COMPONENT(charmOutputDirectory ${charmBuildDirectory}/${charmName}     ABSOLUTE)
    EXECUTE_PROCESS(COMMAND git ls-tree -r --name-only HEAD ${charmInputDirectory}
                    COMMAND tr " \n" ";;"
                    OUTPUT_VARIABLE charmInputFiles OUTPUT_STRIP_TRAILING_WHITESPACE)
+   LIST(FILTER charmInputFiles EXCLUDE REGEX "^$")   # Remove empty item at end of list
 
-   MESSAGE("Charm: ${charmInputDirectory} -> ${charmOutputDirectory} ; ${charmInputFiles}")
 
    makeUniqueTarget(generate_charm "generate_${charmName}")
-   ADD_CUSTOM_COMMAND(OUTPUT  ${charmOutputDirectory}/version
-                      COMMAND charm build --build-dir ${CHARMS_BUILD_DIRECTORY}
+   SET(timestampFile ${charmOutputDirectory}/.stamp)
+   MESSAGE("Charm: ${charmInputDirectory} -> ${charmOutputDirectory}  ; TS=${generate_charm}")
+   ADD_CUSTOM_COMMAND(OUTPUT  ${timestampFile}
+                      COMMAND charm build --build-dir ${charmBuildDirectory}
+                      COMMAND touch ${timestampFile}
+                      WORKING_DIRECTORY ${charmInputDirectory}
                       DEPENDS ${charmInputFiles})
-   ADD_CUSTOM_TARGET(${generate_charm} ALL DEPENDS ${charmOutputDirectory}/version)
+   ADD_CUSTOM_TARGET(${generate_charm} DEPENDS ${timestampFile})
 
-   APPEND(allCharms ${generate_charm})
+   LIST(APPEND allCharms ${generate_charm})
 ENDFOREACH()
 
 
+# ###### Generate VNFDs #####################################################
 FOREACH(vnfd IN LISTS VNFD_LIST)
    EXECUTE_PROCESS(COMMAND git ls-tree -r --name-only HEAD ${vnfd}
                    COMMAND tr " \n" ";;"
                    OUTPUT_VARIABLE vnfdFiles OUTPUT_STRIP_TRAILING_WHITESPACE)
+   LIST(FILTER vnfdFiles EXCLUDE REGEX "^$")   # Remove empty item at end of list
 
    SET(vnfdDefinition "${vnfd}/${vnfd}.yaml")
    SET(vnfdPackage    "${vnfd}.tar.gz")
@@ -125,6 +135,7 @@ FOREACH(vnfd IN LISTS VNFD_LIST)
 ENDFOREACH()
 
 
+# ###### Generate NSDs ######################################################
 FOREACH(nsd IN LISTS NSD_LIST)
    EXECUTE_PROCESS(COMMAND git ls-tree -r --name-only HEAD ${nsd}
                    COMMAND tr " \n" ";;"
