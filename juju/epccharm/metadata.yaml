@@ -35,6 +35,5 @@ tags:
   - nfv
 subordinate: false
 series:
+  - trusty
   - xenial
-  - bionic
-  - focal

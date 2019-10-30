@@ -29,4 +29,7 @@
 includes:
   - layer:basic
   - layer:vnfproxy
+options:
+  basic:
+    include_system_packages: true
 repo: https://github.com/simula/5gvinni-oai-ns

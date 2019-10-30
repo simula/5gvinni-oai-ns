@@ -451,7 +451,7 @@ vnfd:vnfd-catalog:
         # ###### Juju Charm #################################################
         vnf-configuration:
             juju:
-                charm: epccharm
+                charm: simple2
             initial-config-primitive:
             -   seq: '1'
                 name: config
@@ -462,18 +462,18 @@ vnfd:vnfd-catalog:
                     value: ubuntu
                 -   name: ssh-password
                     value: osm4u
-            -   seq: '2'
-                name: touch
-                parameter:
-                -   name: filename
-                    data-type: STRING
-                    value: '/home/ubuntu/first-touch'
-            config-primitive:
-            -   name: touch
-                parameter:
-                -   name: filename
-                    data-type: STRING
-                    default-value: '/home/ubuntu/touched'
+#            -   seq: '2'
+#                name: touch
+#                parameter:
+#                -   name: filename
+#                    data-type: STRING
+#                    value: '/home/ubuntu/first-touch'
+#            config-primitive:
+#            -   name: touch
+#                parameter:
+#                -   name: filename
+#                    data-type: STRING
+#                    default-value: '/home/ubuntu/touched'
 
             ##service-primitive:
             ##-   name: config
