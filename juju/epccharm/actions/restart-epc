@@ -16,4 +16,3 @@ try:
     main()
 except Exception as e:
     action_fail(repr(e))
-EOF
