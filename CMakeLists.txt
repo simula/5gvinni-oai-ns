@@ -39,8 +39,8 @@ PROJECT(SimulaMet-OAI-EPC C)
 # OPTIONS
 #############################################################################
 
-SET(VALIDATE_DESCRIPTOR "devops/descriptor-packages/tools/validate_descriptor.py")
-SET(GENERATE_DESCRIPTOR "devops/descriptor-packages/tools/generate_descriptor_pkg.sh")
+SET(VALIDATE_DESCRIPTOR_SCRIPT "devops/descriptor-packages/tools/validate_descriptor.py")
+SET(GENERATE_DESCRIPTOR_SCRIPT "devops/descriptor-packages/tools/generate_descriptor_pkg.sh")
 
 SET(VNFD_LIST SimulaMet-OAI-EPC_vnfd)
 SET(NSD_LIST  SimulaMet-OAI-EPC_nsd)
@@ -52,6 +52,21 @@ EXECUTE_PROCESS(COMMAND git ls-tree --name-only HEAD .
                 COMMAND tr "\n" ";"
                 WORKING_DIRECTORY ${CHARMS_SOURCE_DIRECTORY}
                 OUTPUT_VARIABLE CHARM_SOURCE_LIST OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+
+#############################################################################
+# REQUIREMENTS
+#############################################################################
+
+FIND_PROGRAM(VALIDATE_DESCRIPTOR ${VALIDATE_DESCRIPTOR_SCRIPT})
+IF(NOT VALIDATE_DESCRIPTOR)
+   MESSAGE(FATAL_ERROR "validate_descriptor.py (${VALIDATE_DESCRIPTOR_SCRIPT}) not found!")
+ENDIF()
+
+FIND_PROGRAM(GENERATE_DESCRIPTOR ${GENERATE_DESCRIPTOR_SCRIPT})
+IF(NOT GENERATE_DESCRIPTOR)
+   MESSAGE(FATAL_ERROR "validate_descriptor.py (${GENERATE_DESCRIPTOR_SCRIPT}) not found!")
+ENDIF()
 
 
 #############################################################################
