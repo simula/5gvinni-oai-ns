@@ -27,63 +27,61 @@
 # Contact: dreibh@simula.no
 
 vnfd:vnfd-catalog:
-    vnfd:
-    -   id: SimulaMet-OAI-EPC_vnfd
-        name: SimulaMet-OAI-EPC_vnfd
-        short-name: SimulaMet-OAI-EPC_vnfd
-        description: SimulaMet OpenAirInterface Evolved Packet Core VNF
-        vendor: Thomas Dreibholz
-        version: '1.0'
-        logo: NorNet.png
+  vnfd:
+    - id: SimulaMet-OAI-EPC_vnfd
+      name: SimulaMet-OAI-EPC_vnfd
+      short-name: SimulaMet-OAI-EPC_vnfd
+      description: SimulaMet OpenAirInterface Evolved Packet Core VNF
+      vendor: Thomas Dreibholz
+      version: '1.0'
+      logo: NorNet.png
 
-        # ###### Management Interface #######################################
-        mgmt-interface:
-            cp: mme-mgmt
+      # ###### Management Interface #########################################
+      mgmt-interface:
+        cp: mme-mgmt
 
-        vdu:
+      vdu:
 
         # ###### VDU: MME (Mobility Management Entity) ######################
-        -   id: MME
-            name: MME
-            description: MME
-            count: 1
+        - id: MME
+          name: MME
+          description: MME
+          count: 1
 
-            # ====== VDU VM Configuration ===================================
-            vm-flavor:
-                vcpu-count: 1
-                memory-mb: 2048
-                storage-gb: 24
-            image: 'Template-Ubuntu-5gVINNI-Development-Bionic'
-            cloud-init-file: mme-init
+          # ====== VDU VM Configuration =====================================
+          vm-flavor:
+            vcpu-count: 1
+            memory-mb: 2048
+            storage-gb: 24
+          image: Template-Ubuntu-5gVINNI-Development-Bionic
+          cloud-init-file: mme-init
 
-            # ====== Interfaces =============================================
-            interface:
-            # Specify the external interfaces
-            # There can be multiple interfaces defined
-            -   name: eth0
-                type: EXTERNAL
-                mgmt-interface: true
-                virtual-interface:
-                    type: PARAVIRT
-                external-connection-point-ref: mme-mgmt
-            -   name: eth1
-                type: INTERNAL
-                virtual-interface:
-                    type: PARAVIRT
-                internal-connection-point-ref: mme-s6a
-            -   name: eth2
-                type: INTERNAL
-                virtual-interface:
-                    type: PARAVIRT
-                internal-connection-point-ref: mme-s11
-            -   name: eth3
-                type: EXTERNAL
-                virtual-interface:
-                    type: PARAVIRT
-                external-connection-point-ref: mme-s1c
+          # ====== Interfaces ===============================================
+          interface:
+            - name: eth0
+              type: EXTERNAL
+              mgmt-interface: true
+              virtual-interface:
+                type: PARAVIRT
+              external-connection-point-ref: mme-mgmt
+            - name: eth1
+              type: INTERNAL
+              virtual-interface:
+                type: PARAVIRT
+              internal-connection-point-ref: mme-s6a
+            - name: eth2
+              type: INTERNAL
+              virtual-interface:
+                type: PARAVIRT
+              internal-connection-point-ref: mme-s11
+            - name: eth3
+              type: EXTERNAL
+              virtual-interface:
+                type: PARAVIRT
+              external-connection-point-ref: mme-s1c
 
-            # ====== Internal Connection Points =============================
-            internal-connection-point:
+          # ====== Internal Connection Points ===============================
+          internal-connection-point:
             - id: mme-s6a
               name: mme-s6a
               type: VPORT
@@ -91,163 +89,130 @@ vnfd:vnfd-catalog:
               name: mme-s11
               type: VPORT
 
-            ## ====== Juju Charm =============================================
-            #vdu-configuration:
-                #juju:
-                    #charm: mmecharm
-                #initial-config-primitive:
-                #-   seq: '1'
-                    #name: config
-                    #parameter:
-                    #-   name: ssh-hostname
-                        #value: <rw_mgmt_ip>
-                    #-   name: ssh-username
-                        #value: nornetpp
-                    #-   name: ssh-password
-                        #value: <password>
-                #-   seq: '2'
-                    #name: configure-mme
-                    #parameter:
-                    ##-   name: mme-mgmt-ip
-                        ##data-type: STRING
-                        ##value: <mme_mgmt_ip>
-                    #-   name: mme-s1c-ip
-                        #data-type: STRING
-                        #value: <mme_s1c_ip>
-                    ##-   name: hss-mgmt-ip
-                        ##data-type: STRING
-                        ##value: <hss_mgmt_ip>
-                    ##-   name: spgwc-mgmt-ip
-                        ##data-type: STRING
-                        ##value: <spgwc_mgmt_ip>
-                    ##-   name: spgwu-mgmt-ip
-                        ##data-type: STRING
-                        ##value: <spgwu_mgmt_ip>
-                    #-   name: spgwu-s1u-ip
-                        #data-type: STRING
-                        #value: <spgwu_s1u_ip>
-                    ##-   name: spgwu-sgi-ip
-                        ##data-type: STRING
-                        ##value: <spgwu_sgi_ip>
-                #-   seq: '3'
-                    #name: restart-mme
+          # ====== Juju Charm ===============================================
+          # vdu-configuration:
+            # juju:
+              # charm: mmecharm
+            # initial-config-primitive:
+              # - seq: '1'
+                # name: config
+                # parameter:
+                # - name: ssh-hostname
+                    # value: <rw_mgmt_ip>
+                # - name: ssh-username
+                    # value: nornetpp
+                # - name: ssh-password
+                    # value: <password>
+              # - seq: '2'
+                # name: configure-mme
+                # parameter:
+                # - name: mme-s1c-ip
+                    # data-type: STRING
+                    # value: <mme_s1c_ip>
+                # - name: spgwu-s1u-ip
+                    # data-type: STRING
+                    # value: <spgwu_s1u_ip>
+              # - seq: '3'
+                # name: restart-mme
 
 
         # ###### VDU: HSS (Home Subscriber Server) ##########################
-        -   id: HSS
-            name: HSS
-            description: HSS
-            count: 1
+        - id: HSS
+          name: HSS
+          description: HSS
+          count: 1
 
-            # ====== VDU VM Configuration ===================================
-            vm-flavor:
-                vcpu-count: 1
-                memory-mb: 2048
-                storage-gb: 24
-            image: 'Template-Ubuntu-5gVINNI-Development-Bionic'
-            cloud-init-file: hss-init
+          # ====== VDU VM Configuration =====================================
+          vm-flavor:
+            vcpu-count: 1
+            memory-mb: 2048
+            storage-gb: 24
+          image: Template-Ubuntu-5gVINNI-Development-Bionic
+          cloud-init-file: hss-init
 
-            # ====== Interfaces =============================================
-            interface:
-            # Specify the external interfaces
-            # There can be multiple interfaces defined
-            -   name: eth0
-                type: EXTERNAL
-                mgmt-interface: true
-                virtual-interface:
-                    type: PARAVIRT
-                external-connection-point-ref: hss-mgmt
-            -   name: eth1
-                type: INTERNAL
-                virtual-interface:
-                    type: PARAVIRT
-                internal-connection-point-ref: hss-s6a
+          # ====== Interfaces ===============================================
+          interface:
+            - name: eth0
+              type: EXTERNAL
+              mgmt-interface: true
+              virtual-interface:
+                type: PARAVIRT
+              external-connection-point-ref: hss-mgmt
+            - name: eth1
+              type: INTERNAL
+              virtual-interface:
+                type: PARAVIRT
+              internal-connection-point-ref: hss-s6a
 
-            # ====== Internal Connection Points =============================
-            internal-connection-point:
+          # ====== Internal Connection Points ===============================
+          internal-connection-point:
             - id: hss-s6a
               name: hss-s6a
               type: VPORT
 
-            # ====== Juju Charm =============================================
-            #vdu-configuration:
-                #juju:
-                    #charm: hsscharm
-                #initial-config-primitive:
-                #-   seq: '1'
-                    #name: config
-                    #parameter:
-                    #-   name: ssh-hostname
-                        #value: <rw_mgmt_ip>
-                    #-   name: ssh-username
-                        #value: nornetpp
-                    #-   name: ssh-password
-                        #value: <password>
-                #-   seq: '2'
-                    #name: configure-hss
-                    #parameter:
-                    ##-   name: mme-mgmt-ip
-                        ##data-type: STRING
-                        ##value: <mme_mgmt_ip>
-                    #-   name: mme-s1c-ip
-                        #data-type: STRING
-                        #value: <mme_s1c_ip>
-                    ##-   name: hss-mgmt-ip
-                        ##data-type: STRING
-                        ##value: <hss_mgmt_ip>
-                    ##-   name: spgwc-mgmt-ip
-                        ##data-type: STRING
-                        ##value: <spgwc_mgmt_ip>
-                    ##-   name: spgwu-mgmt-ip
-                        ##data-type: STRING
-                        ##value: <spgwu_mgmt_ip>
-                    #-   name: spgwu-s1u-ip
-                        #data-type: STRING
-                        #value: <spgwu_s1u_ip>
-                    ##-   name: spgwu-sgi-ip
-                        ##data-type: STRING
-                        ##value: <spgwu_sgi_ip>
-                #-   seq: '3'
-                    #name: restart-hss
+          # ====== Juju Charm ===============================================
+          # vdu-configuration:
+            # juju:
+              # charm: hsscharm
+            # initial-config-primitive:
+              # - seq: '1'
+                # name: config
+                # parameter:
+                # - name: ssh-hostname
+                    # value: <rw_mgmt_ip>
+                # - name: ssh-username
+                    # value: nornetpp
+                # - name: ssh-password
+                    # value: <password>
+              # - seq: '2'
+                # name: configure-hss
+                # parameter:
+                # - name: mme-s1c-ip
+                    # data-type: STRING
+                    # value: <mme_s1c_ip>
+                # - name: spgwu-s1u-ip
+                    # data-type: STRING
+                    # value: <spgwu_s1u_ip>
+              # - seq: '3'
+                # name: restart-hss
 
 
-        # ###### VDU: SPGW-U (Serving & Packet Data Network Gateway - Control Plane) #####
-        -   id: SPGW-C
-            name: SPGW-C
-            description: SPGW-C
-            count: 1
+        # ###### VDU: SPGW-C ################################################
+        # (Serving & Packet Data Network Gateway -- Control Plane)
+        - id: SPGW-C
+          name: SPGW-C
+          description: SPGW-C
+          count: 1
 
-            # ====== VDU VM Configuration ===================================
-            vm-flavor:
-                vcpu-count: 1
-                memory-mb: 2048
-                storage-gb: 24
-            image: 'Template-Ubuntu-5gVINNI-Development-Bionic'
-            cloud-init-file: spgwc-init
+          # ====== VDU VM Configuration =====================================
+          vm-flavor:
+            vcpu-count: 1
+            memory-mb: 2048
+            storage-gb: 24
+          image: Template-Ubuntu-5gVINNI-Development-Bionic
+          cloud-init-file: spgwc-init
 
-            # ====== Interfaces =============================================
-            interface:
-            # Specify the external interfaces
-            # There can be multiple interfaces defined
-            -   name: eth0
-                type: EXTERNAL
-                mgmt-interface: true
-                virtual-interface:
-                    type: PARAVIRT
-                external-connection-point-ref: spgwc-mgmt
-            -   name: eth1
-                type: INTERNAL
-                virtual-interface:
-                    type: PARAVIRT
-                internal-connection-point-ref: spgwc-sxab
-            -   name: eth2
-                type: INTERNAL
-                virtual-interface:
-                    type: PARAVIRT
-                internal-connection-point-ref: spgwc-s11
+          # ====== Interfaces ===============================================
+          interface:
+            - name: eth0
+              type: EXTERNAL
+              mgmt-interface: true
+              virtual-interface:
+                type: PARAVIRT
+              external-connection-point-ref: spgwc-mgmt
+            - name: eth1
+              type: INTERNAL
+              virtual-interface:
+                type: PARAVIRT
+              internal-connection-point-ref: spgwc-sxab
+            - name: eth2
+              type: INTERNAL
+              virtual-interface:
+                type: PARAVIRT
+              internal-connection-point-ref: spgwc-s11
 
-            # ====== Internal Connection Points =============================
-            internal-connection-point:
+          # ====== Internal Connection Points ===============================
+          internal-connection-point:
             - id: spgwc-sxab
               name: spgwc-sxab
               type: VPORT
@@ -255,236 +220,152 @@ vnfd:vnfd-catalog:
               name: spgwc-s11
               type: VPORT
 
-            ## ====== Juju Charm =============================================
-            #vdu-configuration:
-                #juju:
-                    #charm: spgwccharm
-                #initial-config-primitive:
-                #-   seq: '1'
-                    #name: config
-                    #parameter:
-                    #-   name: ssh-hostname
-                        #value: <rw_mgmt_ip>
-                    #-   name: ssh-username
-                        #value: nornetpp
-                    #-   name: ssh-password
-                        #value: <password>
-                #-   seq: '2'
-                    #name: configure-spgwc
-                    #parameter:
-                    ##-   name: mme-mgmt-ip
-                        ##data-type: STRING
-                        ##value: <mme_mgmt_ip>
-                    #-   name: mme-s1c-ip
-                        #data-type: STRING
-                        #value: <mme_s1c_ip>
-                    ##-   name: hss-mgmt-ip
-                        ##data-type: STRING
-                        ##value: <hss_mgmt_ip>
-                    ##-   name: spgwc-mgmt-ip
-                        ##data-type: STRING
-                        ##value: <spgwc_mgmt_ip>
-                    ##-   name: spgwu-mgmt-ip
-                        ##data-type: STRING
-                        ##value: <spgwu_mgmt_ip>
-                    #-   name: spgwu-s1u-ip
-                        #data-type: STRING
-                        #value: <spgwu_s1u_ip>
-                    ##-   name: spgwu-sgi-ip
-                        ##data-type: STRING
-                        ##value: <spgwu_sgi_ip>
-                #-   seq: '3'
-                    #name: restart-spgwc
 
+        # ###### VDU: SPGW-U ################################################
+        # (Serving & Packet Data Network Gateway -- User Plane)
+        - id: SPGW-U
+          name: SPGW-U
+          description: SPGW-U
+          count: 1
 
+          # ====== VDU VM Configuration =====================================
+          vm-flavor:
+            vcpu-count: 1
+            memory-mb: 2048
+            storage-gb: 24
+          image: Template-Ubuntu-5gVINNI-Development-Bionic
+          cloud-init-file: spgwu-init
+          # guest-epa:
+          #     cpu-pinning-policy: DEDICATED
+          #     mempage-size: LARGE
 
-        # ###### VDU: SPGW-U (Serving & Packet Data Network Gateway - User Plane) #####
-        -   id: SPGW-U
-            name: SPGW-U
-            description: SPGW-U
-            count: 1
+          # ====== Interfaces ===============================================
+          interface:
+            - name: eth0
+              type: EXTERNAL
+              mgmt-interface: true
+              virtual-interface:
+                type: PARAVIRT
+              external-connection-point-ref: spgwu-mgmt
+            - name: eth1
+              type: INTERNAL
+              virtual-interface:
+                type: PARAVIRT
+              internal-connection-point-ref: spgwu-sxab
+            - name: eth2
+              type: EXTERNAL
+              virtual-interface:
+                type: PARAVIRT
+              external-connection-point-ref: spgwu-s1u
+            - name: eth3
+              type: EXTERNAL
+              virtual-interface:
+                type: PARAVIRT
+              external-connection-point-ref: spgwu-sgi
 
-            # ====== VDU VM Configuration ===================================
-            vm-flavor:
-                vcpu-count: 1
-                memory-mb: 2048
-                storage-gb: 24
-            image: 'Template-Ubuntu-5gVINNI-Development-Bionic'
-            cloud-init-file: spgwu-init
-            # guest-epa:
-            #     cpu-pinning-policy: DEDICATED
-            #     mempage-size: LARGE
-
-            # ====== Interfaces =============================================
-            interface:
-            # Specify the external interfaces
-            # There can be multiple interfaces defined
-            -   name: eth0
-                type: EXTERNAL
-                mgmt-interface: true
-                virtual-interface:
-                    type: PARAVIRT
-                external-connection-point-ref: spgwu-mgmt
-            -   name: eth1
-                type: INTERNAL
-                virtual-interface:
-                    type: PARAVIRT
-                internal-connection-point-ref: spgwu-sxab
-            -   name: eth2
-                type: EXTERNAL
-                virtual-interface:
-                    type: PARAVIRT
-                external-connection-point-ref: spgwu-s1u
-            -   name: eth3
-                type: EXTERNAL
-                virtual-interface:
-                    type: PARAVIRT
-                external-connection-point-ref: spgwu-sgi
-
-            # ====== Internal Connection Points =============================
-            internal-connection-point:
+           # ====== Internal Connection Points ==============================
+          internal-connection-point:
             - id: spgwu-sxab
               name: spgwu-sxab
               type: VPORT
 
-            ## ====== Juju Charm =============================================
-            #vdu-configuration:
-                #juju:
-                    #charm: spgwucharm
-                #initial-config-primitive:
-                #-   seq: '1'
-                    #name: config
-                    #parameter:
-                    #-   name: ssh-hostname
-                        #value: <rw_mgmt_ip>
-                    #-   name: ssh-username
-                        #value: nornetpp
-                    #-   name: ssh-password
-                        #value: <password>
-                #-   seq: '2'
-                    #name: configure-spgwu
-                    #parameter:
-                    ##-   name: mme-mgmt-ip
-                        ##data-type: STRING
-                        ##value: <mme_mgmt_ip>
-                    #-   name: mme-s1c-ip
-                        #data-type: STRING
-                        #value: <mme_s1c_ip>
-                    ##-   name: hss-mgmt-ip
-                        ##data-type: STRING
-                        ##value: <hss_mgmt_ip>
-                    ##-   name: spgwc-mgmt-ip
-                        ##data-type: STRING
-                        ##value: <spgwc_mgmt_ip>
-                    ##-   name: spgwu-mgmt-ip
-                        ##data-type: STRING
-                        ##value: <spgwu_mgmt_ip>
-                    #-   name: spgwu-s1u-ip
-                        #data-type: STRING
-                        #value: <spgwu_s1u_ip>
-                    ##-   name: spgwu-sgi-ip
-                        ##data-type: STRING
-                        ##value: <spgwu_sgi_ip>
-                #-   seq: '3'
-                    #name: restart-spgwu
+          # ====== Juju Charm ===============================================
+          # vdu-configuration:
+            # juju:
+              # charm: spgwccharm
+            # initial-config-primitive:
+              # - seq: '1'
+                # name: config
+                # parameter:
+                # - name: ssh-hostname
+                    # value: <rw_mgmt_ip>
+                # - name: ssh-username
+                    # value: nornetpp
+                # - name: ssh-password
+                    # value: <password>
+              # - seq: '2'
+                # name: configure-spgwc
+                # parameter:
+                # - name: mme-s1c-ip
+                    # data-type: STRING
+                    # value: <mme_s1c_ip>
+                # - name: spgwu-s1u-ip
+                    # data-type: STRING
+                    # value: <spgwu_s1u_ip>
+              # - seq: '3'
+                # name: restart-spgwc
 
 
-        # ###### Internal VLDs ##############################################
+      # ###### Internal VLDs ################################################
 
-        # ====== Network Address Ranges of the Internal Networks ============
-        ip-profiles:
+      # ====== Network Address Ranges of the Internal Networks ==============
+      ip-profiles:
         - name: S6a
           description: S6a Network
           ip-profile-params:
-              ip-version: ipv4
-              subnet-address: 172.16.6.0/24
-              dhcp-params:
-                  enabled: true
+            ip-version: ipv4
+            subnet-address: 172.16.6.0/24
+            dhcp-params:
+              enabled: true
         - name: S11
           description: S11 Network
           ip-profile-params:
-              ip-version: ipv4
-              subnet-address: 172.16.1.0/24
-              dhcp-params:
-                  enabled: true
+            ip-version: ipv4
+            subnet-address: 172.16.1.0/24
+            dhcp-params:
+              enabled: true
         - name: SXab
           description: SXab Network
           ip-profile-params:
-              ip-version: ipv4
-              subnet-address: 172.55.55.0/24
-              dhcp-params:
-                  enabled: true
+            ip-version: ipv4
+            subnet-address: 172.55.55.0/24
+            dhcp-params:
+              enabled: true
 
-        # ====== Internal Connections =======================================
-        internal-vld:
+      # ====== Internal Connections =========================================
+      internal-vld:
         - id: s6a
           ip-profile-ref: S6a
           name: S6a
           internal-connection-point:
-          - id-ref: mme-s6a
-          - id-ref: hss-s6a
+            - id-ref: mme-s6a
+            - id-ref: hss-s6a
         - id: s11
           name: S11
           ip-profile-ref: S11
           internal-connection-point:
-          - id-ref: mme-s11
-          - id-ref: spgwc-s11
+            - id-ref: mme-s11
+            - id-ref: spgwc-s11
         - id: sxab
           name: SXab
           ip-profile-ref: SXab
           internal-connection-point:
-          - id-ref: spgwu-sxab
-          - id-ref: spgwc-sxab
+            - id-ref: spgwu-sxab
+            - id-ref: spgwc-sxab
 
 
-        # ###### External Connection Points #################################
-        connection-point:
-        -   name: mme-mgmt
-        -   name: mme-s1c
-        -   name: hss-mgmt
-        -   name: spgwc-mgmt
-        -   name: spgwu-mgmt
-        -   name: spgwu-s1u
-        -   name: spgwu-sgi
+      # ###### External Connection Points ###################################
+      connection-point:
+        - name: mme-mgmt
+        - name: mme-s1c
+        - name: hss-mgmt
+        - name: spgwc-mgmt
+        - name: spgwu-mgmt
+        - name: spgwu-s1u
+        - name: spgwu-sgi
 
 
-        # ###### Juju Charm #################################################
-        vnf-configuration:
-            juju:
-                charm: epccharm
-            initial-config-primitive:
-            -   seq: '1'
-                name: config
-                parameter:
-                -   name: ssh-hostname
-                    value: <rw_mgmt_ip>
-                -   name: ssh-username
-                    value: ubuntu
-                -   name: ssh-password
-                    value: osm4u
-#            -   seq: '2'
-#                name: touch
-#                parameter:
-#                -   name: filename
-#                    data-type: STRING
-#                    value: '/home/ubuntu/first-touch'
-#            config-primitive:
-#            -   name: touch
-#                parameter:
-#                -   name: filename
-#                    data-type: STRING
-#                    default-value: '/home/ubuntu/touched'
-
-            ##service-primitive:
-            ##-   name: config
-                ##parameter:
-                ##-   name: <config parameter>
-                    ##data-type: [STRING|INTEGER]
-                    ##mandatory: [true|false]
-                    ##default-value: <value>
-            ##-   name: <action name>
-                ##parameter:
-                ##-   name: <action parameter>
-                    ##data-type: [STRING|INTEGER]
-                    ##mandatory: [true|false]
-                    ##default-value: <value>
+      # ###### Juju Charm ###################################################
+      vnf-configuration:
+        juju:
+          charm: epccharm
+        initial-config-primitive:
+          - seq: '1'
+            name: config
+            parameter:
+              - name: ssh-hostname
+                value: <rw_mgmt_ip>
+              - name: ssh-username
+                value: ubuntu
+              - name: ssh-password
+                value: osm4u
