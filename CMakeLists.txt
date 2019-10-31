@@ -48,7 +48,9 @@ SET(NSD_LIST  SimulaMet-OAI-EPC_nsd)
 # Automatically obtain list of charms:
 SET(CHARMS_SOURCE_DIRECTORY "juju/")
 SET(CHARMS_BUILD_DIRECTORY  ".build/")
-EXECUTE_PROCESS(COMMAND git ls-files | cut -d/ -f1 | sort -u
+EXECUTE_PROCESS(COMMAND git ls-files
+                COMMAND cut -d/ -f1
+                COMMAND sort -u
                 COMMAND tr "\n" ";"
                 WORKING_DIRECTORY ${CHARMS_SOURCE_DIRECTORY}
                 OUTPUT_VARIABLE CHARM_SOURCE_LIST OUTPUT_STRIP_TRAILING_WHITESPACE)
@@ -57,6 +59,11 @@ EXECUTE_PROCESS(COMMAND git ls-files | cut -d/ -f1 | sort -u
 #############################################################################
 # REQUIREMENTS
 #############################################################################
+
+FIND_PROGRAM(YAMLLINT yamllint)
+IF(NOT YAMLLINT)
+   MESSAGE(FATAL_ERROR "yamllint (Ubuntu/Debian: yamllint) not found!")
+ENDIF()
 
 FIND_PROGRAM(VALIDATE_DESCRIPTOR ${VALIDATE_DESCRIPTOR_SCRIPT})
 IF(NOT VALIDATE_DESCRIPTOR)
