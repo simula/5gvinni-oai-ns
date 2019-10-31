@@ -28,73 +28,73 @@
 
 nsd:nsd-catalog:
   nsd:
-  - id: SimulaMet-OAI-EPC_nsd
-    name: SimulaMet-OAI-EPC_nsd
-    short-name: SimulaMet-OAI-EPC_nsd
-    description: SimulaMet OpenAirInterface Evolved Packet Core NS
-    vendor: Thomas Dreibholz
-    version: '1.0'
-    logo: NorNet.png
+    - id: SimulaMet-OAI-EPC_nsd
+      name: SimulaMet-OAI-EPC_nsd
+      short-name: SimulaMet-OAI-EPC_nsd
+      description: SimulaMet OpenAirInterface Evolved Packet Core NS
+      vendor: Thomas Dreibholz
+      version: '1.0'
+      logo: NorNet.png
 
       # ###### VNFDs that are part of this NSD ##############################
-    constituent-vnfd:
-    - member-vnf-index: 1
-      vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
+      constituent-vnfd:
+        - member-vnf-index: 1
+          vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
 
       # ###### VLDs #########################################################
-    vld:
+      vld:
         # ====== Management =================================================
-      - id: SimulaMet-OAI-EPC_nsd-mgmt
-        name: management
-        short-name: management
-        mgmt-network: 'true'
-        type: ELAN
-        vim-network-name: mgmt
-        vnfd-connection-point-ref:
-        - member-vnf-index-ref: 1
-          vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
-          vnfd-connection-point-ref: mme-mgmt
-        - member-vnf-index-ref: 1
-          vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
-          vnfd-connection-point-ref: hss-mgmt
-        - member-vnf-index-ref: 1
-          vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
-          vnfd-connection-point-ref: spgwc-mgmt
-        - member-vnf-index-ref: 1
-          vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
-          vnfd-connection-point-ref: spgwu-mgmt
+        - id: SimulaMet-OAI-EPC_nsd-mgmt
+          name: management
+          short-name: management
+          mgmt-network: 'true'
+          type: ELAN
+          vim-network-name: mgmt
+          vnfd-connection-point-ref:
+            - member-vnf-index-ref: 1
+              vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
+              vnfd-connection-point-ref: mme-mgmt
+            - member-vnf-index-ref: 1
+              vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
+              vnfd-connection-point-ref: hss-mgmt
+            - member-vnf-index-ref: 1
+              vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
+              vnfd-connection-point-ref: spgwc-mgmt
+            - member-vnf-index-ref: 1
+              vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
+              vnfd-connection-point-ref: spgwu-mgmt
 
         # ====== S1-C =======================================================
-      - id: SimulaMet-OAI-EPC_nsd-S1C
-        name: SimulaMet-OAI-EPC_nsd-S1C
-        short-name: SimulaMet-OAI-EPC_nsd-S1C
-        type: ELAN
-        vim-network-name: nornet-simula
-        vnfd-connection-point-ref:
-        - member-vnf-index-ref: 1
-          vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
-          vnfd-connection-point-ref: mme-s1c
-          ip-address: 192.168.247.102
+        - id: SimulaMet-OAI-EPC_nsd-S1C
+          name: SimulaMet-OAI-EPC_nsd-S1C
+          short-name: SimulaMet-OAI-EPC_nsd-S1C
+          type: ELAN
+          vim-network-name: nornet-simula
+          vnfd-connection-point-ref:
+            - member-vnf-index-ref: 1
+              vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
+              vnfd-connection-point-ref: mme-s1c
+              ip-address: 192.168.247.102
 
         # ====== S1-U =======================================================
-      - id: SimulaMet-OAI-EPC_nsd-S1U
-        name: SimulaMet-OAI-EPC_nsd-S1U
-        short-name: SimulaMet-OAI-EPC_nsd-S1U
-        type: ELAN
-        vim-network-name: nornet-simula
-        vnfd-connection-point-ref:
-        - member-vnf-index-ref: 1
-          vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
-          vnfd-connection-point-ref: spgwu-s1u
-          ip-address: 192.168.248.159
+        - id: SimulaMet-OAI-EPC_nsd-S1U
+          name: SimulaMet-OAI-EPC_nsd-S1U
+          short-name: SimulaMet-OAI-EPC_nsd-S1U
+          type: ELAN
+          vim-network-name: nornet-simula
+          vnfd-connection-point-ref:
+            - member-vnf-index-ref: 1
+              vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
+              vnfd-connection-point-ref: spgwu-s1u
+              ip-address: 192.168.248.159
 
         # ====== SGi ========================================================
-      - id: SimulaMet-OAI-EPC_nsd-SGi
-        name: SimulaMet-OAI-EPC_nsd-SGi
-        short-name: SimulaMet-OAI-EPC_nsd-SGi
-        type: ELAN
-        vim-network-name: nornet-simula
-        vnfd-connection-point-ref:
-        - member-vnf-index-ref: 1
-          vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
-          vnfd-connection-point-ref: spgwu-sgi
+        - id: SimulaMet-OAI-EPC_nsd-SGi
+          name: SimulaMet-OAI-EPC_nsd-SGi
+          short-name: SimulaMet-OAI-EPC_nsd-SGi
+          type: ELAN
+          vim-network-name: nornet-simula
+          vnfd-connection-point-ref:
+            - member-vnf-index-ref: 1
+              vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
+              vnfd-connection-point-ref: spgwu-sgi
