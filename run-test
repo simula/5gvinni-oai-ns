@@ -75,7 +75,7 @@ while [ $# -gt 0 ] ; do
    osm ns-create \
       --ns_name ${NS} \
       --nsd_name ${NSD} \
-      --config_file ${PARAMS} \
+      ${config_file_option} \
       --vim_account openstack-site \
       --ssh_keys ~/.ssh/id_rsa.pub
    # --config '{vld: [ {name: mgmtnet, vim-network-name: osm-ext} ] }'
