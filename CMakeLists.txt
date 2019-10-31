@@ -107,7 +107,7 @@ FOREACH(charmName IN LISTS CHARM_SOURCE_LIST)
       GET_FILENAME_COMPONENT(charmInputDirectory  ${CHARMS_SOURCE_DIRECTORY}/${charmName} ABSOLUTE)
       GET_FILENAME_COMPONENT(charmBuildDirectory  ${CHARMS_BUILD_DIRECTORY}               ABSOLUTE)
       GET_FILENAME_COMPONENT(charmOutputDirectory ${charmBuildDirectory}/${charmName}     ABSOLUTE)
-      EXECUTE_PROCESS(COMMAND git ls-tree -r --name-only HEAD ${charmInputDirectory}
+      EXECUTE_PROCESS(COMMAND git ls-files ${charmInputDirectory}
                       COMMAND tr " \n" ";;"
                       OUTPUT_VARIABLE charmInputFiles OUTPUT_STRIP_TRAILING_WHITESPACE)
 
@@ -122,10 +122,32 @@ FOREACH(charmName IN LISTS CHARM_SOURCE_LIST)
 ENDFOREACH()
 
 
+# ###### Validate YAML ######################################################
+EXECUTE_PROCESS(COMMAND git ls-files ${vnfd}
+                COMMAND grep -E ".yaml$"
+                COMMAND tr " \n" ";;"
+                OUTPUT_VARIABLE yamlFiles OUTPUT_STRIP_TRAILING_WHITESPACE)
+SET(allYAMLs "")
+FOREACH(yamlFile IN LISTS yamlFiles)
+   IF(NOT ${yamlFile} STREQUAL "")
+      makeUniqueTarget(validate_yaml "validate_${yamlFile}")
+
+      SET(timestampFile ".${validate_yaml}.stamp")
+      ADD_CUSTOM_COMMAND(OUTPUT ${timestampFile}
+                         COMMAND yamllint -d '{extends: default, rules: {document-start: {present: no}}}' ${yamlFile}
+                         COMMAND touch ${timestampFile}
+                         DEPENDS ${yamlFile})
+      ADD_CUSTOM_TARGET(${validate_yaml} DEPENDS ${timestampFile})
+
+      LIST(APPEND allYAMLs ${validate_yaml})
+   ENDIF()
+ENDFOREACH()
+
+
 # ###### Generate VNFDs #####################################################
 SET(allVNFDs "")
 FOREACH(vnfd IN LISTS VNFD_LIST)
-   EXECUTE_PROCESS(COMMAND git ls-tree -r --name-only HEAD ${vnfd}
+   EXECUTE_PROCESS(COMMAND git ls-files ${vnfd}
                    COMMAND tr " \n" ";;"
                    OUTPUT_VARIABLE vnfdFiles OUTPUT_STRIP_TRAILING_WHITESPACE)
 
@@ -141,7 +163,7 @@ FOREACH(vnfd IN LISTS VNFD_LIST)
                             COMMAND rm -rf ${charmCopyDirectory}
                             COMMAND cp -a ${charmOutputDirectory} ${charmCopyDirectory}
                             DEPENDS ${charmOutputDirectory}/version)
-         ADD_CUSTOM_TARGET(${generate_vnfd_charm} DEPENDS ${charmCopyDirectory}/version ${generate_charm})
+         ADD_CUSTOM_TARGET(${generate_vnfd_charm} DEPENDS ${charmCopyDirectory}/version ${allYAMLs} ${generate_charm})
          LIST(APPEND allCharmsInVNFD ${generate_vnfd_charm})
       ENDIF()
    ENDFOREACH()
@@ -157,7 +179,7 @@ FOREACH(vnfd IN LISTS VNFD_LIST)
                       COMMAND du -k ${vnfdPackage}
                       DEPENDS ${vnfdFiles})
    ADD_CUSTOM_TARGET(${generate_vnfdPackage}
-                     DEPENDS ${vnfdPackage} ${allCharmsInVNFD})
+                     DEPENDS ${vnfdPackage} ${allYAMLs} ${allCharmsInVNFD})
 
    LIST(APPEND allVNFDs ${generate_vnfdPackage})
 ENDFOREACH()
@@ -165,7 +187,7 @@ ENDFOREACH()
 
 # ###### Generate NSDs ######################################################
 FOREACH(nsd IN LISTS NSD_LIST)
-   EXECUTE_PROCESS(COMMAND git ls-tree -r --name-only HEAD ${nsd}
+   EXECUTE_PROCESS(COMMAND git ls-files ${nsd}
                    COMMAND tr " \n" ";;"
                    OUTPUT_VARIABLE nsdFiles OUTPUT_STRIP_TRAILING_WHITESPACE)
 
@@ -180,5 +202,5 @@ FOREACH(nsd IN LISTS NSD_LIST)
                       COMMAND du -k ${nsdPackage}
                       DEPENDS ${nsdFiles})
    ADD_CUSTOM_TARGET(${generate_nsdPackage}
-                     ALL DEPENDS ${nsdPackage} ${allVNFDs})
+                     ALL DEPENDS ${nsdPackage} ${allYAMLs} ${allVNFDs})
 ENDFOREACH()
