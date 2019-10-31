@@ -27,6 +27,7 @@
 # Contact: dreibh@simula.no
 
 name: spgwccharm
+display-name: spgwccharm
 summary: SimulaMet-OAI SPGW-C Charm
 maintainer: Thomas Dreibholz <dreibh@simula.no>
 description: |

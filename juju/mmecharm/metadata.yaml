@@ -27,6 +27,7 @@
 # Contact: dreibh@simula.no
 
 name: mmecharm
+display-name: mmecharm
 summary: SimulaMet-OAI MME Charm
 maintainer: Thomas Dreibholz <dreibh@simula.no>
 description: |
