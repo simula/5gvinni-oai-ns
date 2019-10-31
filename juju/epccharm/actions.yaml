@@ -32,6 +32,24 @@ touch:
     filename:
       description: The name of the file to touch.
       type: string
-      default: ""
+      default: ''
   required:
     - filename
+
+configure-epc:
+  description: Configures the EPC
+  params:
+    mme-s1c-ip:
+      description: MME S1-C IP
+      data-type: string
+      default: 0.0.0.0
+    spgwu-s1u-ip:
+      description: SPGW-U S1-U IP
+      data-type: string
+      default: 0.0.0.0
+  required:
+    - mme-s1c-ip
+    - spgwu-s1u-ip
+
+restart-epc:
+  description: Restarts the EPC
