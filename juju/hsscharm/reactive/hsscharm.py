@@ -51,7 +51,7 @@ def install_hsscharm_proxy_charm():
 
 # ###### configure-hss function #############################################
 @when('actions.configure-hss')
-def actions.configure_hss():
+def configure_hss():
    clear_flag('actions.configure-hss')
 
 

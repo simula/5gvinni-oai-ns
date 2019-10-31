@@ -51,7 +51,7 @@ def install_spgwccharm_proxy_charm():
 
 # ###### configure-spgwc function ###########################################
 @when('actions.configure-spgwc')
-def actions.configure_spgwc():
+def configure_spgwc():
    clear_flag('actions.configure-spgwc')
 
 

@@ -51,7 +51,7 @@ def install_epccharm_proxy_charm():
 
 # ###### configure-epc function #############################################
 @when('actions.configure-epc')
-def actions.configure_epc():
+def configure_epc():
    clear_flag('actions.configure-epc')
 
 

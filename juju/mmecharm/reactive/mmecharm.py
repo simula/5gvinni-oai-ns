@@ -51,7 +51,7 @@ def install_mmecharm_proxy_charm():
 
 # ###### configure-mme function #############################################
 @when('actions.configure-mme')
-def actions.configure_mme():
+def configure_mme():
    clear_flag('actions.configure-mme')
 
 

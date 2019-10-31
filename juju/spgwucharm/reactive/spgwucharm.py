@@ -51,7 +51,7 @@ def install_spgwucharm_proxy_charm():
 
 # ###### configure-spgwu function ###########################################
 @when('actions.configure-spgwu')
-def actions.configure_spgwu():
+def configure_spgwu():
    clear_flag('actions.configure-spgwu')
 
 
