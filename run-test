@@ -27,7 +27,7 @@
 #
 # Contact: dreibh@simula.no
 
-NS="SimulaMet-OAI-EPC"
+NS="hackfest_proxycharm"
 VNFD="${NS}_vnfd"
 NSD="${NS}_nsd"
 

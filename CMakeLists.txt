@@ -42,8 +42,25 @@ PROJECT(SimulaMet-OAI-EPC C)
 SET(VALIDATE_DESCRIPTOR_SCRIPT "devops/descriptor-packages/tools/validate_descriptor.py")
 SET(GENERATE_DESCRIPTOR_SCRIPT "devops/descriptor-packages/tools/generate_descriptor_pkg.sh")
 
-SET(VNFD_LIST SimulaMet-OAI-EPC_vnfd)
-SET(NSD_LIST  SimulaMet-OAI-EPC_nsd)
+# Automatically obtain list of VNFDs:
+EXECUTE_PROCESS(COMMAND git ls-files
+                COMMAND cut -d/ -f1
+                COMMAND sort -u
+                COMMAND grep "vnfd$"
+                COMMAND tr "\n" ";"
+                COMMAND sed -e "s/;$//g"
+                OUTPUT_VARIABLE VNFD_LIST OUTPUT_STRIP_TRAILING_WHITESPACE)
+MESSAGE("VNFDs: ${VNFD_LIST}")
+
+# Automatically obtain list of NSDs:
+EXECUTE_PROCESS(COMMAND git ls-files
+                COMMAND cut -d/ -f1
+                COMMAND sort -u
+                COMMAND grep "nsd$"
+                COMMAND tr "\n" ";"
+                COMMAND sed -e "s/;$//g"
+                OUTPUT_VARIABLE NSD_LIST OUTPUT_STRIP_TRAILING_WHITESPACE)
+MESSAGE("NSDs: ${NSD_LIST}")
 
 # Automatically obtain list of charms:
 SET(CHARMS_SOURCE_DIRECTORY "juju/")
@@ -54,6 +71,7 @@ EXECUTE_PROCESS(COMMAND git ls-files
                 COMMAND tr "\n" ";"
                 WORKING_DIRECTORY ${CHARMS_SOURCE_DIRECTORY}
                 OUTPUT_VARIABLE CHARM_SOURCE_LIST OUTPUT_STRIP_TRAILING_WHITESPACE)
+MESSAGE("Charms: ${CHARM_SOURCE_LIST}")
 
 
 #############################################################################
@@ -141,7 +159,7 @@ FOREACH(yamlFile IN LISTS yamlFiles)
 
       SET(timestampFile ".${validate_yaml}.stamp")
       ADD_CUSTOM_COMMAND(OUTPUT ${timestampFile}
-                         COMMAND yamllint -d '{extends: default, rules: {document-start: {present: no}}}' ${yamlFile}
+                         COMMAND echo ${YAMLLINT} -d '{extends: default, rules: {document-start: {present: no}}}' ${yamlFile}
                          COMMAND touch ${timestampFile}
                          DEPENDS ${yamlFile})
       ADD_CUSTOM_TARGET(${validate_yaml} DEPENDS ${timestampFile})
@@ -168,6 +186,7 @@ FOREACH(vnfd IN LISTS VNFD_LIST)
          GET_FILENAME_COMPONENT(charmCopyDirectory   ${vnfd}/charms/${charmName}            ABSOLUTE)
          ADD_CUSTOM_COMMAND(OUTPUT  ${charmCopyDirectory}/version
                             COMMAND rm -rf ${charmCopyDirectory}
+                            COMMAND mkdir -p ${charmCopyDirectory}
                             COMMAND cp -a ${charmOutputDirectory} ${charmCopyDirectory}
                             DEPENDS ${charmOutputDirectory}/version)
          ADD_CUSTOM_TARGET(${generate_vnfd_charm} DEPENDS ${charmCopyDirectory}/version ${allYAMLs} ${generate_charm})
