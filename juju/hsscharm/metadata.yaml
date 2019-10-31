@@ -28,7 +28,7 @@
 
 name: hsscharm
 display-name: hsscharm
-summary:  SimulaMet-OAI HSS Charm
+summary: SimulaMet-OAI HSS Charm
 maintainer: Thomas Dreibholz <dreibh@simula.no>
 description: |
   This charm manages the HSS.

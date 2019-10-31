@@ -27,30 +27,30 @@
 # Contact: dreibh@simula.no
 
 additionalParamsForVnf:
-- member-vnf-index: '1'
-  additionalParams:
-    mme_s1c_ip: 192.168.247.102
-    spgwu_s1u_ip: 192.168.248.159
-    password: osm4us
+  - member-vnf-index: '1'
+    additionalParams:
+      mme_s1c_ip: 192.168.247.102
+      spgwu_s1u_ip: 192.168.248.159
+      password: osm4us
 
 vnf:
-- member-vnf-index: '1'
-  internal-vld:
-  - name: S6a
-    internal-connection-point:
-    - id-ref: mme-s6a
-      ip-address: 172.16.6.2
-    - id-ref: hss-s6a
-      ip-address: 172.16.6.129
-  - name: S11
-    internal-connection-point:
-    - id-ref: mme-s11
-      ip-address: 172.16.1.102
-    - id-ref: spgwc-s11
-      ip-address: 172.16.1.104
-  - name: SXab
-    internal-connection-point:
-    - id-ref: spgwu-sxab
-      ip-address: 172.55.55.102
-    - id-ref: spgwc-sxab
-      ip-address: 172.55.55.101
+  - member-vnf-index: '1'
+    internal-vld:
+      - name: S6a
+        internal-connection-point:
+          - id-ref: mme-s6a
+            ip-address: 172.16.6.2
+          - id-ref: hss-s6a
+            ip-address: 172.16.6.129
+      - name: S11
+        internal-connection-point:
+          - id-ref: mme-s11
+            ip-address: 172.16.1.102
+          - id-ref: spgwc-s11
+            ip-address: 172.16.1.104
+      - name: SXab
+        internal-connection-point:
+          - id-ref: spgwu-sxab
+            ip-address: 172.55.55.102
+          - id-ref: spgwc-sxab
+            ip-address: 172.55.55.101
