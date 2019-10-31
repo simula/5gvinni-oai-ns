@@ -451,7 +451,7 @@ vnfd:vnfd-catalog:
         # ###### Juju Charm #################################################
         vnf-configuration:
             juju:
-                charm: simple2
+                charm: epccharm
             initial-config-primitive:
             -   seq: '1'
                 name: config

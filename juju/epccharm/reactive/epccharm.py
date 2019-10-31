@@ -26,42 +26,38 @@
 #
 # Contact: dreibh@simula.no
 
-from charms.reactive import when, when_not, set_flag
-
 from charmhelpers.core.hookenv import (
     action_get,
     action_fail,
     action_set,
-    config,
-    status_set,
+    status_set
 )
-
 from charms.reactive import (
-    remove_state as remove_flag,
-    set_state as set_flag,
-    when, when_not
+    clear_flag,
+    set_flag,
+    when,
+    when_not
 )
-
 import charms.sshproxy
 
-@when('actions.configure-epc')
-def configure_spgw():
-    hss_ip = action_get('hss-ip')
-    spgw_ip = action_get('spgw-ip')
-#    cmd1 = "sudo ip link set ens4 up && sudo dhclient ens4"
-#    charms.sshproxy._run(cmd1)
-#    cmd2 = "sudo ip link set ens5 up && sudo dhclient ens5"
-#    charms.sshproxy._run(cmd2)
-#    cmd3 = "sudo ip link set ens6 up && sudo dhclient ens6"
-#    charms.sshproxy._run(cmd3)
-#    cmd3='sudo sed -i "\'s/$hss_ip/{}/g\'" /etc/nextepc/freeDiameter/mme.conf'.format(hss_ip)
-#    charms.sshproxy._run(cmd3)
-#    cmd4='sudo sed -i "\'s/$spgw_ip/{}/g\'" /etc/nextepc/freeDiameter/mme.conf'.format(spgw_ip)
-#    charms.sshproxy._run(cmd4)
-    remove_flag('actions.configure-epc')
 
-@when('actions.restart-epc')
-def restart_spgw():
-#    cmd = "sudo systemctl restart nextepc-mmed"
-#    charms.sshproxy._run(cmd)
-    remove_flag('actions.restart-epc')
+@when('sshproxy.configured')
+@when_not('epccharm.installed')
+def install_epccharm_proxy_charm():
+    set_flag('epccharm.installed')
+    status_set('active', 'Ready!')
+
+
+@when('actions.touch')
+def touch():
+    err = ''
+    try:
+        filename = action_get('filename')
+        cmd = ['touch {}'.format(filename)]
+        result, err = charms.sshproxy._run(cmd)
+    except:
+        action_fail('command failed:' + err)
+    else:
+        action_set({'outout': result})
+    finally:
+        clear_flag('actions.touch')
