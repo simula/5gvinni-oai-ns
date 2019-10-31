@@ -27,13 +27,14 @@
 #
 # Contact: dreibh@simula.no
 
-NS="hackfest_proxycharm"
+NS="SimulaMet-OAI-EPC"
 VNFD="${NS}_vnfd"
 NSD="${NS}_nsd"
 
 
 # ====== Build ==============================================================
 echo -e "\x1b[34m`date +%FT%H:%M:%S`: Building ...\x1b[0m"
+cmake .
 make
 
 
@@ -61,11 +62,18 @@ fi
 osm ns-create \
    --ns_name ${NS} \
    --nsd_name ${NSD} \
+   --config_file params.yaml \
    --vim_account openstack-site \
-   --ssh_keys ~/.ssh/id_rsa.pub \
-   ${config_file_option}
+   --ssh_keys ~/.ssh/id_rsa.pub
 # --config '{vld: [ {name: mgmtnet, vim-network-name: osm-ext} ] }'
 
 
 # ====== Done! ==============================================================
 echo -e "\x1b[34m`date +%FT%H:%M:%S`: Done!\x1b[0m"
+
+# osm ns-list --filter=name=${NS}
+id=`osm ns-list --filter=name=${NS} | grep "| ${NS}" | awk '{ print $4 }'`
+echo "ID=${id}"
+sleep 10
+echo "juju switch ${id}"
+juju switch ${id}

@@ -26,42 +26,7 @@
 #
 # Contact: dreibh@simula.no
 
-
-# ====== Requirements  ======================================================
-# curl "https://osm-download.etsi.org/repository/osm/debian/ReleaseSIX/OSM%20ETSI%20Release%20Key.gpg" | sudo apt-key add -
-# sudo apt-get update
-# sudo add-apt-repository -y "deb [arch=amd64] https://osm-download.etsi.org/repository/osm/debian/ReleaseSIX stable IM osmclient devops"
-# sudo apt-get update
-# sudo apt-get install python-osm-im
-# sudo -H pip install pyangbind
-# ===========================================================================
-
-# NOTE: Clone https://osm.etsi.org/gerrit/osm/devops.git to .., or update the following definitions:
-VALIDATE_DESCRIPTOR = ../../devops/descriptor-packages/tools/validate_descriptor.py
-GENERATE_DESCRIPTOR = ../../devops/descriptor-packages/tools/generate_descriptor_pkg.sh
-
-NS="hackfest_proxycharm"
-VNFD="${NS}_vnfd"
-NSD="${NS}_nsd"
-
-
-.PHONY:	all
-all:	${VNFD}.tar.gz ${NSD}.tar.gz
-
-
-VNFD_FILES := $(shell git ls-tree -r --name-only HEAD ${VNFD})
-${VNFD}.tar.gz:	 $(VNFD_FILES)
-	$(VALIDATE_DESCRIPTOR) ${VNFD}/${VNFD}.yaml
-	$(GENERATE_DESCRIPTOR) -t vnfd -N ${VNFD}/
-	du -k ${VNFD}.tar.gz
-
-NSD_FILES := $(shell git ls-tree -r --name-only HEAD ${NSD})
-${NSD}.tar.gz:	$(NSD_FILES)
-	$(VALIDATE_DESCRIPTOR) ${NSD}/${NSD}.yaml
-	$(GENERATE_DESCRIPTOR) -t nsd -N ${NSD}/
-	du -k ${NSD}.tar.gz
-
-
-.PHONY:	clean
-clean:
-	rm -f *.tar.gz
+includes:
+  - layer:basic
+  - layer:vnfproxy
+repo: https://github.com/simula/5gvinni-oai-ns
