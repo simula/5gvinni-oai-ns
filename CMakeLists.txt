@@ -69,6 +69,7 @@ EXECUTE_PROCESS(COMMAND git ls-files
                 COMMAND cut -d/ -f1
                 COMMAND sort -u
                 COMMAND tr "\n" ";"
+                COMMAND sed -e "s/;$//g"
                 WORKING_DIRECTORY ${CHARMS_SOURCE_DIRECTORY}
                 OUTPUT_VARIABLE CHARM_SOURCE_LIST OUTPUT_STRIP_TRAILING_WHITESPACE)
 MESSAGE("Charms: ${CHARM_SOURCE_LIST}")
@@ -125,47 +126,46 @@ FUNCTION(makeUniqueTarget target fileName)
 ENDFUNCTION()
 
 
-# ###### Generate Juju Charms ###############################################
-FILE(MAKE_DIRECTORY ${CHARMS_BUILD_DIRECTORY})
-FOREACH(charmName IN LISTS CHARM_SOURCE_LIST)
-   IF(NOT ${charmName} STREQUAL "")
-      GET_FILENAME_COMPONENT(charmInputDirectory  ${CHARMS_SOURCE_DIRECTORY}/${charmName} ABSOLUTE)
-      GET_FILENAME_COMPONENT(charmBuildDirectory  ${CHARMS_BUILD_DIRECTORY}               ABSOLUTE)
-      GET_FILENAME_COMPONENT(charmOutputDirectory ${charmBuildDirectory}/${charmName}     ABSOLUTE)
-      EXECUTE_PROCESS(COMMAND git ls-files ${charmInputDirectory}
-                      COMMAND tr " \n" ";;"
-                      OUTPUT_VARIABLE charmInputFiles OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-      makeUniqueTarget(generate_charm "generate_${charmName}")
-      SET(timestampFile ${charmOutputDirectory}/version)
-      ADD_CUSTOM_COMMAND(OUTPUT  ${timestampFile}
-                         COMMAND charm build --build-dir ${charmBuildDirectory}
-                         WORKING_DIRECTORY ${charmInputDirectory}
-                         DEPENDS ${charmInputFiles})
-      ADD_CUSTOM_TARGET(${generate_charm} DEPENDS ${timestampFile})
-   ENDIF()
-ENDFOREACH()
-
-
 # ###### Validate YAML ######################################################
 EXECUTE_PROCESS(COMMAND git ls-files ${vnfd}
                 COMMAND grep -E ".yaml$"
-                COMMAND tr " \n" ";;"
+                COMMAND tr "\n" ";"
+                COMMAND sed -e "s/;$//g"
                 OUTPUT_VARIABLE yamlFiles OUTPUT_STRIP_TRAILING_WHITESPACE)
 SET(allYAMLs "")
 FOREACH(yamlFile IN LISTS yamlFiles)
-   IF(NOT ${yamlFile} STREQUAL "")
-      makeUniqueTarget(validate_yaml "validate_${yamlFile}")
+   makeUniqueTarget(validate_yaml "validate_${yamlFile}")
 
-      SET(timestampFile ".${validate_yaml}.stamp")
-      ADD_CUSTOM_COMMAND(OUTPUT ${timestampFile}
-                         COMMAND echo ${YAMLLINT} -d '{extends: default, rules: {document-start: {present: no}}}' ${yamlFile}
-                         COMMAND touch ${timestampFile}
-                         DEPENDS ${yamlFile})
-      ADD_CUSTOM_TARGET(${validate_yaml} DEPENDS ${timestampFile})
+   SET(timestampFile ".${validate_yaml}.stamp")
+   ADD_CUSTOM_COMMAND(OUTPUT ${timestampFile}
+                      COMMAND echo ${YAMLLINT} -d '{extends: default, rules: {document-start: {present: no}}}' ${yamlFile}
+                      COMMAND touch ${timestampFile}
+                      DEPENDS ${yamlFile})
+   ADD_CUSTOM_TARGET(${validate_yaml} DEPENDS ${timestampFile})
 
-      LIST(APPEND allYAMLs ${validate_yaml})
-   ENDIF()
+   LIST(APPEND allYAMLs ${validate_yaml})
+ENDFOREACH()
+
+
+# ###### Generate Juju Charms ###############################################
+FILE(MAKE_DIRECTORY ${CHARMS_BUILD_DIRECTORY})
+FOREACH(charmName IN LISTS CHARM_SOURCE_LIST)
+   GET_FILENAME_COMPONENT(charmInputDirectory  ${CHARMS_SOURCE_DIRECTORY}/${charmName} ABSOLUTE)
+   GET_FILENAME_COMPONENT(charmBuildDirectory  ${CHARMS_BUILD_DIRECTORY}               ABSOLUTE)
+   GET_FILENAME_COMPONENT(charmOutputDirectory ${charmBuildDirectory}/${charmName}     ABSOLUTE)
+   EXECUTE_PROCESS(COMMAND git ls-files ${charmInputDirectory}
+                   COMMAND tr "\n" ";"
+                   COMMAND sed -e "s/;$//g"
+                   OUTPUT_VARIABLE charmInputFiles OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+   makeUniqueTarget(generate_charm "generate_${charmName}")
+   SET(timestampFile "${charmOutputDirectory}.stamp")
+   ADD_CUSTOM_COMMAND(OUTPUT  ${timestampFile}
+                      COMMAND charm build --build-dir ${charmBuildDirectory}
+                      COMMAND touch ${timestampFile}
+                      WORKING_DIRECTORY ${charmInputDirectory}
+                      DEPENDS ${charmInputFiles})
+   ADD_CUSTOM_TARGET(${generate_charm} DEPENDS ${timestampFile})
 ENDFOREACH()
 
 
@@ -173,25 +173,24 @@ ENDFOREACH()
 SET(allVNFDs "")
 FOREACH(vnfd IN LISTS VNFD_LIST)
    EXECUTE_PROCESS(COMMAND git ls-files ${vnfd}
-                   COMMAND tr " \n" ";;"
+                   COMMAND tr "\n" ";"
+                   COMMAND sed -e "s/;$//g"
                    OUTPUT_VARIABLE vnfdFiles OUTPUT_STRIP_TRAILING_WHITESPACE)
 
    # ====== Copy the built Juju Charms ======================================
    SET(allCharmsInVNFD "")
    FOREACH(charmName IN LISTS CHARM_SOURCE_LIST)
-      IF(NOT ${charmName} STREQUAL "")
-         makeUniqueTarget(generate_charm      "generate_${charmName}")
-         makeUniqueTarget(generate_vnfd_charm "generate_${vnfd}_${charmName}")
-         GET_FILENAME_COMPONENT(charmOutputDirectory ${CHARMS_BUILD_DIRECTORY}/${charmName} ABSOLUTE)
-         GET_FILENAME_COMPONENT(charmCopyDirectory   ${vnfd}/charms/${charmName}            ABSOLUTE)
-         ADD_CUSTOM_COMMAND(OUTPUT  ${charmCopyDirectory}/version
-                            COMMAND rm -rf ${charmCopyDirectory}
-                            COMMAND mkdir -p ${charmCopyDirectory}
-                            COMMAND cp -a ${charmOutputDirectory} ${charmCopyDirectory}
-                            DEPENDS ${charmOutputDirectory}/version)
-         ADD_CUSTOM_TARGET(${generate_vnfd_charm} DEPENDS ${charmCopyDirectory}/version ${allYAMLs} ${generate_charm})
-         LIST(APPEND allCharmsInVNFD ${generate_vnfd_charm})
-      ENDIF()
+      makeUniqueTarget(generate_charm      "generate_${charmName}")
+      makeUniqueTarget(generate_vnfd_charm "generate_${vnfd}_${charmName}")
+      GET_FILENAME_COMPONENT(charmOutputDirectory ${CHARMS_BUILD_DIRECTORY}/${charmName} ABSOLUTE)
+      GET_FILENAME_COMPONENT(charmCopyDirectory   ${vnfd}/charms/${charmName}            ABSOLUTE)
+      ADD_CUSTOM_COMMAND(OUTPUT  ${charmCopyDirectory}/version
+                         COMMAND rm -rf ${charmCopyDirectory}
+                         COMMAND mkdir -p ${charmCopyDirectory}
+                         COMMAND cp -a ${charmOutputDirectory} ${charmCopyDirectory}
+                         DEPENDS ${charmOutputDirectory}/version)
+      ADD_CUSTOM_TARGET(${generate_vnfd_charm} DEPENDS ${charmCopyDirectory}/version ${allYAMLs} ${generate_charm})
+      LIST(APPEND allCharmsInVNFD ${generate_vnfd_charm})
    ENDFOREACH()
 
    # ====== Generate the VNFD ===============================================
@@ -214,7 +213,8 @@ ENDFOREACH()
 # ###### Generate NSDs ######################################################
 FOREACH(nsd IN LISTS NSD_LIST)
    EXECUTE_PROCESS(COMMAND git ls-files ${nsd}
-                   COMMAND tr " \n" ";;"
+                   COMMAND tr "\n" ";"
+                   COMMAND sed -e "s/;$//g"
                    OUTPUT_VARIABLE nsdFiles OUTPUT_STRIP_TRAILING_WHITESPACE)
 
    # ====== Generate the NSD ================================================
