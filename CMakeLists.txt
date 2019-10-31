@@ -48,7 +48,7 @@ SET(NSD_LIST  SimulaMet-OAI-EPC_nsd)
 # Automatically obtain list of charms:
 SET(CHARMS_SOURCE_DIRECTORY "juju/")
 SET(CHARMS_BUILD_DIRECTORY  ".build/")
-EXECUTE_PROCESS(COMMAND git ls-tree --name-only HEAD .
+EXECUTE_PROCESS(COMMAND git ls-files | cut -d/ -f1 | sort -u
                 COMMAND tr "\n" ";"
                 WORKING_DIRECTORY ${CHARMS_SOURCE_DIRECTORY}
                 OUTPUT_VARIABLE CHARM_SOURCE_LIST OUTPUT_STRIP_TRAILING_WHITESPACE)
