@@ -27,53 +27,71 @@
 #
 # Contact: dreibh@simula.no
 
-NS="hackfest_proxycharm"
-VNFD="${NS}_vnfd"
-NSD="${NS}_nsd"
+n=0
+while [ $# -gt 0 ] ; do
+   NS="$1"
+   VNFD="${NS}_vnfd"
+   NSD="${NS}_nsd"
+   PARAMS="${NS}-params.yaml"
+   if [ ! -d "${NSD}" ] ; then
+      echo >&2 "ERROR: NSD ${NSD} not found!"
+      echo >&2 ""
+      echo "NDSs in this directory:"
+      git ls-files | cut -d/ -f1 | sort -u | grep "_nsd$" | sed -e "s/_nsd$//g" >&2
+      echo  >&2 ""
+      exit 1
+   fi
 
 
-# ====== Build ==============================================================
-echo -e "\x1b[34m`date +%FT%H:%M:%S`: Building ...\x1b[0m"
-cmake .
-make
+   # ====== Build ==============================================================
+   if [ $n -eq 0 ] ; then
+      echo -e "\x1b[34m`date +%FT%H:%M:%S`: Building ...\x1b[0m"
+      cmake .
+      make
+   fi
 
 
-# ====== Clean up ===========================================================
-echo -e "\x1b[34m`date +%FT%H:%M:%S`: Deleting existing setup ...\x1b[0m"
-osm ns-delete --wait ${NS} || true
-osm nsd-delete ${NSD} || true
-osm vnfd-delete ${VNFD} || true
+   # ====== Clean up ===========================================================
+   echo -e "\x1b[34m`date +%FT%H:%M:%S`: Deleting existing setup ${NS} ...\x1b[0m"
+   osm ns-delete --wait ${NS} || true
+   osm nsd-delete ${NSD} || true
+   osm vnfd-delete ${VNFD} || true
 
 
-# ====== Create =============================================================
-echo -e "\x1b[34m`date +%FT%H:%M:%S`: Creating ...\x1b[0m"
-osm vnfd-create ${VNFD}.tar.gz
-osm nsd-create ${NSD}.tar.gz
+   # ====== Create =============================================================
+   echo -e "\x1b[34m`date +%FT%H:%M:%S`: Creating ${NS} ...\x1b[0m"
+   osm vnfd-create ${VNFD}.tar.gz
+   osm nsd-create ${NSD}.tar.gz
 
 
-# ====== Instantiate ========================================================
-echo -e "\x1b[34m`date +%FT%H:%M:%S`: Instantiating ...\x1b[0m"
-if [ -e params.yaml ] ; then
-   config_file_option=" --config_file params.yaml"
-else
-   echo >&2 "WARNING: No configuration file params.yaml found!"
-   config_file_option=""
-fi
-osm ns-create \
-   --ns_name ${NS} \
-   --nsd_name ${NSD} \
-   --config_file params.yaml \
-   --vim_account openstack-site \
-   --ssh_keys ~/.ssh/id_rsa.pub
-# --config '{vld: [ {name: mgmtnet, vim-network-name: osm-ext} ] }'
+   # ====== Instantiate ========================================================
+   echo -e "\x1b[34m`date +%FT%H:%M:%S`: Instantiating ${NS} ...\x1b[0m"
+   if [ -e ${PARAMS} ] ; then
+      config_file_option=" --config_file ${PARAMS}"
+   else
+      echo >&2 "WARNING: No configuration file ${PARAMS} found!"
+      config_file_option=""
+   fi
+   osm ns-create \
+      --ns_name ${NS} \
+      --nsd_name ${NSD} \
+      --config_file ${PARAMS} \
+      --vim_account openstack-site \
+      --ssh_keys ~/.ssh/id_rsa.pub
+   # --config '{vld: [ {name: mgmtnet, vim-network-name: osm-ext} ] }'
 
 
-# ====== Done! ==============================================================
-echo -e "\x1b[34m`date +%FT%H:%M:%S`: Done!\x1b[0m"
+   # ====== Done! ==============================================================
+   echo -e "\x1b[34m`date +%FT%H:%M:%S`: Done!\x1b[0m"
 
-# osm ns-list --filter=name=${NS}
-id=`osm ns-list --filter=name=${NS} | grep "| ${NS}" | awk '{ print $4 }'`
-echo "ID=${id}"
-sleep 10
-echo "juju switch ${id}"
-juju switch ${id}
+   # osm ns-list --filter=name=${NS}
+   id=`osm ns-list --filter=name=${NS} | grep "| ${NS}" | awk '{ print $4 }'`
+   echo "ID=${id}"
+   sleep 10
+   echo "juju switch ${id}"
+   juju switch ${id}
+
+
+   shift
+   let n=$n+1
+done
