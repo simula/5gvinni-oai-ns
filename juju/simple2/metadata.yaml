@@ -27,6 +27,7 @@
 # Contact: dreibh@simula.no
 
 name: simple2
+display-name: simple2
 summary: A simple VNF proxy charm
 maintainer: Thomas Dreibholz <dreibh@simula.no>
 description: |
