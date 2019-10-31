@@ -27,6 +27,6 @@
 # Contact: dreibh@simula.no
 
 includes:
-  - layer:basic
-  - layer:vnfproxy
+- layer:basic
+- layer:vnfproxy
 repo: https://github.com/simula/5gvinni-oai-ns

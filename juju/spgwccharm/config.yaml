@@ -26,20 +26,4 @@
 #
 # Contact: dreibh@simula.no
 
-configure-spgwu:
-  description: Configures the SPGW-U
-  params:
-    mme-s1c-ip:
-      description: MME S1-C IP
-      data-type: string
-      default: 0.0.0.0
-    spgwu-s1u-ip:
-      description: SPGW-U S1-U IP
-      data-type: string
-      default: 0.0.0.0
-  required:
-    - mme-s1c-ip
-    - spgwu-s1u-ip
-
-restart-spgwu:
-  description: Restarts the SPGW-U
+options:

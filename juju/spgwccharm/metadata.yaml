@@ -27,12 +27,12 @@
 # Contact: dreibh@simula.no
 
 name: spgwccharm
-summary:  SimulaMet-OAI SPGW-C Charm
+summary: SimulaMet-OAI SPGW-C Charm
 maintainer: Thomas Dreibholz <dreibh@simula.no>
 description: |
-  This charm configures the SPGW-C.
+  This charm manages the SPGW-C.
 tags:
-  - nfv
+  - network
 subordinate: false
 series:
   - xenial

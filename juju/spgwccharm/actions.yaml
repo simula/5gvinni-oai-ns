@@ -27,37 +27,19 @@
 # Contact: dreibh@simula.no
 
 configure-spgwc:
-  description: "Configures the SPGW-C"
+  description: Configures the SPGW-C
   params:
-    #mme-mgmt-ip:
-       #description: "MME Management IP"
-       #data-type: string
-       #default: "0.0.0.0"
     mme-s1c-ip:
-       description: "MME S1-C IP"
-       data-type: string
-       default: "0.0.0.0"
-    #hss-mgmt-ip:
-       #description: "HSS Management IP"
-       #data-type: string
-       #default: "0.0.0.0"
-    #spgwc-mgmt-ip:
-       #description: "SPGW-C Management IP"
-       #data-type: string
-       #default: "0.0.0.0"
-    #spgwu-mgmt-ip:
-       #description: "SPGW-U Management IP"
-       #data-type: string
-       #default: "0.0.0.0"
+      description: MME S1-C IP
+      data-type: string
+      default: 0.0.0.0
     spgwu-s1u-ip:
-       description: "SPGW-U S1-U IP"
-       data-type: string
-       default: "0.0.0.0"
-    #spgwu-sgi-ip:
-       #description: "SPGW-U SGi IP"
-       #data-type: string
-       #default: "0.0.0.0"
+      description: SPGW-U S1-U IP
+      data-type: string
+      default: 0.0.0.0
+  required:
+    - mme-s1c-ip
+    - spgwu-s1u-ip
 
 restart-spgwc:
-  description: "Restarts the SPGW-C"
-  params:
+  description: Restarts the SPGW-C

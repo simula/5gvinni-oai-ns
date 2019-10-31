@@ -32,9 +32,9 @@ maintainer: Thomas Dreibholz <dreibh@simula.no>
 description: |
   This is a simple proxy charm example.
 tags:
-- network
+  - network
 subordinate: false
 series:
-- xenial
-- bionic
-- focal
+  - xenial
+  - bionic
+  - focal

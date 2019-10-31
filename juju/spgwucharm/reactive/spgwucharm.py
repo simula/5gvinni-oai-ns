@@ -26,34 +26,36 @@
 #
 # Contact: dreibh@simula.no
 
-from charms.reactive import when, when_not, set_flag
-
 from charmhelpers.core.hookenv import (
     action_get,
     action_fail,
     action_set,
-    config,
-    status_set,
+    status_set
 )
-
 from charms.reactive import (
-    remove_state as remove_flag,
-    set_state as set_flag,
-    when, when_not
+    clear_flag,
+    set_flag,
+    when,
+    when_not
 )
-
 import charms.sshproxy
 
-@when('actions.configure-spgwu')
-def configure_spgwu():
-    spgw_ip = action_get('spgw-ip')
-    spgwu_ip = action_get('spgwu-ip')
-    cmd1 = "sudo ip link set ens4 up && sudo dhclient ens4"
-    charms.sshproxy._run(cmd1)
-    remove_flag('actions.configure-spgwu')
 
+# ###### Installation #######################################################
+@when('sshproxy.configured')
+@when_not('spgwucharm.installed')
+def install_spgwucharm_proxy_charm():
+   set_flag('spgwucharm.installed')
+   status_set('active', 'Ready!')
+
+
+# ###### configure-spgwu function ###########################################
+@when('actions.configure-spgwu')
+def actions.configure_spgwu():
+   clear_flag('actions.configure-spgwu')
+
+
+# ###### restart-spgwu function #############################################
 @when('actions.restart-spgwu')
 def restart_spgwu():
-    cmd = "sudo systemctl restart nextepc-spgwud"
-    charms.sshproxy._run(cmd)
-    remove_flag('actions.restart-spgwu')
+   clear_flag('actions.restart-spgwu')

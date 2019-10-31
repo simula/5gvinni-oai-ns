@@ -26,34 +26,36 @@
 #
 # Contact: dreibh@simula.no
 
-from charms.reactive import when, when_not, set_flag
-
 from charmhelpers.core.hookenv import (
     action_get,
     action_fail,
     action_set,
-    config,
-    status_set,
+    status_set
 )
-
 from charms.reactive import (
-    remove_state as remove_flag,
-    set_state as set_flag,
-    when, when_not
+    clear_flag,
+    set_flag,
+    when,
+    when_not
 )
-
 import charms.sshproxy
 
-@when('actions.configure-mme')
-def configure_mme():
-    spgw_ip = action_get('spgw-ip')
-    mme_ip = action_get('mme-ip')
-    cmd1 = "sudo ip link set ens4 up && sudo dhclient ens4"
-    charms.sshproxy._run(cmd1)
-    remove_flag('actions.configure-mme')
 
+# ###### Installation #######################################################
+@when('sshproxy.configured')
+@when_not('mmecharm.installed')
+def install_mmecharm_proxy_charm():
+   set_flag('mmecharm.installed')
+   status_set('active', 'Ready!')
+
+
+# ###### configure-mme function #############################################
+@when('actions.configure-mme')
+def actions.configure_mme():
+   clear_flag('actions.configure-mme')
+
+
+# ###### restart-mme function ###############################################
 @when('actions.restart-mme')
 def restart_mme():
-    cmd = "sudo systemctl restart nextepc-mmed"
-    charms.sshproxy._run(cmd)
-    remove_flag('actions.restart-mme')
+   clear_flag('actions.restart-mme')

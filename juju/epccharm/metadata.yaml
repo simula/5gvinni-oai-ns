@@ -30,11 +30,11 @@ name: epccharm
 summary: A simple VNF proxy charm
 maintainer: Thomas Dreibholz <dreibh@simula.no>
 description: |
-  This is a simple proxy charm example.
+  This charm manages the EPC.
 tags:
-- network
+  - network
 subordinate: false
 series:
-- xenial
-- bionic
-- focal
+  - xenial
+  - bionic
+  - focal

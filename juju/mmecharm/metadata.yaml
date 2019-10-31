@@ -27,12 +27,12 @@
 # Contact: dreibh@simula.no
 
 name: mmecharm
-summary:  SimulaMet-OAI MME Charm
+summary: SimulaMet-OAI MME Charm
 maintainer: Thomas Dreibholz <dreibh@simula.no>
 description: |
-  This charm configures the MME.
+  This charm manages the MME.
 tags:
-  - nfv
+  - network
 subordinate: false
 series:
   - xenial
