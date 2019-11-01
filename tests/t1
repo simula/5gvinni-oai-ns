@@ -5,40 +5,55 @@ import os
 import sys
 
 
+# Dummy function:
+def clear_flag(flag):
+   # Nothing to do!
+   None
+
+
 # ###### Execute command ####################################################
 def execute(commands):
+#    err = ''
+#    try:
+#       result, err = charms.sshproxy._run(commands)
+#    except:
+#       action_fail('command failed:' + err)
+#       return False
+#    else:
+#       action_set({ 'outout': result})
+#       return True
    sys.stdout.write('-----------------------------------------------------------------------------\n')
    sys.stdout.write(commands)
-   # os.system(commands)
+   return True
 
 
-# ###### Prepare installation ###############################################
-commands = """\
+# ###### configure-hss function #############################################
+# @when('actions.configure-hss')
+# @when('hsscharm.installed')
+def configure_hss():
+
+   # ====== Install Cassandra and the HSS ===================================
+   # For a documentation of the installation procedure, see:
+   # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
+
+   gitRepository      = 'https://github.com/OPENAIRINTERFACE/openair-cn.git'
+   gitDirectory       = 'openair-cn'
+   gitCommit          = 'develop'
+   cassandraServerIP  = '172.16.6.129'
+   networkRealm       = 'simula.nornet'
+   networkLTE_K       = '449c4b91aeacd0ace182cf3a5a72bfa1'
+   networkOP_K        = '1006020f0a478bf6b699f15c062e42b3'
+   networkIMSIFirst   = '242881234500000'
+   networkMSISDNFirst = '24288880000000'
+   networkUsers       = 1024
+
+   commands = """\
+echo "###### Preparing system ###############################################" && \
 sudo dhclient ens4 || true && \\
 sudo add-apt-repository -y ppa:rmescandon/yq && \\
-DEBIAN_FRONTEND=noninteractive sudo apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends yq
-"""
-execute(commands)
-
-
-# ###### Install Cassandra and the HSS ######################################
-# For a documentation of the installation procedure, see:
-# https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
-
-gitRepository      = 'https://github.com/OPENAIRINTERFACE/openair-cn.git'
-gitDirectory       = 'openair-cn'
-gitCommit          = 'develop'
-cassandraServerIP  = '172.16.6.129'
-networkRealm       = 'simula.nornet'
-networkLTE_K       = '449c4b91aeacd0ace182cf3a5a72bfa1'
-networkOP_K        = '1006020f0a478bf6b699f15c062e42b3'
-networkIMSIFirst   = '242881234500000'
-networkMSISDNFirst = '24288880000000'
-networkUsers       = 1024
-
-commands = """\
-cd /home/nornetpp/src && \\
+DEBIAN_FRONTEND=noninteractive sudo apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends yq && \\
 echo "###### Preparing sources ##############################################" && \
+cd /home/nornetpp/src && \\
 rm -rf {gitDirectory} && \\
 git clone {gitRepository} {gitDirectory} && \\
 cd {gitDirectory} && \\
@@ -91,16 +106,19 @@ for K in "${{!HSS_CONF[@]}}"; do sudo egrep -lRZ "$K" $PREFIX | xargs -0 -l sudo
 echo "====== Updating key ... ======" && \\
 oai_hss -j $PREFIX/hss_rel14.json --onlyloadkey
 """.format(
-   gitRepository      = gitRepository,
-   gitDirectory       = gitDirectory,
-   gitCommit          = gitCommit,
-   cassandraServerIP  = cassandraServerIP,
-   networkRealm       = networkRealm,
-   networkLTE_K       = networkLTE_K,
-   networkOP_K        = networkOP_K,
-   networkIMSIFirst   = networkIMSIFirst,
-   networkMSISDNFirst = networkMSISDNFirst,
-   networkUsers       = networkUsers
-)
+      gitRepository      = gitRepository,
+      gitDirectory       = gitDirectory,
+      gitCommit          = gitCommit,
+      cassandraServerIP  = cassandraServerIP,
+      networkRealm       = networkRealm,
+      networkLTE_K       = networkLTE_K,
+      networkOP_K        = networkOP_K,
+      networkIMSIFirst   = networkIMSIFirst,
+      networkMSISDNFirst = networkMSISDNFirst,
+      networkUsers       = networkUsers
+   )
 
-execute(commands)
+   if execute(commands) == True:
+      clear_flag('actions.configure-hss')
+
+configure_hss()
