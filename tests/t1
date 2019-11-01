@@ -5,7 +5,7 @@ import os
 import sys
 
 
-# Dummy function:
+# ###### Dummy function #####################################################
 def clear_flag(flag):
    # Nothing to do!
    None
@@ -25,6 +25,8 @@ def execute(commands):
    sys.stdout.write('-----------------------------------------------------------------------------\n')
    sys.stdout.write(commands)
    return True
+
+
 
 
 # ###### configure-hss function #############################################
@@ -48,11 +50,11 @@ def configure_hss():
    networkUsers       = 1024
 
    commands = """\
-echo "###### Preparing system ###############################################" && \
+echo "###### Preparing system ###############################################" && \\
 sudo dhclient ens4 || true && \\
 sudo add-apt-repository -y ppa:rmescandon/yq && \\
 DEBIAN_FRONTEND=noninteractive sudo apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends yq && \\
-echo "###### Preparing sources ##############################################" && \
+echo "###### Preparing sources ##############################################" && \\
 cd /home/nornetpp/src && \\
 rm -rf {gitDirectory} && \\
 git clone {gitRepository} {gitDirectory} && \\
@@ -121,4 +123,64 @@ oai_hss -j $PREFIX/hss_rel14.json --onlyloadkey
    if execute(commands) == True:
       clear_flag('actions.configure-hss')
 
-configure_hss()
+
+
+
+# ###### configure-mme function #############################################
+# @when('actions.configure-mme')
+# @when('mmecharm.installed')
+def configure_mme():
+
+   # ====== Install Cassandra and the HSS ===================================
+   # For a documentation of the installation procedure, see:
+   # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
+
+   gitRepository      = 'https://github.com/OPENAIRINTERFACE/openair-cn.git'
+   gitDirectory       = 'openair-cn'
+   gitCommit          = 'develop'
+   cassandraServerIP  = '172.16.6.129'
+   networkRealm       = 'simula.nornet'
+   networkLTE_K       = '449c4b91aeacd0ace182cf3a5a72bfa1'
+   networkOP_K        = '1006020f0a478bf6b699f15c062e42b3'
+   networkIMSIFirst   = '242881234500000'
+   networkMSISDNFirst = '24288880000000'
+   networkUsers       = 1024
+
+   commands = """\
+echo "###### Preparing system ###############################################" && \\
+sudo dhclient ens4 || true && \\
+sudo dhclient ens5 || true && \\
+sudo dhclient ens6 || true && \\
+echo "###### Preparing sources ##############################################" && \\
+cd /home/nornetpp/src && \\
+rm -rf {gitDirectory} && \\
+git clone {gitRepository} {gitDirectory} && \\
+cd {gitDirectory} && \\
+git checkout {gitCommit} && \\
+cd scripts && \\
+mkdir logs && \\
+echo "###### Building MME ####################################################" && \\
+./build_mme --check-installed-software --force && \\
+./build_mme --clean
+""".format(
+      gitRepository      = gitRepository,
+      gitDirectory       = gitDirectory,
+      gitCommit          = gitCommit,
+      cassandraServerIP  = cassandraServerIP,
+      networkRealm       = networkRealm,
+      networkLTE_K       = networkLTE_K,
+      networkOP_K        = networkOP_K,
+      networkIMSIFirst   = networkIMSIFirst,
+      networkMSISDNFirst = networkMSISDNFirst,
+      networkUsers       = networkUsers
+   )
+
+   if execute(commands) == True:
+      clear_flag('actions.configure-mme')
+
+
+
+
+# ###########################################################################
+# configure_hss()
+configure_mme()
