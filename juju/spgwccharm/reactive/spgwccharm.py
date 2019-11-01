@@ -41,6 +41,18 @@ from charms.reactive import (
 import charms.sshproxy
 
 
+# ###### Execute command ####################################################
+def execute(commands):
+   err = ''
+   try:
+      result, err = charms.sshproxy._run(commands)
+   except:
+      action_fail('command failed:' + err)
+      return -1
+   else:
+      action_set({ 'outout': result} )
+      return result
+
 # ###### Installation #######################################################
 @when('sshproxy.configured')
 @when_not('spgwccharm.installed')
@@ -51,11 +63,20 @@ def install_spgwccharm_proxy_charm():
 
 # ###### configure-spgwc function ###########################################
 @when('actions.configure-spgwc')
+@when('spgwccharm.installed')
 def configure_spgwc():
-   clear_flag('actions.configure-spgwc')
+   commands = """\
+sudo dhclient ens4 || true && \\
+sudo dhclient ens5 || true
+"""
+   if execute(commands) == 0:
+      clear_flag('actions.configure-spgwc')
 
 
 # ###### restart-spgwc function #############################################
 @when('actions.restart-spgwc')
+@when('spgwccharm.installed')
 def restart_spgwc():
-   clear_flag('actions.restart-spgwc')
+   commands = 'touch /tmp/restart-spgwc'
+   if execute(commands) == 0:
+      clear_flag('actions.restart-spgwc')
