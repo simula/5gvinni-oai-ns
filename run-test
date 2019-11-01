@@ -27,6 +27,22 @@
 #
 # Contact: dreibh@simula.no
 
+# ###### Print usage ########################################################
+PROGRAM="$0"
+function usage()
+{
+   echo >&2 "Usage: ${PROGRAM} NS [NS ...]"
+   echo >&2 ""
+   echo >&2 "Available NSs in this directory:"
+   git ls-files | cut -d/ -f1 | sort -u | grep "_nsd$" | sed -e "s/_nsd$//g" -e "s/^/* /g" >&2
+}
+
+
+# ###### Main program #######################################################
+if [ $# -lt 1 ] ; then
+   usage
+   exit 0
+fi
 n=0
 while [ $# -gt 0 ] ; do
    NS="$1"
@@ -36,14 +52,12 @@ while [ $# -gt 0 ] ; do
    if [ ! -d "${NSD}" ] ; then
       echo >&2 "ERROR: NSD ${NSD} not found!"
       echo >&2 ""
-      echo "NDSs in this directory:"
-      git ls-files | cut -d/ -f1 | sort -u | grep "_nsd$" | sed -e "s/_nsd$//g" >&2
-      echo  >&2 ""
+      usage
       exit 1
    fi
 
 
-   # ====== Build ==============================================================
+   # ====== Build ===========================================================
    if [ $n -eq 0 ] ; then
       echo -e "\x1b[34m`date +%FT%H:%M:%S`: Building ...\x1b[0m"
       cmake .
@@ -51,20 +65,20 @@ while [ $# -gt 0 ] ; do
    fi
 
 
-   # ====== Clean up ===========================================================
+   # ====== Clean up ========================================================
    echo -e "\x1b[34m`date +%FT%H:%M:%S`: Deleting existing setup ${NS} ...\x1b[0m"
    osm ns-delete --wait ${NS} || true
    osm nsd-delete ${NSD} || true
    osm vnfd-delete ${VNFD} || true
 
 
-   # ====== Create =============================================================
+   # ====== Create ==========================================================
    echo -e "\x1b[34m`date +%FT%H:%M:%S`: Creating ${NS} ...\x1b[0m"
    osm vnfd-create ${VNFD}.tar.gz
    osm nsd-create ${NSD}.tar.gz
 
 
-   # ====== Instantiate ========================================================
+   # ====== Instantiate =====================================================
    echo -e "\x1b[34m`date +%FT%H:%M:%S`: Instantiating ${NS} ...\x1b[0m"
    if [ -e ${PARAMS} ] ; then
       config_file_option=" --config_file ${PARAMS}"
@@ -81,7 +95,7 @@ while [ $# -gt 0 ] ; do
    # --config '{vld: [ {name: mgmtnet, vim-network-name: osm-ext} ] }'
 
 
-   # ====== Done! ==============================================================
+   # ====== Done! ===========================================================
    echo -e "\x1b[34m`date +%FT%H:%M:%S`: Done!\x1b[0m"
 
    # osm ns-list --filter=name=${NS}
