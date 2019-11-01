@@ -66,11 +66,38 @@ def install_spgwucharm_proxy_charm():
 @when('actions.configure-spgwu')
 @when('spgwucharm.installed')
 def configure_spgwu():
+
+   # ====== Install SPGW-U ==================================================
+   # For a documentation of the installation procedure, see:
+   # https://github.com/OPENAIRINTERFACE/openair-cn-cups/wiki/OpenAirSoftwareSupport#install-spgw-u
+
+   gitRepository = 'https://github.com/OPENAIRINTERFACE/openair-cn-cups.git'
+   gitDirectory  = 'openair-cn-cups'
+   gitCommit     = 'develop'
+   networkRealm  = 'simula.nornet'
+
    commands = """\
+echo "###### Preparing system ###############################################" && \\
 sudo dhclient ens4 || true && \\
 sudo dhclient ens5 || true && \\
-sudo dhclient ens6 || true
-"""
+sudo dhclient ens6 || true && \\
+echo "###### Preparing sources ##############################################" && \\
+cd /home/nornetpp/src && \\
+rm -rf {gitDirectory} && \\
+git clone {gitRepository} {gitDirectory} && \\
+cd {gitDirectory} && \\
+git checkout {gitCommit} && \\
+cd build/scripts && \\
+echo "###### Building MME ####################################################" && \\
+./build_spgwu -I -f && \
+./build_spgwu -c -V -b Debug -j
+""".format(
+      gitRepository = gitRepository,
+      gitDirectory  = gitDirectory,
+      gitCommit     = gitCommit,
+      networkRealm  = networkRealm
+   )
+
    if execute(commands) == True:
       clear_flag('actions.configure-spgwu')
 

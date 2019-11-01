@@ -41,6 +41,19 @@ from charms.reactive import (
 import charms.sshproxy
 
 
+# ###### Execute command ####################################################
+def execute(commands):
+   err = ''
+   try:
+      result, err = charms.sshproxy._run(commands)
+   except:
+      action_fail('command failed:' + err)
+      return False
+   else:
+      action_set({ 'outout': result})
+      return True
+
+
 # ###### Installation #######################################################
 @when('sshproxy.configured')
 @when_not('mmecharm.installed')
@@ -54,9 +67,9 @@ def install_mmecharm_proxy_charm():
 @when('mmecharm.installed')
 def configure_mme():
 
-   # ====== Install Cassandra and the HSS ===================================
+   # ====== Install MME =====================================================
    # For a documentation of the installation procedure, see:
-   # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
+   # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-mme
 
    gitRepository      = 'https://github.com/OPENAIRINTERFACE/openair-cn.git'
    gitDirectory       = 'openair-cn'
