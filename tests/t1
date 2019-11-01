@@ -5,32 +5,52 @@ import os
 import sys
 
 
+# ###### Execute command ####################################################
 def execute(commands):
+   sys.stdout.write('-----------------------------------------------------------------------------\n')
    sys.stdout.write(commands)
    # os.system(commands)
 
 
-
-gitRepository = "https://github.com/OPENAIRINTERFACE/openair-cn.git"
-gitDirectory  = "openair-cn"
-gitCommit     = "develop"
+# ###### Prepare installation ###############################################
+commands = """\
+DEBIAN_FRONTEND=noninteractive sudo apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends python3-pip && \\
+sudo pip3 install yamlpal
+"""
+execute(commands)
 
 
 # ###### Install the HSS ####################################################
 # For documentation, see:
 # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
+
+gitRepository = "https://github.com/OPENAIRINTERFACE/openair-cn.git"
+gitDirectory  = "openair-cn"
+gitCommit     = "develop"
+
 commands = """\
 cd /home/nornetpp/src && \\
+echo "###### Preparing sources ##############################################" && \
 rm -rf {gitDirectory} && \\
 git clone {gitRepository} {gitDirectory} && \\
 cd {gitDirectory} && \\
 git checkout {gitCommit} && \\
 cd scripts && \\
+echo "###### Building Cassandra #############################################" && \\
 ./build_cassandra --check-installed-software --force && \\
+sudo update-alternatives --set java /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java && \\
 sudo service cassandra stop && \\
-sudo update-alternatives --config java && \\
+sudo rm -rf /var/lib/cassandra/data/system/* && \\
+sudo rm -rf /var/lib/cassandra/commitlog/* && \\
+sudo rm -rf /var/lib/cassandra/data/system_traces/* && \\
+sudo rm -rf /var/lib/cassandra/saved_caches/* && \\
+????????????????????? \\
 sudo service cassandra start && \\
-nodetool status
+sleep 10 && \\
+sudo service cassandra status | cat && \\
+echo "###### Building HSS ###################################################" && \\
+./build_hss_rel14 --check-installed-software --force && \\
+./build_hss_rel14 --clean
 """.format(
    gitRepository = gitRepository,
    gitDirectory  = gitDirectory,
