@@ -207,7 +207,7 @@ FOREACH(vnfd IN LISTS VNFD_LIST)
 
       SET(timestampFile ".${validate_cloudinit}.stamp")
       ADD_CUSTOM_COMMAND(OUTPUT ${timestampFile}
-                         COMMAND ${YAMLLINT} -d '{extends: default, rules: {document-start: {present: no}}}' ${vnfdCloudInitFile}
+                         COMMAND ${YAMLLINT} -d '{extends: relaxed, rules: {document-start: {present: no}}}' ${vnfdCloudInitFile}
                          COMMAND touch ${timestampFile}
                          DEPENDS ${vnfdCloudInitFile})
       ADD_CUSTOM_TARGET(${validate_cloudinit} DEPENDS ${timestampFile})
