@@ -28,7 +28,7 @@ execute(commands)
 gitRepository      = 'https://github.com/OPENAIRINTERFACE/openair-cn.git'
 gitDirectory       = 'openair-cn'
 gitCommit          = 'develop'
-cassandraServerIP  = '172.16.6.2'
+cassandraServerIP  = '172.16.6.129'
 networkRealm       = 'simula.nornet'
 networkLTE_K       = '449c4b91aeacd0ace182cf3a5a72bfa1'
 networkOP_K        = '1006020f0a478bf6b699f15c062e42b3'
