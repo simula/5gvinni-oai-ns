@@ -41,6 +41,19 @@ from charms.reactive import (
 import charms.sshproxy
 
 
+# ###### Execute command ####################################################
+def execute(commands):
+   err = ''
+   try:
+      result, err = charms.sshproxy._run(commands)
+   except:
+      action_fail('command failed:' + err)
+      return -1
+   else:
+      action_set({ 'outout': result} )
+      return result
+
+
 # ###### Installation #######################################################
 @when('sshproxy.configured')
 @when_not('hsscharm.installed')
@@ -53,31 +66,17 @@ def install_hsscharm_proxy_charm():
 @when('actions.configure-hss')
 @when('hsscharm.installed')
 def configure_hss():
-   err = ''
-   try:
-      # filename = action_get('filename')
-      cmd = [ 'touch /tmp/configure-hss' ]
-      result, err = charms.sshproxy._run(cmd)
-   except:
-      action_fail('command failed:' + err)
-   else:
-      action_set({'outout': result})
-
-   clear_flag('actions.configure-hss')
+   commands = """\
+sudo dhclient ens4 || true
+"""
+   if execute(commands) == 0:
+      clear_flag('actions.configure-hss')
 
 
 # ###### restart-hss function ###############################################
 @when('actions.restart-hss')
 @when('hsscharm.installed')
 def restart_hss():
-   err = ''
-   try:
-      # filename = action_get('filename')
-      cmd = [ 'touch /tmp/restart-hss' ]
-      result, err = charms.sshproxy._run(cmd)
-   except:
-      action_fail('command failed:' + err)
-   else:
-      action_set({'outout': result})
-
-   clear_flag('actions.restart-hss')
+   commands = 'touch /tmp/restart-hss'
+   if execute(commands) == 0:
+      clear_flag('actions.restart-hss')
