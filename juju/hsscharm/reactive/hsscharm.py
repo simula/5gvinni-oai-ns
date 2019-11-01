@@ -52,10 +52,30 @@ def install_hsscharm_proxy_charm():
 # ###### configure-hss function #############################################
 @when('actions.configure-hss')
 def configure_hss():
+   err = ''
+   try:
+      # filename = action_get('filename')
+      cmd = [ 'touch /tmp/configure-hss' ]
+      result, err = charms.sshproxy._run(cmd)
+   except:
+      action_fail('command failed:' + err)
+   else:
+      action_set({'outout': result})
+
    clear_flag('actions.configure-hss')
 
 
 # ###### restart-hss function ###############################################
 @when('actions.restart-hss')
 def restart_hss():
+   err = ''
+   try:
+      # filename = action_get('filename')
+      cmd = [ 'touch /tmp/restart-hss' ]
+      result, err = charms.sshproxy._run(cmd)
+   except:
+      action_fail('command failed:' + err)
+   else:
+      action_set({'outout': result})
+
    clear_flag('actions.restart-hss')

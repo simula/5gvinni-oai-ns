@@ -151,30 +151,30 @@ vnfd:vnfd-catalog:
               type: VPORT
 
           # ====== Juju Charm ===============================================
-          # vdu-configuration:
-            # juju:
-              # charm: hsscharm
-            # initial-config-primitive:
-              # - seq: '1'
-                # name: config
-                # parameter:
-                # - name: ssh-hostname
-                    # value: <rw_mgmt_ip>
-                # - name: ssh-username
-                    # value: nornetpp
-                # - name: ssh-password
-                    # value: <password>
-              # - seq: '2'
-                # name: configure-hss
-                # parameter:
-                # - name: mme-s1c-ip
-                    # data-type: STRING
-                    # value: <mme_s1c_ip>
-                # - name: spgwu-s1u-ip
-                    # data-type: STRING
-                    # value: <spgwu_s1u_ip>
-              # - seq: '3'
-                # name: restart-hss
+          vdu-configuration:
+            juju:
+              charm: hsscharm
+            initial-config-primitive:
+              - seq: '1'
+                name: config
+                parameter:
+                  - name: ssh-hostname
+                    value: <rw_mgmt_ip>
+                  - name: ssh-username
+                    value: nornetpp
+                  - name: ssh-password
+                    value: <password>
+              - seq: '2'
+                name: configure-hss
+                parameter:
+                  - name: mme-s1c-ip
+                    data-type: STRING
+                    value: <mme_s1c_ip>
+                  - name: spgwu-s1u-ip
+                    data-type: STRING
+                    value: <spgwu_s1u_ip>
+              - seq: '3'
+                name: restart-hss
 
 
         # ###### VDU: SPGW-C ################################################
