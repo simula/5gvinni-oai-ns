@@ -140,7 +140,7 @@ for K in "${{!HSS_CONF[@]}}"; do sudo egrep -lRZ "$K" $PREFIX | xargs -0 -l sudo
 ../src/hss_rel14/bin/make_certs.sh hss {networkRealm} $PREFIX && \\
 echo "====== Updating key ... ======" && \\
 oai_hss -j $PREFIX/hss_rel14.json --onlyloadkey
-   """.format(
+""".format(
       gitRepository      = gitRepository,
       gitDirectory       = gitDirectory,
       gitCommit          = gitCommit,
