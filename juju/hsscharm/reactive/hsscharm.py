@@ -83,11 +83,11 @@ def configure_hss():
    networkUsers       = 1024
 
    commands = """\
-echo "###### Preparing system ###############################################" && \
+echo "###### Preparing system ###############################################" && \\
 sudo dhclient ens4 || true && \\
 sudo add-apt-repository -y ppa:rmescandon/yq && \\
 DEBIAN_FRONTEND=noninteractive sudo apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends yq && \\
-echo "###### Preparing sources ##############################################" && \
+echo "###### Preparing sources ##############################################" && \\
 cd /home/nornetpp/src && \\
 rm -rf {gitDirectory} && \\
 git clone {gitRepository} {gitDirectory} && \\
