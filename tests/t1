@@ -1,0 +1,40 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+import os
+import sys
+
+
+def execute(commands):
+   sys.stdout.write(commands)
+   # os.system(commands)
+
+
+
+gitRepository = "https://github.com/OPENAIRINTERFACE/openair-cn.git"
+gitDirectory  = "openair-cn"
+gitCommit     = "develop"
+
+
+# ###### Install the HSS ####################################################
+# For documentation, see:
+# https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
+commands = """\
+cd /home/nornetpp/src && \\
+rm -rf {gitDirectory} && \\
+git clone {gitRepository} {gitDirectory} && \\
+cd {gitDirectory} && \\
+git checkout {gitCommit} && \\
+cd scripts && \\
+./build_cassandra --check-installed-software --force && \\
+sudo service cassandra stop && \\
+sudo update-alternatives --config java && \\
+sudo service cassandra start && \\
+nodetool status
+""".format(
+   gitRepository = gitRepository,
+   gitDirectory  = gitDirectory,
+   gitCommit     = gitCommit
+)
+
+execute(commands)
