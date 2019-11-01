@@ -1,5 +1,6 @@
 #cloud-config
 hostname: mme
+manage_etc_hosts: localhost
 password: {{ password }}
 chpasswd: { expire: False }
 ssh_pwauth: True
