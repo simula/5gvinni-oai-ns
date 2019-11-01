@@ -52,10 +52,30 @@ def install_epccharm_proxy_charm():
 # ###### configure-epc function #############################################
 @when('actions.configure-epc')
 def configure_epc():
+   err = ''
+   try:
+      # filename = action_get('filename')
+      cmd = [ 'touch /tmp/configure-epc' ]
+      result, err = charms.sshproxy._run(cmd)
+   except:
+      action_fail('command failed:' + err)
+   else:
+      action_set({'outout': result})
+
    clear_flag('actions.configure-epc')
 
 
 # ###### restart-epc function ###############################################
 @when('actions.restart-epc')
 def restart_epc():
+   err = ''
+   try:
+      # filename = action_get('filename')
+      cmd = [ 'touch /tmp/restart-epc' ]
+      result, err = charms.sshproxy._run(cmd)
+   except:
+      action_fail('command failed:' + err)
+   else:
+      action_set({'outout': result})
+
    clear_flag('actions.restart-epc')
