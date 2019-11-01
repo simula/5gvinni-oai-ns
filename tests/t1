@@ -14,19 +14,25 @@ def execute(commands):
 
 # ###### Prepare installation ###############################################
 commands = """\
-DEBIAN_FRONTEND=noninteractive sudo apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends python3-pip && \\
-sudo pip3 install yamlpal
+sudo add-apt-repository -y ppa:rmescandon/yq && \\
+DEBIAN_FRONTEND=noninteractive sudo apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends yq
 """
 execute(commands)
 
 
-# ###### Install the HSS ####################################################
+# ###### Install Cassandra and the HSS ######################################
 # For documentation, see:
 # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
 
-gitRepository = "https://github.com/OPENAIRINTERFACE/openair-cn.git"
-gitDirectory  = "openair-cn"
-gitCommit     = "develop"
+gitRepository      = "https://github.com/OPENAIRINTERFACE/openair-cn.git"
+gitDirectory       = "openair-cn"
+gitCommit          = "develop"
+cassandraServerIP  = "172.16.6.2"
+networkRealm       = "simula.nornet"
+networkLTE_K       = "449c4b91aeacd0ace182cf3a5a72bfa1"
+networkIMSIFirst   = "242881234500000"
+networkMSISDNFirst = "24288880000000"
+networkUsers       = 1024
 
 commands = """\
 cd /home/nornetpp/src && \\
@@ -44,17 +50,33 @@ sudo rm -rf /var/lib/cassandra/data/system/* && \\
 sudo rm -rf /var/lib/cassandra/commitlog/* && \\
 sudo rm -rf /var/lib/cassandra/data/system_traces/* && \\
 sudo rm -rf /var/lib/cassandra/saved_caches/* && \\
-????????????????????? \\
+sudo yq w -i /etc/cassandra/cassandra.yaml "cluster_name" "HSS Cluster" && \\
+sudo yq w -i /etc/cassandra/cassandra.yaml "seed_provider[0].class_name" "org.apache.cassandra.locator.SimpleSeedProvider" && \\
+sudo yq w -i /etc/cassandra/cassandra.yaml "seed_provider[0].parameters[0].seeds" "{cassandraServerIP}" && \\
+sudo yq w -i /etc/cassandra/cassandra.yaml "listen_address" "{cassandraServerIP}" && \\
+sudo yq w -i /etc/cassandra/cassandra.yaml "rpc_address" "{cassandraServerIP}" && \\
+sudo yq w -i /etc/cassandra/cassandra.yaml "endpoint_snitch" "GossipingPropertyFileSnitch" && \\
 sudo service cassandra start && \\
 sleep 10 && \\
 sudo service cassandra status | cat && \\
 echo "###### Building HSS ###################################################" && \\
 ./build_hss_rel14 --check-installed-software --force && \\
-./build_hss_rel14 --clean
+./build_hss_rel14 --clean && \\
+cqlsh --file ../src/hss_rel14/db/oai_db.cql {cassandraServerIP} && \\
+./data_provisioning_users --apn default.{networkRealm} --apn2 internet.{networkRealm} --key {networkLTE_K} --imsi-first {networkIMSIFirst} --msisdn-first {networkMSISDNFirst} --mme-identity mme.{networkRealm} --no-of-users {networkUsers} --realm {networkRealm} --truncate True  --verbose True --cassandra-cluster {cassandraServerIP} && \\
+./data_provisioning_mme --id 3 --mme-identity mme.{networkRealm} --realm {networkRealm} --ue-reachability 1 --truncate True  --verbose True -C {cassandraServerIP} && \\
+echo "###### Creating HSS configuration files ###############################" && \\
+oai_hss -j $PREFIX/hss_rel14.json --onlyloadkey
 """.format(
-   gitRepository = gitRepository,
-   gitDirectory  = gitDirectory,
-   gitCommit     = gitCommit
+   gitRepository      = gitRepository,
+   gitDirectory       = gitDirectory,
+   gitCommit          = gitCommit,
+   cassandraServerIP  = cassandraServerIP,
+   networkRealm       = networkRealm,
+   networkLTE_K       = networkLTE_K,
+   networkIMSIFirst   = networkIMSIFirst,
+   networkMSISDNFirst = networkMSISDNFirst,
+   networkUsers       = networkUsers
 )
 
 execute(commands)
