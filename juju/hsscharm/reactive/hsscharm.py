@@ -51,6 +51,7 @@ def install_hsscharm_proxy_charm():
 
 # ###### configure-hss function #############################################
 @when('actions.configure-hss')
+@when('hsscharm.installed')
 def configure_hss():
    err = ''
    try:
@@ -67,6 +68,7 @@ def configure_hss():
 
 # ###### restart-hss function ###############################################
 @when('actions.restart-hss')
+@when('hsscharm.installed')
 def restart_hss():
    err = ''
    try:

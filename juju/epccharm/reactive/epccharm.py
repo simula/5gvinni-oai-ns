@@ -51,6 +51,7 @@ def install_epccharm_proxy_charm():
 
 # ###### configure-epc function #############################################
 @when('actions.configure-epc')
+@when('epccharm.installed')
 def configure_epc():
    err = ''
    try:
@@ -67,6 +68,7 @@ def configure_epc():
 
 # ###### restart-epc function ###############################################
 @when('actions.restart-epc')
+@when('epccharm.installed')
 def restart_epc():
    err = ''
    try:
