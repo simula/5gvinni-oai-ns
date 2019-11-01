@@ -67,7 +67,9 @@ def install_hsscharm_proxy_charm():
 @when('hsscharm.installed')
 def configure_hss():
    commands = """\
-sudo dhclient ens4 || true
+sudo dhclient ens4 || true && \\
+sudo add-apt-repository -y ppa:rmescandon/yq && \\
+DEBIAN_FRONTEND=noninteractive sudo apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends yq
 """
    if execute(commands) == 0:
       clear_flag('actions.configure-hss')
