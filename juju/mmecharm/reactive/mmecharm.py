@@ -51,11 +51,33 @@ def install_mmecharm_proxy_charm():
 
 # ###### configure-mme function #############################################
 @when('actions.configure-mme')
+@when('mmecharm.installed')
 def configure_mme():
+   err = ''
+   try:
+      # filename = action_get('filename')
+      cmd = [ 'touch /tmp/configure-mme' ]
+      result, err = charms.sshproxy._run(cmd)
+   except:
+      action_fail('command failed:' + err)
+   else:
+      action_set({'outout': result})
+
    clear_flag('actions.configure-mme')
 
 
 # ###### restart-mme function ###############################################
 @when('actions.restart-mme')
+@when('mmecharm.installed')
 def restart_mme():
+   err = ''
+   try:
+      # filename = action_get('filename')
+      cmd = [ 'touch /tmp/restart-mme' ]
+      result, err = charms.sshproxy._run(cmd)
+   except:
+      action_fail('command failed:' + err)
+   else:
+      action_set({'outout': result})
+
    clear_flag('actions.restart-mme')
