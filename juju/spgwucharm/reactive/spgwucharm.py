@@ -48,10 +48,10 @@ def execute(commands):
       result, err = charms.sshproxy._run(commands)
    except:
       action_fail('command failed:' + err)
-      return -1
+      return False
    else:
-      action_set({ 'outout': result} )
-      return result
+      action_set({ 'outout': result})
+      return True
 
 
 # ###### Installation #######################################################
@@ -71,7 +71,7 @@ sudo dhclient ens4 || true && \\
 sudo dhclient ens5 || true && \\
 sudo dhclient ens6 || true
 """
-   if execute(commands) == 0:
+   if execute(commands) == True:
       clear_flag('actions.configure-spgwu')
 
 
@@ -80,5 +80,5 @@ sudo dhclient ens6 || true
 @when('spgwucharm.installed')
 def restart_spgwu():
    commands = 'touch /tmp/restart-spgwu'
-   if execute(commands) == 0:
+   if execute(commands) == True:
       clear_flag('actions.restart-spgwu')

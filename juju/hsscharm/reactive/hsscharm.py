@@ -48,10 +48,10 @@ def execute(commands):
       result, err = charms.sshproxy._run(commands)
    except:
       action_fail('command failed:' + err)
-      return -1
+      return False
    else:
-      action_set({ 'outout': result} )
-      return result
+      action_set({ 'outout': result})
+      return True
 
 
 # ###### Installation #######################################################
@@ -71,7 +71,7 @@ sudo dhclient ens4 || true && \\
 sudo add-apt-repository -y ppa:rmescandon/yq && \\
 DEBIAN_FRONTEND=noninteractive sudo apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends yq
 """
-   if execute(commands) == 0:
+   if execute(commands) == True:
       clear_flag('actions.configure-hss')
 
 
@@ -80,5 +80,5 @@ DEBIAN_FRONTEND=noninteractive sudo apt install -y -o Dpkg::Options::=--force-co
 @when('hsscharm.installed')
 def restart_hss():
    commands = 'touch /tmp/restart-hss'
-   if execute(commands) == 0:
+   if execute(commands) == True:
       clear_flag('actions.restart-hss')
