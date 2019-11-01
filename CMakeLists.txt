@@ -193,6 +193,28 @@ FOREACH(vnfd IN LISTS VNFD_LIST)
       LIST(APPEND allCharmsInVNFD ${generate_vnfd_charm})
    ENDFOREACH()
 
+   # ====== Validate cloud-init YAML files ==================================
+   EXECUTE_PROCESS(COMMAND git ls-files ${vnfd}/cloud_init
+                   COMMAND grep -E -- "-init$"
+                   COMMAND tr "\n" ";"
+                   COMMAND sed -e "s/;$//g"
+                   OUTPUT_VARIABLE vnfdCloudInitFiles OUTPUT_STRIP_TRAILING_WHITESPACE)
+   MESSAGE("COMMAND git ls-files ${vnfd}/cloud-init: Cloud-Init: ${vnfdCloudInitFiles}")
+
+   SET(allVNFDCloudInitFiles "")
+   FOREACH(vnfdCloudInitFile IN LISTS vnfdCloudInitFiles)
+      makeUniqueTarget(validate_cloudinit "validate_${vnfdCloudInitFile}")
+
+      SET(timestampFile ".${validate_cloudinit}.stamp")
+      ADD_CUSTOM_COMMAND(OUTPUT ${timestampFile}
+                         COMMAND ${YAMLLINT} -d '{extends: default, rules: {document-start: {present: no}}}' ${vnfdCloudInitFile}
+                         COMMAND touch ${timestampFile}
+                         DEPENDS ${vnfdCloudInitFile})
+      ADD_CUSTOM_TARGET(${validate_cloudinit} DEPENDS ${timestampFile})
+
+      LIST(APPEND allVNFDCloudInitFiles ${validate_cloudinit})
+   ENDFOREACH()
+
    # ====== Generate the VNFD ===============================================
    SET(vnfdDefinition "${vnfd}/${vnfd}.yaml")
    SET(vnfdPackage    "${vnfd}.tar.gz")
@@ -204,7 +226,7 @@ FOREACH(vnfd IN LISTS VNFD_LIST)
                       COMMAND du -k ${vnfdPackage}
                       DEPENDS ${vnfdFiles})
    ADD_CUSTOM_TARGET(${generate_vnfdPackage}
-                     DEPENDS ${vnfdPackage} ${allYAMLs} ${allCharmsInVNFD})
+                     DEPENDS ${vnfdPackage} ${allYAMLs} ${allVNFDCloudInitFiles} ${allCharmsInVNFD})
 
    LIST(APPEND allVNFDs ${generate_vnfdPackage})
 ENDFOREACH()
