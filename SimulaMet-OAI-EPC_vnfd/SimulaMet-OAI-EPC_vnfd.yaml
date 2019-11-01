@@ -392,7 +392,7 @@ vnfd:vnfd-catalog:
               - name: ssh-hostname
                 value: <rw_mgmt_ip>
               - name: ssh-username
-                value: ubuntu
+                value: nornetpp
               - name: ssh-password
                 value: osm4u
           - seq: '2'
