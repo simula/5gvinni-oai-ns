@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 # =====================================================================
 #     #######  #####          #     #   ###   #     # #     #   ###
 #     #       #     #         #     #    #    ##    # ##    #    #
@@ -39,7 +41,12 @@ from charms.reactive import (
     when_not
 )
 import charms.sshproxy
+from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
 
+
+# ###########################################################################
+# #### Helper functions                                                  ####
+# ###########################################################################
 
 # ###### Execute command ####################################################
 def execute(commands):
@@ -53,6 +60,54 @@ def execute(commands):
       action_set({ 'outout': result})
       return True
 
+
+# ######  Get /etc/network/interfaces setup for interface ###################
+def configureInterface(name,
+                       ipv4Interface = IPv4Interface('0.0.0.0/0'), ipv4Gateway = None,
+                       ipv6Interface = None,                       ipv6Gateway = None,
+                       metric = 1):
+   configuration = 'auto ' + name + '\\n'
+
+   # ====== IPv4 ============================================================
+   if ipv4Interface == IPv4Interface('0.0.0.0/0'):
+      configuration = configuration + 'iface ' + name + ' inet dhcp'
+   else:
+      configuration = configuration + \
+         'iface ' + name + ' inet static\\n' + \
+         '\\taddress ' + str(ipv4Interface.ip)      + '\\n' + \
+         '\\tnetmask ' + str(ipv4Interface.netmask) + '\\n'
+      if ((ipv4Gateway != None) and (ipv4Gateway != IPv4Address('0.0.0.0'))):
+         configuration = configuration + \
+            '\\tgateway ' + str(ipv4Gateway) + '\\n' + \
+            '\\tmetric '  + str(metric)      + '\\n'
+
+   # ====== IPv6 ============================================================
+   if ipv6Interface == None:
+      configuration = configuration + \
+          '\\niface ' + name + ' inet6 manual\\n' + \
+          '\\tautoconf 0\\n'
+   elif ipv6Interface == IPv6Interface('::/0'):
+      configuration = configuration + \
+          '\\niface ' + name + ' inet6 dhcp\\n' + \
+          '\\tautoconf 0\\n'
+   else:
+      configuration = configuration + \
+         '\\niface ' + name + ' inet6 static\\n' + \
+         '\\tautoconf 0\\n' + \
+         '\\taddress ' + str(ipv6Interface.ip)                + '\\n' + \
+         '\\tnetmask ' + str(ipv6Interface.network.prefixlen) + '\\n'
+      if ((ipv6Gateway != None) and (ipv6Gateway != IPv6Address('::'))):
+         configuration = configuration + \
+            '\\tgateway ' + str(ipv6Gateway) + '\\n' + \
+            '\\tmetric '  + str(metric)      + '\\n'
+
+   return configuration
+
+
+
+# ###########################################################################
+# #### Charm functions                                                   ####
+# ###########################################################################
 
 # ###### Installation #######################################################
 @when('sshproxy.configured')
@@ -82,9 +137,12 @@ def configure_hss():
    networkMSISDNFirst = '24288880000000'
    networkUsers       = 1024
 
+   # Prepare network configurations:
+   configurationS6a = configureInterface('ens4', IPv4Interface('0.0.0.0/0'))
+
    commands = """\
 echo "###### Preparing system ###############################################" && \\
-sudo dhclient ens4 || true && \\
+echo -e "{configurationS6a}" | sudo tee /etc/network/interfaces.d/61-ens4 && sudo ifup ens4 || true && \\
 sudo add-apt-repository -y ppa:rmescandon/yq && \\
 DEBIAN_FRONTEND=noninteractive sudo apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends yq && \\
 echo "###### Preparing sources ##############################################" && \\
@@ -150,7 +208,8 @@ oai_hss -j $PREFIX/hss_rel14.json --onlyloadkey
       networkOP_K        = networkOP_K,
       networkIMSIFirst   = networkIMSIFirst,
       networkMSISDNFirst = networkMSISDNFirst,
-      networkUsers       = networkUsers
+      networkUsers       = networkUsers,
+      configurationS6a   = configurationS6a
    )
 
    if execute(commands) == True:
