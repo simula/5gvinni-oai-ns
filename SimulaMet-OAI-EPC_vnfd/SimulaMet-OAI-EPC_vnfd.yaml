@@ -50,7 +50,7 @@ vnfd:vnfd-catalog:
 
           # ====== VDU VM Configuration =====================================
           vm-flavor:
-            vcpu-count: 1
+            vcpu-count: 4
             memory-mb: 4096
             storage-gb: 24
           image: Template-Ubuntu-5gVINNI-Development-Bionic
@@ -124,7 +124,7 @@ vnfd:vnfd-catalog:
 
           # ====== VDU VM Configuration =====================================
           vm-flavor:
-            vcpu-count: 1
+            vcpu-count: 4
             memory-mb: 4096
             storage-gb: 24
           image: Template-Ubuntu-5gVINNI-Development-Bionic
@@ -186,7 +186,7 @@ vnfd:vnfd-catalog:
 
           # ====== VDU VM Configuration =====================================
           vm-flavor:
-            vcpu-count: 1
+            vcpu-count: 4
             memory-mb: 4096
             storage-gb: 24
           image: Template-Ubuntu-5gVINNI-Development-Bionic
@@ -256,7 +256,7 @@ vnfd:vnfd-catalog:
 
           # ====== VDU VM Configuration =====================================
           vm-flavor:
-            vcpu-count: 1
+            vcpu-count: 4
             memory-mb: 4096
             storage-gb: 24
           image: Template-Ubuntu-5gVINNI-Development-Bionic

@@ -57,7 +57,7 @@ def execute(commands):
       action_fail('command failed:' + err)
       return False
    else:
-      action_set({ 'outout': result})
+      action_set({ 'outout': 'DONE!'})
       return True
 
 
