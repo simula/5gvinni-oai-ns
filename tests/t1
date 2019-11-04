@@ -345,6 +345,6 @@ echo "###### Building SPGW-C ################################################" &
 
 # ###########################################################################
 #configure_hss()
-configure_mme()
+#configure_mme()
 #configure_spgwu()
-#configure_spgwc()
+configure_spgwc()
