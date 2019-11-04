@@ -66,7 +66,13 @@ def configureInterface(name,
                        ipv4Interface = IPv4Interface('0.0.0.0/0'), ipv4Gateway = None,
                        ipv6Interface = None,                       ipv6Gateway = None,
                        metric = 1):
-   configuration = 'auto ' + name + '\\n'
+
+   # NOTE:
+   # Double escaping is required for \ and " in "configuration" string!
+   # 1. Python
+   # 2. bash -c "<command>"
+
+   configuration = 'auto ' + name + '\\\\n'
 
    # ====== IPv4 ============================================================
    if ipv4Interface == IPv4Interface('0.0.0.0/0'):
@@ -80,16 +86,17 @@ def configureInterface(name,
          configuration = configuration + \
             '\\\\tgateway ' + str(ipv4Gateway) + '\\\\n' + \
             '\\\\tmetric '  + str(metric)      + '\\\\n'
+      configuration = configuration + '\\\\n'
 
    # ====== IPv6 ============================================================
    if ipv6Interface == None:
       configuration = configuration + \
-          '\\\\niface ' + name + ' inet6 manual\\\\n' + \
-          '\\\\tautoconf 0\\\\n'
+         '\\\\niface ' + name + ' inet6 manual\\\\n' + \
+         '\\\\tautoconf 0\\\\n'
    elif ipv6Interface == IPv6Interface('::/0'):
       configuration = configuration + \
-          '\\\\niface ' + name + ' inet6 dhcp\\\\n' + \
-          '\\\\tautoconf 0\\\\n'
+         '\\\\niface ' + name + ' inet6 dhcp\\\\n' + \
+         '\\\\tautoconf 0\\\\n'
    else:
       configuration = configuration + \
          '\\\\niface ' + name + ' inet6 static\\\\n' + \
@@ -140,19 +147,12 @@ def configure_hss():
    # Prepare network configurations:
    configurationS6a = configureInterface('ens4', IPv4Interface('0.0.0.0/0'))
 
-   c1 = "TestA\tB"
-   c2 = "TestA\\tB"
-   c3 = "TestA\\\tB"
-   c4 = "TestA\\\\tB"
-   c5 = "TestA\\\\\tB"
-   c6 = "TestA\\\\\\tB"
+   # NOTE:
+   # Double escaping is required for \ and " in "command" string!
+   # 1. Python
+   # 2. bash -c "<command>"
+
    commands = """\
-echo -e \\\"{c1}\\\"| tee /tmp/t1.txt ; \\
-echo -e \\\"{c2}\\\"| tee /tmp/t2.txt ; \\
-echo -e \\\"{c3}\\\"| tee /tmp/t3.txt ; \\
-echo -e \\\"{c4}\\\"| tee /tmp/t4.txt ; \\
-echo -e \\\"{c5}\\\"| tee /tmp/t5.txt ; \\
-echo -e \\\"{c6}\\\"| tee /tmp/t6.txt ; \\
 echo \\\"###### Preparing system ###############################################\\\" && \\
 echo -e \\\"{configurationS6a}\\\" | sudo tee /etc/network/interfaces.d/61-ens4 && sudo ifup ens4 || true && \\
 sudo add-apt-repository -y ppa:rmescandon/yq && \\
@@ -221,8 +221,7 @@ oai_hss -j $PREFIX/hss_rel14.json --onlyloadkey
       networkIMSIFirst   = networkIMSIFirst,
       networkMSISDNFirst = networkMSISDNFirst,
       networkUsers       = networkUsers,
-      configurationS6a   = configurationS6a,
-      c1=c1,c2=c2,c3=c3,c4=c4,c5=c5,c6=c6
+      configurationS6a   = configurationS6a
    )
 
    if execute(commands) == True:

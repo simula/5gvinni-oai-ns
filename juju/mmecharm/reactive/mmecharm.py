@@ -66,40 +66,47 @@ def configureInterface(name,
                        ipv4Interface = IPv4Interface('0.0.0.0/0'), ipv4Gateway = None,
                        ipv6Interface = None,                       ipv6Gateway = None,
                        metric = 1):
-   configuration = 'auto ' + name + '\\n'
+
+   # NOTE:
+   # Double escaping is required for \ and " in "configuration" string!
+   # 1. Python
+   # 2. bash -c "<command>"
+
+   configuration = 'auto ' + name + '\\\\n'
 
    # ====== IPv4 ============================================================
    if ipv4Interface == IPv4Interface('0.0.0.0/0'):
       configuration = configuration + 'iface ' + name + ' inet dhcp'
    else:
       configuration = configuration + \
-         'iface ' + name + ' inet static\\n' + \
-         '\\taddress ' + str(ipv4Interface.ip)      + '\\n' + \
-         '\\tnetmask ' + str(ipv4Interface.netmask) + '\\n'
+         'iface ' + name + ' inet static\\\\n' + \
+         '\\\\taddress ' + str(ipv4Interface.ip)      + '\\\\n' + \
+         '\\\\tnetmask ' + str(ipv4Interface.netmask) + '\\\\n'
       if ((ipv4Gateway != None) and (ipv4Gateway != IPv4Address('0.0.0.0'))):
          configuration = configuration + \
-            '\\tgateway ' + str(ipv4Gateway) + '\\n' + \
-            '\\tmetric '  + str(metric)      + '\\n'
+            '\\\\tgateway ' + str(ipv4Gateway) + '\\\\n' + \
+            '\\\\tmetric '  + str(metric)      + '\\\\n'
+      configuration = configuration + '\\\\n'
 
    # ====== IPv6 ============================================================
    if ipv6Interface == None:
       configuration = configuration + \
-          '\\niface ' + name + ' inet6 manual\\n' + \
-          '\\tautoconf 0\\n'
+         '\\\\niface ' + name + ' inet6 manual\\\\n' + \
+         '\\\\tautoconf 0\\\\n'
    elif ipv6Interface == IPv6Interface('::/0'):
       configuration = configuration + \
-          '\\niface ' + name + ' inet6 dhcp\\n' + \
-          '\\tautoconf 0\\n'
+         '\\\\niface ' + name + ' inet6 dhcp\\\\n' + \
+         '\\\\tautoconf 0\\\\n'
    else:
       configuration = configuration + \
-         '\\niface ' + name + ' inet6 static\\n' + \
-         '\\tautoconf 0\\n' + \
-         '\\taddress ' + str(ipv6Interface.ip)                + '\\n' + \
-         '\\tnetmask ' + str(ipv6Interface.network.prefixlen) + '\\n'
+         '\\\\niface ' + name + ' inet6 static\\\\n' + \
+         '\\\\tautoconf 0\\\\n' + \
+         '\\\\taddress ' + str(ipv6Interface.ip)                + '\\\\n' + \
+         '\\\\tnetmask ' + str(ipv6Interface.network.prefixlen) + '\\\\n'
       if ((ipv6Gateway != None) and (ipv6Gateway != IPv6Address('::'))):
          configuration = configuration + \
-            '\\tgateway ' + str(ipv6Gateway) + '\\n' + \
-            '\\tmetric '  + str(metric)      + '\\n'
+            '\\\\tgateway ' + str(ipv6Gateway) + '\\\\n' + \
+            '\\\\tmetric '  + str(metric)      + '\\\\n'
 
    return configuration
 
@@ -146,12 +153,17 @@ def configure_mme():
    configurationS11 = configureInterface('ens5', IPv4Interface('0.0.0.0/0'))
    configurationS1C = configureInterface('ens6', networkS1C_IPv4Interface, networkS1C_IPv4Gateway)
 
+   # NOTE:
+   # Double escaping is required for \ and " in "command" string!
+   # 1. Python
+   # 2. bash -c "<command>"
+
    commands = """\
-echo "###### Preparing system ###############################################" && \\
-echo -e "{configurationS6a}" | sudo tee /etc/network/interfaces.d/61-ens4 && sudo ifup ens4 || true && \\
-echo -e "{configurationS11}" | sudo tee /etc/network/interfaces.d/62-ens5 && sudo ifup ens5 || true && \\
-echo -e "{configurationS1C}" | sudo tee /etc/network/interfaces.d/63-ens6 && sudo ifup ens6 || true && \\
-echo "###### Preparing sources ##############################################" && \\
+echo \\\"###### Preparing system ###############################################\\\" && \\
+echo -e \\\"{configurationS6a}\\\" | sudo tee /etc/network/interfaces.d/61-ens4 && sudo ifup ens4 || true && \\
+echo -e \\\"{configurationS11}\\\" | sudo tee /etc/network/interfaces.d/62-ens5 && sudo ifup ens5 || true && \\
+echo -e \\\"{configurationS1C}\\\" | sudo tee /etc/network/interfaces.d/63-ens6 && sudo ifup ens6 || true && \\
+echo \\\"###### Preparing sources ##############################################\\\" && \\
 cd /home/nornetpp/src && \\
 rm -rf {gitDirectory} && \\
 git clone {gitRepository} {gitDirectory} && \\
@@ -159,7 +171,7 @@ cd {gitDirectory} && \\
 git checkout {gitCommit} && \\
 cd scripts && \\
 mkdir logs && \\
-echo "###### Building MME ####################################################" && \\
+echo \\\"###### Building MME ####################################################\\\" && \\
 ./build_mme --check-installed-software --force && \\
 ./build_mme --clean
 """.format(

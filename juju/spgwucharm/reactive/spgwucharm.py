@@ -66,40 +66,47 @@ def configureInterface(name,
                        ipv4Interface = IPv4Interface('0.0.0.0/0'), ipv4Gateway = None,
                        ipv6Interface = None,                       ipv6Gateway = None,
                        metric = 1):
-   configuration = 'auto ' + name + '\\n'
+
+   # NOTE:
+   # Double escaping is required for \ and " in "configuration" string!
+   # 1. Python
+   # 2. bash -c "<command>"
+
+   configuration = 'auto ' + name + '\\\\n'
 
    # ====== IPv4 ============================================================
    if ipv4Interface == IPv4Interface('0.0.0.0/0'):
       configuration = configuration + 'iface ' + name + ' inet dhcp'
    else:
       configuration = configuration + \
-         'iface ' + name + ' inet static\\n' + \
-         '\\taddress ' + str(ipv4Interface.ip)      + '\\n' + \
-         '\\tnetmask ' + str(ipv4Interface.netmask) + '\\n'
+         'iface ' + name + ' inet static\\\\n' + \
+         '\\\\taddress ' + str(ipv4Interface.ip)      + '\\\\n' + \
+         '\\\\tnetmask ' + str(ipv4Interface.netmask) + '\\\\n'
       if ((ipv4Gateway != None) and (ipv4Gateway != IPv4Address('0.0.0.0'))):
          configuration = configuration + \
-            '\\tgateway ' + str(ipv4Gateway) + '\\n' + \
-            '\\tmetric '  + str(metric)      + '\\n'
+            '\\\\tgateway ' + str(ipv4Gateway) + '\\\\n' + \
+            '\\\\tmetric '  + str(metric)      + '\\\\n'
+      configuration = configuration + '\\\\n'
 
    # ====== IPv6 ============================================================
    if ipv6Interface == None:
       configuration = configuration + \
-          '\\niface ' + name + ' inet6 manual\\n' + \
-          '\\tautoconf 0\\n'
+         '\\\\niface ' + name + ' inet6 manual\\\\n' + \
+         '\\\\tautoconf 0\\\\n'
    elif ipv6Interface == IPv6Interface('::/0'):
       configuration = configuration + \
-          '\\niface ' + name + ' inet6 dhcp\\n' + \
-          '\\tautoconf 0\\n'
+         '\\\\niface ' + name + ' inet6 dhcp\\\\n' + \
+         '\\\\tautoconf 0\\\\n'
    else:
       configuration = configuration + \
-         '\\niface ' + name + ' inet6 static\\n' + \
-         '\\tautoconf 0\\n' + \
-         '\\taddress ' + str(ipv6Interface.ip)                + '\\n' + \
-         '\\tnetmask ' + str(ipv6Interface.network.prefixlen) + '\\n'
+         '\\\\niface ' + name + ' inet6 static\\\\n' + \
+         '\\\\tautoconf 0\\\\n' + \
+         '\\\\taddress ' + str(ipv6Interface.ip)                + '\\\\n' + \
+         '\\\\tnetmask ' + str(ipv6Interface.network.prefixlen) + '\\\\n'
       if ((ipv6Gateway != None) and (ipv6Gateway != IPv6Address('::'))):
          configuration = configuration + \
-            '\\tgateway ' + str(ipv6Gateway) + '\\n' + \
-            '\\tmetric '  + str(metric)      + '\\n'
+            '\\\\tgateway ' + str(ipv6Gateway) + '\\\\n' + \
+            '\\\\tmetric '  + str(metric)      + '\\\\n'
 
    return configuration
 
@@ -142,19 +149,24 @@ def configure_spgwu():
    configurationSGI  = configureInterface('ens6', networkSGi_IPv4Interface, networkSGi_IPv4Gateway,
                                                   networkSGi_IPv6Interface, networkSGi_IPv6Gateway)
 
+   # NOTE:
+   # Double escaping is required for \ and " in "command" string!
+   # 1. Python
+   # 2. bash -c "<command>"
+
    commands = """\
-echo "###### Preparing system ###############################################" && \\
-echo -e "{configurationSXab}" | sudo tee /etc/network/interfaces.d/61-ens4 && sudo ifup ens4 || true && \\
-echo -e "{configurationS1U}" | sudo tee /etc/network/interfaces.d/62-ens5 && sudo ifup ens5 || true && \\
-echo -e "{configurationSGI}" | sudo tee /etc/network/interfaces.d/63-ens6 && sudo ifup ens6 || true && \\
-echo "###### Preparing sources ##############################################" && \\
+echo \\\"###### Preparing system ###############################################\\\" && \\
+echo -e \\\"{configurationSXab}\\\" | sudo tee /etc/network/interfaces.d/61-ens4 && sudo ifup ens4 || true && \\
+echo -e \\\"{configurationS1U}\\\" | sudo tee /etc/network/interfaces.d/62-ens5 && sudo ifup ens5 || true && \\
+echo -e \\\"{configurationSGI}\\\" | sudo tee /etc/network/interfaces.d/63-ens6 && sudo ifup ens6 || true && \\
+echo \\\"###### Preparing sources ##############################################\\\" && \\
 cd /home/nornetpp/src && \\
 rm -rf {gitDirectory} && \\
 git clone {gitRepository} {gitDirectory} && \\
 cd {gitDirectory} && \\
 git checkout {gitCommit} && \\
 cd build/scripts && \\
-echo "###### Building SPGW-U ################################################" && \\
+echo \\\"###### Building SPGW-U ################################################\\\" && \\
 ./build_spgwu -I -f && \
 ./build_spgwu -c -V -b Debug -j
 """.format(
