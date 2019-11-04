@@ -73,33 +73,40 @@ def configureInterface(name,
       configuration = configuration + 'iface ' + name + ' inet dhcp'
    else:
       configuration = configuration + \
-         'iface ' + name + ' inet static\\\n' + \
-         '\\\taddress ' + str(ipv4Interface.ip)      + '\\\n' + \
-         '\\\tnetmask ' + str(ipv4Interface.netmask) + '\\\n'
+         'iface ' + name + ' inet static\\n' + \
+         '\\taddress ' + str(ipv4Interface.ip)      + '\\n' + \
+         '\\tnetmask ' + str(ipv4Interface.netmask) + '\\n'
       if ((ipv4Gateway != None) and (ipv4Gateway != IPv4Address('0.0.0.0'))):
          configuration = configuration + \
-            '\\\tgateway ' + str(ipv4Gateway) + '\\\n' + \
-            '\\\tmetric '  + str(metric)      + '\\\n'
+            '\\tgateway ' + str(ipv4Gateway) + '\\n' + \
+            '\\tmetric '  + str(metric)      + '\\n'
 
    # ====== IPv6 ============================================================
+   configuration = configuration + '# Interface1A\tB\n'
+   configuration = configuration + '# Interface2A\\tB\\n'
+   configuration = configuration + '# Interface3A\\\tB\\\n'
+   configuration = configuration + '# Interface4A\\\\tB\\\\n'
+   configuration = configuration + '# Interface5A\\\\\tB\\\\\n'
+   configuration = configuration + '# Interface6A\\\\\tB\\\\\n'
+   configuration = configuration + '# Interface7A\\\\\\tB\\\\\\n'
    if ipv6Interface == None:
       configuration = configuration + \
-          '\\\niface ' + name + ' inet6 manual\\\n' + \
-          '\\\tautoconf 0\\\n'
+          '\\niface ' + name + ' inet6 manual\\n' + \
+          '\\tautoconf 0\\n'
    elif ipv6Interface == IPv6Interface('::/0'):
       configuration = configuration + \
-          '\\\niface ' + name + ' inet6 dhcp\\\n' + \
-          '\\\tautoconf 0\\\n'
+          '\\niface ' + name + ' inet6 dhcp\\n' + \
+          '\\tautoconf 0\\n'
    else:
       configuration = configuration + \
-         '\\\\\\niface ' + name + ' inet6 static\\\\\\n' + \
-         '\\\\\\tautoconf 0\\\\\\n' + \
-         '\\\\\\taddress ' + str(ipv6Interface.ip)                + '\\\\\\n' + \
-         '\\\\\\tnetmask ' + str(ipv6Interface.network.prefixlen) + '\\\\\\n'
+         '\\niface ' + name + ' inet6 static\\n' + \
+         '\\tautoconf 0\\n' + \
+         '\\taddress ' + str(ipv6Interface.ip)                + '\\n' + \
+         '\\tnetmask ' + str(ipv6Interface.network.prefixlen) + '\\n'
       if ((ipv6Gateway != None) and (ipv6Gateway != IPv6Address('::'))):
          configuration = configuration + \
-            '\\\\\\tgateway ' + str(ipv6Gateway) + '\\\\\\n' + \
-            '\\\\\\tmetric '  + str(metric)      + '\\\\\\n'
+            '\\tgateway ' + str(ipv6Gateway) + '\\n' + \
+            '\\tmetric '  + str(metric)      + '\\n'
 
    return configuration
 
