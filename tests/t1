@@ -203,11 +203,15 @@ export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
 cd /home/nornetpp/src && \\
 cd {gitDirectory} && \\
 cd scripts && \\
-./build_hss_rel14 --check-installed-software --force && \\
-./build_hss_rel14 --clean && \\
+echo \\\"====== Building dependencies ... ======\\\" && \\
+./build_hss_rel14 --check-installed-software --force >logs/build_hss_rel14-1.log 2>&1 && \\
+echo \\\"====== Building service ... ======\\\" && \\
+./build_hss_rel14 --clean >logs/build_hss_rel14-2.log 2>&1 && \\
 cqlsh --file ../src/hss_rel14/db/oai_db.cql {cassandraServerIP} && \\
-./data_provisioning_users --apn default.{networkRealm} --apn2 internet.{networkRealm} --key {networkLTE_K} --imsi-first {networkIMSIFirst} --msisdn-first {networkMSISDNFirst} --mme-identity mme.{networkRealm} --no-of-users {networkUsers} --realm {networkRealm} --truncate True  --verbose True --cassandra-cluster {cassandraServerIP} && \\
-./data_provisioning_mme --id 3 --mme-identity mme.{networkRealm} --realm {networkRealm} --ue-reachability 1 --truncate True  --verbose True -C {cassandraServerIP} && \\
+echo \\\"====== Provisioning users ... ======\\\" && \\
+./data_provisioning_users --apn default.{networkRealm} --apn2 internet.{networkRealm} --key {networkLTE_K} --imsi-first {networkIMSIFirst} --msisdn-first {networkMSISDNFirst} --mme-identity mme.{networkRealm} --no-of-users {networkUsers} --realm {networkRealm} --truncate True  --verbose True --cassandra-cluster {cassandraServerIP} >logs/data_provisioning_users.log 2>&1 && \\
+echo \\\"====== Provisioning MME ... ======\\\" && \\
+./data_provisioning_mme --id 3 --mme-identity mme.{networkRealm} --realm {networkRealm} --ue-reachability 1 --truncate True  --verbose True -C {cassandraServerIP} >logs/data_provisioning_mme.log 2>&1 && \\
 echo \\\"###### Creating HSS configuration files ###############################\\\" && \\
 openssl rand -out \$HOME/.rnd 128 && \\
 echo \\\"====== Configuring Diameter ... ======\\\" && \\
@@ -229,7 +233,7 @@ HSS_CONF[@ROAMING_ALLOWED@]='true' && \\
 for K in \\\"\${{!HSS_CONF[@]}}\\\"; do echo \\\"K=\$K ...\\\" && sudo egrep -lRZ \\\"\$K\\\" \$PREFIX | xargs -0 -l sudo sed -i -e \\\"s|\$K|\${{HSS_CONF[\$K]}}|g\\\" ; done && \\
 ../src/hss_rel14/bin/make_certs.sh hss {networkRealm} \$PREFIX && \\
 echo \\\"====== Updating key ... ======\\\" && \\
-oai_hss -j \$PREFIX/hss_rel14.json --onlyloadkey""".format(
+oai_hss -j \$PREFIX/hss_rel14.json --onlyloadkey >logs/onlyloadkey.log 2>&1""".format(
       gitDirectory       = gitDirectory,
       cassandraServerIP  = cassandraServerIP,
       networkRealm       = networkRealm,
