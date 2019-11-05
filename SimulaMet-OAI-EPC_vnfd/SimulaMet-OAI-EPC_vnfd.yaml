@@ -42,6 +42,89 @@ vnfd:vnfd-catalog:
 
       vdu:
 
+        # ###### VDU: MME (Mobility Management Entity) ######################
+        - id: MME
+          name: MME
+          description: MME
+          count: 1
+
+          # ====== VDU VM Configuration =====================================
+          vm-flavor:
+            vcpu-count: 4
+            memory-mb: 4096
+            storage-gb: 24
+          image: Template-Ubuntu-5gVINNI-Development-Bionic
+          cloud-init-file: mme-init
+
+          # ====== Interfaces ===============================================
+          interface:
+            - name: eth0
+              type: EXTERNAL
+              mgmt-interface: true
+              virtual-interface:
+                type: PARAVIRT
+              external-connection-point-ref: mme-mgmt
+            - name: eth1
+              type: INTERNAL
+              virtual-interface:
+                type: PARAVIRT
+              internal-connection-point-ref: mme-s6a
+            - name: eth2
+              type: INTERNAL
+              virtual-interface:
+                type: PARAVIRT
+              internal-connection-point-ref: mme-s11
+            - name: eth3
+              type: EXTERNAL
+              virtual-interface:
+                type: PARAVIRT
+              external-connection-point-ref: mme-s1c
+
+          # ====== Internal Connection Points ===============================
+          internal-connection-point:
+            - id: mme-s6a
+              name: mme-s6a
+              type: VPORT
+            - id: mme-s11
+              name: mme-s11
+              type: VPORT
+
+          # ====== Juju Charm ===============================================
+          vdu-configuration:
+            juju:
+              charm: mmecharm
+            initial-config-primitive:
+              - seq: '1'
+                name: config
+                parameter:
+                  - name: ssh-hostname
+                    value: <rw_mgmt_ip>
+                  - name: ssh-username
+                    value: nornetpp
+                  - name: ssh-password
+                    value: <password>
+              - seq: '2'
+                name: prepare-mme-build
+                parameter:
+                  - name: mme-s1c-ip
+                    data-type: STRING
+                    value: <mme_s1c_ip>
+                  - name: spgwu-s1u-ip
+                    data-type: STRING
+                    value: <spgwu_s1u_ip>
+              - seq: '3'
+                name: configure-mme
+                parameter:
+                  - name: mme-s1c-ip
+                    data-type: STRING
+                    value: <mme_s1c_ip>
+                  - name: spgwu-s1u-ip
+                    data-type: STRING
+                    value: <spgwu_s1u_ip>
+              - seq: '4'
+                name: restart-mme
+
+
         # ###### VDU: HSS (Home Subscriber Server) ##########################
         - id: HSS
           name: HSS
@@ -119,80 +202,6 @@ vnfd:vnfd-catalog:
                     value: <spgwu_s1u_ip>
               - seq: '5'
                 name: restart-hss
-
-
-        # ###### VDU: MME (Mobility Management Entity) ######################
-        - id: MME
-          name: MME
-          description: MME
-          count: 1
-
-          # ====== VDU VM Configuration =====================================
-          vm-flavor:
-            vcpu-count: 4
-            memory-mb: 4096
-            storage-gb: 24
-          image: Template-Ubuntu-5gVINNI-Development-Bionic
-          cloud-init-file: mme-init
-
-          # ====== Interfaces ===============================================
-          interface:
-            - name: eth0
-              type: EXTERNAL
-              mgmt-interface: true
-              virtual-interface:
-                type: PARAVIRT
-              external-connection-point-ref: mme-mgmt
-            - name: eth1
-              type: INTERNAL
-              virtual-interface:
-                type: PARAVIRT
-              internal-connection-point-ref: mme-s6a
-            - name: eth2
-              type: INTERNAL
-              virtual-interface:
-                type: PARAVIRT
-              internal-connection-point-ref: mme-s11
-            - name: eth3
-              type: EXTERNAL
-              virtual-interface:
-                type: PARAVIRT
-              external-connection-point-ref: mme-s1c
-
-          # ====== Internal Connection Points ===============================
-          internal-connection-point:
-            - id: mme-s6a
-              name: mme-s6a
-              type: VPORT
-            - id: mme-s11
-              name: mme-s11
-              type: VPORT
-
-          # ====== Juju Charm ===============================================
-          vdu-configuration:
-            juju:
-              charm: mmecharm
-            initial-config-primitive:
-              - seq: '1'
-                name: config
-                parameter:
-                  - name: ssh-hostname
-                    value: <rw_mgmt_ip>
-                  - name: ssh-username
-                    value: nornetpp
-                  - name: ssh-password
-                    value: <password>
-              - seq: '2'
-                name: configure-mme
-                parameter:
-                  - name: mme-s1c-ip
-                    data-type: STRING
-                    value: <mme_s1c_ip>
-                  - name: spgwu-s1u-ip
-                    data-type: STRING
-                    value: <spgwu_s1u_ip>
-              - seq: '3'
-                name: restart-mme
 
 
         # ###### VDU: SPGW-C ################################################

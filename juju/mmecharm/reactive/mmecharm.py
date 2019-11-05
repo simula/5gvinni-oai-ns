@@ -57,7 +57,7 @@ def execute(commands):
       action_fail('command failed:' + err)
       return False
    else:
-      action_set({ 'outout': 'DONE!'})
+      action_set( { 'outout': str(result).encode('utf-8') } )
       return True
 
 
@@ -124,10 +124,10 @@ def install_mmecharm_proxy_charm():
    status_set('active', 'Ready!')
 
 
-# ###### configure-mme function #############################################
-@when('actions.configure-mme')
+# ###### prepare-mme-build function #########################################
+@when('actions.prepare-mme-build')
 @when('mmecharm.installed')
-def configure_mme():
+def prepare_mme_build():
 
    # ====== Install MME =====================================================
    # For a documentation of the installation procedure, see:
@@ -136,13 +136,6 @@ def configure_mme():
    gitRepository            = 'https://github.com/OPENAIRINTERFACE/openair-cn.git'
    gitDirectory             = 'openair-cn'
    gitCommit                = 'develop'
-   cassandraServerIP        = '172.16.6.129'
-   networkRealm             = 'simula.nornet'
-   networkLTE_K             = '449c4b91aeacd0ace182cf3a5a72bfa1'
-   networkOP_K              = '1006020f0a478bf6b699f15c062e42b3'
-   networkIMSIFirst         = '242881234500000'
-   networkMSISDNFirst       = '24288880000000'
-   networkUsers             = 1024
    networkS1C_IPv4Interface = IPv4Interface('192.168.247.102/24')
    networkS1C_IPv4Gateway   = IPv4Address('0.0.0.0')
    networkS1C_IPv6Interface = None
@@ -157,6 +150,7 @@ def configure_mme():
    # Double escaping is required for \ and " in "command" string!
    # 1. Python
    # 2. bash -c "<command>"
+   # That is: $ => \$ ; \ => \\ ; " => \\\"
 
    commands = """\
 echo \\\"###### Preparing system ###############################################\\\" && \\
@@ -165,16 +159,57 @@ echo -e \\\"{configurationS11}\\\" | sudo tee /etc/network/interfaces.d/62-ens5 
 echo -e \\\"{configurationS1C}\\\" | sudo tee /etc/network/interfaces.d/63-ens6 && sudo ifup ens6 || true && \\
 echo \\\"###### Preparing sources ##############################################\\\" && \\
 cd /home/nornetpp/src && \\
-rm -rf {gitDirectory} && \\
-git clone {gitRepository} {gitDirectory} && \\
-cd {gitDirectory} && \\
+if [ ! -d \\\"{gitDirectory}\\\" ] ; then git clone --quiet {gitRepository} {gitDirectory} && cd {gitDirectory} ; else cd {gitDirectory} && git pull ; fi && \\
 git checkout {gitCommit} && \\
 cd scripts && \\
-mkdir logs && \\
+mkdir -p logs""".format(
+      gitRepository    = gitRepository,
+      gitDirectory     = gitDirectory,
+      gitCommit        = gitCommit,
+      configurationS6a = configurationS6a,
+      configurationS11 = configurationS11,
+      configurationS1C = configurationS1C
+   )
+
+   if execute(commands) == True:
+      set_flag('mmecharm.prepared-mme-build')
+      clear_flag('actions.configure-mme')
+
+
+# ###### configure-mme function #############################################
+@when('actions.configure-mme')
+@when('mmecharm.prepared-mme-build')
+def configure_mme():
+
+   # ====== Install MME =====================================================
+   # For a documentation of the installation procedure, see:
+   # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-mme
+
+   gitRepository      = 'https://github.com/OPENAIRINTERFACE/openair-cn.git'
+   gitDirectory       = 'openair-cn'
+   gitCommit          = 'develop'
+   cassandraServerIP  = '172.16.6.129'
+   networkRealm       = 'simula.nornet'
+   networkLTE_K       = '449c4b91aeacd0ace182cf3a5a72bfa1'
+   networkOP_K        = '1006020f0a478bf6b699f15c062e42b3'
+   networkIMSIFirst   = '242881234500000'
+   networkMSISDNFirst = '24288880000000'
+   networkUsers       = 1024
+
+   # NOTE:
+   # Double escaping is required for \ and " in "command" string!
+   # 1. Python
+   # 2. bash -c "<command>"
+   # That is: $ => \$ ; \ => \\ ; " => \\\"
+
+   commands = """\
 echo \\\"###### Building MME ####################################################\\\" && \\
-./build_mme --check-installed-software --force && \\
-./build_mme --clean
-""".format(
+export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
+echo \\\"====== Building dependencies ... ======\\\" && \\
+./build_mme --check-installed-software --force >logs/build_mme-1.log 2>&1 && \\
+echo \\\"====== Building service ... ======\\\" && \\
+./build_mme --clean >logs/build_mme-2.log 2>&1 && \\
+true""".format(
       gitRepository      = gitRepository,
       gitDirectory       = gitDirectory,
       gitCommit          = gitCommit,
@@ -184,10 +219,7 @@ echo \\\"###### Building MME ###################################################
       networkOP_K        = networkOP_K,
       networkIMSIFirst   = networkIMSIFirst,
       networkMSISDNFirst = networkMSISDNFirst,
-      networkUsers       = networkUsers,
-      configurationS6a   = configurationS6a,
-      configurationS11   = configurationS11,
-      configurationS1C   = configurationS1C
+      networkUsers       = networkUsers
    )
 
    if execute(commands) == True:
