@@ -57,7 +57,7 @@ def execute(commands):
       action_fail('command failed:' + err)
       return False
    else:
-      action_set( { 'outout': str(result).encode('utf-8') } )
+      # action_set( { 'outout': str(result).encode('utf-8') } )
       return True
 
 
