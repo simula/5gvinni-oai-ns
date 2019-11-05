@@ -185,16 +185,33 @@ def configure_mme():
    # For a documentation of the installation procedure, see:
    # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-mme
 
-   gitRepository      = 'https://github.com/OPENAIRINTERFACE/openair-cn.git'
-   gitDirectory       = 'openair-cn'
-   gitCommit          = 'develop'
-   cassandraServerIP  = '172.16.6.129'
-   networkRealm       = 'simula.nornet'
-   networkLTE_K       = '449c4b91aeacd0ace182cf3a5a72bfa1'
-   networkOP_K        = '1006020f0a478bf6b699f15c062e42b3'
-   networkIMSIFirst   = '242881234500000'
-   networkMSISDNFirst = '24288880000000'
-   networkUsers       = 1024
+   gitRepository          = 'https://github.com/OPENAIRINTERFACE/openair-cn.git'
+   gitDirectory           = 'openair-cn'
+   gitCommit              = 'develop'
+   hssS6a_IPv4Address     = '172.16.6.129'
+   mmeS1C_IPv4IfName      = 'enp6'
+   mmeS1C_IPv4Interface   = IPv4Interface('192.168.247.102/24')
+   mmeS11_IPv4IfName      = 'enp5'
+   mmeS11_IPv4Interface   = IPv4Interface('172.16.1.102/24')
+   spwgcS11_IPv4Interface = IPv4Interface('172.16.1.104/24')
+   networkRealm           = 'simula.nornet'
+   networkMCC             = 242
+   networkMNC             = 88
+   networkLTE_K           = '449c4b91aeacd0ace182cf3a5a72bfa1'
+   networkOP_K            = '1006020f0a478bf6b699f15c062e42b3'
+   networkIMSIFirst       = '242881234500000'
+   networkMSISDNFirst     = '24288880000000'
+   networkUsers           = 1024
+
+   TAC_SGW_TEST = 7
+   TAC_SGW_0    = 600
+   TAC_MME_0    = 601
+   TAC_MME_1    = 602
+
+   tac_sgw_test = '{:04x}'.format(TAC_SGW_TEST)
+   tac_sgw_0    = '{:04x}'.format(TAC_SGW_0)
+   tac_mme_0    = '{:04x}'.format(TAC_MME_0)
+   tac_mme_1    = '{:04x}'.format(TAC_MME_1)
 
    # NOTE:
    # Double escaping is required for \ and " in "command" string!
@@ -205,21 +222,91 @@ def configure_mme():
    commands = """\
 echo \\\"###### Building MME ####################################################\\\" && \\
 export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
+cd /home/nornetpp/src && \\
+cd {gitDirectory} && \\
+cd scripts && \\
 echo \\\"====== Building dependencies ... ======\\\" && \\
 ./build_mme --check-installed-software --force >logs/build_mme-1.log 2>&1 && \\
 echo \\\"====== Building service ... ======\\\" && \\
 ./build_mme --clean >logs/build_mme-2.log 2>&1 && \\
-true""".format(
-      gitRepository      = gitRepository,
-      gitDirectory       = gitDirectory,
-      gitCommit          = gitCommit,
-      cassandraServerIP  = cassandraServerIP,
-      networkRealm       = networkRealm,
-      networkLTE_K       = networkLTE_K,
-      networkOP_K        = networkOP_K,
-      networkIMSIFirst   = networkIMSIFirst,
-      networkMSISDNFirst = networkMSISDNFirst,
-      networkUsers       = networkUsers
+echo \\\"###### Creating MME configuration files ###############################\\\" && \\
+openssl rand -out \$HOME/.rnd 128 && \\
+INSTANCE=1 && \\
+PREFIX='/usr/local/etc/oai' && \\
+sudo mkdir -m 0777 -p \$PREFIX && \\
+sudo mkdir -m 0777 -p \$PREFIX/freeDiameter && \\
+sudo cp ../etc/mme_fd.sprint.conf  \$PREFIX/freeDiameter/mme_fd.conf && \\
+sudo cp ../etc/mme.conf  \$PREFIX && \\
+declare -A MME_CONF && \\
+MME_CONF[@MME_S6A_IP_ADDR@]=\\\"127.0.0.11\\\" && \\
+MME_CONF[@INSTANCE@]=\$INSTANCE && \\
+MME_CONF[@PREFIX@]=\$PREFIX && \\
+MME_CONF[@REALM@]='{networkRealm}' && \\
+MME_CONF[@PID_DIRECTORY@]='/var/run' && \\
+MME_CONF[@MME_FQDN@]=\\\"mme.{networkRealm}\\\" && \\
+MME_CONF[@HSS_HOSTNAME@]='hss' && \\
+MME_CONF[@HSS_FQDN@]=\\\"hss.{networkRealm}\\\" && \\
+MME_CONF[@HSS_IP_ADDR@]='{hssS6a_IPv4Address}' && \\
+MME_CONF[@MCC@]='{networkMCC}' && \\
+MME_CONF[@MNC@]='{networkMNC}' && \\
+MME_CONF[@MME_GID@]='32768' && \\
+MME_CONF[@MME_CODE@]='3' && \\
+MME_CONF[@TAC_0@]='600' && \\
+MME_CONF[@TAC_1@]='601' && \\
+MME_CONF[@TAC_2@]='602' && \\
+MME_CONF[@MME_INTERFACE_NAME_FOR_S1_MME@]='{mmeS1C_IPv4IfName}' && \\
+MME_CONF[@MME_IPV4_ADDRESS_FOR_S1_MME@]='{mmeS1C_IPv4Interface}' && \\
+MME_CONF[@MME_INTERFACE_NAME_FOR_S11@]='{mmeS11_IPv4IfName}' && \\
+MME_CONF[@MME_IPV4_ADDRESS_FOR_S11@]='{mmeS11_IPv4Interface}' && \\
+MME_CONF[@MME_INTERFACE_NAME_FOR_S10@]='eth0:m10' && \\
+MME_CONF[@MME_IPV4_ADDRESS_FOR_S10@]='192.168.10.110/24' && \\
+MME_CONF[@OUTPUT@]='CONSOLE' && \\
+MME_CONF[@SGW_IPV4_ADDRESS_FOR_S11_TEST_0@]='{spwgcS11_IPv4Interface}' && \\
+MME_CONF[@SGW_IPV4_ADDRESS_FOR_S11_0@]='{spwgcS11_IPv4Interface}' && \\
+MME_CONF[@PEER_MME_IPV4_ADDRESS_FOR_S10_0@]='0.0.0.0/24' && \\
+MME_CONF[@PEER_MME_IPV4_ADDRESS_FOR_S10_1@]='0.0.0.0/24' && \\
+MME_CONF[@TAC-LB_SGW_TEST_0@]={tac_sgw_test_hi} && \\
+MME_CONF[@TAC-HB_SGW_TEST_0@]={tac_sgw_test_lo} && \\
+MME_CONF[@MCC_SGW_0@]={networkMCC} && \\
+MME_CONF[@MNC3_SGW_0@]={networkMNC:03d} && \\
+MME_CONF[@TAC-LB_SGW_0@]={tac_sgw_0_hi} && \\
+MME_CONF[@TAC-HB_SGW_0@]={tac_sgw_0_lo} && \\
+MME_CONF[@MCC_MME_0@]={networkMCC} && \\
+MME_CONF[@MNC3_MME_0@]={networkMNC:03d} && \\
+MME_CONF[@TAC-LB_MME_0@]={tac_mme_0_hi} && \\
+MME_CONF[@TAC-HB_MME_0@]={tac_mme_0_lo} && \\
+MME_CONF[@MCC_MME_1@]={networkMCC} && \\
+MME_CONF[@MNC3_MME_1@]={networkMNC:03d} && \\
+MME_CONF[@TAC-LB_MME_1@]={tac_mme_1_hi} && \\
+MME_CONF[@TAC-HB_MME_1@]={tac_mme_1_lo} && \\
+for K in \\\"\${{!MME_CONF[@]}}\\\"; do sudo egrep -lRZ \\\"\$K\\\" \$PREFIX | xargs -0 -l sudo sed -i -e \\\"s|\$K|\${{MME_CONF[\$K]}}|g\\\" ; ret=\$?;[[ ret -ne 0 ]] && echo \\\"Tried to replace \$K with \${{MME_CONF[\$K]}}\\\" || true ; done && \\
+sudo ./check_mme_s6a_certificate \$PREFIX/freeDiameter mme.{networkRealm} >logs/check_mme_s6a_certificate.log 2>&1""".format(
+      gitRepository          = gitRepository,
+      gitDirectory           = gitDirectory,
+      gitCommit              = gitCommit,
+      hssS6a_IPv4Address     = hssS6a_IPv4Address,
+      mmeS1C_IPv4IfName      = mmeS1C_IPv4IfName,
+      mmeS1C_IPv4Interface   = mmeS1C_IPv4Interface,
+      mmeS11_IPv4IfName      = mmeS11_IPv4IfName,
+      mmeS11_IPv4Interface   = mmeS11_IPv4Interface,
+      spwgcS11_IPv4Interface = spwgcS11_IPv4Interface,
+      networkRealm           = networkRealm,
+      networkMCC             = networkMCC,
+      networkMNC             = networkMNC,
+      networkLTE_K           = networkLTE_K,
+      networkOP_K            = networkOP_K,
+      networkIMSIFirst       = networkIMSIFirst,
+      networkMSISDNFirst     = networkMSISDNFirst,
+      networkUsers           = networkUsers,
+
+      tac_sgw_test_hi        = tac_sgw_test[0:2],
+      tac_sgw_test_lo        = tac_sgw_test[2:4],
+      tac_sgw_0_hi           = tac_sgw_0[0:2],
+      tac_sgw_0_lo           = tac_sgw_0[2:4],
+      tac_mme_0_hi           = tac_mme_0[0:2],
+      tac_mme_0_lo           = tac_mme_0[2:4],
+      tac_mme_1_hi           = tac_mme_1[0:2],
+      tac_mme_1_lo           = tac_mme_1[2:4]
    )
 
    if execute(commands) == True:
