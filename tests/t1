@@ -143,7 +143,7 @@ def configure_cassandra():
 
    commands = """\
 echo \\\"###### Building Cassandra #############################################\\\" && \\
-export MAKEFLAGS=\\\"-j\`nproc\`\\\" && \\
+export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
 cd /home/nornetpp/src && \\
 cd {gitDirectory} && \\
 cd scripts && \\
@@ -199,7 +199,7 @@ def configure_hss():
 
    commands = """\
 echo \\\"###### Building HSS ###################################################\\\" && \\
-export MAKEFLAGS=\\\"-j\`nproc\`\\\" && \\
+export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
 cd /home/nornetpp/src && \\
 cd {gitDirectory} && \\
 cd scripts && \\
@@ -338,7 +338,7 @@ def configure_mme():
 
    commands = """\
 echo \\\"###### Building MME ####################################################\\\" && \\
-export MAKEFLAGS=\\\"-j\`nproc\`\\\" && \\
+export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
 cd /home/nornetpp/src && \\
 cd {gitDirectory} && \\
 cd scripts && \\
@@ -383,29 +383,29 @@ MME_CONF[@SGW_IPV4_ADDRESS_FOR_S11_0@]='{spwgcS11_IPv4Interface}' && \\
 MME_CONF[@PEER_MME_IPV4_ADDRESS_FOR_S10_0@]='0.0.0.0/24' && \\
 MME_CONF[@PEER_MME_IPV4_ADDRESS_FOR_S10_1@]='0.0.0.0/24' && \\
 TAC_SGW_TEST='7' && \\
-tmph=\`echo \\\"\$TAC_SGW_TEST / 256\\\" | bc\` && \\
-tmpl=\`echo \\\"\$TAC_SGW_TEST % 256\\\" | bc\` && \\
-MME_CONF[@TAC-LB_SGW_TEST_0@]=\`printf \\\"%02x\\n\\\" \$tmpl\` && \\
-MME_CONF[@TAC-HB_SGW_TEST_0@]=\`printf \\\"%02x\\n\\\" \$tmph\` && \\
+tmph=`echo \\\"\$TAC_SGW_TEST / 256\\\" | bc` && \\
+tmpl=`echo \\\"\$TAC_SGW_TEST % 256\\\" | bc` && \\
+MME_CONF[@TAC-LB_SGW_TEST_0@]=`printf \\\"%02x\\n\\\" \$tmpl` && \\
+MME_CONF[@TAC-HB_SGW_TEST_0@]=`printf \\\"%02x\\n\\\" \$tmph` && \\
 MME_CONF[@MCC_SGW_0@]={networkMCC} && \\
-MME_CONF[@MNC3_SGW_0@]=\`printf \\\"%03d\\n\\\" \$(echo {networkMNC} | sed 's/^0*//')\` && \\
+MME_CONF[@MNC3_SGW_0@]=`printf \\\"%03d\\n\\\" \$(echo {networkMNC} | sed 's/^0*//')` && \\
 TAC_SGW_0='600' && \\
-tmph=\`echo \\\"\$TAC_SGW_0 / 256\\\" | bc\` && \\
-tmpl=\`echo \\\"\$TAC_SGW_0 % 256\\\" | bc\` && \\
-MME_CONF[@TAC-LB_SGW_0@]=\`printf \\\"%02x\\n\\\" \$tmpl\` && \\
-MME_CONF[@TAC-HB_SGW_0@]=\`printf \\\"%02x\\n\\\" \$tmph\` && \\
+tmph=`echo \\\"\$TAC_SGW_0 / 256\\\" | bc` && \\
+tmpl=`echo \\\"\$TAC_SGW_0 % 256\\\" | bc` && \\
+MME_CONF[@TAC-LB_SGW_0@]=`printf \\\"%02x\\n\\\" \$tmpl` && \\
+MME_CONF[@TAC-HB_SGW_0@]=`printf \\\"%02x\\n\\\" \$tmph` && \\
 MME_CONF[@MCC_MME_0@]={networkMCC} && \\
-MME_CONF[@MNC3_MME_0@]=\`printf \\\"%03d\\n\\\" \$(echo {networkMNC} | sed 's/^0*//')\` && \\
+MME_CONF[@MNC3_MME_0@]=`printf \\\"%03d\\n\\\" \$(echo {networkMNC} | sed 's/^0*//')` && \\
 TAC_MME_0='601' && \\
-tmph=\`echo \\\"\$TAC_MME_0 / 256\\\" | bc\` && \\
-tmpl=\`echo \\\"\$TAC_MME_0 % 256\\\" | bc\` && \\
-MME_CONF[@TAC-LB_MME_0@]=\`printf \\\"%02x\\n\\\" \$tmpl\` && \\
-MME_CONF[@TAC-HB_MME_0@]=\`printf \\\"%02x\\n\\\" \$tmph\` && \\
+tmph=`echo \\\"\$TAC_MME_0 / 256\\\" | bc` && \\
+tmpl=`echo \\\"\$TAC_MME_0 % 256\\\" | bc` && \\
+MME_CONF[@TAC-LB_MME_0@]=`printf \\\"%02x\\n\\\" \$tmpl` && \\
+MME_CONF[@TAC-HB_MME_0@]=`printf \\\"%02x\\n\\\" \$tmph` && \\
 MME_CONF[@MCC_MME_1@]={networkMCC} && \\
-MME_CONF[@MNC3_MME_1@]=\`printf \\\"%03d\\n\\\" \$(echo {networkMNC} | sed 's/^0*//')\` && \\
+MME_CONF[@MNC3_MME_1@]=`printf \\\"%03d\\n\\\" \$(echo {networkMNC} | sed 's/^0*//')` && \\
 TAC_MME_1='602' && \\
-tmph=\`echo \\\"\$TAC_MME_1 / 256\\\" | bc\` && \\
-tmpl=\`echo \\\"\$TAC_MME_1 % 256\\\" | bc\` && \\
+tmph=`echo \\\"\$TAC_MME_1 / 256\\\" | bc` && \\
+tmpl=`echo \\\"\$TAC_MME_1 % 256\\\" | bc` && \\
 MME_CONF[@TAC-LB_MME_1@]=`printf \\\"%02x\\n\\\" \$tmpl` && \\
 MME_CONF[@TAC-HB_MME_1@]=`printf \\\"%02x\\n\\\" \$tmph` && \\
 for K in \\\"\${{!MME_CONF[@]}}\\\"; do sudo egrep -lRZ \\\"\$K\\\" \$PREFIX | xargs -0 -l sudo sed -i -e \\\"s|\$K|\${{MME_CONF[\$K]}}|g\\\" ; ret=\$?;[[ ret -ne 0 ]] && echo \\\"Tried to replace \$K with \${{MME_CONF[\$K]}}\\\" ; done && \\
