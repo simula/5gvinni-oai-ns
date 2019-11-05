@@ -54,10 +54,10 @@ def execute(commands):
    try:
       result, err = charms.sshproxy._run(commands)
    except:
-      action_fail('command failed:' + err)
+      action_fail('command failed:' + err.encode('utf-8'))
       return False
    else:
-      action_set({ 'outout': result})
+      action_set( { 'outout': result.encode('utf-8') } )
       return True
 
 
@@ -127,6 +127,7 @@ def install_hsscharm_proxy_charm():
 # ###### prepare-cassandra-hss-build function ###############################
 @when('actions.prepare-cassandra-hss-build')
 @when('hsscharm.installed')
+@when_not('hsscharm.prepared-cassandra-hss-build')
 def prepare_cassandra_hss_build():
 
    # ====== Install Cassandra and the HSS ===================================
@@ -149,16 +150,14 @@ def prepare_cassandra_hss_build():
    commands = """\
 echo \\\"###### Preparing system ###############################################\\\" && \\
 echo -e \\\"{configurationS6a}\\\" | sudo tee /etc/network/interfaces.d/61-ens4 && sudo ifup ens4 || true && \\
-sudo add-apt-repository -y ppa:rmescandon/yq && \\
+if [ \\\"`find /etc/apt/sources.list.d -name 'rmescandon-ubuntu-yq-*.list'`\\\" == \\\"\\\" ] ; then sudo add-apt-repository -y ppa:rmescandon/yq ; fi && \\
 DEBIAN_FRONTEND=noninteractive sudo apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends yq && \\
 echo \\\"###### Preparing sources ##############################################\\\" && \\
 cd /home/nornetpp/src && \\
-rm -rf {gitDirectory} && \\
-git clone {gitRepository} {gitDirectory} && \\
-cd {gitDirectory} && \\
+if [ ! -d \\\"{gitDirectory}\\\" ] ; then git clone --quiet {gitRepository} {gitDirectory} ; else cd {gitDirectory} && git pull ; fi && \\
 git checkout {gitCommit} && \\
 cd scripts && \\
-mkdir logs""".format(
+mkdir -p logs""".format(
       gitRepository    = gitRepository,
       gitDirectory     = gitDirectory,
       gitCommit        = gitCommit,
@@ -194,6 +193,7 @@ export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
 cd /home/nornetpp/src && \\
 cd {gitDirectory} && \\
 cd scripts && \\
+sudo rm -f /etc/apt/sources.list.d/cassandra.sources.list && \
 ./build_cassandra --check-installed-software --force && \\
 sudo update-alternatives --set java /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java && \\
 sudo service cassandra stop && \\
