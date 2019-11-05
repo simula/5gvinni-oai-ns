@@ -124,25 +124,18 @@ def install_hsscharm_proxy_charm():
    status_set('active', 'Ready!')
 
 
-# ###### configure-hss function #############################################
-@when('actions.configure-hss')
+# ###### prepare-cassandra-hss-build function ###############################
+@when('actions.prepare-cassandra-hss-build')
 @when('hsscharm.installed')
-def configure_hss():
+def prepare_cassandra_hss_build():
 
    # ====== Install Cassandra and the HSS ===================================
    # For a documentation of the installation procedure, see:
    # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
 
-   gitRepository      = 'https://github.com/OPENAIRINTERFACE/openair-cn.git'
-   gitDirectory       = 'openair-cn'
-   gitCommit          = 'develop'
-   cassandraServerIP  = '172.16.6.129'
-   networkRealm       = 'simula.nornet'
-   networkLTE_K       = '449c4b91aeacd0ace182cf3a5a72bfa1'
-   networkOP_K        = '1006020f0a478bf6b699f15c062e42b3'
-   networkIMSIFirst   = '242881234500000'
-   networkMSISDNFirst = '24288880000000'
-   networkUsers       = 1024
+   gitRepository = 'https://github.com/OPENAIRINTERFACE/openair-cn.git'
+   gitDirectory  = 'openair-cn'
+   gitCommit     = 'develop'
 
    # Prepare network configurations:
    configurationS6a = configureInterface('ens4', IPv4Interface('0.0.0.0/0'))
@@ -151,6 +144,7 @@ def configure_hss():
    # Double escaping is required for \ and " in "command" string!
    # 1. Python
    # 2. bash -c "<command>"
+   # That is: $ => \$ ; \ => \\ ; " => \\\"
 
    commands = """\
 echo \\\"###### Preparing system ###############################################\\\" && \\
@@ -164,8 +158,42 @@ git clone {gitRepository} {gitDirectory} && \\
 cd {gitDirectory} && \\
 git checkout {gitCommit} && \\
 cd scripts && \\
-mkdir logs && \\
+mkdir logs""".format(
+      gitRepository    = gitRepository,
+      gitDirectory     = gitDirectory,
+      gitCommit        = gitCommit,
+      configurationS6a = configurationS6a
+   )
+
+   if execute(commands) == True:
+      set_flag('hsscharm.prepared-cassandra-hss-build')
+      clear_flag('actions.configure-hss')
+
+
+# ###### configure-cassandra function #######################################
+@when('actions.configure-cassandra')
+@when('hsscharm.prepared-cassandra-hss-build')
+def configure_cassandra():
+
+   # ====== Install Cassandra and the HSS ===================================
+   # For a documentation of the installation procedure, see:
+   # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
+
+   gitDirectory      = 'openair-cn'
+   cassandraServerIP = '172.16.6.129'
+
+   # NOTE:
+   # Double escaping is required for \ and " in "command" string!
+   # 1. Python
+   # 2. bash -c "<command>"
+   # That is: $ => \$ ; \ => \\ ; " => \\\"
+
+   commands = """\
 echo \\\"###### Building Cassandra #############################################\\\" && \\
+export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
+cd /home/nornetpp/src && \\
+cd {gitDirectory} && \\
+cd scripts && \\
 ./build_cassandra --check-installed-software --force && \\
 sudo update-alternatives --set java /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java && \\
 sudo service cassandra stop && \\
@@ -181,56 +209,91 @@ sudo yq w -i /etc/cassandra/cassandra.yaml \\\"rpc_address\\\" \\\"{cassandraSer
 sudo yq w -i /etc/cassandra/cassandra.yaml \\\"endpoint_snitch\\\" \\\"GossipingPropertyFileSnitch\\\" && \\
 sudo service cassandra start && \\
 sleep 10 && \\
-sudo service cassandra status | cat && \\
+sudo service cassandra status | cat""".format(
+      gitDirectory      = gitDirectory,
+      cassandraServerIP = cassandraServerIP
+   )
+
+   if execute(commands) == True:
+      set_flag('hsscharm.configured-cassandra')
+      clear_flag('actions.configure-cassandra')
+
+
+# ###### configure-hss function #############################################
+@when('actions.configure-hss')
+@when('hsscharm.configured-cassandra')
+def configure_hss():
+
+   # ====== Install Cassandra and the HSS ===================================
+   # For a documentation of the installation procedure, see:
+   # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
+
+   gitDirectory       = 'openair-cn'
+   cassandraServerIP  = '172.16.6.129'
+   networkRealm       = 'simula.nornet'
+   networkLTE_K       = '449c4b91aeacd0ace182cf3a5a72bfa1'
+   networkOP_K        = '1006020f0a478bf6b699f15c062e42b3'
+   networkIMSIFirst   = '242881234500000'
+   networkMSISDNFirst = '24288880000000'
+   networkUsers       = 1024
+
+   # NOTE:
+   # Double escaping is required for \ and " in "command" string!
+   # 1. Python
+   # 2. bash -c "<command>"
+   # That is: $ => \$ ; \ => \\ ; " => \\\"
+
+   commands = """\
 echo \\\"###### Building HSS ###################################################\\\" && \\
+export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
+cd /home/nornetpp/src && \\
+cd {gitDirectory} && \\
+cd scripts && \\
 ./build_hss_rel14 --check-installed-software --force && \\
 ./build_hss_rel14 --clean && \\
 cqlsh --file ../src/hss_rel14/db/oai_db.cql {cassandraServerIP} && \\
 ./data_provisioning_users --apn default.{networkRealm} --apn2 internet.{networkRealm} --key {networkLTE_K} --imsi-first {networkIMSIFirst} --msisdn-first {networkMSISDNFirst} --mme-identity mme.{networkRealm} --no-of-users {networkUsers} --realm {networkRealm} --truncate True  --verbose True --cassandra-cluster {cassandraServerIP} && \\
 ./data_provisioning_mme --id 3 --mme-identity mme.{networkRealm} --realm {networkRealm} --ue-reachability 1 --truncate True  --verbose True -C {cassandraServerIP} && \\
 echo \\\"###### Creating HSS configuration files ###############################\\\" && \\
-openssl rand -out $HOME/.rnd 128 && \\
+openssl rand -out \$HOME/.rnd 128 && \\
 echo \\\"====== Configuring Diameter ... ======\\\" && \\
 PREFIX='/usr/local/etc/oai' && \\
-sudo mkdir -m 0777 -p $PREFIX && \\
-sudo mkdir -m 0777 -p $PREFIX/freeDiameter && \\
-sudo cp ../etc/acl.conf ../etc/hss_rel14_fd.conf $PREFIX/freeDiameter && \\
-sudo cp ../etc/hss_rel14.conf ../etc/hss_rel14.json $PREFIX && \\
-sudo sed -i -e 's/#ListenOn/ListenOn/g' $PREFIX/freeDiameter/hss_rel14_fd.conf && \\
+sudo mkdir -m 0777 -p \$PREFIX && \\
+sudo mkdir -m 0777 -p \$PREFIX/freeDiameter && \\
+sudo cp ../etc/acl.conf ../etc/hss_rel14_fd.conf \$PREFIX/freeDiameter && \\
+sudo cp ../etc/hss_rel14.conf ../etc/hss_rel14.json \$PREFIX && \\
+sudo sed -i -e 's/#ListenOn/ListenOn/g' \$PREFIX/freeDiameter/hss_rel14_fd.conf && \\
 echo \\\"====== Updating configuration files ... ======\\\" && \\
 declare -A HSS_CONF && \\
-HSS_CONF[@PREFIX@]=$PREFIX && \\
+HSS_CONF[@PREFIX@]=\$PREFIX && \\
 HSS_CONF[@REALM@]='{networkRealm}' && \\
 HSS_CONF[@HSS_FQDN@]='hss.{networkRealm}' && \\
 HSS_CONF[@cassandra_Server_IP@]='{cassandraServerIP}' && \\
 HSS_CONF[@cassandra_IP@]='{cassandraServerIP}' && \\
 HSS_CONF[@OP_KEY@]='{networkOP_K}' && \\
 HSS_CONF[@ROAMING_ALLOWED@]='true' && \\
-for K in \\\"${{!HSS_CONF[@]}}\\\"; do sudo egrep -lRZ \\\"$K\\\" $PREFIX | xargs -0 -l sudo sed -i -e \\\"s|$K|${{HSS_CONF[$K]}}|g\\\" ; done && \\
-../src/hss_rel14/bin/make_certs.sh hss {networkRealm} $PREFIX && \\
+for K in \\\"\${{!HSS_CONF[@]}}\\\"; do echo \\\"K=\$K ...\\\" && sudo egrep -lRZ \\\"\$K\\\" \$PREFIX | xargs -0 -l sudo sed -i -e \\\"s|\$K|\${{HSS_CONF[\$K]}}|g\\\" ; done && \\
+../src/hss_rel14/bin/make_certs.sh hss {networkRealm} \$PREFIX && \\
 echo \\\"====== Updating key ... ======\\\" && \\
-oai_hss -j $PREFIX/hss_rel14.json --onlyloadkey
-""".format(
-      gitRepository      = gitRepository,
+oai_hss -j \$PREFIX/hss_rel14.json --onlyloadkey""".format(
       gitDirectory       = gitDirectory,
-      gitCommit          = gitCommit,
       cassandraServerIP  = cassandraServerIP,
       networkRealm       = networkRealm,
       networkLTE_K       = networkLTE_K,
       networkOP_K        = networkOP_K,
       networkIMSIFirst   = networkIMSIFirst,
       networkMSISDNFirst = networkMSISDNFirst,
-      networkUsers       = networkUsers,
-      configurationS6a   = configurationS6a
+      networkUsers       = networkUsers
    )
 
    if execute(commands) == True:
+      set_flag('hsscharm.configured-hss')
       clear_flag('actions.configure-hss')
 
 
 # ###### restart-hss function ###############################################
 @when('actions.restart-hss')
-@when('hsscharm.installed')
+@when('hsscharm.configured-hss')
 def restart_hss():
    commands = 'touch /tmp/restart-hss'
    if execute(commands) == True:

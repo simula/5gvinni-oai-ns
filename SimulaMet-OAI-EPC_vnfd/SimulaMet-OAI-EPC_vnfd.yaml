@@ -91,7 +91,7 @@ vnfd:vnfd-catalog:
                   - name: ssh-password
                     value: <password>
               - seq: '2'
-                name: configure-hss
+                name: prepare-cassandra-hss-build
                 parameter:
                   - name: mme-s1c-ip
                     data-type: STRING
@@ -100,6 +100,24 @@ vnfd:vnfd-catalog:
                     data-type: STRING
                     value: <spgwu_s1u_ip>
               - seq: '3'
+                name: configure-cassandra
+                parameter:
+                  - name: mme-s1c-ip
+                    data-type: STRING
+                    value: <mme_s1c_ip>
+                  - name: spgwu-s1u-ip
+                    data-type: STRING
+                    value: <spgwu_s1u_ip>
+              - seq: '4'
+                name: configure-hss
+                parameter:
+                  - name: mme-s1c-ip
+                    data-type: STRING
+                    value: <mme_s1c_ip>
+                  - name: spgwu-s1u-ip
+                    data-type: STRING
+                    value: <spgwu_s1u_ip>
+              - seq: '5'
                 name: restart-hss
 
 
