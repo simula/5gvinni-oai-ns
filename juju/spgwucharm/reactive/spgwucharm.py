@@ -170,9 +170,7 @@ cd /home/nornetpp/src && \\
 if [ ! -d \\\"{gitDirectory}\\\" ] ; then git clone --quiet {gitRepository} {gitDirectory} && cd {gitDirectory} ; else cd {gitDirectory} && git pull ; fi && \\
 git checkout {gitCommit} && \\
 cd build/scripts && \\
-mkdir -p logs && \\
 echo \\\"###### Done! ##########################################################\\\"""".format(
-
       gitRepository     = gitRepository,
       gitDirectory      = gitDirectory,
       gitCommit         = gitCommit,
@@ -191,7 +189,7 @@ echo \\\"###### Done! ##########################################################
 
 # ###### configure-spgwu function ###########################################
 @when('actions.configure-spgwu')
-@when('spgwccharm.prepared-spgwu-build')
+@when('spgwucharm.prepared-spgwu-build')
 def configure_spgwu():
 
    # ====== Install SPGW-U ==================================================
@@ -218,6 +216,7 @@ export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
 cd /home/nornetpp/src && \\
 cd {gitDirectory} && \\
 cd build/scripts && \\
+mkdir -p logs && \\
 echo \\\"====== Building dependencies ... ======\\\" && \\
 ./build_spgwu -I -f >logs/build_spgwu-1.log 2>&1 && \\
 echo \\\"====== Building service ... ======\\\" && \\
@@ -235,7 +234,6 @@ SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_SX@]='{spgwuSXab_IfName}'
 SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_SGI@]='{spgwuSGi_IfName}'
 for K in \\\"\${{!SPGWU_CONF[@]}}\\\"; do sudo egrep -lRZ \\\"\$K\\\" \$PREFIX | xargs -0 -l sudo sed -i -e \\\"s|\$K|\${{SPGWU_CONF[\$K]}}|g\\\" ; ret=\$?;[[ ret -ne 0 ]] && echo \\\"Tried to replace \$K with \${{SPGWU_CONF[\$K]}}\\\" || true ; done && \\
 echo \\\"###### Done! ##########################################################\\\"""".format(
-
       gitRepository     = gitRepository,
       gitDirectory      = gitDirectory,
       gitCommit         = gitCommit,

@@ -531,7 +531,7 @@ echo \\\"###### Done! ##########################################################
 
 # ###### configure-spgwu function ###########################################
 # @when('actions.configure-spgwu')
-# @when('spgwccharm.prepared-spgwu-build')
+# @when('spgwucharm.prepared-spgwu-build')
 def configure_spgwu():
 
    # ====== Install SPGW-U ==================================================
