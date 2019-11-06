@@ -121,7 +121,6 @@ cd /home/nornetpp/src && \\
 if [ ! -d \\\"{gitDirectory}\\\" ] ; then git clone --quiet {gitRepository} {gitDirectory} && cd {gitDirectory} ; else cd {gitDirectory} && git pull ; fi && \\
 git checkout {gitCommit} && \\
 cd scripts && \\
-mkdir -p logs && \\
 echo \\\"###### Done! ##########################################################\\\"""".format(
       gitRepository    = gitRepository,
       gitDirectory     = gitDirectory,
@@ -216,6 +215,7 @@ export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
 cd /home/nornetpp/src && \\
 cd {gitDirectory} && \\
 cd scripts && \\
+mkdir -p logs && \\
 echo \\\"====== Building dependencies ... ======\\\" && \\
 ./build_hss_rel14 --check-installed-software --force >logs/build_hss_rel14-1.log 2>&1 && \\
 echo \\\"====== Building service ... ======\\\" && \\
@@ -308,7 +308,6 @@ cd /home/nornetpp/src && \\
 if [ ! -d \\\"{gitDirectory}\\\" ] ; then git clone --quiet {gitRepository} {gitDirectory} && cd {gitDirectory} ; else cd {gitDirectory} && git pull ; fi && \\
 git checkout {gitCommit} && \\
 cd scripts && \\
-mkdir -p logs && \\
 echo \\\"###### Done! ##########################################################\\\"""".format(
       gitRepository    = gitRepository,
       gitDirectory     = gitDirectory,
@@ -375,6 +374,7 @@ export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
 cd /home/nornetpp/src && \\
 cd {gitDirectory} && \\
 cd scripts && \\
+mkdir -p logs && \\
 echo \\\"====== Building dependencies ... ======\\\" && \\
 ./build_mme --check-installed-software --force >logs/build_mme-1.log 2>&1 && \\
 echo \\\"====== Building service ... ======\\\" && \\
@@ -512,7 +512,6 @@ cd /home/nornetpp/src && \\
 if [ ! -d \\\"{gitDirectory}\\\" ] ; then git clone --quiet {gitRepository} {gitDirectory} && cd {gitDirectory} ; else cd {gitDirectory} && git pull ; fi && \\
 git checkout {gitCommit} && \\
 cd build/scripts && \\
-mkdir -p logs && \\
 echo \\\"###### Done! ##########################################################\\\"""".format(
       gitRepository     = gitRepository,
       gitDirectory      = gitDirectory,
@@ -559,6 +558,7 @@ export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
 cd /home/nornetpp/src && \\
 cd {gitDirectory} && \\
 cd build/scripts && \\
+mkdir -p logs && \\
 echo \\\"====== Building dependencies ... ======\\\" && \\
 ./build_spgwu -I -f >logs/build_spgwu-1.log 2>&1 && \\
 echo \\\"====== Building service ... ======\\\" && \\
@@ -634,7 +634,6 @@ cd /home/nornetpp/src && \\
 if [ ! -d \\\"{gitDirectory}\\\" ] ; then git clone --quiet {gitRepository} {gitDirectory} && cd {gitDirectory} ; else cd {gitDirectory} && git pull ; fi && \\
 git checkout {gitCommit} && \\
 cd build/scripts && \\
-mkdir -p logs && \\
 echo \\\"###### Done! ##########################################################\\\"""".format(
       gitRepository          = gitRepository,
       gitDirectory           = gitDirectory,
@@ -685,6 +684,7 @@ export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
 cd /home/nornetpp/src && \\
 cd {gitDirectory} && \\
 cd build/scripts && \\
+mkdir -p logs && \\
 echo \\\"====== Building dependencies ... ======\\\" && \\
 ./build_spgwc -I -f >logs/build_spgwc-1.log 2>&1 && \\
 echo \\\"====== Building service ... ======\\\" && \\
