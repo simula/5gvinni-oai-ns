@@ -170,7 +170,8 @@ cd /home/nornetpp/src && \\
 if [ ! -d \\\"{gitDirectory}\\\" ] ; then git clone --quiet {gitRepository} {gitDirectory} && cd {gitDirectory} ; else cd {gitDirectory} && git pull ; fi && \\
 git checkout {gitCommit} && \\
 cd build/scripts && \\
-mkdir -p logs""".format(
+mkdir -p logs && \\
+echo \\\"###### Done! ##########################################################""".format(
       gitRepository     = gitRepository,
       gitDirectory      = gitDirectory,
       gitCommit         = gitCommit,
@@ -217,9 +218,9 @@ cd /home/nornetpp/src && \\
 cd {gitDirectory} && \\
 cd build/scripts && \\
 echo \\\"====== Building dependencies ... ======\\\" && \\
-./build_spgwu -I -f && \
+./build_spgwu -I -f >logs/build_spgwu-1.log 2>&1 && \\
 echo \\\"====== Building service ... ======\\\" && \\
-./build_spgwu -c -V -b Debug -j && \\
+./build_spgwu -c -V -b Debug -j >logs/build_spgwu-2.log 2>&1 && \\
 INSTANCE=1 && \\
 PREFIX='/usr/local/etc/oai' && \\
 sudo mkdir -m 0777 -p \$PREFIX && \\
@@ -231,8 +232,8 @@ SPGWU_CONF[@PID_DIRECTORY@]='/var/run'
 SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_S1U_S12_S4_UP@]='{spgwuS1U_IfName}'
 SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_SX@]='{spgwuSXab_IfName}'
 SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_SGI@]='{spgwuSGi_IfName}'
-for K in \\\"\${{!SPGWU_CONF[@]}}\\\"; do sudo egrep -lRZ \\\"\$K\\\" \$PREFIX | xargs -0 -l sudo sed -i -e \\\"s|\$K|\${{SPGWU_CONF[\$K]}}|g\\\" ; ret=\$?;[[ ret -ne 0 ]] && echo \\\"Tried to replace \$K with \${{SPGWU_CONF[\$K]}}\\\" || true ; done
-""".format(
+for K in \\\"\${{!SPGWU_CONF[@]}}\\\"; do sudo egrep -lRZ \\\"\$K\\\" \$PREFIX | xargs -0 -l sudo sed -i -e \\\"s|\$K|\${{SPGWU_CONF[\$K]}}|g\\\" ; ret=\$?;[[ ret -ne 0 ]] && echo \\\"Tried to replace \$K with \${{SPGWU_CONF[\$K]}}\\\" || true ; done && \\
+echo \\\"###### Done! ##########################################################""".format(
       gitRepository     = gitRepository,
       gitDirectory      = gitDirectory,
       gitCommit         = gitCommit,

@@ -1,0 +1,2 @@
+SPGW-C:
+Build ./build_spgwc -I -f fails if repository is not cleaned.
