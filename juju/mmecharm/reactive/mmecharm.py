@@ -142,9 +142,13 @@ def prepare_mme_build():
    networkS1C_IPv6Gateway   = None
 
    # Prepare network configurations:
-   configurationS6a = configureInterface('ens4', IPv4Interface('0.0.0.0/0'))
-   configurationS11 = configureInterface('ens5', IPv4Interface('0.0.0.0/0'))
-   configurationS1C = configureInterface('ens6', networkS1C_IPv4Interface, networkS1C_IPv4Gateway)
+   mmeS6a_IfName = 'ens4'
+   mmeS11_IfName = 'ens5'
+   mmeS1C_IfName = 'ens6'
+
+   configurationS6a = configureInterface(mmeS6a_IfName, IPv4Interface('0.0.0.0/0'))
+   configurationS11 = configureInterface(mmeS11_IfName, IPv4Interface('0.0.0.0/0'))
+   configurationS1C = configureInterface(mmeS1C_IfName, networkS1C_IPv4Interface, networkS1C_IPv4Gateway)
 
    # NOTE:
    # Double escaping is required for \ and " in "command" string!
@@ -154,9 +158,9 @@ def prepare_mme_build():
 
    commands = """\
 echo \\\"###### Preparing system ###############################################\\\" && \\
-echo -e \\\"{configurationS6a}\\\" | sudo tee /etc/network/interfaces.d/61-ens4 && sudo ifup ens4 || true && \\
-echo -e \\\"{configurationS11}\\\" | sudo tee /etc/network/interfaces.d/62-ens5 && sudo ifup ens5 || true && \\
-echo -e \\\"{configurationS1C}\\\" | sudo tee /etc/network/interfaces.d/63-ens6 && sudo ifup ens6 || true && \\
+echo -e \\\"{configurationS6a}\\\" | sudo tee /etc/network/interfaces.d/61-{mmeS6a_IfName} && sudo ifup {mmeS6a_IfName} || true && \\
+echo -e \\\"{configurationS11}\\\" | sudo tee /etc/network/interfaces.d/62-{mmeS11_IfName} && sudo ifup {mmeS11_IfName} || true && \\
+echo -e \\\"{configurationS1C}\\\" | sudo tee /etc/network/interfaces.d/63-{mmeS1C_IfName} && sudo ifup {mmeS1C_IfName} || true && \\
 echo \\\"###### Preparing sources ##############################################\\\" && \\
 cd /home/nornetpp/src && \\
 if [ ! -d \\\"{gitDirectory}\\\" ] ; then git clone --quiet {gitRepository} {gitDirectory} && cd {gitDirectory} ; else cd {gitDirectory} && git pull ; fi && \\
@@ -166,6 +170,9 @@ mkdir -p logs""".format(
       gitRepository    = gitRepository,
       gitDirectory     = gitDirectory,
       gitCommit        = gitCommit,
+      mmeS6a_IfName    = mmeS6a_IfName,
+      mmeS11_IfName    = mmeS11_IfName,
+      mmeS1C_IfName    = mmeS1C_IfName,
       configurationS6a = configurationS6a,
       configurationS11 = configurationS11,
       configurationS1C = configurationS1C
