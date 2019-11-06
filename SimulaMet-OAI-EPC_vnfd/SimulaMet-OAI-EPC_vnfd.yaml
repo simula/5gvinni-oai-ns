@@ -42,6 +42,169 @@ vnfd:vnfd-catalog:
 
       vdu:
 
+        # ###### VDU: SPGW-C ################################################
+        # (Serving & Packet Data Network Gateway -- Control Plane)
+        - id: SPGW-C
+          name: SPGW-C
+          description: SPGW-C
+          count: 1
+
+          # ====== VDU VM Configuration =====================================
+          vm-flavor:
+            vcpu-count: 4
+            memory-mb: 4096
+            storage-gb: 24
+          image: Template-Ubuntu-5gVINNI-Development-Bionic
+          cloud-init-file: spgwc-init
+
+          # ====== Interfaces ===============================================
+          interface:
+            - name: eth0
+              type: EXTERNAL
+              mgmt-interface: true
+              virtual-interface:
+                type: PARAVIRT
+              external-connection-point-ref: spgwc-mgmt
+            - name: eth1
+              type: INTERNAL
+              virtual-interface:
+                type: PARAVIRT
+              internal-connection-point-ref: spgwc-sxab
+            - name: eth2
+              type: INTERNAL
+              virtual-interface:
+                type: PARAVIRT
+              internal-connection-point-ref: spgwc-s11
+
+          # ====== Internal Connection Points ===============================
+          internal-connection-point:
+            - id: spgwc-sxab
+              name: spgwc-sxab
+              type: VPORT
+            - id: spgwc-s11
+              name: spgwc-s11
+              type: VPORT
+
+          # ====== Juju Charm ===============================================
+          vdu-configuration:
+            juju:
+              charm: spgwccharm
+            initial-config-primitive:
+              - seq: '1'
+                name: config
+                parameter:
+                  - name: ssh-hostname
+                    value: <rw_mgmt_ip>
+                  - name: ssh-username
+                    value: nornetpp
+                  - name: ssh-password
+                    value: <password>
+              - seq: '2'
+                name: prepare-spgwc-build
+                parameter:
+                  - name: mme-s1c-ip
+                    data-type: STRING
+                    value: <mme_s1c_ip>
+                  - name: spgwu-s1u-ip
+                    data-type: STRING
+                    value: <spgwu_s1u_ip>
+              - seq: '3'
+                name: configure-spgwc
+                parameter:
+                  - name: mme-s1c-ip
+                    data-type: STRING
+                    value: <mme_s1c_ip>
+                  - name: spgwu-s1u-ip
+                    data-type: STRING
+                    value: <spgwu_s1u_ip>
+              - seq: '4'
+                name: restart-spgwc
+
+
+        # ###### VDU: SPGW-U ################################################
+        # (Serving & Packet Data Network Gateway -- User Plane)
+        - id: SPGW-U
+          name: SPGW-U
+          description: SPGW-U
+          count: 1
+
+          # ====== VDU VM Configuration =====================================
+          vm-flavor:
+            vcpu-count: 4
+            memory-mb: 4096
+            storage-gb: 24
+          image: Template-Ubuntu-5gVINNI-Development-Bionic
+          cloud-init-file: spgwu-init
+          # guest-epa:
+          #     cpu-pinning-policy: DEDICATED
+          #     mempage-size: LARGE
+
+          # ====== Interfaces ===============================================
+          interface:
+            - name: eth0
+              type: EXTERNAL
+              mgmt-interface: true
+              virtual-interface:
+                type: PARAVIRT
+              external-connection-point-ref: spgwu-mgmt
+            - name: eth1
+              type: INTERNAL
+              virtual-interface:
+                type: PARAVIRT
+              internal-connection-point-ref: spgwu-sxab
+            - name: eth2
+              type: EXTERNAL
+              virtual-interface:
+                type: PARAVIRT
+              external-connection-point-ref: spgwu-s1u
+            - name: eth3
+              type: EXTERNAL
+              virtual-interface:
+                type: PARAVIRT
+              external-connection-point-ref: spgwu-sgi
+
+          # ====== Internal Connection Points ===============================
+          internal-connection-point:
+            - id: spgwu-sxab
+              name: spgwu-sxab
+              type: VPORT
+
+          # ====== Juju Charm ===============================================
+          vdu-configuration:
+            juju:
+              charm: spgwucharm
+            initial-config-primitive:
+              - seq: '1'
+                name: config
+                parameter:
+                  - name: ssh-hostname
+                    value: <rw_mgmt_ip>
+                  - name: ssh-username
+                    value: nornetpp
+                  - name: ssh-password
+                    value: <password>
+              - seq: '2'
+                name: prepare-spgwu-build
+                parameter:
+                  - name: mme-s1c-ip
+                    data-type: STRING
+                    value: <mme_s1c_ip>
+                  - name: spgwu-s1u-ip
+                    data-type: STRING
+                    value: <spgwu_s1u_ip>
+              - seq: '3'
+                name: configure-spgwu
+                parameter:
+                  - name: mme-s1c-ip
+                    data-type: STRING
+                    value: <mme_s1c_ip>
+                  - name: spgwu-s1u-ip
+                    data-type: STRING
+                    value: <spgwu_s1u_ip>
+              - seq: '4'
+                name: restart-spgwu
+
+
         # ###### VDU: MME (Mobility Management Entity) ######################
         - id: MME
           name: MME
@@ -202,151 +365,6 @@ vnfd:vnfd-catalog:
                     value: <spgwu_s1u_ip>
               - seq: '5'
                 name: restart-hss
-
-
-        # ###### VDU: SPGW-C ################################################
-        # (Serving & Packet Data Network Gateway -- Control Plane)
-        - id: SPGW-C
-          name: SPGW-C
-          description: SPGW-C
-          count: 1
-
-          # ====== VDU VM Configuration =====================================
-          vm-flavor:
-            vcpu-count: 4
-            memory-mb: 4096
-            storage-gb: 24
-          image: Template-Ubuntu-5gVINNI-Development-Bionic
-          cloud-init-file: spgwc-init
-
-          # ====== Interfaces ===============================================
-          interface:
-            - name: eth0
-              type: EXTERNAL
-              mgmt-interface: true
-              virtual-interface:
-                type: PARAVIRT
-              external-connection-point-ref: spgwc-mgmt
-            - name: eth1
-              type: INTERNAL
-              virtual-interface:
-                type: PARAVIRT
-              internal-connection-point-ref: spgwc-sxab
-            - name: eth2
-              type: INTERNAL
-              virtual-interface:
-                type: PARAVIRT
-              internal-connection-point-ref: spgwc-s11
-
-          # ====== Internal Connection Points ===============================
-          internal-connection-point:
-            - id: spgwc-sxab
-              name: spgwc-sxab
-              type: VPORT
-            - id: spgwc-s11
-              name: spgwc-s11
-              type: VPORT
-
-          # ====== Juju Charm ===============================================
-          vdu-configuration:
-            juju:
-              charm: spgwccharm
-            initial-config-primitive:
-              - seq: '1'
-                name: config
-                parameter:
-                  - name: ssh-hostname
-                    value: <rw_mgmt_ip>
-                  - name: ssh-username
-                    value: nornetpp
-                  - name: ssh-password
-                    value: <password>
-              - seq: '2'
-                name: configure-spgwc
-                parameter:
-                  - name: mme-s1c-ip
-                    data-type: STRING
-                    value: <mme_s1c_ip>
-                  - name: spgwu-s1u-ip
-                    data-type: STRING
-                    value: <spgwu_s1u_ip>
-              - seq: '3'
-                name: restart-spgwc
-
-
-        # ###### VDU: SPGW-U ################################################
-        # (Serving & Packet Data Network Gateway -- User Plane)
-        - id: SPGW-U
-          name: SPGW-U
-          description: SPGW-U
-          count: 1
-
-          # ====== VDU VM Configuration =====================================
-          vm-flavor:
-            vcpu-count: 4
-            memory-mb: 4096
-            storage-gb: 24
-          image: Template-Ubuntu-5gVINNI-Development-Bionic
-          cloud-init-file: spgwu-init
-          # guest-epa:
-          #     cpu-pinning-policy: DEDICATED
-          #     mempage-size: LARGE
-
-          # ====== Interfaces ===============================================
-          interface:
-            - name: eth0
-              type: EXTERNAL
-              mgmt-interface: true
-              virtual-interface:
-                type: PARAVIRT
-              external-connection-point-ref: spgwu-mgmt
-            - name: eth1
-              type: INTERNAL
-              virtual-interface:
-                type: PARAVIRT
-              internal-connection-point-ref: spgwu-sxab
-            - name: eth2
-              type: EXTERNAL
-              virtual-interface:
-                type: PARAVIRT
-              external-connection-point-ref: spgwu-s1u
-            - name: eth3
-              type: EXTERNAL
-              virtual-interface:
-                type: PARAVIRT
-              external-connection-point-ref: spgwu-sgi
-
-          # ====== Internal Connection Points ===============================
-          internal-connection-point:
-            - id: spgwu-sxab
-              name: spgwu-sxab
-              type: VPORT
-
-          # ====== Juju Charm ===============================================
-          vdu-configuration:
-            juju:
-              charm: spgwucharm
-            initial-config-primitive:
-              - seq: '1'
-                name: config
-                parameter:
-                  - name: ssh-hostname
-                    value: <rw_mgmt_ip>
-                  - name: ssh-username
-                    value: nornetpp
-                  - name: ssh-password
-                    value: <password>
-              - seq: '2'
-                name: configure-spgwu
-                parameter:
-                  - name: mme-s1c-ip
-                    data-type: STRING
-                    value: <mme_s1c_ip>
-                  - name: spgwu-s1u-ip
-                    data-type: STRING
-                    value: <spgwu_s1u_ip>
-              - seq: '3'
-                name: restart-spgwu
 
 
       # ###### Internal VLDs ################################################

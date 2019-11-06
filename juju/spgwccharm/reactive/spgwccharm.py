@@ -57,7 +57,7 @@ def execute(commands):
       action_fail('command failed:' + err)
       return False
    else:
-      action_set({ 'outout': 'DONE!'})
+      # action_set( { 'outout': str(result).encode('utf-8') } )
       return True
 
 
@@ -124,15 +124,129 @@ def install_spgwccharm_proxy_charm():
    status_set('active', 'Ready!')
 
 
+# ###### prepare-spgwc-build function #######################################
+@when('actions.prepare-spgwc-build')
+@when('spgwccharm.installed')
+def prepare_spgwc_build():
+
+   # ====== Install MME =====================================================
+   # For a documentation of the installation procedure, see:
+   # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-spgwc
+
+   gitRepository         = 'https://github.com/OPENAIRINTERFACE/openair-cn-cups.git'
+   gitDirectory          = 'openair-cn-cups'
+   gitCommit             = 'develop'
+
+   # Prepare network configurations:
+   spgwcS11_IfName       = 'enp5'
+   spgwcSXab_IfName      = 'enp4'
+   configurationS11      = configureInterface(spgwcS11_IfName,  IPv4Interface('0.0.0.0/0'))
+   configurationSXab     = configureInterface(spgwcSXab_IfName, IPv4Interface('0.0.0.0/0'))
+
+   # S5S8 dummy interfaces:
+   spgwcS5S8_SGW_IfName  = 'dummy0:s5c'
+   configurationS5S8_SGW = configureInterface(spgwcS5S8_SGW_IfName, IPv4Interface('172.58.58.102/24'))
+   spgwcS5S8_PGW_IfName  = 'dummy0:p5c'
+   configurationS5S8_PGW = configureInterface(spgwcS5S8_PGW_IfName, IPv4Interface('172.58.58.101/24'))
+
+   # NOTE:
+   # Double escaping is required for \ and " in "command" string!
+   # 1. Python
+   # 2. bash -c "<command>"
+   # That is: $ => \$ ; \ => \\ ; " => \\\"
+
+   commands = """\
+echo \\\"###### Preparing system ###############################################\\\" && \\
+echo -e \\\"{configurationS11}\\\" | sudo tee /etc/network/interfaces.d/61-ens4 && sudo ifup ens4 || true && \\
+echo -e \\\"{configurationSXab}\\\" | sudo tee /etc/network/interfaces.d/62-ens5 && sudo ifup ens5 || true && \\
+sudo ip link add dummy0 type dummy || true && \\
+echo -e \\\"{configurationS5S8_SGW}\\\" | sudo tee /etc/network/interfaces.d/63-{spgwcS5S8_SGW_IfName} && sudo ifup {spgwcS5S8_SGW_IfName} || true && \\
+echo -e \\\"{configurationS5S8_PGW}\\\" | sudo tee /etc/network/interfaces.d/64-{spgwcS5S8_PGW_IfName} && sudo ifup {spgwcS5S8_PGW_IfName} || true && \\
+echo \\\"###### Preparing sources ##############################################\\\" && \\
+cd /home/nornetpp/src && \\
+if [ ! -d \\\"{gitDirectory}\\\" ] ; then git clone --quiet {gitRepository} {gitDirectory} && cd {gitDirectory} ; else cd {gitDirectory} && git pull ; fi && \\
+git checkout {gitCommit} && \\
+cd build/scripts && \\
+mkdir -p logs""".format(
+      gitRepository          = gitRepository,
+      gitDirectory           = gitDirectory,
+      gitCommit              = gitCommit,
+      configurationS11       = configurationS11,
+      configurationSXab      = configurationSXab,
+      spgwcS5S8_SGW_IfName = spgwcS5S8_SGW_IfName,
+      configurationS5S8_SGW  = configurationS5S8_SGW,
+      spgwcS5S8_PGW_IfName = spgwcS5S8_PGW_IfName,
+      configurationS5S8_PGW  = configurationS5S8_PGW
+   )
+
+   if execute(commands) == True:
+      set_flag('spgwccharm.prepared-spgwc-build')
+      clear_flag('actions.configure-spgwc')
+
+
 # ###### configure-spgwc function ###########################################
 @when('actions.configure-spgwc')
 @when('spgwccharm.installed')
 def configure_spgwc():
+
+   # ====== Install SPGW-C ==================================================
+   # For a documentation of the installation procedure, see:
+   # https://github.com/OPENAIRINTERFACE/openair-cn-cups/wiki/OpenAirSoftwareSupport#install-spgw-c
+
+   gitDirectory         = 'openair-cn-cups'
+   networkRealm         = 'simula.nornet'
+   networkDNS1_IPv4     = IPv4Address('10.1.1.1')
+   networkDNS2_IPv4     = IPv4Address('10.1.2.1')
+
+   spgwcSXab_IfName     = 'enp4'
+   spgwcS11_IfName      = 'enp5'
+   spgwcS5S8_SGW_IfName = 'dummy0:s5c'
+   spgwcS5S8_PGW_IfName = 'dummy0:p5c'
+
+   # NOTE:
+   # Double escaping is required for \ and " in "command" string!
+   # 1. Python
+   # 2. bash -c "<command>"
+   # That is: $ => \$ ; \ => \\ ; " => \\\"
+
+   #commands = """\
+#echo \\\"###### Building SPGW-C ################################################\\\" && \\
+#export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
+#cd /home/nornetpp/src && \\
+#cd {gitDirectory} && \\
+#cd build/scripts && \\
+#echo \\\"====== Building dependencies ... ======\\\" && \\
+#./build_spgwc -I -f && \
+#echo \\\"====== Building service ... ======\\\" && \\
+#./build_spgwc -c -V -b Debug -j
    commands = """\
-echo -e "auto ens4\niface ens4 inet dhcp" | sudo tee /etc/network/interfaces.d/60-ens4 && sudo ifup ens4 || true && \\
-echo -e "auto ens5\niface ens5 inet dhcp" | sudo tee /etc/network/interfaces.d/61-ens5 && sudo ifup ens5 || true && \\
-true
-"""
+echo \\\"###### Creating SPGW-C configuration files ############################\\\" && \\
+INSTANCE=1 && \\
+PREFIX='/usr/local/etc/oai' && \\
+sudo mkdir -m 0777 -p \$PREFIX && \\
+sudo cp ../../etc/spgw_c.conf  \$PREFIX && \\
+declare -A SPGWC_CONF && \\
+SPGWC_CONF[@INSTANCE@]=\$INSTANCE && \\
+SPGWC_CONF[@PREFIX@]=\$PREFIX && \\
+SPGWC_CONF[@PID_DIRECTORY@]='/var/run' && \\
+SPGWC_CONF[@SGW_INTERFACE_NAME_FOR_S11@]='{spgwcS11_IfName}' && \\
+SPGWC_CONF[@SGW_INTERFACE_NAME_FOR_S5_S8_CP@]='{spgwcS5S8_SGW_IfName}' && \\
+SPGWC_CONF[@PGW_INTERFACE_NAME_FOR_S5_S8_CP@]='{spgwcS5S8_PGW_IfName}' && \\
+SPGWC_CONF[@PGW_INTERFACE_NAME_FOR_SX@]='{spgwcSXab_IfName}' && \\
+SPGWC_CONF[@DEFAULT_DNS_IPV4_ADDRESS@]='{networkDNS1_IPv4}' && \\
+SPGWC_CONF[@DEFAULT_DNS_SEC_IPV4_ADDRESS@]='{networkDNS2_IPv4}' && \\
+for K in \\\"\${{!SPGWC_CONF[@]}}\\\"; do sudo egrep -lRZ \\\"\$K\\\" \$PREFIX | xargs -0 -l sudo sed -i -e \\\"s|\$K|\${{SPGWC_CONF[\$K]}}|g\\\" ; ret=\$?;[[ ret -ne 0 ]] && echo \\\"Tried to replace \$K with \${{SPGWC_CONF[\$K]}}\\\" || true ; done
+""".format(
+      gitDirectory         = gitDirectory,
+      networkRealm         = networkRealm,
+      networkDNS1_IPv4     = networkDNS1_IPv4,
+      networkDNS2_IPv4     = networkDNS2_IPv4,
+      spgwcSXab_IfName     = spgwcSXab_IfName,
+      spgwcS11_IfName      = spgwcS11_IfName,
+      spgwcS5S8_SGW_IfName = spgwcS5S8_SGW_IfName,
+      spgwcS5S8_PGW_IfName = spgwcS5S8_PGW_IfName
+   )
+
    if execute(commands) == True:
       clear_flag('actions.configure-spgwc')
 
