@@ -158,8 +158,8 @@ def prepare_spgwc_build():
 
    commands = """\
 echo \\\"###### Preparing system ###############################################\\\" && \\
-echo -e \\\"{configurationS11}\\\" | sudo tee /etc/network/interfaces.d/61-ens4 && sudo ifup ens4 || true && \\
-echo -e \\\"{configurationSXab}\\\" | sudo tee /etc/network/interfaces.d/62-ens5 && sudo ifup ens5 || true && \\
+echo -e \\\"{configurationS11}\\\" | sudo tee /etc/network/interfaces.d/61-{spgwcS11_IfName} && sudo ifup {spgwcS11_IfName} || true && \\
+echo -e \\\"{configurationSXab}\\\" | sudo tee /etc/network/interfaces.d/62-{spgwcSXab_IfName} && sudo ifup {spgwcSXab_IfName} || true && \\
 sudo ip link add dummy0 type dummy || true && \\
 echo -e \\\"{configurationS5S8_SGW}\\\" | sudo tee /etc/network/interfaces.d/63-{spgwcS5S8_SGW_IfName} && sudo ifup {spgwcS5S8_SGW_IfName} || true && \\
 echo -e \\\"{configurationS5S8_PGW}\\\" | sudo tee /etc/network/interfaces.d/64-{spgwcS5S8_PGW_IfName} && sudo ifup {spgwcS5S8_PGW_IfName} || true && \\
@@ -172,11 +172,13 @@ mkdir -p logs""".format(
       gitRepository          = gitRepository,
       gitDirectory           = gitDirectory,
       gitCommit              = gitCommit,
+      spgwcS11_IfName        = spgwcS11_IfName,
+      spgwcSXab_IfName       = spgwcSXab_IfName,
+      spgwcS5S8_SGW_IfName   = spgwcS5S8_SGW_IfName,
+      spgwcS5S8_PGW_IfName   = spgwcS5S8_PGW_IfName,
       configurationS11       = configurationS11,
       configurationSXab      = configurationSXab,
-      spgwcS5S8_SGW_IfName = spgwcS5S8_SGW_IfName,
       configurationS5S8_SGW  = configurationS5S8_SGW,
-      spgwcS5S8_PGW_IfName = spgwcS5S8_PGW_IfName,
       configurationS5S8_PGW  = configurationS5S8_PGW
    )
 

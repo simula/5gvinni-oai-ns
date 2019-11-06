@@ -570,8 +570,9 @@ for K in \\\"\${{!SPGWU_CONF[@]}}\\\"; do sudo egrep -lRZ \\\"\$K\\\" \$PREFIX |
 
 
 # ###### prepare-spgwc-build function #######################################
-# @when('actions.prepare-spgwc-build')
-# @when('spgwccharm.installed')
+#@when('actions.prepare-spgwc-build')
+#@when('spgwccharm.installed')
+#@when_not('spgwccharm.prepared-spgwc-build')
 def prepare_spgwc_build():
 
    # ====== Install SPGW-C ==================================================
@@ -602,8 +603,8 @@ def prepare_spgwc_build():
 
    commands = """\
 echo \\\"###### Preparing system ###############################################\\\" && \\
-echo -e \\\"{configurationS11}\\\" | sudo tee /etc/network/interfaces.d/61-ens4 && sudo ifup ens4 || true && \\
-echo -e \\\"{configurationSXab}\\\" | sudo tee /etc/network/interfaces.d/62-ens5 && sudo ifup ens5 || true && \\
+echo -e \\\"{configurationS11}\\\" | sudo tee /etc/network/interfaces.d/61-{spgwcS11_IfName} && sudo ifup {spgwcS11_IfName} || true && \\
+echo -e \\\"{configurationSXab}\\\" | sudo tee /etc/network/interfaces.d/62-{spgwcSXab_IfName} && sudo ifup {spgwcSXab_IfName} || true && \\
 sudo ip link add dummy0 type dummy || true && \\
 echo -e \\\"{configurationS5S8_SGW}\\\" | sudo tee /etc/network/interfaces.d/63-{spgwcS5S8_SGW_IfName} && sudo ifup {spgwcS5S8_SGW_IfName} || true && \\
 echo -e \\\"{configurationS5S8_PGW}\\\" | sudo tee /etc/network/interfaces.d/64-{spgwcS5S8_PGW_IfName} && sudo ifup {spgwcS5S8_PGW_IfName} || true && \\
@@ -616,22 +617,24 @@ mkdir -p logs""".format(
       gitRepository          = gitRepository,
       gitDirectory           = gitDirectory,
       gitCommit              = gitCommit,
+      spgwcS11_IfName        = spgwcS11_IfName,
+      spgwcSXab_IfName       = spgwcSXab_IfName,
+      spgwcS5S8_SGW_IfName   = spgwcS5S8_SGW_IfName,
+      spgwcS5S8_PGW_IfName   = spgwcS5S8_PGW_IfName,
       configurationS11       = configurationS11,
       configurationSXab      = configurationSXab,
-      spgwcS5S8_SGW_IfName = spgwcS5S8_SGW_IfName,
       configurationS5S8_SGW  = configurationS5S8_SGW,
-      spgwcS5S8_PGW_IfName = spgwcS5S8_PGW_IfName,
       configurationS5S8_PGW  = configurationS5S8_PGW
    )
 
    if execute(commands) == True:
       set_flag('spgwccharm.prepared-spgwc-build')
-      clear_flag('actions.configure-spgwc')
+      clear_flag('actions.prepare-spgwc-build')
 
 
 # ###### configure-spgwc function ###########################################
 #@when('actions.configure-spgwc')
-#@when('spgwccharm.installed')
+#@when('spgwccharm.prepared-spgwc-build')
 def configure_spgwc():
 
    # ====== Install SPGW-C ==================================================
@@ -696,15 +699,15 @@ for K in \\\"\${{!SPGWC_CONF[@]}}\\\"; do sudo egrep -lRZ \\\"\$K\\\" \$PREFIX |
 
 
 # ###########################################################################
-prepare_cassandra_hss_build()
-configure_cassandra()
-configure_hss()
+#prepare_cassandra_hss_build()
+#configure_cassandra()
+#configure_hss()
 
-prepare_mme_build()
-configure_mme()
+#prepare_mme_build()
+#configure_mme()
 
-prepare_spgwu_build()
-configure_spgwu()
+#prepare_spgwu_build()
+#configure_spgwu()
 
 prepare_spgwc_build()
 configure_spgwc()
