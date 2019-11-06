@@ -129,9 +129,9 @@ def install_spgwccharm_proxy_charm():
 @when('spgwccharm.installed')
 def prepare_spgwc_build():
 
-   # ====== Install MME =====================================================
+   # ====== Install SPGW-C ==================================================
    # For a documentation of the installation procedure, see:
-   # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-spgwc
+   # https://github.com/OPENAIRINTERFACE/openair-cn-cups/wiki/OpenAirSoftwareSupport#install-spgw-c
 
    gitRepository         = 'https://github.com/OPENAIRINTERFACE/openair-cn-cups.git'
    gitDirectory          = 'openair-cn-cups'
@@ -209,17 +209,16 @@ def configure_spgwc():
    # 2. bash -c "<command>"
    # That is: $ => \$ ; \ => \\ ; " => \\\"
 
-   #commands = """\
-#echo \\\"###### Building SPGW-C ################################################\\\" && \\
-#export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
-#cd /home/nornetpp/src && \\
-#cd {gitDirectory} && \\
-#cd build/scripts && \\
-#echo \\\"====== Building dependencies ... ======\\\" && \\
-#./build_spgwc -I -f && \
-#echo \\\"====== Building service ... ======\\\" && \\
-#./build_spgwc -c -V -b Debug -j
    commands = """\
+echo \\\"###### Building SPGW-C ################################################\\\" && \\
+export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
+cd /home/nornetpp/src && \\
+cd {gitDirectory} && \\
+cd build/scripts && \\
+echo \\\"====== Building dependencies ... ======\\\" && \\
+./build_spgwc -I -f && \
+echo \\\"====== Building service ... ======\\\" && \\
+./build_spgwc -c -V -b Debug -j
 echo \\\"###### Creating SPGW-C configuration files ############################\\\" && \\
 INSTANCE=1 && \\
 PREFIX='/usr/local/etc/oai' && \\
