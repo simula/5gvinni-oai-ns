@@ -195,13 +195,13 @@ def configure_spgwu():
    # For a documentation of the installation procedure, see:
    # https://github.com/OPENAIRINTERFACE/openair-cn-cups/wiki/OpenAirSoftwareSupport#install-spgw-u
 
-   gitRepository            = 'https://github.com/OPENAIRINTERFACE/openair-cn-cups.git'
-   gitDirectory             = 'openair-cn-cups'
-   gitCommit                = 'develop'
+   gitRepository    = 'https://github.com/OPENAIRINTERFACE/openair-cn-cups.git'
+   gitDirectory     = 'openair-cn-cups'
+   gitCommit        = 'develop'
 
-   spgwuSXab_IfName         = 'enp4'
-   spgwuS1U_IfName          = 'enp5'
-   spgwuSGi_IfName          = 'enp6'
+   spgwuSXab_IfName = 'enp4'
+   spgwuS1U_IfName  = 'enp5'
+   spgwuSGi_IfName  = 'enp6'
 
    # NOTE:
    # Double escaping is required for \ and " in "command" string!

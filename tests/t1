@@ -449,13 +449,13 @@ def prepare_spgwu_build():
    # For a documentation of the installation procedure, see:
    # https://github.com/OPENAIRINTERFACE/openair-cn-cups/wiki/OpenAirSoftwareSupport#install-spgw-u
 
-   gitRepository            = 'https://github.com/OPENAIRINTERFACE/openair-cn-cups.git'
-   gitDirectory             = 'openair-cn-cups'
-   gitCommit                = 'develop'
+   gitRepository    = 'https://github.com/OPENAIRINTERFACE/openair-cn-cups.git'
+   gitDirectory     = 'openair-cn-cups'
+   gitCommit        = 'develop'
 
-   spgwuSXab_IfName         = 'enp4'
-   spgwuS1U_IfName          = 'enp5'
-   spgwuSGi_IfName          = 'enp6'
+   spgwuSXab_IfName = 'enp4'
+   spgwuS1U_IfName  = 'enp5'
+   spgwuSGi_IfName  = 'enp6'
 
    networkS1U_IPv4Interface = IPv4Interface('192.168.248.159/24')
    networkSGi_IPv4Interface = IPv4Interface('10.254.1.203/24')
@@ -511,13 +511,13 @@ def configure_spgwu():
    # For a documentation of the installation procedure, see:
    # https://github.com/OPENAIRINTERFACE/openair-cn-cups/wiki/OpenAirSoftwareSupport#install-spgw-u
 
-   gitRepository            = 'https://github.com/OPENAIRINTERFACE/openair-cn-cups.git'
-   gitDirectory             = 'openair-cn-cups'
-   gitCommit                = 'develop'
+   gitRepository    = 'https://github.com/OPENAIRINTERFACE/openair-cn-cups.git'
+   gitDirectory     = 'openair-cn-cups'
+   gitCommit        = 'develop'
 
-   spgwuSXab_IfName         = 'enp4'
-   spgwuS1U_IfName          = 'enp5'
-   spgwuSGi_IfName          = 'enp6'
+   spgwuSXab_IfName = 'enp4'
+   spgwuS1U_IfName  = 'enp5'
+   spgwuSGi_IfName  = 'enp6'
 
    # NOTE:
    # Double escaping is required for \ and " in "command" string!
