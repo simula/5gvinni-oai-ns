@@ -139,7 +139,8 @@ def prepare_cassandra_hss_build():
    gitCommit     = 'develop'
 
    # Prepare network configurations:
-   configurationS6a = configureInterface('ens4', IPv4Interface('0.0.0.0/0'))
+   hssS6a_IfName    = 'ens4'
+   configurationS6a = configureInterface(hssS6a_IfName, IPv4Interface('0.0.0.0/0'))
 
    # NOTE:
    # Double escaping is required for \ and " in "command" string!
@@ -149,7 +150,7 @@ def prepare_cassandra_hss_build():
 
    commands = """\
 echo \\\"###### Preparing system ###############################################\\\" && \\
-echo -e \\\"{configurationS6a}\\\" | sudo tee /etc/network/interfaces.d/61-ens4 && sudo ifup ens4 || true && \\
+echo -e \\\"{configurationS6a}\\\" | sudo tee /etc/network/interfaces.d/61-{hssS6a_IfName} && sudo ifup {hssS6a_IfName} || true && \\
 if [ \\\"`find /etc/apt/sources.list.d -name 'rmescandon-ubuntu-yq-*.list'`\\\" == \\\"\\\" ] ; then sudo add-apt-repository -y ppa:rmescandon/yq ; fi && \\
 DEBIAN_FRONTEND=noninteractive sudo apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends yq && \\
 echo \\\"###### Preparing sources ##############################################\\\" && \\
@@ -161,6 +162,7 @@ mkdir -p logs""".format(
       gitRepository    = gitRepository,
       gitDirectory     = gitDirectory,
       gitCommit        = gitCommit,
+      hssS6a_IfName    = hssS6a_IfName,
       configurationS6a = configurationS6a
    )
 
