@@ -124,6 +124,68 @@ def install_spgwucharm_proxy_charm():
    status_set('active', 'Ready!')
 
 
+# ###### prepare-spgwu-build function #######################################
+@when('actions.prepare-spgwu-build')
+@when('spgwucharm.installed')
+def prepare_spgwu_build():
+
+   # ====== Install SPGW-U ==================================================
+   # For a documentation of the installation procedure, see:
+   # https://github.com/OPENAIRINTERFACE/openair-cn-cups/wiki/OpenAirSoftwareSupport#install-spgw-u
+
+   gitRepository            = 'https://github.com/OPENAIRINTERFACE/openair-cn-cups.git'
+   gitDirectory             = 'openair-cn-cups'
+   gitCommit                = 'develop'
+
+   spgwuSXab_IfName         = 'enp4'
+   spgwuS1U_IfName          = 'enp5'
+   spgwuSGi_IfName          = 'enp6'
+
+   networkS1U_IPv4Interface = IPv4Interface('192.168.248.159/24')
+   networkSGi_IPv4Interface = IPv4Interface('10.254.1.203/24')
+   networkSGi_IPv4Gateway   = IPv4Address('10.254.1.1')
+   networkSGi_IPv6Interface = IPv6Interface('3ffe::2/64')
+   networkSGi_IPv6Gateway   = IPv6Address('3ffe::1')
+
+   # Prepare network configurations:
+   configurationSXab = configureInterface(spgwuSXab_IfName, IPv4Interface('0.0.0.0/0'))
+   configurationS1U  = configureInterface(spgwuS1U_IfName, networkS1U_IPv4Interface, IPv4Address('0.0.0.0'))
+   configurationSGi  = configureInterface(spgwuSGi_IfName, networkSGi_IPv4Interface, networkSGi_IPv4Gateway,
+                                                           networkSGi_IPv6Interface, networkSGi_IPv6Gateway)
+
+   # NOTE:
+   # Double escaping is required for \ and " in "command" string!
+   # 1. Python
+   # 2. bash -c "<command>"
+   # That is: $ => \$ ; \ => \\ ; " => \\\"
+
+   commands = """\
+echo \\\"###### Preparing system ###############################################\\\" && \\
+echo -e \\\"{configurationSXab}\\\" | sudo tee /etc/network/interfaces.d/61-{spgwuSXab_IfName} && sudo ifup {spgwuSXab_IfName} || true && \\
+echo -e \\\"{configurationS1U}\\\" | sudo tee /etc/network/interfaces.d/62-{spgwuS1U_IfName} && sudo ifup {spgwuS1U_IfName} || true && \\
+echo -e \\\"{configurationSGi}\\\" | sudo tee /etc/network/interfaces.d/63-{spgwuSGi_IfName} && sudo ifup {spgwuSGi_IfName} || true && \\
+echo \\\"###### Preparing sources ##############################################\\\" && \\
+cd /home/nornetpp/src && \\
+if [ ! -d \\\"{gitDirectory}\\\" ] ; then git clone --quiet {gitRepository} {gitDirectory} && cd {gitDirectory} ; else cd {gitDirectory} && git pull ; fi && \\
+git checkout {gitCommit} && \\
+cd build/scripts && \\
+mkdir -p logs""".format(
+      gitRepository     = gitRepository,
+      gitDirectory      = gitDirectory,
+      gitCommit         = gitCommit,
+      spgwuSXab_IfName  = spgwuSXab_IfName,
+      spgwuS1U_IfName   = spgwuS1U_IfName,
+      spgwuSGi_IfName   = spgwuSGi_IfName,
+      configurationSXab = configurationSXab,
+      configurationS1U  = configurationS1U,
+      configurationSGi  = configurationSGi
+   )
+
+   if execute(commands) == True:
+      set_flag('spgwucharm.prepared-spgwu-build')
+      clear_flag('actions.configure-spgwu')
+
+
 # ###### configure-spgwu function ###########################################
 @when('actions.configure-spgwu')
 @when('spgwucharm.installed')
@@ -136,47 +198,46 @@ def configure_spgwu():
    gitRepository            = 'https://github.com/OPENAIRINTERFACE/openair-cn-cups.git'
    gitDirectory             = 'openair-cn-cups'
    gitCommit                = 'develop'
-   networkRealm             = 'simula.nornet'
-   networkS1U_IPv4Interface = IPv4Interface('192.168.248.159/24')
-   networkSGi_IPv4Interface = IPv4Interface('10.254.1.203/24')
-   networkSGi_IPv4Gateway   = IPv4Address('10.254.1.1')
-   networkSGi_IPv6Interface = IPv6Interface('3ffe::2/64')
-   networkSGi_IPv6Gateway   = IPv6Address('3ffe::1')
 
-   # Prepare network configurations:
-   configurationSXab = configureInterface('ens4', IPv4Interface('0.0.0.0/0'))
-   configurationS1U  = configureInterface('ens5', networkS1U_IPv4Interface, IPv4Address('0.0.0.0'))
-   configurationSGI  = configureInterface('ens6', networkSGi_IPv4Interface, networkSGi_IPv4Gateway,
-                                                  networkSGi_IPv6Interface, networkSGi_IPv6Gateway)
+   spgwuSXab_IfName         = 'enp4'
+   spgwuS1U_IfName          = 'enp5'
+   spgwuSGi_IfName          = 'enp6'
 
    # NOTE:
    # Double escaping is required for \ and " in "command" string!
    # 1. Python
    # 2. bash -c "<command>"
+   # That is: $ => \$ ; \ => \\ ; " => \\\"
 
    commands = """\
-echo \\\"###### Preparing system ###############################################\\\" && \\
-echo -e \\\"{configurationSXab}\\\" | sudo tee /etc/network/interfaces.d/61-ens4 && sudo ifup ens4 || true && \\
-echo -e \\\"{configurationS1U}\\\" | sudo tee /etc/network/interfaces.d/62-ens5 && sudo ifup ens5 || true && \\
-echo -e \\\"{configurationSGI}\\\" | sudo tee /etc/network/interfaces.d/63-ens6 && sudo ifup ens6 || true && \\
-echo \\\"###### Preparing sources ##############################################\\\" && \\
-cd /home/nornetpp/src && \\
-rm -rf {gitDirectory} && \\
-git clone {gitRepository} {gitDirectory} && \\
-cd {gitDirectory} && \\
-git checkout {gitCommit} && \\
-cd build/scripts && \\
 echo \\\"###### Building SPGW-U ################################################\\\" && \\
+export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
+cd /home/nornetpp/src && \\
+cd {gitDirectory} && \\
+cd build/scripts && \\
+echo \\\"====== Building dependencies ... ======\\\" && \\
 ./build_spgwu -I -f && \
-./build_spgwu -c -V -b Debug -j
+echo \\\"====== Building service ... ======\\\" && \\
+./build_spgwu -c -V -b Debug -j && \\
+INSTANCE=1 && \\
+PREFIX='/usr/local/etc/oai' && \\
+sudo mkdir -m 0777 -p \$PREFIX && \\
+sudo cp ../../etc/spgw_u.conf  \$PREFIX
+declare -A SPGWU_CONF
+SPGWU_CONF[@INSTANCE@]=\$INSTANCE
+SPGWU_CONF[@PREFIX@]=\$PREFIX
+SPGWU_CONF[@PID_DIRECTORY@]='/var/run'
+SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_S1U_S12_S4_UP@]='{spgwuS1U_IfName}'
+SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_SX@]='{spgwuSXab_IfName}'
+SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_SGI@]='{spgwuSGi_IfName}'
+for K in \\\"\${{!SPGWU_CONF[@]}}\\\"; do sudo egrep -lRZ \\\"\$K\\\" \$PREFIX | xargs -0 -l sudo sed -i -e \\\"s|\$K|\${{SPGWU_CONF[\$K]}}|g\\\" ; ret=\$?;[[ ret -ne 0 ]] && echo \\\"Tried to replace \$K with \${{SPGWU_CONF[\$K]}}\\\" || true ; done
 """.format(
       gitRepository     = gitRepository,
       gitDirectory      = gitDirectory,
       gitCommit         = gitCommit,
-      networkRealm      = networkRealm,
-      configurationSXab = configurationSXab,
-      configurationS1U  = configurationS1U,
-      configurationSGI  = configurationSGI
+      spgwuSXab_IfName  = spgwuSXab_IfName,
+      spgwuS1U_IfName   = spgwuS1U_IfName,
+      spgwuSGi_IfName   = spgwuSGi_IfName,
    )
 
    if execute(commands) == True:

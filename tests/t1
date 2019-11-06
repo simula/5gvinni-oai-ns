@@ -514,7 +514,10 @@ def configure_spgwu():
    gitRepository            = 'https://github.com/OPENAIRINTERFACE/openair-cn-cups.git'
    gitDirectory             = 'openair-cn-cups'
    gitCommit                = 'develop'
-   networkRealm             = 'simula.nornet'
+
+   spgwuSXab_IfName         = 'enp4'
+   spgwuS1U_IfName          = 'enp5'
+   spgwuSGi_IfName          = 'enp6'
 
    # NOTE:
    # Double escaping is required for \ and " in "command" string!
@@ -531,12 +534,26 @@ cd build/scripts && \\
 echo \\\"====== Building dependencies ... ======\\\" && \\
 ./build_spgwu -I -f && \
 echo \\\"====== Building service ... ======\\\" && \\
-./build_spgwu -c -V -b Debug -j
+./build_spgwu -c -V -b Debug -j && \\
+INSTANCE=1 && \\
+PREFIX='/usr/local/etc/oai' && \\
+sudo mkdir -m 0777 -p \$PREFIX && \\
+sudo cp ../../etc/spgw_u.conf  \$PREFIX
+declare -A SPGWU_CONF
+SPGWU_CONF[@INSTANCE@]=\$INSTANCE
+SPGWU_CONF[@PREFIX@]=\$PREFIX
+SPGWU_CONF[@PID_DIRECTORY@]='/var/run'
+SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_S1U_S12_S4_UP@]='{spgwuS1U_IfName}'
+SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_SX@]='{spgwuSXab_IfName}'
+SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_SGI@]='{spgwuSGi_IfName}'
+for K in \\\"\${{!SPGWU_CONF[@]}}\\\"; do sudo egrep -lRZ \\\"\$K\\\" \$PREFIX | xargs -0 -l sudo sed -i -e \\\"s|\$K|\${{SPGWU_CONF[\$K]}}|g\\\" ; ret=\$?;[[ ret -ne 0 ]] && echo \\\"Tried to replace \$K with \${{SPGWU_CONF[\$K]}}\\\" || true ; done
 """.format(
       gitRepository     = gitRepository,
       gitDirectory      = gitDirectory,
       gitCommit         = gitCommit,
-      networkRealm      = networkRealm
+      spgwuSXab_IfName  = spgwuSXab_IfName,
+      spgwuS1U_IfName   = spgwuS1U_IfName,
+      spgwuSGi_IfName   = spgwuSGi_IfName,
    )
 
    if execute(commands) == True:
@@ -677,7 +694,8 @@ for K in \\\"\${{!SPGWC_CONF[@]}}\\\"; do sudo egrep -lRZ \\\"\$K\\\" \$PREFIX |
 #prepare_mme_build()
 #configure_mme()
 
-#configure_spgwu()
+prepare_spgwu_build()
+configure_spgwu()
 
-prepare_spgwc_build()
-configure_spgwc()
+#prepare_spgwc_build()
+#configure_spgwc()
