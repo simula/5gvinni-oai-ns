@@ -127,6 +127,7 @@ def install_spgwccharm_proxy_charm():
 # ###### prepare-spgwc-build function #######################################
 @when('actions.prepare-spgwc-build')
 @when('spgwccharm.installed')
+@when_not('spgwccharm.prepared-spgwc-build')
 def prepare_spgwc_build():
 
    # ====== Install SPGW-C ==================================================
@@ -181,12 +182,12 @@ mkdir -p logs""".format(
 
    if execute(commands) == True:
       set_flag('spgwccharm.prepared-spgwc-build')
-      clear_flag('actions.configure-spgwc')
+      clear_flag('actions.prepare-spgwc-build')
 
 
 # ###### configure-spgwc function ###########################################
 @when('actions.configure-spgwc')
-@when('spgwccharm.installed')
+@when('spgwccharm.prepared-spgwc-build')
 def configure_spgwc():
 
    # ====== Install SPGW-C ==================================================

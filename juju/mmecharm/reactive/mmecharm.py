@@ -127,6 +127,7 @@ def install_mmecharm_proxy_charm():
 # ###### prepare-mme-build function #########################################
 @when('actions.prepare-mme-build')
 @when('mmecharm.installed')
+@when_not('mmecharm.prepared-mme-build')
 def prepare_mme_build():
 
    # ====== Install MME =====================================================
@@ -180,7 +181,7 @@ mkdir -p logs""".format(
 
    if execute(commands) == True:
       set_flag('mmecharm.prepared-mme-build')
-      clear_flag('actions.configure-mme')
+      clear_flag('actions.prepare-mme-build')
 
 
 # ###### configure-mme function #############################################

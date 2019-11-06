@@ -127,6 +127,7 @@ def install_spgwucharm_proxy_charm():
 # ###### prepare-spgwu-build function #######################################
 @when('actions.prepare-spgwu-build')
 @when('spgwucharm.installed')
+@when_not('spgwucharm.prepared-spgwu-build')
 def prepare_spgwu_build():
 
    # ====== Install SPGW-U ==================================================
@@ -183,12 +184,12 @@ mkdir -p logs""".format(
 
    if execute(commands) == True:
       set_flag('spgwucharm.prepared-spgwu-build')
-      clear_flag('actions.configure-spgwu')
+      clear_flag('actions.prepare-spgwu-build')
 
 
 # ###### configure-spgwu function ###########################################
 @when('actions.configure-spgwu')
-@when('spgwucharm.installed')
+@when('spgwccharm.prepared-spgwu-build')
 def configure_spgwu():
 
    # ====== Install SPGW-U ==================================================
