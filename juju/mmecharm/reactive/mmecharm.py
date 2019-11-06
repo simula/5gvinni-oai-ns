@@ -197,9 +197,9 @@ def configure_mme():
    gitDirectory           = 'openair-cn'
    gitCommit              = 'develop'
    hssS6a_IPv4Address     = '172.16.6.129'
-   mmeS1C_IPv4IfName      = 'enp6'
+   mmeS1C_IPv4IfName      = 'ens6'
    mmeS1C_IPv4Interface   = IPv4Interface('192.168.247.102/24')
-   mmeS11_IPv4IfName      = 'enp5'
+   mmeS11_IPv4IfName      = 'ens5'
    mmeS11_IPv4Interface   = IPv4Interface('172.16.1.102/24')
    spwgcS11_IPv4Interface = IPv4Interface('172.16.1.104/24')
    networkRealm           = 'simula.nornet'

@@ -79,9 +79,18 @@ def configureInterface(name,
 
 
 
+# ###### Installation #######################################################
+# @when('sshproxy.configured')
+# @when_not('hsscharm.installed')
+def install_hsscharm_proxy_charm():
+   set_flag('hsscharm.installed')
+   status_set('active', 'Ready!')
+
+
 # ###### prepare-cassandra-hss-build function ###############################
 # @when('actions.prepare-cassandra-hss-build')
 # @when('hsscharm.installed')
+# @when_not('hsscharm.prepared-cassandra-hss-build')
 def prepare_cassandra_hss_build():
 
    # ====== Install Cassandra and the HSS ===================================
@@ -256,6 +265,7 @@ oai_hss -j \$PREFIX/hss_rel14.json --onlyloadkey >logs/onlyloadkey.log 2>&1""".f
 # ###### prepare-mme-build function #########################################
 # @when('actions.prepare-mme-build')
 # @when('mmecharm.installed')
+# @when_not('mmecharm.prepared-mme-build')
 def prepare_mme_build():
 
    # ====== Install MME =====================================================
@@ -309,7 +319,7 @@ mkdir -p logs""".format(
 
    if execute(commands) == True:
       set_flag('mmecharm.prepared-mme-build')
-      clear_flag('actions.configure-mme')
+      clear_flag('actions.prepare-mme-build')
 
 
 # ###### configure-mme function #############################################
@@ -325,9 +335,9 @@ def configure_mme():
    gitDirectory           = 'openair-cn'
    gitCommit              = 'develop'
    hssS6a_IPv4Address     = '172.16.6.129'
-   mmeS1C_IPv4IfName      = 'enp6'
+   mmeS1C_IPv4IfName      = 'ens6'
    mmeS1C_IPv4Interface   = IPv4Interface('192.168.247.102/24')
-   mmeS11_IPv4IfName      = 'enp5'
+   mmeS11_IPv4IfName      = 'ens5'
    mmeS11_IPv4Interface   = IPv4Interface('172.16.1.102/24')
    spwgcS11_IPv4Interface = IPv4Interface('172.16.1.104/24')
    networkRealm           = 'simula.nornet'
@@ -449,22 +459,25 @@ sudo ./check_mme_s6a_certificate \$PREFIX/freeDiameter mme.{networkRealm} >logs/
       clear_flag('actions.configure-mme')
 
 
+
+
 # ###### prepare-spgwu-build function #######################################
 # @when('actions.prepare-spgwu-build')
 # @when('spgwucharm.installed')
+# @when_not('spgwucharm.prepared-spgwu-build')
 def prepare_spgwu_build():
 
    # ====== Install SPGW-U ==================================================
    # For a documentation of the installation procedure, see:
    # https://github.com/OPENAIRINTERFACE/openair-cn-cups/wiki/OpenAirSoftwareSupport#install-spgw-u
 
-   gitRepository    = 'https://github.com/OPENAIRINTERFACE/openair-cn-cups.git'
-   gitDirectory     = 'openair-cn-cups'
-   gitCommit        = 'develop'
+   gitRepository            = 'https://github.com/OPENAIRINTERFACE/openair-cn-cups.git'
+   gitDirectory             = 'openair-cn-cups'
+   gitCommit                = 'develop'
 
-   spgwuSXab_IfName = 'enp4'
-   spgwuS1U_IfName  = 'enp5'
-   spgwuSGi_IfName  = 'enp6'
+   spgwuSXab_IfName         = 'ens4'
+   spgwuS1U_IfName          = 'ens5'
+   spgwuSGi_IfName          = 'ens6'
 
    networkS1U_IPv4Interface = IPv4Interface('192.168.248.159/24')
    networkSGi_IPv4Interface = IPv4Interface('10.254.1.203/24')
@@ -508,12 +521,12 @@ mkdir -p logs""".format(
 
    if execute(commands) == True:
       set_flag('spgwucharm.prepared-spgwu-build')
-      clear_flag('actions.configure-spgwu')
+      clear_flag('actions.prepare-spgwu-build')
 
 
 # ###### configure-spgwu function ###########################################
-#@when('actions.configure-spgwu')
-#@when('spgwucharm.installed')
+# @when('actions.configure-spgwu')
+# @when('spgwccharm.prepared-spgwu-build')
 def configure_spgwu():
 
    # ====== Install SPGW-U ==================================================
@@ -524,9 +537,9 @@ def configure_spgwu():
    gitDirectory     = 'openair-cn-cups'
    gitCommit        = 'develop'
 
-   spgwuSXab_IfName = 'enp4'
-   spgwuS1U_IfName  = 'enp5'
-   spgwuSGi_IfName  = 'enp6'
+   spgwuSXab_IfName = 'ens4'
+   spgwuS1U_IfName  = 'ens5'
+   spgwuSGi_IfName  = 'ens6'
 
    # NOTE:
    # Double escaping is required for \ and " in "command" string!
@@ -569,10 +582,12 @@ for K in \\\"\${{!SPGWU_CONF[@]}}\\\"; do sudo egrep -lRZ \\\"\$K\\\" \$PREFIX |
       clear_flag('actions.configure-spgwu')
 
 
+
+
 # ###### prepare-spgwc-build function #######################################
-#@when('actions.prepare-spgwc-build')
-#@when('spgwccharm.installed')
-#@when_not('spgwccharm.prepared-spgwc-build')
+# @when('actions.prepare-spgwc-build')
+# @when('spgwccharm.installed')
+# @when_not('spgwccharm.prepared-spgwc-build')
 def prepare_spgwc_build():
 
    # ====== Install SPGW-C ==================================================
@@ -584,8 +599,8 @@ def prepare_spgwc_build():
    gitCommit             = 'develop'
 
    # Prepare network configurations:
-   spgwcS11_IfName       = 'enp5'
-   spgwcSXab_IfName      = 'enp4'
+   spgwcS11_IfName       = 'ens5'
+   spgwcSXab_IfName      = 'ens4'
    configurationS11      = configureInterface(spgwcS11_IfName,  IPv4Interface('0.0.0.0/0'))
    configurationSXab     = configureInterface(spgwcSXab_IfName, IPv4Interface('0.0.0.0/0'))
 
@@ -633,8 +648,8 @@ mkdir -p logs""".format(
 
 
 # ###### configure-spgwc function ###########################################
-#@when('actions.configure-spgwc')
-#@when('spgwccharm.prepared-spgwc-build')
+# @when('actions.configure-spgwc')
+# @when('spgwccharm.prepared-spgwc-build')
 def configure_spgwc():
 
    # ====== Install SPGW-C ==================================================
@@ -646,8 +661,8 @@ def configure_spgwc():
    networkDNS1_IPv4     = IPv4Address('10.1.1.1')
    networkDNS2_IPv4     = IPv4Address('10.1.2.1')
 
-   spgwcSXab_IfName     = 'enp4'
-   spgwcS11_IfName      = 'enp5'
+   spgwcSXab_IfName     = 'ens4'
+   spgwcS11_IfName      = 'ens5'
    spgwcS5S8_SGW_IfName = 'dummy0:s5c'
    spgwcS5S8_PGW_IfName = 'dummy0:p5c'
 
@@ -699,15 +714,15 @@ for K in \\\"\${{!SPGWC_CONF[@]}}\\\"; do sudo egrep -lRZ \\\"\$K\\\" \$PREFIX |
 
 
 # ###########################################################################
-#prepare_cassandra_hss_build()
-#configure_cassandra()
-#configure_hss()
+prepare_cassandra_hss_build()
+configure_cassandra()
+configure_hss()
 
-#prepare_mme_build()
-#configure_mme()
+prepare_mme_build()
+configure_mme()
 
-#prepare_spgwu_build()
-#configure_spgwu()
+prepare_spgwu_build()
+configure_spgwu()
 
 prepare_spgwc_build()
 configure_spgwc()

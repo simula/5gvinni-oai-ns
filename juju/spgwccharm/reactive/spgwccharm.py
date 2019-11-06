@@ -139,8 +139,8 @@ def prepare_spgwc_build():
    gitCommit             = 'develop'
 
    # Prepare network configurations:
-   spgwcS11_IfName       = 'enp5'
-   spgwcSXab_IfName      = 'enp4'
+   spgwcS11_IfName       = 'ens5'
+   spgwcSXab_IfName      = 'ens4'
    configurationS11      = configureInterface(spgwcS11_IfName,  IPv4Interface('0.0.0.0/0'))
    configurationSXab     = configureInterface(spgwcSXab_IfName, IPv4Interface('0.0.0.0/0'))
 
@@ -201,8 +201,8 @@ def configure_spgwc():
    networkDNS1_IPv4     = IPv4Address('10.1.1.1')
    networkDNS2_IPv4     = IPv4Address('10.1.2.1')
 
-   spgwcSXab_IfName     = 'enp4'
-   spgwcS11_IfName      = 'enp5'
+   spgwcSXab_IfName     = 'ens4'
+   spgwcS11_IfName      = 'ens5'
    spgwcS5S8_SGW_IfName = 'dummy0:s5c'
    spgwcS5S8_PGW_IfName = 'dummy0:p5c'
 

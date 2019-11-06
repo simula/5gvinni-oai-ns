@@ -138,9 +138,9 @@ def prepare_spgwu_build():
    gitDirectory             = 'openair-cn-cups'
    gitCommit                = 'develop'
 
-   spgwuSXab_IfName         = 'enp4'
-   spgwuS1U_IfName          = 'enp5'
-   spgwuSGi_IfName          = 'enp6'
+   spgwuSXab_IfName         = 'ens4'
+   spgwuS1U_IfName          = 'ens5'
+   spgwuSGi_IfName          = 'ens6'
 
    networkS1U_IPv4Interface = IPv4Interface('192.168.248.159/24')
    networkSGi_IPv4Interface = IPv4Interface('10.254.1.203/24')
@@ -200,9 +200,9 @@ def configure_spgwu():
    gitDirectory     = 'openair-cn-cups'
    gitCommit        = 'develop'
 
-   spgwuSXab_IfName = 'enp4'
-   spgwuS1U_IfName  = 'enp5'
-   spgwuSGi_IfName  = 'enp6'
+   spgwuSXab_IfName = 'ens4'
+   spgwuS1U_IfName  = 'ens5'
+   spgwuSGi_IfName  = 'ens6'
 
    # NOTE:
    # Double escaping is required for \ and " in "command" string!
