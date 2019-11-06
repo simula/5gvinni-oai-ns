@@ -168,7 +168,8 @@ if [ ! -d \\\"{gitDirectory}\\\" ] ; then git clone --quiet {gitRepository} {git
 git checkout {gitCommit} && \\
 cd scripts && \\
 mkdir -p logs && \\
-echo \\\"###### Done! ##########################################################""".format(
+echo \\\"###### Done! ##########################################################\\\"""".format(
+
       gitRepository    = gitRepository,
       gitDirectory     = gitDirectory,
       gitCommit        = gitCommit,
@@ -290,7 +291,8 @@ MME_CONF[@TAC-LB_MME_1@]={tac_mme_1_hi} && \\
 MME_CONF[@TAC-HB_MME_1@]={tac_mme_1_lo} && \\
 for K in \\\"\${{!MME_CONF[@]}}\\\"; do sudo egrep -lRZ \\\"\$K\\\" \$PREFIX | xargs -0 -l sudo sed -i -e \\\"s|\$K|\${{MME_CONF[\$K]}}|g\\\" ; ret=\$?;[[ ret -ne 0 ]] && echo \\\"Tried to replace \$K with \${{MME_CONF[\$K]}}\\\" || true ; done && \\
 sudo ./check_mme_s6a_certificate \$PREFIX/freeDiameter mme.{networkRealm} >logs/check_mme_s6a_certificate.log 2>&1 && \\
-echo \\\"###### Done! ##########################################################""".format(
+echo \\\"###### Done! ##########################################################\\\"""".format(
+
       gitRepository          = gitRepository,
       gitDirectory           = gitDirectory,
       gitCommit              = gitCommit,

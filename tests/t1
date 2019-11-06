@@ -122,7 +122,7 @@ if [ ! -d \\\"{gitDirectory}\\\" ] ; then git clone --quiet {gitRepository} {git
 git checkout {gitCommit} && \\
 cd scripts && \\
 mkdir -p logs && \\
-echo \\\"###### Done! ##########################################################""".format(
+echo \\\"###### Done! ##########################################################\\\"""".format(
       gitRepository    = gitRepository,
       gitDirectory     = gitDirectory,
       gitCommit        = gitCommit,
@@ -176,7 +176,7 @@ sudo yq w -i /etc/cassandra/cassandra.yaml \\\"endpoint_snitch\\\" \\\"Gossiping
 sudo service cassandra start && \\
 sleep 10 && \\
 sudo service cassandra status | cat && \\
-echo \\\"###### Done! ##########################################################""".format(
+echo \\\"###### Done! ##########################################################\\\"""".format(
       gitDirectory      = gitDirectory,
       cassandraServerIP = cassandraServerIP
    )
@@ -247,7 +247,7 @@ for K in \\\"\${{!HSS_CONF[@]}}\\\"; do echo \\\"K=\$K ...\\\" && sudo egrep -lR
 ../src/hss_rel14/bin/make_certs.sh hss {networkRealm} \$PREFIX && \\
 echo \\\"====== Updating key ... ======\\\" && \\
 oai_hss -j \$PREFIX/hss_rel14.json --onlyloadkey >logs/onlyloadkey.log 2>&1 && \\
-echo \\\"###### Done! ##########################################################""".format(
+echo \\\"###### Done! ##########################################################\\\"""".format(
       gitDirectory       = gitDirectory,
       cassandraServerIP  = cassandraServerIP,
       networkRealm       = networkRealm,
@@ -309,7 +309,7 @@ if [ ! -d \\\"{gitDirectory}\\\" ] ; then git clone --quiet {gitRepository} {git
 git checkout {gitCommit} && \\
 cd scripts && \\
 mkdir -p logs && \\
-echo \\\"###### Done! ##########################################################""".format(
+echo \\\"###### Done! ##########################################################\\\"""".format(
       gitRepository    = gitRepository,
       gitDirectory     = gitDirectory,
       gitCommit        = gitCommit,
@@ -431,7 +431,7 @@ MME_CONF[@TAC-LB_MME_1@]={tac_mme_1_hi} && \\
 MME_CONF[@TAC-HB_MME_1@]={tac_mme_1_lo} && \\
 for K in \\\"\${{!MME_CONF[@]}}\\\"; do sudo egrep -lRZ \\\"\$K\\\" \$PREFIX | xargs -0 -l sudo sed -i -e \\\"s|\$K|\${{MME_CONF[\$K]}}|g\\\" ; ret=\$?;[[ ret -ne 0 ]] && echo \\\"Tried to replace \$K with \${{MME_CONF[\$K]}}\\\" || true ; done && \\
 sudo ./check_mme_s6a_certificate \$PREFIX/freeDiameter mme.{networkRealm} >logs/check_mme_s6a_certificate.log 2>&1 && \\
-echo \\\"###### Done! ##########################################################""".format(
+echo \\\"###### Done! ##########################################################\\\"""".format(
       gitRepository          = gitRepository,
       gitDirectory           = gitDirectory,
       gitCommit              = gitCommit,
@@ -513,7 +513,7 @@ if [ ! -d \\\"{gitDirectory}\\\" ] ; then git clone --quiet {gitRepository} {git
 git checkout {gitCommit} && \\
 cd build/scripts && \\
 mkdir -p logs && \\
-echo \\\"###### Done! ##########################################################""".format(
+echo \\\"###### Done! ##########################################################\\\"""".format(
       gitRepository     = gitRepository,
       gitDirectory      = gitDirectory,
       gitCommit         = gitCommit,
@@ -575,7 +575,7 @@ SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_S1U_S12_S4_UP@]='{spgwuS1U_IfName}'
 SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_SX@]='{spgwuSXab_IfName}'
 SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_SGI@]='{spgwuSGi_IfName}'
 for K in \\\"\${{!SPGWU_CONF[@]}}\\\"; do sudo egrep -lRZ \\\"\$K\\\" \$PREFIX | xargs -0 -l sudo sed -i -e \\\"s|\$K|\${{SPGWU_CONF[\$K]}}|g\\\" ; ret=\$?;[[ ret -ne 0 ]] && echo \\\"Tried to replace \$K with \${{SPGWU_CONF[\$K]}}\\\" || true ; done && \\
-echo \\\"###### Done! ##########################################################""".format(
+echo \\\"###### Done! ##########################################################\\\"""".format(
       gitRepository     = gitRepository,
       gitDirectory      = gitDirectory,
       gitCommit         = gitCommit,
@@ -635,7 +635,7 @@ if [ ! -d \\\"{gitDirectory}\\\" ] ; then git clone --quiet {gitRepository} {git
 git checkout {gitCommit} && \\
 cd build/scripts && \\
 mkdir -p logs && \\
-echo \\\"###### Done! ##########################################################""".format(
+echo \\\"###### Done! ##########################################################\\\"""".format(
       gitRepository          = gitRepository,
       gitDirectory           = gitDirectory,
       gitCommit              = gitCommit,
@@ -705,7 +705,7 @@ SPGWC_CONF[@PGW_INTERFACE_NAME_FOR_SX@]='{spgwcSXab_IfName}' && \\
 SPGWC_CONF[@DEFAULT_DNS_IPV4_ADDRESS@]='{networkDNS1_IPv4}' && \\
 SPGWC_CONF[@DEFAULT_DNS_SEC_IPV4_ADDRESS@]='{networkDNS2_IPv4}' && \\
 for K in \\\"\${{!SPGWC_CONF[@]}}\\\"; do sudo egrep -lRZ \\\"\$K\\\" \$PREFIX | xargs -0 -l sudo sed -i -e \\\"s|\$K|\${{SPGWC_CONF[\$K]}}|g\\\" ; ret=\$?;[[ ret -ne 0 ]] && echo \\\"Tried to replace \$K with \${{SPGWC_CONF[\$K]}}\\\" || true ; done && \\
-echo \\\"###### Done! ##########################################################""".format(
+echo \\\"###### Done! ##########################################################\\\"""".format(
       gitDirectory         = gitDirectory,
       networkRealm         = networkRealm,
       networkDNS1_IPv4     = networkDNS1_IPv4,

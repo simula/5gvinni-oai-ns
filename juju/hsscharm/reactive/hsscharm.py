@@ -159,7 +159,8 @@ if [ ! -d \\\"{gitDirectory}\\\" ] ; then git clone --quiet {gitRepository} {git
 git checkout {gitCommit} && \\
 cd scripts && \\
 mkdir -p logs && \\
-echo \\\"###### Done! ##########################################################""".format(
+echo \\\"###### Done! ##########################################################\\\"""".format(
+
       gitRepository    = gitRepository,
       gitDirectory     = gitDirectory,
       gitCommit        = gitCommit,
@@ -213,7 +214,8 @@ sudo yq w -i /etc/cassandra/cassandra.yaml \\\"endpoint_snitch\\\" \\\"Gossiping
 sudo service cassandra start && \\
 sleep 10 && \\
 sudo service cassandra status | cat && \\
-echo \\\"###### Done! ##########################################################""".format(
+echo \\\"###### Done! ##########################################################\\\"""".format(
+
       gitDirectory      = gitDirectory,
       cassandraServerIP = cassandraServerIP
    )
@@ -284,7 +286,8 @@ for K in \\\"\${{!HSS_CONF[@]}}\\\"; do echo \\\"K=\$K ...\\\" && sudo egrep -lR
 ../src/hss_rel14/bin/make_certs.sh hss {networkRealm} \$PREFIX && \\
 echo \\\"====== Updating key ... ======\\\" && \\
 oai_hss -j \$PREFIX/hss_rel14.json --onlyloadkey >logs/onlyloadkey.log 2>&1 && \\
-echo \\\"###### Done! ##########################################################""".format(
+echo \\\"###### Done! ##########################################################\\\"""".format(
+
       gitDirectory       = gitDirectory,
       cassandraServerIP  = cassandraServerIP,
       networkRealm       = networkRealm,

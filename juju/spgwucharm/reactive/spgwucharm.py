@@ -171,7 +171,8 @@ if [ ! -d \\\"{gitDirectory}\\\" ] ; then git clone --quiet {gitRepository} {git
 git checkout {gitCommit} && \\
 cd build/scripts && \\
 mkdir -p logs && \\
-echo \\\"###### Done! ##########################################################""".format(
+echo \\\"###### Done! ##########################################################\\\"""".format(
+
       gitRepository     = gitRepository,
       gitDirectory      = gitDirectory,
       gitCommit         = gitCommit,
@@ -233,7 +234,8 @@ SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_S1U_S12_S4_UP@]='{spgwuS1U_IfName}'
 SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_SX@]='{spgwuSXab_IfName}'
 SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_SGI@]='{spgwuSGi_IfName}'
 for K in \\\"\${{!SPGWU_CONF[@]}}\\\"; do sudo egrep -lRZ \\\"\$K\\\" \$PREFIX | xargs -0 -l sudo sed -i -e \\\"s|\$K|\${{SPGWU_CONF[\$K]}}|g\\\" ; ret=\$?;[[ ret -ne 0 ]] && echo \\\"Tried to replace \$K with \${{SPGWU_CONF[\$K]}}\\\" || true ; done && \\
-echo \\\"###### Done! ##########################################################""".format(
+echo \\\"###### Done! ##########################################################\\\"""".format(
+
       gitRepository     = gitRepository,
       gitDirectory      = gitDirectory,
       gitCommit         = gitCommit,
