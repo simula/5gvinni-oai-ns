@@ -158,9 +158,7 @@ cd /home/nornetpp/src && \\
 if [ ! -d \\\"{gitDirectory}\\\" ] ; then git clone --quiet {gitRepository} {gitDirectory} && cd {gitDirectory} ; else cd {gitDirectory} && git pull ; fi && \\
 git checkout {gitCommit} && \\
 cd scripts && \\
-mkdir -p logs && \\
 echo \\\"###### Done! ##########################################################\\\"""".format(
-
       gitRepository    = gitRepository,
       gitDirectory     = gitDirectory,
       gitCommit        = gitCommit,
@@ -197,6 +195,7 @@ export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
 cd /home/nornetpp/src && \\
 cd {gitDirectory} && \\
 cd scripts && \\
+mkdir -p logs && \\
 sudo rm -f /etc/apt/sources.list.d/cassandra.sources.list && \
 ./build_cassandra --check-installed-software --force >logs/build_cassandra.log 2>&1 && \\
 sudo update-alternatives --set java /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java && \\
@@ -215,7 +214,6 @@ sudo service cassandra start && \\
 sleep 10 && \\
 sudo service cassandra status | cat && \\
 echo \\\"###### Done! ##########################################################\\\"""".format(
-
       gitDirectory      = gitDirectory,
       cassandraServerIP = cassandraServerIP
    )
@@ -255,6 +253,7 @@ export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
 cd /home/nornetpp/src && \\
 cd {gitDirectory} && \\
 cd scripts && \\
+mkdir -p logs && \\
 echo \\\"====== Building dependencies ... ======\\\" && \\
 ./build_hss_rel14 --check-installed-software --force >logs/build_hss_rel14-1.log 2>&1 && \\
 echo \\\"====== Building service ... ======\\\" && \\
@@ -287,7 +286,6 @@ for K in \\\"\${{!HSS_CONF[@]}}\\\"; do echo \\\"K=\$K ...\\\" && sudo egrep -lR
 echo \\\"====== Updating key ... ======\\\" && \\
 oai_hss -j \$PREFIX/hss_rel14.json --onlyloadkey >logs/onlyloadkey.log 2>&1 && \\
 echo \\\"###### Done! ##########################################################\\\"""".format(
-
       gitDirectory       = gitDirectory,
       cassandraServerIP  = cassandraServerIP,
       networkRealm       = networkRealm,

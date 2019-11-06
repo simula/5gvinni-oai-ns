@@ -158,6 +158,7 @@ export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
 cd /home/nornetpp/src && \\
 cd {gitDirectory} && \\
 cd scripts && \\
+mkdir -p logs && \\
 sudo rm -f /etc/apt/sources.list.d/cassandra.sources.list && \
 ./build_cassandra --check-installed-software --force >logs/build_cassandra.log 2>&1 && \\
 sudo update-alternatives --set java /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java && \\
