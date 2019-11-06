@@ -167,9 +167,7 @@ cd /home/nornetpp/src && \\
 if [ ! -d \\\"{gitDirectory}\\\" ] ; then git clone --quiet {gitRepository} {gitDirectory} && cd {gitDirectory} ; else cd {gitDirectory} && git pull ; fi && \\
 git checkout {gitCommit} && \\
 cd scripts && \\
-mkdir -p logs && \\
 echo \\\"###### Done! ##########################################################\\\"""".format(
-
       gitRepository    = gitRepository,
       gitDirectory     = gitDirectory,
       gitCommit        = gitCommit,
@@ -235,6 +233,7 @@ export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
 cd /home/nornetpp/src && \\
 cd {gitDirectory} && \\
 cd scripts && \\
+mkdir -p logs && \\
 echo \\\"====== Building dependencies ... ======\\\" && \\
 ./build_mme --check-installed-software --force >logs/build_mme-1.log 2>&1 && \\
 echo \\\"====== Building service ... ======\\\" && \\
@@ -292,7 +291,6 @@ MME_CONF[@TAC-HB_MME_1@]={tac_mme_1_lo} && \\
 for K in \\\"\${{!MME_CONF[@]}}\\\"; do sudo egrep -lRZ \\\"\$K\\\" \$PREFIX | xargs -0 -l sudo sed -i -e \\\"s|\$K|\${{MME_CONF[\$K]}}|g\\\" ; ret=\$?;[[ ret -ne 0 ]] && echo \\\"Tried to replace \$K with \${{MME_CONF[\$K]}}\\\" || true ; done && \\
 sudo ./check_mme_s6a_certificate \$PREFIX/freeDiameter mme.{networkRealm} >logs/check_mme_s6a_certificate.log 2>&1 && \\
 echo \\\"###### Done! ##########################################################\\\"""".format(
-
       gitRepository          = gitRepository,
       gitDirectory           = gitDirectory,
       gitCommit              = gitCommit,
