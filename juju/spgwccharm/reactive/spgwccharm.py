@@ -256,19 +256,22 @@ echo \\\"###### Done! ##########################################################
       spgwcS5S8_PGW_IfName = spgwcS5S8_PGW_IfName
    )
 
-   try:
-       stdout, stderr = execute(commands)
-   except:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       action_fail('command execution failed:' + str(err))
-   else:
-      set_flag('spgwccharm.prepared-spgwc-build')
-      # action_set( { 'output': stdout } )
-      status_set('active', 'prepare-spgwc-build: configuring SPGW-C build COMPLETED')
-   finally:
-      clear_flag('actions.prepare-spgwc-build')
-      status_set('active', 'prepare-spgwc-build: configuring SPGW-C build FAILED!')
+   stdout, stderr = execute(commands)
+   clear_flag('actions.prepare-spgwc-build')
+
+   #try:
+       #stdout, stderr = execute(commands)
+   #except:
+       #exc_type, exc_value, exc_traceback = sys.exc_info()
+       #err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       #action_fail('command execution failed:' + str(err))
+       #status_set('active', 'prepare-spgwc-build: configuring SPGW-C build FAILED!')
+   #else:
+      #set_flag('spgwccharm.prepared-spgwc-build')
+      #action_set( { 'output': stdout } )
+      #status_set('active', 'prepare-spgwc-build: configuring SPGW-C build COMPLETED')
+   #finally:
+      #clear_flag('actions.prepare-spgwc-build')
 
 
 # ###### restart-spgwc function #############################################
