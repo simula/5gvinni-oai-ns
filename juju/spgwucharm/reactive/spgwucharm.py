@@ -113,7 +113,7 @@ def configureInterface(name,
 @when_not('spgwucharm.installed')
 def install_spgwucharm_proxy_charm():
    set_flag('spgwucharm.installed')
-   status_set('active', 'Ready!')
+   status_set('active', 'install_spgwucharm_proxy_charm: SSH proxy charm is READY')
 
 
 # ###### prepare-spgwu-build function #######################################
