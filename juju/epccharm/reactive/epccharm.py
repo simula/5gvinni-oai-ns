@@ -41,6 +41,7 @@ from charms.reactive import (
     when_not
 )
 import charms.sshproxy
+import sys
 import traceback
 from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
 
