@@ -185,7 +185,7 @@ echo \\\"###### Done! ##########################################################
        action_fail('command execution failed:' + str(err))
    else:
       set_flag('spgwccharm.prepared-spgwc-build')
-      action_set( { 'output': stdout } )
+      # action_set( { 'output': stdout } )
       status_set('active', 'prepare-spgwc-build: preparing SPGW-C build COMPLETED')
    finally:
       clear_flag('actions.prepare-spgwc-build')
@@ -264,7 +264,7 @@ echo \\\"###### Done! ##########################################################
        action_fail('command execution failed:' + str(err))
    else:
       set_flag('spgwccharm.prepared-spgwc-build')
-      action_set( { 'output': stdout } )
+      # action_set( { 'output': stdout } )
       status_set('active', 'prepare-spgwc-build: configuring SPGW-C build COMPLETED')
    finally:
       clear_flag('actions.prepare-spgwc-build')

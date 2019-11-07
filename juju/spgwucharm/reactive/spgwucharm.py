@@ -41,6 +41,7 @@ from charms.reactive import (
     when_not
 )
 import charms.sshproxy
+import sys
 import traceback
 from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
 
@@ -184,7 +185,7 @@ echo \\\"###### Done! ##########################################################
        action_fail('ommand execution failed:' + str(err))
    else:
       set_flag('spgwucharm.prepared-spgwu-build')
-      action_set( { 'output': stdout } )
+      # action_set( { 'output': stdout } )
       status_set('active', 'prepare-spgwu-build: preparing SPGW-U build COMPLETED')
    finally:
       clear_flag('actions.prepare-spgwu-build')
@@ -255,7 +256,7 @@ echo \\\"###### Done! ##########################################################
        action_fail('ommand execution failed:' + str(err))
    else:
       set_flag('spgwucharm.prepared-spgwu-build')
-      action_set( { 'output': stdout } )
+      # action_set( { 'output': stdout } )
       status_set('active', 'prepare-spgwu-build: configuring SPGW-U build COMPLETED')
    finally:
       clear_flag('actions.prepare-spgwu-build')
