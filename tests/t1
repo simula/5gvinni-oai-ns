@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import functools
 import os
 import re
 import sys
@@ -17,6 +18,25 @@ def clear_flag(flag):
 def set_flag(flag):
    # Nothing to do!
    pass
+
+
+# ###### Dummy decorator ####################################################
+def when(*flags):
+    def decorator_when(func):
+        @functools.wraps(func)
+        def wrapper_when(*args, **kwargs):
+            return func(*args, **kwargs)
+        return wrapper_when
+    return decorator_when
+
+# ###### Dummy decorator ####################################################
+def when_not(*flags):
+    def decorator_when(func):
+        @functools.wraps(func)
+        def wrapper_when(*args, **kwargs):
+            return func(*args, **kwargs)
+        return wrapper_when
+    return decorator_when
 
 
 # ###### Execute command ####################################################
@@ -80,17 +100,17 @@ def configureInterface(name,
 
 
 # ###### Installation #######################################################
-# @when('sshproxy.configured')
-# @when_not('hsscharm.installed')
+@when('sshproxy.configured')
+@when_not('hsscharm.installed')
 def install_hsscharm_proxy_charm():
    set_flag('hsscharm.installed')
    status_set('active', 'Ready!')
 
 
 # ###### prepare-cassandra-hss-build function ###############################
-# @when('actions.prepare-cassandra-hss-build')
-# @when('hsscharm.installed')
-# @when_not('hsscharm.prepared-cassandra-hss-build')
+@when('actions.prepare-cassandra-hss-build')
+@when('hsscharm.installed')
+@when_not('hsscharm.prepared-cassandra-hss-build')
 def prepare_cassandra_hss_build():
 
    # ====== Install Cassandra and the HSS ===================================
@@ -135,8 +155,8 @@ echo \\\"###### Done! ##########################################################
 
 
 # ###### configure-cassandra function #######################################
-# @when('actions.configure-cassandra')
-# @when('hsscharm.prepared-cassandra-hss-build')
+@when('actions.configure-cassandra')
+@when('hsscharm.prepared-cassandra-hss-build')
 def configure_cassandra():
 
    # ====== Install Cassandra and the HSS ===================================
@@ -187,8 +207,8 @@ echo \\\"###### Done! ##########################################################
 
 
 # ###### configure-hss function #############################################
-# @when('actions.configure-hss')
-# @when('hsscharm.configured-cassandra')
+@when('actions.configure-hss')
+@when('hsscharm.configured-cassandra')
 def configure_hss():
 
    # ====== Install Cassandra and the HSS ===================================
@@ -267,9 +287,9 @@ echo \\\"###### Done! ##########################################################
 
 
 # ###### prepare-mme-build function #########################################
-# @when('actions.prepare-mme-build')
-# @when('mmecharm.installed')
-# @when_not('mmecharm.prepared-mme-build')
+@when('actions.prepare-mme-build')
+@when('mmecharm.installed')
+@when_not('mmecharm.prepared-mme-build')
 def prepare_mme_build():
 
    # ====== Install MME =====================================================
@@ -327,8 +347,8 @@ echo \\\"###### Done! ##########################################################
 
 
 # ###### configure-mme function #############################################
-# @when('actions.configure-mme')
-# @when('mmecharm.prepared-mme-build')
+@when('actions.configure-mme')
+@when('mmecharm.prepared-mme-build')
 def configure_mme():
 
    # ====== Install MME =====================================================
@@ -468,9 +488,9 @@ echo \\\"###### Done! ##########################################################
 
 
 # ###### prepare-spgwu-build function #######################################
-# @when('actions.prepare-spgwu-build')
-# @when('spgwucharm.installed')
-# @when_not('spgwucharm.prepared-spgwu-build')
+@when('actions.prepare-spgwu-build')
+@when('spgwucharm.installed')
+@when_not('spgwucharm.prepared-spgwu-build')
 def prepare_spgwu_build():
 
    # ====== Install SPGW-U ==================================================
@@ -531,8 +551,8 @@ echo \\\"###### Done! ##########################################################
 
 
 # ###### configure-spgwu function ###########################################
-# @when('actions.configure-spgwu')
-# @when('spgwucharm.prepared-spgwu-build')
+@when('actions.configure-spgwu')
+@when('spgwucharm.prepared-spgwu-build')
 def configure_spgwu():
 
    # ====== Install SPGW-U ==================================================
@@ -592,9 +612,9 @@ echo \\\"###### Done! ##########################################################
 
 
 # ###### prepare-spgwc-build function #######################################
-# @when('actions.prepare-spgwc-build')
-# @when('spgwccharm.installed')
-# @when_not('spgwccharm.prepared-spgwc-build')
+@when('actions.prepare-spgwc-build')
+@when('spgwccharm.installed')
+@when_not('spgwccharm.prepared-spgwc-build')
 def prepare_spgwc_build():
 
    # ====== Install SPGW-C ==================================================
@@ -655,8 +675,8 @@ echo \\\"###### Done! ##########################################################
 
 
 # ###### configure-spgwc function ###########################################
-# @when('actions.configure-spgwc')
-# @when('spgwccharm.prepared-spgwc-build')
+@when('actions.configure-spgwc')
+@when('spgwccharm.prepared-spgwc-build')
 def configure_spgwc():
 
    # ====== Install SPGW-C ==================================================
@@ -722,15 +742,15 @@ echo \\\"###### Done! ##########################################################
 
 
 # ###########################################################################
-prepare_cassandra_hss_build()
-configure_cassandra()
-configure_hss()
+#prepare_cassandra_hss_build()
+#configure_cassandra()
+#configure_hss()
 
-prepare_mme_build()
-configure_mme()
+#prepare_mme_build()
+#configure_mme()
 
 prepare_spgwu_build()
 configure_spgwu()
 
-prepare_spgwc_build()
-configure_spgwc()
+#prepare_spgwc_build()
+#configure_spgwc()
