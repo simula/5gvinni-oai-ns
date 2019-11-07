@@ -41,6 +41,7 @@ from charms.reactive import (
     when_not
 )
 import charms.sshproxy
+import traceback
 from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
 
 
@@ -50,16 +51,7 @@ from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
 
 # ###### Execute command ####################################################
 def execute(commands):
-   err = ''
-   try:
-      result, err = charms.sshproxy._run(commands)
-   except:
-      # action_fail('command failed:' + err)
-      action_fail('command failed')
-      return False
-   else:
-      # action_set( { 'outout': str(result).encode('utf-8') } )
-      return True
+   stdout, stderr = charms.sshproxy._run(commands)
 
 
 # ######  Get /etc/network/interfaces setup for interface ###################
@@ -130,6 +122,7 @@ def install_spgwccharm_proxy_charm():
 @when('spgwccharm.installed')
 @when_not('spgwccharm.prepared-spgwc-build')
 def prepare_spgwc_build():
+   status_set('active', 'prepare-spgwc-build: preparing SPGW-C build ...')
 
    # ====== Install SPGW-C ==================================================
    # For a documentation of the installation procedure, see:
@@ -183,15 +176,26 @@ echo \\\"###### Done! ##########################################################
       configurationS5S8_PGW  = configurationS5S8_PGW
    )
 
-   if execute(commands) == True:
+   try:
+       stdout, stderr = execute(commands)
+   except:
+       exc_type, exc_value, exc_traceback = sys.exc_info()
+       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       action_fail('command execution failed:' + str(err))
+   else:
       set_flag('spgwccharm.prepared-spgwc-build')
+      action_set( { 'output': stdout } )
+      status_set('active', 'prepare-spgwc-build: preparing SPGW-C build COMPLETED')
+   finally:
       clear_flag('actions.prepare-spgwc-build')
+      status_set('active', 'prepare-spgwc-build: preparing SPGW-C build FAILED!')
 
 
 # ###### configure-spgwc function ###########################################
 @when('actions.configure-spgwc')
 @when('spgwccharm.prepared-spgwc-build')
 def configure_spgwc():
+   status_set('active', 'prepare-spgwu-build: configuring SPGW-C ...')
 
    # ====== Install SPGW-C ==================================================
    # For a documentation of the installation procedure, see:
@@ -251,8 +255,19 @@ echo \\\"###### Done! ##########################################################
       spgwcS5S8_PGW_IfName = spgwcS5S8_PGW_IfName
    )
 
-   if execute(commands) == True:
-      clear_flag('actions.configure-spgwc')
+   try:
+       stdout, stderr = execute(commands)
+   except:
+       exc_type, exc_value, exc_traceback = sys.exc_info()
+       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       action_fail('command execution failed:' + str(err))
+   else:
+      set_flag('spgwccharm.prepared-spgwc-build')
+      action_set( { 'output': stdout } )
+      status_set('active', 'prepare-spgwc-build: configuring SPGW-C build COMPLETED')
+   finally:
+      clear_flag('actions.prepare-spgwc-build')
+      status_set('active', 'prepare-spgwc-build: configuring SPGW-C build FAILED!')
 
 
 # ###### restart-spgwc function #############################################
