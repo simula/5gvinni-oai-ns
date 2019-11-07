@@ -161,6 +161,7 @@ FOREACH(charmName IN LISTS CHARM_SOURCE_LIST)
    makeUniqueTarget(generate_charm "generate_${charmName}")
    SET(timestampFile "${charmOutputDirectory}.stamp")
    ADD_CUSTOM_COMMAND(OUTPUT  ${timestampFile}
+                      COMMAND rm -rf ${charmOutputDirectory}
                       COMMAND charm build --build-dir ${charmBuildDirectory}
                       # FIXME!
                       COMMAND sed -e "s#^import shlex#import shlex\\\\nimport traceback#g" -i ${charmOutputDirectory}/lib/charms/sshproxy.py
