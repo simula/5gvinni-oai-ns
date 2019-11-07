@@ -570,7 +570,7 @@ echo \\\"###### Done! ##########################################################
    except:
        exc_type, exc_value, exc_traceback = sys.exc_info()
        err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       action_fail('configuration failed:' + str(err))
+       action_fail('command execution failed:' + str(err))
    else:
       set_flag('spgwucharm.prepared-spgwu-build')
       action_set( { 'output': stdout } )
@@ -641,7 +641,7 @@ echo \\\"###### Done! ##########################################################
    except:
        exc_type, exc_value, exc_traceback = sys.exc_info()
        err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       action_fail('configuration failed:' + str(err))
+       action_fail('command execution failed:' + str(err))
    else:
       set_flag('spgwucharm.prepared-spgwu-build')
       action_set( { 'output': stdout } )
@@ -712,26 +712,16 @@ echo \\\"###### Done! ##########################################################
       configurationS5S8_PGW  = configurationS5S8_PGW
    )
 
-   try:
-       stdout, stderr = execute(commands)
-   except:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       action_fail('configuration failed:' + str(err))
-   else:
+   if execute(commands) == True:
       set_flag('spgwccharm.prepared-spgwc-build')
-      action_set( { 'output': stdout } )
-      status_set('active', 'prepare-spgwc-build: preparing SPGW-C build COMPLETED')
-   finally:
       clear_flag('actions.prepare-spgwc-build')
-      status_set('active', 'prepare-spgwc-build: preparing SPGW-C build FAILED!')
 
 
 # ###### configure-spgwc function ###########################################
 @when('actions.configure-spgwc')
 @when('spgwccharm.prepared-spgwc-build')
 def configure_spgwc():
-   status_set('active', 'prepare-spgwu-build: configuring SPGW-C ...')
+   status_set('active', 'prepare-spgwc-build: configuring SPGW-C ...')
 
    # ====== Install SPGW-C ==================================================
    # For a documentation of the installation procedure, see:
@@ -791,19 +781,10 @@ echo \\\"###### Done! ##########################################################
       spgwcS5S8_PGW_IfName = spgwcS5S8_PGW_IfName
    )
 
-   try:
-       stdout, stderr = execute(commands)
-   except:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       action_fail('configuration failed:' + str(err))
-   else:
-      set_flag('spgwccharm.prepared-spgwc-build')
-      action_set( { 'output': stdout } )
-      status_set('active', 'prepare-spgwc-build: configuring SPGW-C build COMPLETED')
-   finally:
-      clear_flag('actions.prepare-spgwc-build')
-      status_set('active', 'prepare-spgwc-build: configuring SPGW-C build FAILED!')
+   if execute(commands) == True:
+      clear_flag('actions.configure-spgwc')
+
+
 
 
 # ###########################################################################
@@ -814,8 +795,8 @@ echo \\\"###### Done! ##########################################################
 #prepare_mme_build()
 #configure_mme()
 
-prepare_spgwu_build()
-configure_spgwu()
+#prepare_spgwu_build()
+#configure_spgwu()
 
 prepare_spgwc_build()
 configure_spgwc()
