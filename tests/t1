@@ -20,6 +20,12 @@ def set_flag(flag):
    pass
 
 
+# ###### Dummy function #####################################################
+def status_set(tag, value):
+   # Nothing to do!
+   pass
+
+
 # ###### Dummy decorator ####################################################
 def when(*flags):
     def decorator_when(func):
@@ -492,6 +498,7 @@ echo \\\"###### Done! ##########################################################
 @when('spgwucharm.installed')
 @when_not('spgwucharm.prepared-spgwu-build')
 def prepare_spgwu_build():
+   status_set('active', 'prepare-spgwu-build: preparing SPGW-U sources ...')
 
    # ====== Install SPGW-U ==================================================
    # For a documentation of the installation procedure, see:
@@ -547,13 +554,18 @@ echo \\\"###### Done! ##########################################################
 
    if execute(commands) == True:
       set_flag('spgwucharm.prepared-spgwu-build')
-      clear_flag('actions.prepare-spgwu-build')
+      status_set('active', 'prepare-spgwu-build: done!')
+   else:
+      status_set('active', 'prepare-spgwu-build: failed!')
+
+   clear_flag('actions.prepare-spgwu-build')
 
 
 # ###### configure-spgwu function ###########################################
 @when('actions.configure-spgwu')
 @when('spgwucharm.prepared-spgwu-build')
 def configure_spgwu():
+   status_set('active', 'prepare-spgwu-build: configuring SPGW-U ...')
 
    # ====== Install SPGW-U ==================================================
    # For a documentation of the installation procedure, see:
@@ -606,7 +618,11 @@ echo \\\"###### Done! ##########################################################
    )
 
    if execute(commands) == True:
-      clear_flag('actions.configure-spgwu')
+      status_set('active', 'prepare-spgwu-build: done!')
+   else:
+      status_set('active', 'prepare-spgwu-build: failed!')
+
+   clear_flag('actions.configure-spgwu')
 
 
 

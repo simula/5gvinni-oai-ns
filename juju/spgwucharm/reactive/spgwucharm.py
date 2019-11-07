@@ -197,6 +197,7 @@ echo \\\"###### Done! ##########################################################
 @when('actions.configure-spgwu')
 @when('spgwucharm.prepared-spgwu-build')
 def configure_spgwu():
+   status_set('active', 'prepare-spgwu-build: configuring SPGW-U ...')
 
    # ====== Install SPGW-U ==================================================
    # For a documentation of the installation procedure, see:
@@ -249,7 +250,11 @@ echo \\\"###### Done! ##########################################################
    )
 
    if execute(commands) == True:
-      clear_flag('actions.configure-spgwu')
+      status_set('active', 'prepare-spgwu-build: done!')
+   else:
+      status_set('active', 'prepare-spgwu-build: failed!')
+
+   clear_flag('actions.configure-spgwu')
 
 
 # ###### restart-spgwu function #############################################
