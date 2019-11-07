@@ -186,11 +186,11 @@ echo \\\"###### Done! ##########################################################
 
    if execute(commands) == True:
       set_flag('spgwucharm.prepared-spgwu-build')
-      clear_flag('actions.prepare-spgwu-build')
-
       status_set('active', 'prepare-spgwu-build: done!')
    else:
       status_set('active', 'prepare-spgwu-build: failed!')
+
+   clear_flag('actions.prepare-spgwu-build')
 
 
 # ###### configure-spgwu function ###########################################
