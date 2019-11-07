@@ -164,6 +164,15 @@ d-i preseed/late_command                            string \
  in-target /usr/bin/apt-add-repository -s -y ppa:dreibh/ppa ; \
  in-target /usr/bin/apt-get update ; \
  in-target /usr/bin/apt-get install -y nornet-management nornet-development nornet-autoupdate ; \
+ in-target /bin/bash -c -- '/bin/echo "# Network configuration written by preseed late_command" >/etc/network/interfaces' ; \
+ in-target /bin/bash -c -- '/bin/echo "source /etc/network/interfaces.d/*" >>/etc/network/interfaces' ; \
+ in-target /bin/bash -c -- '/bin/echo "" >>/etc/network/interfaces' ; \
+ in-target /bin/bash -c -- '/bin/echo "# The loopback network interface" >>/etc/network/interfaces' ; \
+ in-target /bin/bash -c -- '/bin/echo "auto lo" >>/etc/network/interfaces' ; \
+ in-target /bin/bash -c -- '/bin/echo "iface lo inet loopback" >>/etc/network/interfaces' ; \
+ in-target /bin/bash -c -- '/bin/echo "" >>/etc/network/interfaces' ; \
+ in-target /bin/bash -c -- '/bin/echo "iface lo inet6 loopback" >>/etc/network/interfaces' ; \
+ in-target /bin/bash -c -- '/bin/echo "" >>/etc/network/interfaces' ; \
  in-target /bin/sed -i "s/XKBMODEL=\"[a-z]*\"/XKBMODEL=\"<SET_XKBMODEL_HERE>\"/g" /etc/default/keyboard ; \
  in-target /bin/sed -i "s/XKBLAYOUT=\"[a-z]*\"/XKBLAYOUT=\"<SET_XKBLAYOUT_HERE>\"/g" /etc/default/keyboard ; \
  in-target /bin/sed -i "s/XKBVARIANT=\"[a-z]*\"/XKBVARIANT=\"<SET_XKBVARIANT_HERE>\"/g" /etc/default/keyboard ; \
