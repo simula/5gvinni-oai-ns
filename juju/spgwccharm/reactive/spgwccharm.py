@@ -54,7 +54,8 @@ def execute(commands):
    try:
       result, err = charms.sshproxy._run(commands)
    except:
-      action_fail('command failed:' + err)
+      # action_fail('command failed:' + err)
+      action_fail('command failed')
       return False
    else:
       # action_set( { 'outout': str(result).encode('utf-8') } )
