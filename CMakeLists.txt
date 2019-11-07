@@ -162,6 +162,8 @@ FOREACH(charmName IN LISTS CHARM_SOURCE_LIST)
    SET(timestampFile "${charmOutputDirectory}.stamp")
    ADD_CUSTOM_COMMAND(OUTPUT  ${timestampFile}
                       COMMAND charm build --build-dir ${charmBuildDirectory}
+                      # FIXME!
+                      COMMAND sed -e "s#^import shlex#import shlex\\\\nimport traceback#g" -i ${charmOutputDirectory}/lib/charms/sshproxy.py
                       COMMAND touch ${timestampFile}
                       WORKING_DIRECTORY ${charmInputDirectory}
                       DEPENDS ${charmInputFiles})
