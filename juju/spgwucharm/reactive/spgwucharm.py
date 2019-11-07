@@ -50,16 +50,7 @@ from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
 
 # ###### Execute command ####################################################
 def execute(commands):
-   err = ''
-   try:
-      result, err = charms.sshproxy._run(commands)
-   except:
-      # action_fail('command failed:' + err)
-      # action_fail('command failed')
-      return False
-   else:
-      action_set( { 'outout': str(result).encode('utf-8') } )
-      return True
+   stdout, stderr = charms.sshproxy._run(commands)
 
 
 # ######  Get /etc/network/interfaces setup for interface ###################
@@ -130,7 +121,7 @@ def install_spgwucharm_proxy_charm():
 @when('spgwucharm.installed')
 @when_not('spgwucharm.prepared-spgwu-build')
 def prepare_spgwu_build():
-   status_set('active', 'prepare-spgwu-build: preparing SPGW-U sources ...')
+   status_set('active', 'prepare-spgwu-build: preparing SPGW-U build ...')
 
    # ====== Install SPGW-U ==================================================
    # For a documentation of the installation procedure, see:
@@ -184,13 +175,19 @@ echo \\\"###### Done! ##########################################################
       configurationSGi  = configurationSGi
    )
 
-   if execute(commands) == True:
-      set_flag('spgwucharm.prepared-spgwu-build')
-      status_set('active', 'prepare-spgwu-build: done!')
+   try:
+       stdout, stderr = execute(commands)
+   except:
+       exc_type, exc_value, exc_traceback = sys.exc_info()
+       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       action_fail('configuration failed:' + str(err))
    else:
-      status_set('active', 'prepare-spgwu-build: failed!')
-
-   clear_flag('actions.prepare-spgwu-build')
+      set_flag('spgwucharm.prepared-spgwu-build')
+      action_set( { 'output': stdout } )
+      status_set('active', 'prepare-spgwu-build: preparing SPGW-U build COMPLETED')
+   finally:
+      clear_flag('actions.prepare-spgwu-build')
+      status_set('active', 'prepare-spgwu-build: preparing SPGW-U build FAILED!')
 
 
 # ###### configure-spgwu function ###########################################
@@ -249,12 +246,19 @@ echo \\\"###### Done! ##########################################################
       spgwuSGi_IfName   = spgwuSGi_IfName,
    )
 
-   if execute(commands) == True:
-      status_set('active', 'prepare-spgwu-build: done!')
+   try:
+       stdout, stderr = execute(commands)
+   except:
+       exc_type, exc_value, exc_traceback = sys.exc_info()
+       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       action_fail('configuration failed:' + str(err))
    else:
-      status_set('active', 'prepare-spgwu-build: failed!')
-
-   clear_flag('actions.configure-spgwu')
+      set_flag('spgwucharm.prepared-spgwu-build')
+      action_set( { 'output': stdout } )
+      status_set('active', 'prepare-spgwu-build: configuring SPGW-U build COMPLETED')
+   finally:
+      clear_flag('actions.prepare-spgwu-build')
+      status_set('active', 'prepare-spgwu-build: configuring SPGW-U build FAILED!')
 
 
 # ###### restart-spgwu function #############################################
