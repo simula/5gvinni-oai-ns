@@ -259,7 +259,7 @@ echo \\\"###### Done! ##########################################################
       # action_set( { 'output': stdout } )
       status_set('active', 'prepare-spgwu-build: configuring SPGW-U build COMPLETED')
    finally:
-      clear_flag('actions.prepare-spgwu-build')
+      clear_flag('actions.configure-spgwu')
       status_set('active', 'prepare-spgwu-build: configuring SPGW-U build FAILED!')
 
 
