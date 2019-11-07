@@ -52,7 +52,16 @@ from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
 
 # ###### Execute command ####################################################
 def execute(commands):
-   stdout, stderr = charms.sshproxy._run(commands)
+   err = ''
+   try:
+      result, err = charms.sshproxy._run(commands)
+   except:
+      # action_fail('command failed:' + err)
+      action_fail('command failed')
+      return False
+   else:
+      # action_set( { 'outout': str(result).encode('utf-8') } )
+      return True
 
 
 # ######  Get /etc/network/interfaces setup for interface ###################
@@ -177,19 +186,9 @@ echo \\\"###### Done! ##########################################################
       configurationS5S8_PGW  = configurationS5S8_PGW
    )
 
-   try:
-       stdout, stderr = execute(commands)
-   except:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       action_fail('command execution failed:' + str(err))
-   else:
+   if execute(commands) == True:
       set_flag('spgwccharm.prepared-spgwc-build')
-      action_set( { 'output': stdout } )
-      status_set('active', 'prepare-spgwc-build: preparing SPGW-C build COMPLETED')
-   finally:
       clear_flag('actions.prepare-spgwc-build')
-      status_set('active', 'prepare-spgwc-build: preparing SPGW-C build FAILED!')
 
 
 # ###### configure-spgwc function ###########################################
@@ -256,18 +255,7 @@ echo \\\"###### Done! ##########################################################
       spgwcS5S8_PGW_IfName = spgwcS5S8_PGW_IfName
    )
 
-   try:
-       stdout, stderr = execute(commands)
-   except:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       action_fail('command execution failed:' + str(err))
-       status_set('active', 'prepare-spgwc-build: configuring SPGW-C build FAILED!')
-   else:
-      set_flag('spgwccharm.prepared-spgwc-build')
-      action_set( { 'output': stdout } )
-      status_set('active', 'prepare-spgwc-build: configuring SPGW-C build COMPLETED')
-   finally:
+   if execute(commands) == True:
       clear_flag('actions.configure-spgwc')
 
 

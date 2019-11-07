@@ -182,7 +182,7 @@ echo \\\"###### Done! ##########################################################
    except:
        exc_type, exc_value, exc_traceback = sys.exc_info()
        err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       action_fail('ommand execution failed:' + str(err))
+       action_fail('command execution failed:' + str(err))
    else:
       set_flag('spgwucharm.prepared-spgwu-build')
       # action_set( { 'output': stdout } )
@@ -253,7 +253,7 @@ echo \\\"###### Done! ##########################################################
    except:
        exc_type, exc_value, exc_traceback = sys.exc_info()
        err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       action_fail('ommand execution failed:' + str(err))
+       action_fail('command execution failed:' + str(err))
    else:
       set_flag('spgwucharm.prepared-spgwu-build')
       # action_set( { 'output': stdout } )
