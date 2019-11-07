@@ -55,10 +55,10 @@ def execute(commands):
       result, err = charms.sshproxy._run(commands)
    except:
       # action_fail('command failed:' + err)
-      action_fail('command failed')
+      # action_fail('command failed')
       return False
    else:
-      # action_set( { 'outout': str(result).encode('utf-8') } )
+      action_set( { 'outout': str(result).encode('utf-8') } )
       return True
 
 
@@ -130,6 +130,7 @@ def install_spgwucharm_proxy_charm():
 @when('spgwucharm.installed')
 @when_not('spgwucharm.prepared-spgwu-build')
 def prepare_spgwu_build():
+   status_set('active', 'prepare-spgwu-build: preparing SPGW-U sources ...')
 
    # ====== Install SPGW-U ==================================================
    # For a documentation of the installation procedure, see:
@@ -186,6 +187,10 @@ echo \\\"###### Done! ##########################################################
    if execute(commands) == True:
       set_flag('spgwucharm.prepared-spgwu-build')
       clear_flag('actions.prepare-spgwu-build')
+
+      status_set('active', 'prepare-spgwu-build: done!')
+   else:
+      status_set('active', 'prepare-spgwu-build: failed!')
 
 
 # ###### configure-spgwu function ###########################################
