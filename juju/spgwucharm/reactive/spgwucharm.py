@@ -252,6 +252,7 @@ echo \\\"###### Done! ##########################################################
    except:
        exc_type, exc_value, exc_traceback = sys.exc_info()
        err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       action_set( { 'output': stdout.encode('utf-8') } )
        action_fail('command execution failed:' + str(err))
        status_set('active', 'confiigure-spgwu: configuring SPGW-U FAILED!')
    else:
