@@ -183,13 +183,12 @@ echo \\\"###### Done! ##########################################################
        exc_type, exc_value, exc_traceback = sys.exc_info()
        err = traceback.format_exception(exc_type, exc_value, exc_traceback)
        action_fail('command execution failed:' + str(err))
+       status_set('active', 'prepare-spgwu-build: preparing SPGW-U build FAILED!')
    else:
       set_flag('spgwucharm.prepared-spgwu-build')
-      # action_set( { 'output': stdout } )
-      status_set('active', 'prepare-spgwu-build: preparing SPGW-U build COMPLETED')
-   finally:
       clear_flag('actions.prepare-spgwu-build')
-      status_set('active', 'prepare-spgwu-build: preparing SPGW-U build FAILED!')
+      action_set( { 'output': stdout } )
+      status_set('active', 'prepare-spgwu-build: preparing SPGW-U build COMPLETED')
 
 
 # ###### configure-spgwu function ###########################################
@@ -254,13 +253,11 @@ echo \\\"###### Done! ##########################################################
        exc_type, exc_value, exc_traceback = sys.exc_info()
        err = traceback.format_exception(exc_type, exc_value, exc_traceback)
        action_fail('command execution failed:' + str(err))
+       status_set('active', 'confiigure-spgwu: configuring SPGW-U FAILED!')
    else:
-      set_flag('spgwucharm.prepared-spgwu-build')
-      # action_set( { 'output': stdout } )
-      status_set('active', 'prepare-spgwu-build: configuring SPGW-U COMPLETED')
-   finally:
       clear_flag('actions.configure-spgwu')
-      status_set('active', 'prepare-spgwu-build: configuring SPGW-U FAILED!')
+      action_set( { 'output': stdout } )
+      status_set('active', 'confiigure-spgwu: configuring SPGW-U COMPLETED')
 
 
 # ###### restart-spgwu function #############################################
