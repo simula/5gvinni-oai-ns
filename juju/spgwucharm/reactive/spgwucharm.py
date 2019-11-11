@@ -249,6 +249,11 @@ echo \\\"###### Done! ##########################################################
 
    try:
        stdout, stderr = execute(commands)
+   except subprocess.CalledProcessError as e:
+       exc_type, exc_value, exc_traceback = sys.exc_info()
+       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       action_fail('command execution failed:' + str(err) + '\nOutput: ' + e.output)
+       status_set('active', 'confiigure-spgwu: configuring SPGW-U FAILED!')
    except:
        exc_type, exc_value, exc_traceback = sys.exc_info()
        err = traceback.format_exception(exc_type, exc_value, exc_traceback)

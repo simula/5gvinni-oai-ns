@@ -11,11 +11,11 @@ import traceback
 from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
 
 
-class CalledProcessError(Exception):
-   def __init__(self, returncode, cmd, output):
-      self.returncode = returncode
-      self.cmd        = cmd
-      self.output     = output
+#class CalledProcessError(Exception):
+   #def __init__(self, returncode, cmd, output):
+      #self.returncode = returncode
+      #self.cmd        = cmd
+      #self.output     = output
 
 
 def ssh(cmd, host, user, password=None, key=None):
@@ -23,11 +23,11 @@ def ssh(cmd, host, user, password=None, key=None):
 
     cmds = ' '.join(cmd)
     stdin, stdout, stderr = [ b'IN', b'OUT', b'ERR' ]   # client.exec_command(cmds, get_pty=True)
-    retcode = 0   #stdout.channel.recv_exit_status()
+    retcode = 1   #stdout.channel.recv_exit_status()
     # client.close()  # @TODO re-use connections
     if retcode > 0:
         output = stderr.strip()   # FIXME!
-        raise CalledProcessError(returncode=retcode, cmd=cmd, output=output)
+        raise subprocess.CalledProcessError(returncode=retcode, cmd=cmd, output=output)
     return (
         stdout.decode('utf-8').strip(),
         stderr.decode('utf-8').strip()
@@ -54,8 +54,13 @@ pwd"""
 
 try:
     [ stdout, stderr ] = execute(commands)
+except subprocess.CalledProcessError as e:
+    print('FAILURE-1')
+    exc_type, exc_value, exc_traceback = sys.exc_info()
+    err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+    print('command execution failed:' + str(err) + '\n' + str(e.output))
 except:
-    print('FAILURE')
+    print('FAILURE-2')
     exc_type, exc_value, exc_traceback = sys.exc_info()
     err = traceback.format_exception(exc_type, exc_value, exc_traceback)
     print('command execution failed:' + str(err))
@@ -65,14 +70,11 @@ finally:
    print('finally')
 
 
-#reload(sys)
-#sys.setdefaultencoding('ascii')
+#cmd = ['./action-set']
+#values = { 'output': u'This is a test! \u25cf äöüß æøå ÄÖÜ ÆØÅ'.encode('utf-8') }
+#for k, v in list(values.items()):
+   #cmd.append('{}={}'.format(k, v))
+#subprocess.check_call(cmd)
 
-cmd = ['./action-set']
-values = { 'output': u'This is a test! \u25cf äöüß æøå ÄÖÜ ÆØÅ'.encode('utf-8') }
-for k, v in list(values.items()):
-   cmd.append('{}={}'.format(k, v))
-subprocess.check_call(cmd)
-
-cmd = ['./action-set', 'command execution failed:[\'Traceback (most recent call last):\\n\', \'  File "/var/lib/juju/agents/unit-simulamet-oai-epc-b-spgw-u-ad-0/charm/reactive/spgwucharm.py", line 251, in configure_spgwu\\n    stdout, stderr = execute(commands)\\n\', \'  File "/var/lib/juju/agents/unit-simulamet-oai-epc-b-spgw-u-ad-0/charm/reactive/spgwucharm.py", line 55, in execute\\n    return charms.sshproxy._run(commands)\\n\', \'  File "lib/charms/sshproxy.py", line 171, in _run\\n    return ssh(cmd, host, user, passwd, key)\\n\', \'  File "lib/charms/sshproxy.py", line 241, in ssh\\n    output=output)\\n\', \'subprocess.CalledProcessError: Command \\\'[\\\'echo\\\', \\\'"######\\\', \\\'Building\\\', \\\'SPGW-U\\\', \\\'################################################"\\\', \\\'&&\\\', \\\'\\\\nexport\\\', \\\'MAKEFLAGS="-j`nproc`"\\\', \\\'&&\\\', \\\'\\\\ncd\\\', \\\'/home/nornetpp/src\\\', \\\'&&\\\', \\\'\\\\ncd\\\', \\\'openair-cn-cups\\\', \\\'&&\\\', \\\'\\\\ncd\\\', \\\'build/scripts\\\', \\\'&&\\\', \\\'\\\\nmkdir\\\', \\\'-p\\\', \\\'logs\\\', \\\'&&\\\', \\\'\\\\necho\\\', \\\'"======\\\', \\\'Building\\\', \\\'dependencies\\\', \\\'...\\\', \\\'======"\\\', \\\'&&\\\', \\\'\\\\n./build_spgwu\\\', \\\'-I\\\', \\\'-f\\\', \\\'>logs/build_spgwu-1.log\\\', \\\'2>&1\\\', \\\'&&\\\', \\\'\\\\necho\\\', \\\'"======\\\', \\\'Building\\\', \\\'service\\\', \\\'...\\\', \\\'======"\\\', \\\'&&\\\', \\\'\\\\n./build_spgwu\\\', \\\'-c\\\', \\\'-V\\\', \\\'-b\\\', \\\'Debug\\\', \\\'-j\\\', \\\'>logs/build_spgwu-2.log\\\', \\\'2>&1\\\', \\\'&&\\\', \\\'\\\\nINSTANCE=1\\\', \\\'&&\\\', \\\'\\\\nPREFIX=/usr/local/etc/oai\\\', \\\'&&\\\', \\\'\\\\nsudo\\\', \\\'mkdir\\\', \\\'-m\\\', \\\'0777\\\', \\\'-p\\\', \\\'$PREFIX\\\', \\\'&&\\\', \\\'\\\\nsudo\\\', \\\'cp\\\', \\\'../../etc/spgw_u.conf\\\', \\\'$PREFIX\\\', \\\'declare\\\', \\\'-A\\\', \\\'SPGWU_CONF\\\', \\\'SPGWU_CONF[@INSTANCE@]=$INSTANCE\\\', \\\'SPGWU_CONF[@PREFIX@]=$PREFIX\\\', \\\'SPGWU_CONF[@PID_DIRECTORY@]=/var/run\\\', \\\'SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_S1U_S12_S4_UP@]=ens5\\\', \\\'SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_SX@]=ens4\\\', \\\'SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_SGI@]=ens6\\\', \\\'for\\\', \\\'K\\\', \\\'in\\\', \\\'"${!SPGWU_CONF[@]}";\\\', \\\'do\\\', \\\'sudo\\\', \\\'egrep\\\', \\\'-lRZ\\\', \\\'"$K"\\\', \\\'$PREFIX\\\', \\\'|\\\', \\\'xargs\\\', \\\'-0\\\', \\\'-l\\\', \\\'sudo\\\', \\\'sed\\\', \\\'-i\\\', \\\'-e\\\', \\\'"s|$K|${SPGWU_CONF[$K]}|g"\\\', \\\';\\\', \\\'ret=$?;[[\\\', \\\'ret\\\', \\\'-ne\\\', \\\'0\\\', \\\']]\\\', \\\'&&\\\', \\\'echo\\\', \\\'"Tried\\\', \\\'to\\\', \\\'replace\\\', \\\'$K\\\', \\\'with\\\', \\\'${SPGWU_CONF[$K]}"\\\', \\\'||\\\', \\\'true\\\', \\\';\\\', \\\'done\\\', \\\'&&\\\', \\\'\\\\necho\\\', \\\'"######\\\', \\\'Done!\\\', \\\'##########################################################"\\\']\\\' returned non-zero exit status 1\\n\']']
-subprocess.check_call(cmd)
+#cmd = ['./action-set', 'command execution failed:[\'Traceback (most recent call last):\\n\', \'  File "/var/lib/juju/agents/unit-simulamet-oai-epc-b-spgw-u-ad-0/charm/reactive/spgwucharm.py", line 251, in configure_spgwu\\n    stdout, stderr = execute(commands)\\n\', \'  File "/var/lib/juju/agents/unit-simulamet-oai-epc-b-spgw-u-ad-0/charm/reactive/spgwucharm.py", line 55, in execute\\n    return charms.sshproxy._run(commands)\\n\', \'  File "lib/charms/sshproxy.py", line 171, in _run\\n    return ssh(cmd, host, user, passwd, key)\\n\', \'  File "lib/charms/sshproxy.py", line 241, in ssh\\n    output=output)\\n\', \'subprocess.CalledProcessError: Command \\\'[\\\'echo\\\', \\\'"######\\\', \\\'Building\\\', \\\'SPGW-U\\\', \\\'################################################"\\\', \\\'&&\\\', \\\'\\\\nexport\\\', \\\'MAKEFLAGS="-j`nproc`"\\\', \\\'&&\\\', \\\'\\\\ncd\\\', \\\'/home/nornetpp/src\\\', \\\'&&\\\', \\\'\\\\ncd\\\', \\\'openair-cn-cups\\\', \\\'&&\\\', \\\'\\\\ncd\\\', \\\'build/scripts\\\', \\\'&&\\\', \\\'\\\\nmkdir\\\', \\\'-p\\\', \\\'logs\\\', \\\'&&\\\', \\\'\\\\necho\\\', \\\'"======\\\', \\\'Building\\\', \\\'dependencies\\\', \\\'...\\\', \\\'======"\\\', \\\'&&\\\', \\\'\\\\n./build_spgwu\\\', \\\'-I\\\', \\\'-f\\\', \\\'>logs/build_spgwu-1.log\\\', \\\'2>&1\\\', \\\'&&\\\', \\\'\\\\necho\\\', \\\'"======\\\', \\\'Building\\\', \\\'service\\\', \\\'...\\\', \\\'======"\\\', \\\'&&\\\', \\\'\\\\n./build_spgwu\\\', \\\'-c\\\', \\\'-V\\\', \\\'-b\\\', \\\'Debug\\\', \\\'-j\\\', \\\'>logs/build_spgwu-2.log\\\', \\\'2>&1\\\', \\\'&&\\\', \\\'\\\\nINSTANCE=1\\\', \\\'&&\\\', \\\'\\\\nPREFIX=/usr/local/etc/oai\\\', \\\'&&\\\', \\\'\\\\nsudo\\\', \\\'mkdir\\\', \\\'-m\\\', \\\'0777\\\', \\\'-p\\\', \\\'$PREFIX\\\', \\\'&&\\\', \\\'\\\\nsudo\\\', \\\'cp\\\', \\\'../../etc/spgw_u.conf\\\', \\\'$PREFIX\\\', \\\'declare\\\', \\\'-A\\\', \\\'SPGWU_CONF\\\', \\\'SPGWU_CONF[@INSTANCE@]=$INSTANCE\\\', \\\'SPGWU_CONF[@PREFIX@]=$PREFIX\\\', \\\'SPGWU_CONF[@PID_DIRECTORY@]=/var/run\\\', \\\'SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_S1U_S12_S4_UP@]=ens5\\\', \\\'SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_SX@]=ens4\\\', \\\'SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_SGI@]=ens6\\\', \\\'for\\\', \\\'K\\\', \\\'in\\\', \\\'"${!SPGWU_CONF[@]}";\\\', \\\'do\\\', \\\'sudo\\\', \\\'egrep\\\', \\\'-lRZ\\\', \\\'"$K"\\\', \\\'$PREFIX\\\', \\\'|\\\', \\\'xargs\\\', \\\'-0\\\', \\\'-l\\\', \\\'sudo\\\', \\\'sed\\\', \\\'-i\\\', \\\'-e\\\', \\\'"s|$K|${SPGWU_CONF[$K]}|g"\\\', \\\';\\\', \\\'ret=$?;[[\\\', \\\'ret\\\', \\\'-ne\\\', \\\'0\\\', \\\']]\\\', \\\'&&\\\', \\\'echo\\\', \\\'"Tried\\\', \\\'to\\\', \\\'replace\\\', \\\'$K\\\', \\\'with\\\', \\\'${SPGWU_CONF[$K]}"\\\', \\\'||\\\', \\\'true\\\', \\\';\\\', \\\'done\\\', \\\'&&\\\', \\\'\\\\necho\\\', \\\'"######\\\', \\\'Done!\\\', \\\'##########################################################"\\\']\\\' returned non-zero exit status 1\\n\']']
+#subprocess.check_call(cmd)
