@@ -253,7 +253,8 @@ echo \\\"###### Done! ##########################################################
    except subprocess.CalledProcessError as e:
        exc_type, exc_value, exc_traceback = sys.exc_info()
        err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       action_fail('Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8'))
+       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
+       action_fail(message.encode('utf-8'))
        status_set('active', 'confiigure-spgwu: configuring SPGW-U FAILED!')
    except:
        exc_type, exc_value, exc_traceback = sys.exc_info()
