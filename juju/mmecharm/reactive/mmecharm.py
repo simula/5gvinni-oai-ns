@@ -183,7 +183,7 @@ echo \\\"###### Done! ##########################################################
    else:
       set_flag('mmecharm.prepared-mme-build')
       clear_flag('actions.prepare-mme-build')
-      action_set( { 'output': stdout } )
+      action_set( { 'output': stdout.encode('utf-8') } )
       status_set('active', 'prepare-mme-build: preparing MME build COMPLETED')
 
 
@@ -331,7 +331,7 @@ echo \\\"###### Done! ##########################################################
        status_set('active', 'confiigure-mme: configuring MME FAILED!')
    else:
       clear_flag('actions.configure-mme')
-      action_set( { 'output': stdout } )
+      action_set( { 'output': stdout.encode('utf-8') } )
       status_set('active', 'confiigure-mme: configuring MME COMPLETED')
 
 
