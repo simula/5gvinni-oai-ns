@@ -52,16 +52,7 @@ from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
 
 # ###### Execute command ####################################################
 def execute(commands):
-   err = ''
-   try:
-      result, err = charms.sshproxy._run(commands)
-   except:
-      # action_fail('command failed:' + err)
-      action_fail('command failed')
-      return False
-   else:
-      # action_set( { 'outout': str(result).encode('utf-8') } )
-      return True
+   stdout, stderr = charms.sshproxy._run(commands)
 
 
 # ######  Get /etc/network/interfaces setup for interface ###################
@@ -182,9 +173,19 @@ echo \\\"###### Done! ##########################################################
       configurationS1C = configurationS1C
    )
 
-   if execute(commands) == True:
+   try:
+       stdout, stderr = execute(commands)
+   except:
+       exc_type, exc_value, exc_traceback = sys.exc_info()
+       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       action_fail('command execution failed:' + str(err))
+   else:
       set_flag('mmecharm.prepared-mme-build')
       clear_flag('actions.prepare-mme-build')
+      # action_set( { 'output': stdout } )
+      status_set('active', 'prepare-spgwu-build: preparing MME build COMPLETED')
+   finally:
+      status_set('active', 'prepare-spgwu-build: preparing MME build FAILED!')
 
 
 # ###### configure-mme function #############################################
@@ -322,8 +323,18 @@ echo \\\"###### Done! ##########################################################
       tac_mme_1_lo           = tac_mme_1[2:4]
    )
 
-   if execute(commands) == True:
+   try:
+       stdout, stderr = execute(commands)
+   except:
+       exc_type, exc_value, exc_traceback = sys.exc_info()
+       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       action_fail('command execution failed:' + str(err))
+   else:
       clear_flag('actions.configure-mme')
+      # action_set( { 'output': stdout } )
+      status_set('active', 'prepare-spgwu-build: configuring MME COMPLETED')
+   finally:
+      status_set('active', 'prepare-spgwu-build: configuring MME FAILED!')
 
 
 # ###### restart-mme function ###############################################
