@@ -52,16 +52,7 @@ from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
 
 # ###### Execute command ####################################################
 def execute(commands):
-   err = ''
-   try:
-      result, err = charms.sshproxy._run(commands)
-   except:
-      # action_fail('command failed:' + err)
-      action_fail('command failed')
-      return False
-   else:
-      # action_set( { 'outout': str(result).encode('utf-8') } )
-      return True
+   return charms.sshproxy._run(commands)
 
 
 # ######  Get /etc/network/interfaces setup for interface ###################
@@ -169,9 +160,18 @@ echo \\\"###### Done! ##########################################################
       configurationS6a = configurationS6a
    )
 
-   if execute(commands) == True:
+   try:
+       stdout, stderr = execute(commands)
+   except:
+       exc_type, exc_value, exc_traceback = sys.exc_info()
+       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       action_fail('command execution failed:' + str(err))
+       status_set('active', 'prepare-cassandra-hss-build: preparing Cassandra/HSS build FAILED!')
+   else:
       set_flag('hsscharm.prepared-cassandra-hss-build')
-      clear_flag('actions.configure-hss')
+      clear_flag('actions.prepare-cassandra-hss-build')
+      action_set( { 'output': stdout } )
+      status_set('active', 'prepare-cassandra-hss-build: preparing Cassandra/HSS build COMPLETED')
 
 
 # ###### configure-cassandra function #######################################
@@ -221,9 +221,17 @@ echo \\\"###### Done! ##########################################################
       cassandraServerIP = cassandraServerIP
    )
 
-   if execute(commands) == True:
-      set_flag('hsscharm.configured-cassandra')
+   try:
+       stdout, stderr = execute(commands)
+   except:
+       exc_type, exc_value, exc_traceback = sys.exc_info()
+       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       action_fail('command execution failed:' + str(err))
+       status_set('active', 'confiigure-cassandra: configuring Cassandra FAILED!')
+   else:
       clear_flag('actions.configure-cassandra')
+      action_set( { 'output': stdout } )
+      status_set('active', 'confiigure-cassandra: configuring Cassandra COMPLETED')
 
 
 # ###### configure-hss function #############################################
@@ -299,9 +307,17 @@ echo \\\"###### Done! ##########################################################
       networkUsers       = networkUsers
    )
 
-   if execute(commands) == True:
-      set_flag('hsscharm.configured-hss')
+   try:
+       stdout, stderr = execute(commands)
+   except:
+       exc_type, exc_value, exc_traceback = sys.exc_info()
+       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       action_fail('command execution failed:' + str(err))
+       status_set('active', 'confiigure-hss: configuring HSS FAILED!')
+   else:
       clear_flag('actions.configure-hss')
+      action_set( { 'output': stdout } )
+      status_set('active', 'confiigure-hss: configuring HSS COMPLETED')
 
 
 # ###### restart-hss function ###############################################
