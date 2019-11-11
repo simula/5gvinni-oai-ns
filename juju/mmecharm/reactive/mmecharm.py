@@ -123,6 +123,7 @@ def install_mmecharm_proxy_charm():
 @when('mmecharm.installed')
 @when_not('mmecharm.prepared-mme-build')
 def prepare_mme_build():
+   status_set('active', 'prepare-mme-build: preparing MME build ...')
 
    # ====== Install MME =====================================================
    # For a documentation of the installation procedure, see:
@@ -191,6 +192,7 @@ echo \\\"###### Done! ##########################################################
 @when('actions.configure-mme')
 @when('mmecharm.prepared-mme-build')
 def configure_mme():
+   status_set('active', 'configure-mme: configuring MME ...')
 
    # ====== Install MME =====================================================
    # For a documentation of the installation procedure, see:

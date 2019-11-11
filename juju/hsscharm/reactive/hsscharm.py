@@ -123,6 +123,7 @@ def install_hsscharm_proxy_charm():
 @when('hsscharm.installed')
 @when_not('hsscharm.prepared-cassandra-hss-build')
 def prepare_cassandra_hss_build():
+   status_set('active', 'prepare-cassandra-hss-build: preparing Cassandra/HSS build ...')
 
    # ====== Install Cassandra and the HSS ===================================
    # For a documentation of the installation procedure, see:
@@ -178,6 +179,7 @@ echo \\\"###### Done! ##########################################################
 @when('actions.configure-cassandra')
 @when('hsscharm.prepared-cassandra-hss-build')
 def configure_cassandra():
+   status_set('active', 'configure-cassandra: configuring Cassandra ...')
 
    # ====== Install Cassandra and the HSS ===================================
    # For a documentation of the installation procedure, see:
@@ -238,6 +240,7 @@ echo \\\"###### Done! ##########################################################
 @when('actions.configure-hss')
 @when('hsscharm.configured-cassandra')
 def configure_hss():
+   status_set('active', 'configure-hss: configuring HSS ...')
 
    # ====== Install Cassandra and the HSS ===================================
    # For a documentation of the installation procedure, see:

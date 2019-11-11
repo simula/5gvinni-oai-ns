@@ -195,7 +195,7 @@ echo \\\"###### Done! ##########################################################
 @when('actions.configure-spgwc')
 @when('spgwccharm.prepared-spgwc-build')
 def configure_spgwc():
-   status_set('active', 'prepare-spgwc-build: configuring SPGW-C ...')
+   status_set('active', 'configure-spgwc: configuring SPGW-C ...')
 
    # ====== Install SPGW-C ==================================================
    # For a documentation of the installation procedure, see:
