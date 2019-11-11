@@ -57,7 +57,8 @@ def test():
 
    try:
       cmd = 'sudo su -c "/root/configurate.sh"'
-      result, _ = charms.sshproxy._run(cmd)
+      #result, _ = charms.sshproxy._run(cmd)
+      result, _ = ( '', '' )
    except:
       exc_type, exc_value, exc_traceback = sys.exc_info()
       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
@@ -67,5 +68,12 @@ def test():
    finally:
       print('actions.config')
 
+   b = b'1234567890'
 
-test()
+   return None
+   # return ( b.decode('utf-8').strip(), b.decode('utf-8').strip() )
+
+
+x, y = test()
+print(x)
+print(y)
