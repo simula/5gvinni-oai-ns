@@ -69,33 +69,7 @@ finally:
 #sys.setdefaultencoding('ascii')
 
 cmd = ['./action-set']
-values = { 'output': u'bla bla\u25cf'.encode('utf-8') }
+values = { 'output': u'This is a test! \u25cf äöüß æøå ÄÖÜ ÆØÅ'.encode('utf-8') }
 for k, v in list(values.items()):
    cmd.append('{}={}'.format(k, v))
 subprocess.check_call(cmd)
-
-#unit-simulamet-oai-epc-b-hss-aa-0: 12:31:08 DEBUG unit.simulamet-oai-epc-b-hss-aa/0.update-status Traceback (most recent call last):
-#unit-simulamet-oai-epc-b-hss-aa-0: 12:31:08 DEBUG unit.simulamet-oai-epc-b-hss-aa/0.update-status   File "/var/lib/juju/agents/unit-simulamet-oai-epc-b-hss-aa-0/charm/hooks/update-status", line 22, in <module>
-#unit-simulamet-oai-epc-b-hss-aa-0: 12:31:08 DEBUG unit.simulamet-oai-epc-b-hss-aa/0.update-status     main()
-#unit-simulamet-oai-epc-b-hss-aa-0: 12:31:08 DEBUG unit.simulamet-oai-epc-b-hss-aa/0.update-status   File "/usr/local/lib/python3.5/dist-packages/charms/reactive/__init__.py", line 74, in main
-#unit-simulamet-oai-epc-b-hss-aa-0: 12:31:08 DEBUG unit.simulamet-oai-epc-b-hss-aa/0.update-status     bus.dispatch(restricted=restricted_mode)
-#unit-simulamet-oai-epc-b-hss-aa-0: 12:31:08 DEBUG unit.simulamet-oai-epc-b-hss-aa/0.update-status   File "/usr/local/lib/python3.5/dist-packages/charms/reactive/bus.py", line 390, in dispatch
-#unit-simulamet-oai-epc-b-hss-aa-0: 12:31:08 DEBUG unit.simulamet-oai-epc-b-hss-aa/0.update-status     _invoke(other_handlers)
-#unit-simulamet-oai-epc-b-hss-aa-0: 12:31:08 DEBUG unit.simulamet-oai-epc-b-hss-aa/0.update-status   File "/usr/local/lib/python3.5/dist-packages/charms/reactive/bus.py", line 359, in _invoke
-#unit-simulamet-oai-epc-b-hss-aa-0: 12:31:08 DEBUG unit.simulamet-oai-epc-b-hss-aa/0.update-status     handler.invoke()
-#unit-simulamet-oai-epc-b-hss-aa-0: 12:31:08 DEBUG unit.simulamet-oai-epc-b-hss-aa/0.update-status   File "/usr/local/lib/python3.5/dist-packages/charms/reactive/bus.py", line 181, in invoke
-#unit-simulamet-oai-epc-b-hss-aa-0: 12:31:08 DEBUG unit.simulamet-oai-epc-b-hss-aa/0.update-status     self._action(*args)
-#unit-simulamet-oai-epc-b-hss-aa-0: 12:31:08 DEBUG unit.simulamet-oai-epc-b-hss-aa/0.update-status   File "/var/lib/juju/agents/unit-simulamet-oai-epc-b-hss-aa-0/charm/reactive/hsscharm.py", line 233, in configure_cassandra
-#unit-simulamet-oai-epc-b-hss-aa-0: 12:31:08 DEBUG unit.simulamet-oai-epc-b-hss-aa/0.update-status     action_set( { 'output': stdout } )
-#unit-simulamet-oai-epc-b-hss-aa-0: 12:31:08 DEBUG unit.simulamet-oai-epc-b-hss-aa/0.update-status   File "/usr/local/lib/python3.5/dist-packages/charmhelpers/core/hookenv.py", line 965, in action_set
-#unit-simulamet-oai-epc-b-hss-aa-0: 12:31:08 DEBUG unit.simulamet-oai-epc-b-hss-aa/0.update-status     subprocess.check_call(cmd)
-#unit-simulamet-oai-epc-b-hss-aa-0: 12:31:08 DEBUG unit.simulamet-oai-epc-b-hss-aa/0.update-status   File "/usr/lib/python3.5/subprocess.py", line 576, in check_call
-#unit-simulamet-oai-epc-b-hss-aa-0: 12:31:08 DEBUG unit.simulamet-oai-epc-b-hss-aa/0.update-status     retcode = call(*popenargs, **kwargs)
-#unit-simulamet-oai-epc-b-hss-aa-0: 12:31:08 DEBUG unit.simulamet-oai-epc-b-hss-aa/0.update-status   File "/usr/lib/python3.5/subprocess.py", line 557, in call
-#unit-simulamet-oai-epc-b-hss-aa-0: 12:31:08 DEBUG unit.simulamet-oai-epc-b-hss-aa/0.update-status     with Popen(*popenargs, **kwargs) as p:
-#unit-simulamet-oai-epc-b-hss-aa-0: 12:31:08 DEBUG unit.simulamet-oai-epc-b-hss-aa/0.update-status   File "/usr/lib/python3.5/subprocess.py", line 947, in __init__
-#unit-simulamet-oai-epc-b-hss-aa-0: 12:31:08 DEBUG unit.simulamet-oai-epc-b-hss-aa/0.update-status     restore_signals, start_new_session)
-#unit-simulamet-oai-epc-b-hss-aa-0: 12:31:08 DEBUG unit.simulamet-oai-epc-b-hss-aa/0.update-status   File "/usr/lib/python3.5/subprocess.py", line 1490, in _execute_child
-#unit-simulamet-oai-epc-b-hss-aa-0: 12:31:08 DEBUG unit.simulamet-oai-epc-b-hss-aa/0.update-status     restore_signals, start_new_session, preexec_fn)
-#unit-simulamet-oai-epc-b-hss-aa-0: 12:31:08 DEBUG unit.simulamet-oai-epc-b-hss-aa/0.update-status UnicodeEncodeError: 'ascii' codec can't encode character '\u25cf' in position 80: ordinal not in range(128)
-#unit-simulamet-oai-epc-b-hss-aa-0: 12:31:08 ERROR juju.worker.uniter.operation hook "update-status" failed: exit status 1
