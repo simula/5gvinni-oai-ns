@@ -131,6 +131,7 @@ def install_hsscharm_proxy_charm():
 @when('hsscharm.installed')
 @when_not('hsscharm.prepared-cassandra-hss-build')
 def prepare_cassandra_hss_build():
+   status_set('active', 'prepare-cassandra-hss-build: preparing Cassandra/HSS build ...')
 
    # ====== Install Cassandra and the HSS ===================================
    # For a documentation of the installation procedure, see:
@@ -168,15 +169,31 @@ echo \\\"###### Done! ##########################################################
       configurationS6a = configurationS6a
    )
 
-   if execute(commands) == True:
+   try:
+       stdout, stderr = execute(commands)
+   except subprocess.CalledProcessError as e:
+       exc_type, exc_value, exc_traceback = sys.exc_info()
+       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
+       action_fail(message.encode('utf-8'))
+       status_set('active', 'prepare-cassandra-hss-build: preparing Cassandra/HSS build FAILED!')
+   except:
+       exc_type, exc_value, exc_traceback = sys.exc_info()
+       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       action_fail('Command execution failed: ' + str(err))
+       status_set('active', 'prepare-cassandra-hss-build: preparing Cassandra/HSS build FAILED!')
+   else:
       set_flag('hsscharm.prepared-cassandra-hss-build')
-      clear_flag('actions.configure-hss')
+      clear_flag('actions.prepare-cassandra-hss-build')
+      action_set( { 'output': stdout.encode('utf-8') } )
+      status_set('active', 'prepare-cassandra-hss-build: preparing Cassandra/HSS build COMPLETED')
 
 
 # ###### configure-cassandra function #######################################
 @when('actions.configure-cassandra')
 @when('hsscharm.prepared-cassandra-hss-build')
 def configure_cassandra():
+   status_set('active', 'configure-cassandra: configuring Cassandra ...')
 
    # ====== Install Cassandra and the HSS ===================================
    # For a documentation of the installation procedure, see:
@@ -198,7 +215,7 @@ cd /home/nornetpp/src && \\
 cd {gitDirectory} && \\
 cd scripts && \\
 mkdir -p logs && \\
-sudo rm -f /etc/apt/sources.list.d/cassandra.sources.list && \
+sudo rm -f /etc/apt/sources.list.d/cassandra.sources.list && \\
 ./build_cassandra --check-installed-software --force >logs/build_cassandra.log 2>&1 && \\
 sudo update-alternatives --set java /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java && \\
 sudo service cassandra stop && \\
@@ -220,15 +237,30 @@ echo \\\"###### Done! ##########################################################
       cassandraServerIP = cassandraServerIP
    )
 
-   if execute(commands) == True:
-      set_flag('hsscharm.configured-cassandra')
+   try:
+       stdout, stderr = execute(commands)
+   except subprocess.CalledProcessError as e:
+       exc_type, exc_value, exc_traceback = sys.exc_info()
+       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
+       action_fail(message.encode('utf-8'))
+       status_set('active', 'confiigure-cassandra: configuring Cassandra FAILED!')
+   except:
+       exc_type, exc_value, exc_traceback = sys.exc_info()
+       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       action_fail('Command execution failed: ' + str(err))
+       status_set('active', 'confiigure-cassandra: configuring Cassandra FAILED!')
+   else:
       clear_flag('actions.configure-cassandra')
+      action_set( { 'output': stdout.encode('utf-8') } )
+      status_set('active', 'confiigure-cassandra: configuring Cassandra COMPLETED')
 
 
 # ###### configure-hss function #############################################
 @when('actions.configure-hss')
 @when('hsscharm.configured-cassandra')
 def configure_hss():
+   status_set('active', 'configure-hss: configuring HSS ...')
 
    # ====== Install Cassandra and the HSS ===================================
    # For a documentation of the installation procedure, see:
@@ -298,9 +330,23 @@ echo \\\"###### Done! ##########################################################
       networkUsers       = networkUsers
    )
 
-   if execute(commands) == True:
-      set_flag('hsscharm.configured-hss')
+   try:
+       stdout, stderr = execute(commands)
+   except subprocess.CalledProcessError as e:
+       exc_type, exc_value, exc_traceback = sys.exc_info()
+       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
+       action_fail(message.encode('utf-8'))
+       status_set('active', 'confiigure-hss: configuring HSS FAILED!')
+   except:
+       exc_type, exc_value, exc_traceback = sys.exc_info()
+       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       action_fail('Command execution failed: ' + str(err))
+       status_set('active', 'confiigure-hss: configuring HSS FAILED!')
+   else:
       clear_flag('actions.configure-hss')
+      action_set( { 'output': stdout.encode('utf-8') } )
+      status_set('active', 'confiigure-hss: configuring HSS COMPLETED')
 
 
 
@@ -310,6 +356,7 @@ echo \\\"###### Done! ##########################################################
 @when('mmecharm.installed')
 @when_not('mmecharm.prepared-mme-build')
 def prepare_mme_build():
+   status_set('active', 'prepare-mme-build: preparing MME build ...')
 
    # ====== Install MME =====================================================
    # For a documentation of the installation procedure, see:
@@ -360,15 +407,31 @@ echo \\\"###### Done! ##########################################################
       configurationS1C = configurationS1C
    )
 
-   if execute(commands) == True:
+   try:
+       stdout, stderr = execute(commands)
+   except subprocess.CalledProcessError as e:
+       exc_type, exc_value, exc_traceback = sys.exc_info()
+       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
+       action_fail(message.encode('utf-8'))
+       status_set('active', 'prepare-mme-build: preparing MME build FAILED!')
+   except:
+       exc_type, exc_value, exc_traceback = sys.exc_info()
+       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       action_fail('Command execution failed: ' + str(err))
+       status_set('active', 'prepare-mme-build: preparing MME build FAILED!')
+   else:
       set_flag('mmecharm.prepared-mme-build')
       clear_flag('actions.prepare-mme-build')
+      action_set( { 'output': stdout.encode('utf-8') } )
+      status_set('active', 'prepare-mme-build: preparing MME build COMPLETED')
 
 
 # ###### configure-mme function #############################################
 @when('actions.configure-mme')
 @when('mmecharm.prepared-mme-build')
 def configure_mme():
+   status_set('active', 'configure-mme: configuring MME ...')
 
    # ====== Install MME =====================================================
    # For a documentation of the installation procedure, see:
@@ -500,8 +563,23 @@ echo \\\"###### Done! ##########################################################
       tac_mme_1_lo           = tac_mme_1[2:4]
    )
 
-   if execute(commands) == True:
+   try:
+       stdout, stderr = execute(commands)
+   except subprocess.CalledProcessError as e:
+       exc_type, exc_value, exc_traceback = sys.exc_info()
+       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
+       action_fail(message.encode('utf-8'))
+       status_set('active', 'confiigure-mme: configuring MME FAILED!')
+   except:
+       exc_type, exc_value, exc_traceback = sys.exc_info()
+       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       action_fail('Command execution failed: ' + str(err))
+       status_set('active', 'confiigure-mme: configuring MME FAILED!')
+   else:
       clear_flag('actions.configure-mme')
+      action_set( { 'output': stdout.encode('utf-8') } )
+      status_set('active', 'confiigure-mme: configuring MME COMPLETED')
 
 
 
@@ -567,24 +645,29 @@ echo \\\"###### Done! ##########################################################
 
    try:
        stdout, stderr = execute(commands)
+   except subprocess.CalledProcessError as e:
+       exc_type, exc_value, exc_traceback = sys.exc_info()
+       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
+       action_fail(message.encode('utf-8'))
+       status_set('active', 'prepare-spgwu-build: preparing SPGW-U build FAILED!')
    except:
        exc_type, exc_value, exc_traceback = sys.exc_info()
        err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       action_fail('command execution failed:' + str(err))
+       action_fail('Command execution failed: ' + str(err))
+       status_set('active', 'prepare-spgwu-build: preparing SPGW-U build FAILED!')
    else:
       set_flag('spgwucharm.prepared-spgwu-build')
-      action_set( { 'output': stdout } )
-      status_set('active', 'prepare-spgwu-build: preparing SPGW-U build COMPLETED')
-   finally:
       clear_flag('actions.prepare-spgwu-build')
-      status_set('active', 'prepare-spgwu-build: preparing SPGW-U build FAILED!')
+      action_set( { 'output': stdout.encode('utf-8') } )
+      status_set('active', 'prepare-spgwu-build: preparing SPGW-U build COMPLETED')
 
 
 # ###### configure-spgwu function ###########################################
 @when('actions.configure-spgwu')
 @when('spgwucharm.prepared-spgwu-build')
 def configure_spgwu():
-   status_set('active', 'prepare-spgwu-build: configuring SPGW-U ...')
+   status_set('active', 'configure-spgwu: configuring SPGW-U ...')
 
    # ====== Install SPGW-U ==================================================
    # For a documentation of the installation procedure, see:
@@ -638,17 +721,21 @@ echo \\\"###### Done! ##########################################################
 
    try:
        stdout, stderr = execute(commands)
+   except subprocess.CalledProcessError as e:
+       exc_type, exc_value, exc_traceback = sys.exc_info()
+       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
+       action_fail(message.encode('utf-8'))
+       status_set('active', 'confiigure-spgwu: configuring SPGW-U FAILED!')
    except:
        exc_type, exc_value, exc_traceback = sys.exc_info()
        err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       action_fail('command execution failed:' + str(err))
+       action_fail('Command execution failed: ' + str(err))
+       status_set('active', 'confiigure-spgwu: configuring SPGW-U FAILED!')
    else:
-      set_flag('spgwucharm.prepared-spgwu-build')
-      action_set( { 'output': stdout } )
-      status_set('active', 'prepare-spgwu-build: configuring SPGW-U build COMPLETED')
-   finally:
-      clear_flag('actions.prepare-spgwu-build')
-      status_set('active', 'prepare-spgwu-build: configuring SPGW-U build FAILED!')
+      clear_flag('actions.configure-spgwu')
+      action_set( { 'output': stdout.encode('utf-8') } )
+      status_set('active', 'confiigure-spgwu: configuring SPGW-U COMPLETED')
 
 
 
@@ -712,16 +799,31 @@ echo \\\"###### Done! ##########################################################
       configurationS5S8_PGW  = configurationS5S8_PGW
    )
 
-   if execute(commands) == True:
+   try:
+       stdout, stderr = execute(commands)
+   except subprocess.CalledProcessError as e:
+       exc_type, exc_value, exc_traceback = sys.exc_info()
+       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
+       action_fail(message.encode('utf-8'))
+       status_set('active', 'prepare-spgwc-build: preparing SPGW-C build FAILED!')
+   except:
+       exc_type, exc_value, exc_traceback = sys.exc_info()
+       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       action_fail('Command execution failed: ' + str(err))
+       status_set('active', 'prepare-spgwc-build: preparing SPGW-C build FAILED!')
+   else:
       set_flag('spgwccharm.prepared-spgwc-build')
       clear_flag('actions.prepare-spgwc-build')
+      action_set( { 'output': stdout.encode('utf-8') } )
+      status_set('active', 'prepare-spgwc-build: preparing SPGW-C build COMPLETED')
 
 
 # ###### configure-spgwc function ###########################################
 @when('actions.configure-spgwc')
 @when('spgwccharm.prepared-spgwc-build')
 def configure_spgwc():
-   status_set('active', 'prepare-spgwc-build: configuring SPGW-C ...')
+   status_set('active', 'configure-spgwc: configuring SPGW-C ...')
 
    # ====== Install SPGW-C ==================================================
    # For a documentation of the installation procedure, see:
@@ -781,8 +883,23 @@ echo \\\"###### Done! ##########################################################
       spgwcS5S8_PGW_IfName = spgwcS5S8_PGW_IfName
    )
 
-   if execute(commands) == True:
+   try:
+       stdout, stderr = execute(commands)
+   except subprocess.CalledProcessError as e:
+       exc_type, exc_value, exc_traceback = sys.exc_info()
+       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
+       action_fail(message.encode('utf-8'))
+       status_set('active', 'confiigure-spgwc: configuring SPGW-C FAILED!')
+   except:
+       exc_type, exc_value, exc_traceback = sys.exc_info()
+       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       action_fail('Command execution failed: ' + str(err))
+       status_set('active', 'confiigure-spgwc: configuring SPGW-C FAILED!')
+   else:
       clear_flag('actions.configure-spgwc')
+      action_set( { 'output': stdout.encode('utf-8') } )
+      status_set('active', 'confiigure-spgwc: configuring SPGW-C COMPLETED')
 
 
 
