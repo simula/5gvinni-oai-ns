@@ -130,8 +130,19 @@ def prepare_cassandra_hss_build():
    # For a documentation of the installation procedure, see:
    # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
 
-   gitCommit     = action_get('hss-git-commit')
+
+## !!! TEST
+   try:
+      gitCommit     = action_get('hss-git-commit')
+   except subprocess.CalledProcessError as e:
+      exc_type, exc_value, exc_traceback = sys.exc_info()
+      err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+      message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
+## !!!!!!!
+
+
    gitRepository = action_get('hss-git-repository')
+   gitCommit     = action_get('hss-git-commit')
    gitDirectory  = 'openair-cn'
 
    # Prepare network configurations:
