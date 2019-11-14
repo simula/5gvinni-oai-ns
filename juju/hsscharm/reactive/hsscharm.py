@@ -244,6 +244,7 @@ echo \\\"###### Done! ##########################################################
        action_fail('Command execution failed: ' + str(err))
        status_set('active', 'confiigure-cassandra: configuring Cassandra FAILED!')
    else:
+      set_flag('hsscharm.configured-cassandra')
       clear_flag('actions.configure-cassandra')
       action_set( { 'output': stdout.encode('utf-8') } )
       status_set('active', 'confiigure-cassandra: configuring Cassandra COMPLETED')
