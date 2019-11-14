@@ -138,6 +138,7 @@ def prepare_cassandra_hss_build():
       exc_type, exc_value, exc_traceback = sys.exc_info()
       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
+      action_fail(message.encode('utf-8'))
 ## !!!!!!!
 
 
