@@ -31,8 +31,8 @@ additionalParamsForVnf:
   - member-vnf-index: '1'
     additionalParams:
       # ====== HSS ==========================================================
-      hss-git-repository: https://github.com/OPENAIRINTERFACE/openair-cn-cups.git
-      hss-git-commit: 2019.w45
+      hss_git_repository: https://github.com/OPENAIRINTERFACE/openair-cn-cups.git
+      hss_git_commit: 2019.w45
 
       # ====== MME ==========================================================
 
