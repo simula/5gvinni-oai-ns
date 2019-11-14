@@ -138,7 +138,7 @@ FOREACH(yamlFile IN LISTS yamlFiles)
 
    SET(timestampFile ".${validate_yaml}.stamp")
    ADD_CUSTOM_COMMAND(OUTPUT ${timestampFile}
-                      COMMAND ${YAMLLINT} -d '{extends: default, rules: {document-start: {present: no}}}' ${yamlFile}
+                      COMMAND ${YAMLLINT} -d '{extends: default, rules: {document-start: {present: no}, line-length: {max: 1024}}}' ${yamlFile}
                       COMMAND touch ${timestampFile}
                       DEPENDS ${yamlFile})
    ADD_CUSTOM_TARGET(${validate_yaml} DEPENDS ${timestampFile})
