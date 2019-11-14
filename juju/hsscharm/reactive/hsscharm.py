@@ -178,7 +178,7 @@ echo \\\"###### Done! ##########################################################
    else:
       set_flag('hsscharm.prepared-cassandra-hss-build')
       clear_flag('actions.prepare-cassandra-hss-build')
-      action_set( { 'output': stdout.encode('utf-8') } )
+      # action_set( { 'output': stdout.encode('utf-8') } )
       status_set('active', 'prepare-cassandra-hss-build: preparing Cassandra/HSS build COMPLETED')
 
 
@@ -246,7 +246,7 @@ echo \\\"###### Done! ##########################################################
    else:
       set_flag('hsscharm.configured-cassandra')
       clear_flag('actions.configure-cassandra')
-      action_set( { 'output': stdout.encode('utf-8') } )
+      # action_set( { 'output': stdout.encode('utf-8') } )
       status_set('active', 'confiigure-cassandra: configuring Cassandra COMPLETED')
 
 
@@ -339,7 +339,7 @@ echo \\\"###### Done! ##########################################################
        status_set('active', 'confiigure-hss: configuring HSS FAILED!')
    else:
       clear_flag('actions.configure-hss')
-      action_set( { 'output': stdout.encode('utf-8') } )
+      # action_set( { 'output': stdout.encode('utf-8') } )
       status_set('active', 'confiigure-hss: configuring HSS COMPLETED')
 
 

@@ -194,7 +194,7 @@ echo \\\"###### Done! ##########################################################
    else:
       set_flag('spgwucharm.prepared-spgwu-build')
       clear_flag('actions.prepare-spgwu-build')
-      action_set( { 'output': stdout.encode('utf-8') } )
+      # action_set( { 'output': stdout.encode('utf-8') } )
       status_set('active', 'prepare-spgwu-build: preparing SPGW-U build COMPLETED')
 
 
@@ -269,7 +269,7 @@ echo \\\"###### Done! ##########################################################
        status_set('active', 'confiigure-spgwu: configuring SPGW-U FAILED!')
    else:
       clear_flag('actions.configure-spgwu')
-      action_set( { 'output': stdout.encode('utf-8') } )
+      # action_set( { 'output': stdout.encode('utf-8') } )
       status_set('active', 'confiigure-spgwu: configuring SPGW-U COMPLETED')
 
 
