@@ -29,17 +29,17 @@
 prepare-cassandra-hss-build:
   description: Prepares Cassandra and HSS sources
   params:
-    mme-s1c-ip:
-      description: MME S1-C IP
+    hss-git-repository:
+      description: HSS Git repository
       data-type: string
-      default: 0.0.0.0
-    spgwu-s1u-ip:
-      description: SPGW-U S1-U IP
+      default: https://github.com/OPENAIRINTERFACE/openair-cn-cups.git
+    hss-git-commit:
+      description: HSS Git commit
       data-type: string
-      default: 0.0.0.0
+      default: develop
   required:
-    - mme-s1c-ip
-    - spgwu-s1u-ip
+    - hss-git-repository
+    - hss-git-commit
 
 configure-cassandra:
   description: Configures Cassandra

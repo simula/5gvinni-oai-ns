@@ -130,9 +130,9 @@ def prepare_cassandra_hss_build():
    # For a documentation of the installation procedure, see:
    # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
 
-   gitRepository = 'https://github.com/OPENAIRINTERFACE/openair-cn.git'
+   gitRepository = action_get('hss-git-repository')
+   gitCommit     = action_get('hss-git-commit')
    gitDirectory  = 'openair-cn'
-   gitCommit     = 'develop'
 
    # Prepare network configurations:
    hssS6a_IfName    = 'ens4'

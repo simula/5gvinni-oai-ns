@@ -26,13 +26,28 @@
 #
 # Contact: dreibh@simula.no
 
+# ###### VNF Parameters #####################################################
 additionalParamsForVnf:
   - member-vnf-index: '1'
     additionalParams:
+      # ====== HSS ==========================================================
+      hss-git-repository: https://github.com/OPENAIRINTERFACE/openair-cn-cups.git
+      hss-git-commit: 2019.w45
+
+      # ====== MME ==========================================================
+
+      # ====== SPGW-C =======================================================
+
+      # ====== SPGW-U =======================================================
+
       mme_s1c_ip: 192.168.247.102
       spgwu_s1u_ip: 192.168.248.159
+
+      # ====== Other ========================================================
       password: osm4us
 
+
+# ###### VNF-Internal Addresses #############################################
 vnf:
   - member-vnf-index: '1'
     internal-vld:

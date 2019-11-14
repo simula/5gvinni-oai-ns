@@ -139,6 +139,8 @@ def prepare_spgwu_build():
    spgwuSGi_IfName          = 'ens6'
 
    networkS1U_IPv4Interface = IPv4Interface('192.168.248.159/24')
+   networkS1U_IPv4Gateway   = IPv4Address('0.0.0.0')
+
    networkSGi_IPv4Interface = IPv4Interface('10.254.1.203/24')
    networkSGi_IPv4Gateway   = IPv4Address('10.254.1.1')
    networkSGi_IPv6Interface = IPv6Interface('3ffe::2/64')
@@ -146,7 +148,7 @@ def prepare_spgwu_build():
 
    # Prepare network configurations:
    configurationSXab = configureInterface(spgwuSXab_IfName, IPv4Interface('0.0.0.0/0'))
-   configurationS1U  = configureInterface(spgwuS1U_IfName, networkS1U_IPv4Interface, IPv4Address('0.0.0.0'))
+   configurationS1U  = configureInterface(spgwuS1U_IfName, networkS1U_IPv4Interface, networkS1U_IPv4Gateway)
    configurationSGi  = configureInterface(spgwuSGi_IfName, networkSGi_IPv4Interface, networkSGi_IPv4Gateway,
                                                            networkSGi_IPv6Interface, networkSGi_IPv6Gateway)
 
