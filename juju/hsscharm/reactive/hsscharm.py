@@ -124,7 +124,6 @@ def install_hsscharm_proxy_charm():
 @when('hsscharm.installed')
 @when_not('hsscharm.prepared-cassandra-hss-build')
 def prepare_cassandra_hss_build():
-   status_set('active', 'prepare-cassandra-hss-build: preparing Cassandra/HSS build ...')
 
    # ====== Install Cassandra and the HSS ===================================
    # For a documentation of the installation procedure, see:
@@ -149,6 +148,8 @@ def prepare_cassandra_hss_build():
    # Prepare network configurations:
    hssS6a_IfName    = 'ens4'
    configurationS6a = configureInterface(hssS6a_IfName, IPv4Interface('0.0.0.0/0'))
+
+   status_set('active', 'prepare-cassandra-hss-build: preparing Cassandra/HSS build ...')
 
    # NOTE:
    # Double escaping is required for \ and " in "command" string!
@@ -362,3 +363,20 @@ def restart_hss():
    commands = 'touch /tmp/restart-hss'
    if execute(commands) == True:
       clear_flag('actions.restart-hss')
+
+
+# FIXME!
+@when('actions.touch')
+def touch():
+    err = ''
+    try:
+        filename = action_get('filename')
+        cmd = ['touch {}'.format(filename)]
+        result, err = charms.sshproxy._run(cmd)
+    except:
+        action_fail('command failed:' + err)
+    else:
+        action_set({'outout': result})
+    finally:
+        clear_flag('actions.touch')
+# FIXME!

@@ -73,3 +73,13 @@ configure-hss:
 
 restart-hss:
   description: Restarts the HSS
+
+touch:
+  description: Touch a file on the VNF.
+  params:
+    filename:
+      description: The name of the file to touch.
+      type: string
+      default: ""
+  required:
+    - filename
