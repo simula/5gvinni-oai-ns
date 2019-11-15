@@ -94,10 +94,8 @@ vnfd:vnfd-catalog:
                 name: prepare-cassandra-hss-build
                 parameter:
                   - name: hss-git-repository
-                    data-type: STRING
                     value: /home/ubuntu/first-touch
                   - name: hss-git-commit
-                    data-type: STRING
                     value: develop
                   #- name: hss-git-repository
                     #data-type: STRING
