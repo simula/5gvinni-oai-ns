@@ -131,18 +131,23 @@ def prepare_cassandra_hss_build():
 
 
 ## !!! TEST
-   try:
-      gitCommit     = action_get('hss-git-commit')
-   except subprocess.CalledProcessError as e:
-      exc_type, exc_value, exc_traceback = sys.exc_info()
-      err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-      message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-      action_fail(message.encode('utf-8'))
+   filename = action_get('hss-git-repository')
+   cmd = ['touch {}'.format(filename)]
+   result, err = charms.sshproxy._run(cmd)
+   #try:
+      #gitCommit     = action_get('hss-git-commit')
+   #except subprocess.CalledProcessError as e:
+      #exc_type, exc_value, exc_traceback = sys.exc_info()
+      #err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+      #message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
+      #action_fail(message.encode('utf-8'))
 ## !!!!!!!
 
 
-   gitRepository = action_get('hss-git-repository')
-   gitCommit     = action_get('hss-git-commit')
+   gitRepository            = 'https://github.com/OPENAIRINTERFACE/openair-cn.git'
+   gitCommit                = 'develop'
+   #gitRepository = action_get('hss-git-repository')
+   #gitCommit     = action_get('hss-git-commit')
    gitDirectory  = 'openair-cn'
 
    # Prepare network configurations:
@@ -379,11 +384,4 @@ def touch():
         action_set({'outout': result})
     finally:
         clear_flag('actions.touch')
-
-@when('actions.touch2')
-def touch2():
-    filename = action_get('hss-git-repository')
-    cmd = ['touch {}'.format(filename)]
-    result, err = charms.sshproxy._run(cmd)
-    clear_flag('actions.touch2')
 # FIXME!
