@@ -77,9 +77,9 @@ restart-hss:
 touch:
   description: Touch a file on the VNF.
   params:
-    filename:
-      description: The name of the file to touch.
-      type: string
-      default: ""
+    hss-git-repository:
+      description: HSS Git repository
+      data-type: string
+      default: https://github.com/OPENAIRINTERFACE/openair-cn-cups.git
   required:
-    - filename
+    - hss-git-repository
