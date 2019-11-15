@@ -91,7 +91,7 @@ vnfd:vnfd-catalog:
                   - name: ssh-password
                     value: <password>
               - seq: '2'
-                name: touch
+                name: prepare-cassandra-hss-build
                 parameter:
                   - name: hss-git-repository
                     value: /tmp/x0
