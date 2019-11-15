@@ -91,12 +91,19 @@ vnfd:vnfd-catalog:
                   - name: ssh-password
                     value: <password>
               - seq: '2'
-                name: prepare-cassandra-hss-build
+                name: touch
                 parameter:
                   - name: hss-git-repository
-                    value: /home/ubuntu/first-touch
+                    value: /tmp/x0
                   - name: hss-git-commit
                     value: develop
+              #- seq: '2'
+                #name: prepare-cassandra-hss-build
+                #parameter:
+                  #- name: hss-git-repository
+                    #value: /home/ubuntu/first-touch
+                  #- name: hss-git-commit
+                    #value: develop
                   #- name: hss-git-repository
                     #data-type: STRING
                     #value: <hss_git_repository>
