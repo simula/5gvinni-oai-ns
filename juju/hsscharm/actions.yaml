@@ -74,6 +74,7 @@ configure-hss:
 restart-hss:
   description: Restarts the HSS
 
+# FIXME!
 touch:
   description: Touch a file on the VNF.
   params:
@@ -83,3 +84,19 @@ touch:
       default: https://github.com/OPENAIRINTERFACE/openair-cn-cups.git
   required:
     - hss-git-repository
+
+# FIXME!
+touch2:
+  description: Touch a file on the VNF.
+  params:
+    hss-git-repository:
+      description: HSS Git repository
+      data-type: string
+      default: https://github.com/OPENAIRINTERFACE/openair-cn-cups.git
+    hss-git-commit:
+      description: HSS Git commit
+      data-type: string
+      default: develop
+  required:
+    - hss-git-repository
+    - hss-git-commit

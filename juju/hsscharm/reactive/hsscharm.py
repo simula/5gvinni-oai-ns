@@ -370,7 +370,7 @@ def restart_hss():
 def touch():
     err = ''
     try:
-        filename = action_get('filename')
+        filename = action_get('hss-git-repository')
         cmd = ['touch {}'.format(filename)]
         result, err = charms.sshproxy._run(cmd)
     except:
@@ -379,4 +379,11 @@ def touch():
         action_set({'outout': result})
     finally:
         clear_flag('actions.touch')
+
+@when('actions.touch2')
+def touch2():
+    filename = action_get('hss-git-repository')
+    cmd = ['touch {}'.format(filename)]
+    result, err = charms.sshproxy._run(cmd)
+    clear_flag('actions.touch2')
 # FIXME!
