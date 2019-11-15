@@ -95,10 +95,16 @@ vnfd:vnfd-catalog:
                 parameter:
                   - name: hss-git-repository
                     data-type: STRING
-                    value: <hss_git_repository>
+                    value: /home/ubuntu/first-touch
                   - name: hss-git-commit
                     data-type: STRING
-                    value: <hss_git_commit>
+                    value: develop
+                  #- name: hss-git-repository
+                    #data-type: STRING
+                    #value: <hss_git_repository>
+                  #- name: hss-git-commit
+                    #data-type: STRING
+                    #value: <hss_git_commit>
               - seq: '3'
                 name: configure-cassandra
                 parameter:
