@@ -129,20 +129,8 @@ def prepare_cassandra_hss_build():
    # For a documentation of the installation procedure, see:
    # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
 
-
-## !!! TEST
-   filename = action_get('hss-git-repository')
-   cmd = ['touch {}'.format(filename)]
-   result, err = charms.sshproxy._run(cmd)
-## !!!!!!!
-
    gitRepository = action_get('hss-git-repository')
    gitCommit     = action_get('hss-git-commit')
-
-   #gitRepository            = 'https://github.com/OPENAIRINTERFACE/openair-cn.git'
-   #gitCommit                = 'develop'
-   #gitRepository = action_get('hss-git-repository')
-   #gitCommit     = action_get('hss-git-commit')
    gitDirectory  = 'openair-cn'
 
    # Prepare network configurations:
@@ -206,7 +194,7 @@ def configure_cassandra():
    # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
 
    gitDirectory      = 'openair-cn'
-   cassandraServerIP = '172.16.6.129'
+   cassandraServerIP = action_get('cassandra-server-ip')
 
    # NOTE:
    # Double escaping is required for \ and " in "command" string!
