@@ -90,46 +90,22 @@ vnfd:vnfd-catalog:
                     value: nornetpp
                   - name: ssh-password
                     value: <password>
-              - seq: '2'
-                name: prepare-cassandra-hss-build
+            config-primitive:
+              - name: prepare-cassandra-hss-build
                 parameter:
                   - name: hss-git-repository
-                    value: /tmp/x0
+                    default-value: https://github.com/OPENAIRINTERFACE/openair-cn-cups.git
                   - name: hss-git-commit
-                    value: develop
-              #- seq: '2'
-                #name: prepare-cassandra-hss-build
-                #parameter:
-                  #- name: hss-git-repository
-                    #value: /home/ubuntu/first-touch
-                  #- name: hss-git-commit
-                    #value: develop
-                  #- name: hss-git-repository
-                    #data-type: STRING
-                    #value: <hss_git_repository>
-                  #- name: hss-git-commit
-                    #data-type: STRING
-                    #value: <hss_git_commit>
-              - seq: '3'
-                name: configure-cassandra
+                    default-value: develop
+              - name: configure-cassandra
                 parameter:
-                  - name: mme-s1c-ip
-                    data-type: STRING
-                    value: <mme_s1c_ip>
-                  - name: spgwu-s1u-ip
-                    data-type: STRING
-                    value: <spgwu_s1u_ip>
-              - seq: '4'
-                name: configure-hss
+                  - name: cassandra-server-ip
+                    default-value: 172.16.6.129
+              - name: configure-hss
                 parameter:
-                  - name: mme-s1c-ip
-                    data-type: STRING
-                    value: <mme_s1c_ip>
-                  - name: spgwu-s1u-ip
-                    data-type: STRING
-                    value: <spgwu_s1u_ip>
-              - seq: '5'
-                name: restart-hss
+                  - name: cassandra-server-ip
+                    default-value: 172.16.6.129
+              - name: restart-hss
 
 
         # ###### VDU: MME (Mobility Management Entity) ######################
