@@ -124,7 +124,6 @@ def install_hsscharm_proxy_charm():
 @when('hsscharm.installed')
 @when_not('hsscharm.prepared-cassandra-hss-build')
 def prepare_cassandra_hss_build():
-
    # ====== Install Cassandra and the HSS ===================================
    # For a documentation of the installation procedure, see:
    # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
@@ -138,6 +137,11 @@ def prepare_cassandra_hss_build():
    configurationS6a = configureInterface(hssS6a_IfName, IPv4Interface('0.0.0.0/0'))
 
    status_set('active', 'prepare-cassandra-hss-build: preparing Cassandra/HSS build ...')
+
+   # FIXME!!!
+   x = action_get('hss-git-repository')
+   y = action_get('hss-git-commit')
+   # FIXME!!!
 
    # NOTE:
    # Double escaping is required for \ and " in "command" string!
