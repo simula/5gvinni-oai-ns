@@ -139,8 +139,8 @@ def prepare_cassandra_hss_build():
    gitRepository = action_get('hss-git-repository')
    gitCommit     = action_get('hss-git-commit')
 
-   gitRepository            = 'https://github.com/OPENAIRINTERFACE/openair-cn.git'
-   gitCommit                = 'develop'
+   #gitRepository            = 'https://github.com/OPENAIRINTERFACE/openair-cn.git'
+   #gitCommit                = 'develop'
    #gitRepository = action_get('hss-git-repository')
    #gitCommit     = action_get('hss-git-commit')
    gitDirectory  = 'openair-cn'
