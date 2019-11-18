@@ -138,11 +138,6 @@ def prepare_cassandra_hss_build():
 
    status_set('active', 'prepare-cassandra-hss-build: preparing Cassandra/HSS build ...')
 
-   # FIXME!!!
-   x = action_get('hss-git-repository')
-   y = action_get('hss-git-commit')
-   # FIXME!!!
-
    # NOTE:
    # Double escaping is required for \ and " in "command" string!
    # 1. Python
@@ -184,14 +179,13 @@ echo \\\"###### Done! ##########################################################
       set_flag('hsscharm.prepared-cassandra-hss-build')
       clear_flag('actions.prepare-cassandra-hss-build')
       # action_set( { 'output': stdout.encode('utf-8') } )
-      #status_set('active', 'prepare-cassandra-hss-build: preparing Cassandra/HSS build COMPLETED')
+      status_set('active', 'prepare-cassandra-hss-build: preparing Cassandra/HSS build COMPLETED')
 
 
 # ###### configure-cassandra function #######################################
 @when('actions.configure-cassandra')
 @when('hsscharm.prepared-cassandra-hss-build')
 def configure_cassandra():
-   #status_set('active', 'configure-cassandra: configuring Cassandra ...')
 
    # ====== Install Cassandra and the HSS ===================================
    # For a documentation of the installation procedure, see:
@@ -199,6 +193,8 @@ def configure_cassandra():
 
    gitDirectory      = 'openair-cn'
    cassandraServerIP = action_get('cassandra-server-ip')
+
+   status_set('active', 'configure-cassandra: configuring Cassandra ...')
 
    # NOTE:
    # Double escaping is required for \ and " in "command" string!
@@ -360,19 +356,23 @@ def restart_hss():
 # FIXME!
 @when('actions.touch')
 def touch():
-    err = ''
-    try:
-        filename = action_get('hss-git-repository')
-        cassandraServerIP = action_get('cassandra-server-ip')
-        cmd = [ 'echo "{cassandraServerIP}" >{filename}'.format(
-           filename          = filename,
-           cassandraServerIP = cassandraServerIP
-        ) ]
-        result, err = charms.sshproxy._run(cmd)
-    except:
-        action_fail('command failed:' + err)
-    else:
-        action_set({'outout': result})
-    finally:
-        clear_flag('actions.touch')
+   gitDirectory      = 'openair-cn'
+   cassandraServerIP = action_get('cassandra-server-ip')
+
+   status_set('active', 'configure-cassandra: configuring Cassandra ...')
+
+   err = ''
+   try:
+       filename = action_get('/tmp/x0')
+       cmd = [ 'echo "{cassandraServerIP}" >{filename}'.format(
+          filename          = filename,
+          cassandraServerIP = cassandraServerIP
+       ) ]
+       result, err = charms.sshproxy._run(cmd)
+   except:
+       action_fail('command failed:' + err)
+   else:
+       action_set({'outout': result})
+   finally:
+       clear_flag('actions.touch')
 # FIXME!

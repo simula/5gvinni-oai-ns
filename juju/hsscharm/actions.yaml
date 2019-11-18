@@ -68,19 +68,19 @@ restart-hss:
 touch:
   description: Touch a file on the VNF.
   params:
-    hss-git-repository:
-      description: HSS Git repository
-      data-type: string
-      default: https://github.com/OPENAIRINTERFACE/openair-cn-cups.git
-    hss-git-commit:
-      description: HSS Git commit
-      data-type: string
-      default: develop
+    #hss-git-repository:
+      #description: HSS Git repository
+      #data-type: string
+      #default: https://github.com/OPENAIRINTERFACE/openair-cn-cups.git
+    #hss-git-commit:
+      #description: HSS Git commit
+      #data-type: string
+      #default: develop
     cassandra-server-ip:
       description: Cassandra Server IP
       data-type: string
       default: 172.16.6.129
   required:
-    - hss-git-repository
-    - hss-git-commit
+    #- hss-git-repository
+    #- hss-git-commit
     - cassandra-server-ip
