@@ -90,11 +90,11 @@ vnfd:vnfd-catalog:
                     value: nornetpp
                   - name: ssh-password
                     value: <password>
-            config-primitive:
-              - name: prepare-cassandra-hss-build
+              - seq: '2'
+                name: prepare-cassandra-hss-build
                 parameter:
                   - name: hss-git-repository
-                    value: https://github.com/OPENAIRINTERFACE/openair-cn-cups.git
+                    value: /tmp/x0
                   - name: hss-git-commit
                     value: develop
               #- seq: '2'
@@ -110,15 +110,26 @@ vnfd:vnfd-catalog:
                   #- name: hss-git-commit
                     #data-type: STRING
                     #value: <hss_git_commit>
-              - name: configure-cassandra
+              - seq: '3'
+                name: configure-cassandra
                 parameter:
-                  - name: cassandra-server-ip
-                    value: 172.16.6.129
-              - name: configure-hss
+                  - name: mme-s1c-ip
+                    data-type: STRING
+                    value: <mme_s1c_ip>
+                  - name: spgwu-s1u-ip
+                    data-type: STRING
+                    value: <spgwu_s1u_ip>
+              - seq: '4'
+                name: configure-hss
                 parameter:
-                  - name: cassandra-server-ip
-                    value: 172.16.6.129
-              - name: restart-hss
+                  - name: mme-s1c-ip
+                    data-type: STRING
+                    value: <mme_s1c_ip>
+                  - name: spgwu-s1u-ip
+                    data-type: STRING
+                    value: <spgwu_s1u_ip>
+              - seq: '5'
+                name: restart-hss
 
 
         # ###### VDU: MME (Mobility Management Entity) ######################
