@@ -184,7 +184,7 @@ echo \\\"###### Done! ##########################################################
       set_flag('hsscharm.prepared-cassandra-hss-build')
       clear_flag('actions.prepare-cassandra-hss-build')
       # action_set( { 'output': stdout.encode('utf-8') } )
-      status_set('active', 'prepare-cassandra-hss-build: preparing Cassandra/HSS build COMPLETED')
+      #status_set('active', 'prepare-cassandra-hss-build: preparing Cassandra/HSS build COMPLETED')
 
 
 # ###### configure-cassandra function #######################################
