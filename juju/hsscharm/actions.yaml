@@ -76,6 +76,11 @@ touch:
       description: HSS Git commit
       data-type: string
       default: develop
+    cassandra-server-ip:
+      description: Cassandra Server IP
+      data-type: string
+      default: 172.16.6.129
   required:
     - hss-git-repository
     - hss-git-commit
+    - cassandra-server-ip

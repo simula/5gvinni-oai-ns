@@ -187,7 +187,7 @@ echo \\\"###### Done! ##########################################################
 @when('actions.configure-cassandra')
 @when('hsscharm.prepared-cassandra-hss-build')
 def configure_cassandra():
-   status_set('active', 'configure-cassandra: configuring Cassandra ...')
+   #status_set('active', 'configure-cassandra: configuring Cassandra ...')
 
    # ====== Install Cassandra and the HSS ===================================
    # For a documentation of the installation procedure, see:
@@ -359,7 +359,11 @@ def touch():
     err = ''
     try:
         filename = action_get('hss-git-repository')
-        cmd = ['touch {}'.format(filename)]
+        cassandraServerIP = action_get('cassandra-server-ip')
+        cmd = [ 'echo "{cassandraServerIP}" >{filename}'.format(
+           filename          = filename,
+           cassandraServerIP = cassandraServerIP
+        ) ]
         result, err = charms.sshproxy._run(cmd)
     except:
         action_fail('command failed:' + err)
