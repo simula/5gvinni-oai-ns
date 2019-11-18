@@ -51,6 +51,15 @@ from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
 # #### Helper functions                                                  ####
 # ###########################################################################
 
+# ###### Write debug output to file #########################################
+def writeToFile(filename, content):
+   cmd = [ 'echo "{content}" >{filename}'.format(
+      filename = filename,
+      content  = content
+   ) ]
+   result, err = charms.sshproxy._run(cmd)
+
+
 # ###### Execute command ####################################################
 def execute(commands):
    return charms.sshproxy._run(commands)
@@ -191,8 +200,12 @@ def configure_cassandra():
    # For a documentation of the installation procedure, see:
    # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
 
+   writeToFile('/tmp/x0', 'configure_cassandra')   # FIXME!
+
    gitDirectory      = 'openair-cn'
    cassandraServerIP = action_get('cassandra-server-ip')
+
+   writeToFile('/tmp/x1', 'configure_cassandra ' + str(cassandraServerIP))   # FIXME!
 
    status_set('active', 'configure-cassandra: configuring Cassandra ...')
 

@@ -11,6 +11,15 @@ import traceback
 from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
 
 
+# ###### Write debug output to file #########################################
+def writeToFile(filename, content):
+   cmd = [ 'echo "{content}" >{filename}'.format(
+      filename = filename,
+      content  = content
+   ) ]
+   result, err = charms.sshproxy._run(cmd)
+
+
 #class CalledProcessError(Exception):
    #def __init__(self, returncode, cmd, output):
       #self.returncode = returncode
