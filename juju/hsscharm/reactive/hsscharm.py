@@ -363,7 +363,7 @@ def touch():
 
    err = ''
    try:
-       filename = action_get('/tmp/x0')
+       filename = '/tmp/x0'
        cmd = [ 'echo "{cassandraServerIP}" >{filename}'.format(
           filename          = filename,
           cassandraServerIP = cassandraServerIP
