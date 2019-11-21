@@ -90,12 +90,12 @@ ENDIF()
 
 FIND_PROGRAM(VALIDATE_DESCRIPTOR ${VALIDATE_DESCRIPTOR_SCRIPT})
 IF(NOT VALIDATE_DESCRIPTOR)
-   MESSAGE(FATAL_ERROR "validate_descriptor.py (${VALIDATE_DESCRIPTOR_SCRIPT}) not found!")
+   MESSAGE(FATAL_ERROR "validate_descriptor.py (Ubuntu: osm-devops python-osm-im) not found!")
 ENDIF()
 
 FIND_PROGRAM(GENERATE_DESCRIPTOR ${GENERATE_DESCRIPTOR_SCRIPT})
 IF(NOT GENERATE_DESCRIPTOR)
-   MESSAGE(FATAL_ERROR "validate_descriptor.py (${GENERATE_DESCRIPTOR_SCRIPT}) not found!")
+   MESSAGE(FATAL_ERROR "validate_descriptor.py (Ubuntu: osm-devops python-osm-im) not found!")
 ENDIF()
 
 
