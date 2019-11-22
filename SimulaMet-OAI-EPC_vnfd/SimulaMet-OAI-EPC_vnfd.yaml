@@ -172,24 +172,26 @@ vnfd:vnfd-catalog:
                     value: nornetpp
                   - name: ssh-password
                     value: <password>
-            config-primitive:
-              - name: prepare-mme-build
+              - seq: '2'
+                name: prepare-mme-build
                 parameter:
                   - name: mme-s1c-ip
                     data-type: STRING
-                    default-value: <mme_s1c_ip>
+                    value: <mme_s1c_ip>
                   - name: spgwu-s1u-ip
                     data-type: STRING
-                    default-value: <spgwu_s1u_ip>
-              - name: configure-mme
+                    value: <spgwu_s1u_ip>
+              - seq: '3'
+                name: configure-mme
                 parameter:
                   - name: mme-s1c-ip
                     data-type: STRING
-                    default-value: <mme_s1c_ip>
+                    value: <mme_s1c_ip>
                   - name: spgwu-s1u-ip
                     data-type: STRING
-                    default-value: <spgwu_s1u_ip>
-              - name: restart-mme
+                    value: <spgwu_s1u_ip>
+              - seq: '4'
+                name: restart-mme
 
 
         # ###### VDU: SPGW-C ################################################
@@ -249,24 +251,26 @@ vnfd:vnfd-catalog:
                     value: nornetpp
                   - name: ssh-password
                     value: <password>
-            config-primitive:
-              - name: prepare-spgwc-build
+              - seq: '2'
+                name: prepare-spgwc-build
                 parameter:
                   - name: mme-s1c-ip
                     data-type: STRING
-                    default-value: <mme_s1c_ip>
+                    value: <mme_s1c_ip>
                   - name: spgwu-s1u-ip
                     data-type: STRING
-                    default-value: <spgwu_s1u_ip>
-              - name: configure-spgwc
+                    value: <spgwu_s1u_ip>
+              - seq: '3'
+                name: configure-spgwc
                 parameter:
                   - name: mme-s1c-ip
                     data-type: STRING
-                    default-value: <mme_s1c_ip>
+                    value: <mme_s1c_ip>
                   - name: spgwu-s1u-ip
                     data-type: STRING
-                    default-value: <spgwu_s1u_ip>
-              - name: restart-spgwc
+                    value: <spgwu_s1u_ip>
+              - seq: '4'
+                name: restart-spgwc
 
 
         # ###### VDU: SPGW-U ################################################
@@ -331,24 +335,26 @@ vnfd:vnfd-catalog:
                     value: nornetpp
                   - name: ssh-password
                     value: <password>
-            config-primitive:
-              - name: prepare-spgwu-build
+              - seq: '2'
+                name: prepare-spgwu-build
                 parameter:
                   - name: mme-s1c-ip
                     data-type: STRING
-                    default-value: <mme_s1c_ip>
+                    value: <mme_s1c_ip>
                   - name: spgwu-s1u-ip
                     data-type: STRING
-                    default-value: <spgwu_s1u_ip>
-              - name: configure-spgwu
+                    value: <spgwu_s1u_ip>
+              - seq: '3'
+                name: configure-spgwu
                 parameter:
                   - name: mme-s1c-ip
                     data-type: STRING
-                    default-value: <mme_s1c_ip>
+                    value: <mme_s1c_ip>
                   - name: spgwu-s1u-ip
                     data-type: STRING
-                    default-value: <spgwu_s1u_ip>
-              - name: restart-spgwu
+                    value: <spgwu_s1u_ip>
+              - seq: '4'
+                name: restart-spgwu
 
 
       # ###### Internal VLDs ################################################

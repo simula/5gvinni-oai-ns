@@ -121,7 +121,7 @@ def configureInterface(name,
 # ###########################################################################
 
 # ###### Installation #######################################################
-# @when('sshproxy.configured')
+@when('sshproxy.configured')
 @when_not('hsscharm.installed')
 def install_hsscharm_proxy_charm():
    set_flag('hsscharm.installed')
@@ -130,9 +130,10 @@ def install_hsscharm_proxy_charm():
 
 # ###### prepare-cassandra-hss-build function ###############################
 @when('actions.prepare-cassandra-hss-build')
-# @when('hsscharm.installed')
-# @when_not('hsscharm.prepared-cassandra-hss-build')
+@when('hsscharm.installed')
+@when_not('hsscharm.prepared-cassandra-hss-build')
 def prepare_cassandra_hss_build():
+
    # ====== Install Cassandra and the HSS ===================================
    # For a documentation of the installation procedure, see:
    # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
@@ -197,7 +198,7 @@ echo \\\"###### Done! ##########################################################
 
 # ###### configure-cassandra function #######################################
 @when('actions.configure-cassandra')
-# @when('hsscharm.prepared-cassandra-hss-build')
+@when('hsscharm.prepared-cassandra-hss-build')
 def configure_cassandra():
 
    # ====== Install Cassandra and the HSS ===================================
@@ -270,7 +271,7 @@ echo \\\"###### Done! ##########################################################
 
 # ###### configure-hss function #############################################
 @when('actions.configure-hss')
-# @when('hsscharm.configured-cassandra')
+@when('hsscharm.configured-cassandra')
 def configure_hss():
    status_set('active', 'configure-hss: configuring HSS ...')
 
@@ -363,7 +364,7 @@ echo \\\"###### Done! ##########################################################
 
 # ###### restart-hss function ###############################################
 @when('actions.restart-hss')
-# @when('hsscharm.configured-hss')
+@when('hsscharm.configured-hss')
 def restart_hss():
    commands = 'touch /tmp/restart-hss'
    if execute(commands) == True:
