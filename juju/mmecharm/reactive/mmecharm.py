@@ -56,6 +56,31 @@ def execute(commands):
    return charms.sshproxy._run(commands)
 
 
+# ###### Run shell commands, handle exceptions, and upage status flags ######
+def runShellCommands(commands, comment, actionFlagToClear, successFlagToSet = None):
+   status_set('active', comment + ' ...')
+   try:
+       stdout, stderr = execute(commands)
+   except subprocess.CalledProcessError as e:
+       exc_type, exc_value, exc_traceback = sys.exc_info()
+       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
+       action_fail(message.encode('utf-8'))
+       status_set('active', comment + ' COMMANDS FAILED!')
+   except:
+       exc_type, exc_value, exc_traceback = sys.exc_info()
+       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       action_fail('Command execution failed: ' + str(err))
+       status_set('active', comment + ' FAILED!')
+   else:
+      if successFlagToSet != None:
+         set_flag(successFlagToSet)
+      # action_set( { 'output': stdout.encode('utf-8') } )
+      status_set('active', comment + ' COMPLETED')
+   finally:
+      clear_flag(actionFlagToClear)
+
+
 # ######  Get /etc/network/interfaces setup for interface ###################
 def configureInterface(name,
                        ipv4Interface = IPv4Interface('0.0.0.0/0'), ipv4Gateway = None,
@@ -176,25 +201,27 @@ echo \\\"###### Done! ##########################################################
       configurationS1C = configurationS1C
    )
 
-   try:
-       stdout, stderr = execute(commands)
-   except subprocess.CalledProcessError as e:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       action_fail(message.encode('utf-8'))
-       status_set('active', 'prepare-mme-build: preparing MME build FAILED!')
-   except:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       action_fail('Command execution failed: ' + str(err))
-       status_set('active', 'prepare-mme-build: preparing MME build FAILED!')
-   else:
-      set_flag('mmecharm.prepared-mme-build')
-      # action_set( { 'output': stdout.encode('utf-8') } )
-      status_set('active', 'prepare-mme-build: preparing MME build COMPLETED')
-   finally:
-      clear_flag('actions.prepare-mme-build')
+   runShellCommands(commands, 'prepare_mme_build: preparing MME build',
+                    'actions.prepare-mme-build', 'mmecharm.prepared-mme-build')
+   #try:
+       #stdout, stderr = execute(commands)
+   #except subprocess.CalledProcessError as e:
+       #exc_type, exc_value, exc_traceback = sys.exc_info()
+       #err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       #message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
+       #action_fail(message.encode('utf-8'))
+       #status_set('active', 'prepare-mme-build: preparing MME build FAILED!')
+   #except:
+       #exc_type, exc_value, exc_traceback = sys.exc_info()
+       #err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       #action_fail('Command execution failed: ' + str(err))
+       #status_set('active', 'prepare-mme-build: preparing MME build FAILED!')
+   #else:
+      #set_flag('mmecharm.prepared-mme-build')
+      ## action_set( { 'output': stdout.encode('utf-8') } )
+      #status_set('active', 'prepare-mme-build: preparing MME build COMPLETED')
+   #finally:
+      #clear_flag('actions.prepare-mme-build')
 
 
 # ###### configure-mme function #############################################
@@ -332,24 +359,26 @@ echo \\\"###### Done! ##########################################################
       tac_mme_1_lo           = tac_mme_1[2:4]
    )
 
-   try:
-       stdout, stderr = execute(commands)
-   except subprocess.CalledProcessError as e:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       action_fail(message.encode('utf-8'))
-       status_set('active', 'confiigure-mme: configuring MME FAILED!')
-   except:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       action_fail('Command execution failed: ' + str(err))
-       status_set('active', 'confiigure-mme: configuring MME FAILED!')
-   else:
-      # action_set( { 'output': stdout.encode('utf-8') } )
-      status_set('active', 'confiigure-mme: configuring MME COMPLETED')
-   finally:
-      clear_flag('actions.configure-mme')
+   runShellCommands(commands, 'configure_mme: configuring MME',
+                    'actions.configure-mme', 'mmecharm.configured-mme')
+   #try:
+       #stdout, stderr = execute(commands)
+   #except subprocess.CalledProcessError as e:
+       #exc_type, exc_value, exc_traceback = sys.exc_info()
+       #err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       #message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
+       #action_fail(message.encode('utf-8'))
+       #status_set('active', 'confiigure-mme: configuring MME FAILED!')
+   #except:
+       #exc_type, exc_value, exc_traceback = sys.exc_info()
+       #err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       #action_fail('Command execution failed: ' + str(err))
+       #status_set('active', 'confiigure-mme: configuring MME FAILED!')
+   #else:
+      ## action_set( { 'output': stdout.encode('utf-8') } )
+      #status_set('active', 'confiigure-mme: configuring MME COMPLETED')
+   #finally:
+      #clear_flag('actions.configure-mme')
 
 
 # ###### restart-mme function ###############################################

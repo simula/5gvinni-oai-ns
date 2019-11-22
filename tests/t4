@@ -70,5 +70,5 @@ def runShellCommands(commands, comment, actionFlagToClear, successFlagToSet = No
 
 
 commands = 'date'
-runShellCommands(commands, 'configure_cassandra: configuring Cassandra',
-                 'actions.configure-cassandra', 'hsscharm.configured-cassandra')
+runShellCommands(commands, 'prepare_cassandra_hss_build: preparing Cassandra/HSS build',
+                 'actions.prepare-cassandra-hss-build', 'hsscharm.prepared-cassandra-hss-build')

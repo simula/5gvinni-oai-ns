@@ -202,7 +202,7 @@ echo \\\"###### Done! ##########################################################
    )
 
    runShellCommands(commands, 'prepare_cassandra_hss_build: preparing Cassandra/HSS build',
-                    'prepare-cassandra-hss-build', 'hsscharm.prepared-cassandra-hss-build')
+                    'actions.prepare-cassandra-hss-build', 'hsscharm.prepared-cassandra-hss-build')
    #try:
        #stdout, stderr = execute(commands)
    #except subprocess.CalledProcessError as e:
