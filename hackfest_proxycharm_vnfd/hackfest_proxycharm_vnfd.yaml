@@ -69,28 +69,28 @@ vnfd:vnfd-catalog:
                     data-type: STRING
                     default-value: /home/ubuntu/touched
 
-      #vnf-configuration:
-        #juju:
-          #charm: simple
-        #initial-config-primitive:
-          #- seq: '1'
-            #name: config
-            #parameter:
-              #- name: ssh-hostname
-                #value: <rw_mgmt_ip>
-              #- name: ssh-username
-                #value: ubuntu
-              #- name: ssh-password
-                #value: osm4u
-          #- seq: '2'
-            #name: touch
-            #parameter:
-              #- name: filename
-                #data-type: STRING
-                #value: /home/ubuntu/first-touch
-        #config-primitive:
-          #- name: touch
-            #parameter:
-              #- name: filename
-                #data-type: STRING
-                #default-value: /home/ubuntu/touched
+      # vnf-configuration:
+        # juju:
+          # charm: simple
+        # initial-config-primitive:
+          # - seq: '1'
+            # name: config
+            # parameter:
+              # - name: ssh-hostname
+                # value: <rw_mgmt_ip>
+              # - name: ssh-username
+                # value: ubuntu
+              # - name: ssh-password
+                # value: osm4u
+          # - seq: '2'
+            # name: touch
+            # parameter:
+              # - name: filename
+                # data-type: STRING
+                # value: /home/ubuntu/first-touch
+        # config-primitive:
+          # - name: touch
+            # parameter:
+              # - name: filename
+                # data-type: STRING
+                # default-value: /home/ubuntu/touched
