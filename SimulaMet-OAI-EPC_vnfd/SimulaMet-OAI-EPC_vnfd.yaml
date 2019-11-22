@@ -116,6 +116,7 @@ vnfd:vnfd-catalog:
                   - name: network-msisdn-first
                     value: 24288880000000
                   - name: network-users
+                    data-type: INTEGER
                     value: 1024
               - seq: '5'
                 name: restart-hss
