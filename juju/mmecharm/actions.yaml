@@ -56,10 +56,10 @@ prepare-mme-build:
   required:
     - mme-git-repository
     - mme-git-commit
-    - network-S1C-ipv4-interface
-    - network-S1C-ipv4-gateway
-    - network-S1C-ipv6-interface
-    - network-S1C-ipv6-gateway
+    - mme-S1C-ipv4-interface
+    - mme-S1C-ipv4-gateway
+    - mme-S1C-ipv6-interface
+    - mme-S1C-ipv6-gateway
 
 configure-mme:
   description: Configures the MME
