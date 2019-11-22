@@ -41,27 +41,27 @@ additionalParamsForVnf:
       network_users: 1024
 
       # ====== MME ==========================================================
-      mme-S1C-ipv4-interface: 192.168.247.102/24
-      mme-S11-ipv4-interface: 172.16.1.102/24
-      spgwc-S11-ipv4-interface: 172.16.1.104/24
-      network-mcc: 242
-      network-mnc: 88
+      mme_S1C_ipv4_interface: 192.168.247.102/24
+      mme_S11_ipv4_interface: 172.16.1.102/24
+      spgwc_S11_ipv4_interface: 172.16.1.104/24
+      network_mcc: 242
+      network_mnc: 88
 
-      # ====== SPGW-C =======================================================
-      spgwc-git-repository: https://github.com/OPENAIRINTERFACE/openair-cn-cups.git
-      spgwc-git-commit: develop
-      network-dns1: 10.1.1.1
-      network-dns2: 10.1.2.1
+      # ====== SPGW_C =======================================================
+      spgwc_git_repository: https://github.com/OPENAIRINTERFACE/openair-cn-cups.git
+      spgwc_git_commit: develop
+      network_dns1: 10.1.1.1
+      network_dns2: 10.1.2.1
 
-      # ====== SPGW-U =======================================================
-      spgwu-git-repository: https://github.com/OPENAIRINTERFACE/openair-cn-cups.git
-      spgwu-git-commit: develop
-      spgwu-S1U-ipv4-interface: 192.168.248.159/24
-      spgwu-S1U-ipv4-gateway: 0.0.0.0
-      spgwu-SGi-ipv4-interface: 10.254.1.203/24
-      spgwu-SGi-ipv4-gateway: 10.254.1.1
-      spgwu-SGi-ipv6-interface: 3ffe::2/64
-      spgwu-SGi-ipv6-gateway: 3ffe::1
+      # ====== SPGW_U =======================================================
+      spgwu_git_repository: https://github.com/OPENAIRINTERFACE/openair-cn-cups.git
+      spgwu_git_commit: develop
+      spgwu_S1U_ipv4_interface: 192.168.248.159/24
+      spgwu_S1U_ipv4_gateway: 0.0.0.0
+      spgwu_SGi_ipv4_interface: 10.254.1.203/24
+      spgwu_SGi_ipv4_gateway: 10.254.1.1
+      spgwu_SGi_ipv6_interface: 3ffe::2/64
+      spgwu_SGi_ipv6_gateway: 3ffe::1
 
       # ====== Other ========================================================
       password: osm4us
