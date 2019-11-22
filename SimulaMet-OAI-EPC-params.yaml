@@ -33,6 +33,12 @@ additionalParamsForVnf:
       # ====== HSS ==========================================================
       hss_git_repository: https://github.com/OPENAIRINTERFACE/openair-cn-cups.git
       hss_git_commit: 2019.w45
+      network_realm: simula.nornet
+      network_lte_k: 449c4b91aeacd0ace182cf3a5a72bfa1
+      network_op_k: 1006020f0a478bf6b699f15c062e42b3
+      network_imsi_first: 242881234500000
+      network_msisdn_first: 24288880000000
+      network_users: 1024
 
       # ====== MME ==========================================================
 
