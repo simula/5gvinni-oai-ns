@@ -133,10 +133,10 @@ def prepare_mme_build():
    gitRepository            = 'https://github.com/OPENAIRINTERFACE/openair-cn.git'
    gitDirectory             = 'openair-cn'
    gitCommit                = 'develop'
-   networkS1C_IPv4Interface = IPv4Interface('192.168.247.102/24')
-   networkS1C_IPv4Gateway   = IPv4Address('0.0.0.0')
-   networkS1C_IPv6Interface = None
-   networkS1C_IPv6Gateway   = None
+   mmeS1C_IPv4Interface = IPv4Interface('192.168.247.102/24')
+   mmeS1C_IPv4Gateway   = IPv4Address('0.0.0.0')
+   mmeS1C_IPv6Interface = None
+   mmeS1C_IPv6Gateway   = None
 
    # Prepare network configurations:
    mmeS6a_IfName = 'ens4'
@@ -145,7 +145,8 @@ def prepare_mme_build():
 
    configurationS6a = configureInterface(mmeS6a_IfName, IPv4Interface('0.0.0.0/0'))
    configurationS11 = configureInterface(mmeS11_IfName, IPv4Interface('0.0.0.0/0'))
-   configurationS1C = configureInterface(mmeS1C_IfName, networkS1C_IPv4Interface, networkS1C_IPv4Gateway)
+   configurationS1C = configureInterface(mmeS1C_IfName, mmeS1C_IPv4Interface, mmeS1C_IPv4Gateway,
+                                                        mmeS1C_IPv6Interface, mmeS1C_IPv6Gateway)
 
    # NOTE:
    # Double escaping is required for \ and " in "command" string!
@@ -205,13 +206,9 @@ def configure_mme():
    # For a documentation of the installation procedure, see:
    # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-mme
 
-   gitRepository          = 'https://github.com/OPENAIRINTERFACE/openair-cn.git'
-   gitDirectory           = 'openair-cn'
    gitCommit              = 'develop'
    hssS6a_IPv4Address     = '172.16.6.129'
-   mmeS1C_IPv4IfName      = 'ens6'
    mmeS1C_IPv4Interface   = IPv4Interface('192.168.247.102/24')
-   mmeS11_IPv4IfName      = 'ens5'
    mmeS11_IPv4Interface   = IPv4Interface('172.16.1.102/24')
    spwgcS11_IPv4Interface = IPv4Interface('172.16.1.104/24')
    networkRealm           = 'simula.nornet'
@@ -232,6 +229,11 @@ def configure_mme():
    tac_sgw_0    = '{:04x}'.format(TAC_SGW_0)
    tac_mme_0    = '{:04x}'.format(TAC_MME_0)
    tac_mme_1    = '{:04x}'.format(TAC_MME_1)
+
+   # Prepare network configurations:
+   mmeS6a_IfName = 'ens4'
+   mmeS11_IfName = 'ens5'
+   mmeS1C_IfName = 'ens6'
 
    # NOTE:
    # Double escaping is required for \ and " in "command" string!
@@ -275,9 +277,9 @@ MME_CONF[@MME_CODE@]='3' && \\
 MME_CONF[@TAC_0@]='600' && \\
 MME_CONF[@TAC_1@]='601' && \\
 MME_CONF[@TAC_2@]='602' && \\
-MME_CONF[@MME_INTERFACE_NAME_FOR_S1_MME@]='{mmeS1C_IPv4IfName}' && \\
+MME_CONF[@MME_INTERFACE_NAME_FOR_S1_MME@]='{mmeS1C_IfName}' && \\
 MME_CONF[@MME_IPV4_ADDRESS_FOR_S1_MME@]='{mmeS1C_IPv4Interface}' && \\
-MME_CONF[@MME_INTERFACE_NAME_FOR_S11@]='{mmeS11_IPv4IfName}' && \\
+MME_CONF[@MME_INTERFACE_NAME_FOR_S11@]='{mmeS11_IfName}' && \\
 MME_CONF[@MME_IPV4_ADDRESS_FOR_S11@]='{mmeS11_IPv4Interface}' && \\
 MME_CONF[@MME_INTERFACE_NAME_FOR_S10@]='eth0:m10' && \\
 MME_CONF[@MME_IPV4_ADDRESS_FOR_S10@]='192.168.10.110/24' && \\
@@ -303,13 +305,11 @@ MME_CONF[@TAC-HB_MME_1@]={tac_mme_1_lo} && \\
 for K in \\\"\${{!MME_CONF[@]}}\\\"; do sudo egrep -lRZ \\\"\$K\\\" \$PREFIX | xargs -0 -l sudo sed -i -e \\\"s|\$K|\${{MME_CONF[\$K]}}|g\\\" ; ret=\$?;[[ ret -ne 0 ]] && echo \\\"Tried to replace \$K with \${{MME_CONF[\$K]}}\\\" || true ; done && \\
 sudo ./check_mme_s6a_certificate \$PREFIX/freeDiameter mme.{networkRealm} >logs/check_mme_s6a_certificate.log 2>&1 && \\
 echo \\\"###### Done! ##########################################################\\\"""".format(
-      gitRepository          = gitRepository,
       gitDirectory           = gitDirectory,
-      gitCommit              = gitCommit,
       hssS6a_IPv4Address     = hssS6a_IPv4Address,
-      mmeS1C_IPv4IfName      = mmeS1C_IPv4IfName,
+      mmeS1C_IfName          = mmeS1C_IfName,
       mmeS1C_IPv4Interface   = mmeS1C_IPv4Interface,
-      mmeS11_IPv4IfName      = mmeS11_IPv4IfName,
+      mmeS11_IfName          = mmeS11_IfName,
       mmeS11_IPv4Interface   = mmeS11_IPv4Interface,
       spwgcS11_IPv4Interface = spwgcS11_IPv4Interface,
       networkRealm           = networkRealm,

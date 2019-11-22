@@ -41,6 +41,11 @@ additionalParamsForVnf:
       network_users: 1024
 
       # ====== MME ==========================================================
+      mme-S1C-ipv4-interface: 192.168.247.102/24
+      mme-S11-ipv4-interface: 172.16.1.102/24
+      spgwc-S11-ipv4-interface: 172.16.1.104/24
+      network-mcc: 242
+      network-mnc: 88
 
       # ====== SPGW-C =======================================================
 
