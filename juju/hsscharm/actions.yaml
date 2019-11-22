@@ -56,27 +56,27 @@ configure-hss:
   params:
     network-realm:
       description: Network realm
-      type:: string
+      type: string
       default: simula.nornet
     network-lte_k:
       description: LTE_K
-      type:: string
+      type: string
       default: 449c4b91aeacd0ace182cf3a5a72bfa1
     network-op-k:
       description: OP_K
-      type:: string
+      type: string
       default: 1006020f0a478bf6b699f15c062e42b3
     network-imsi-first:
       description: First IMSI
-      type:: string
+      type: string
       default: 242881234500000
     network-msisdn-first:
       description: First MSISDN
-      type:: string
+      type: string
       default: 24288880000000
     network-users:
       description: Number of users
-      type:: integer
+      type: integer
       default: 1024
   required:
     - network-realm
