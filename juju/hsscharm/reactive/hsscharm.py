@@ -203,25 +203,6 @@ echo \\\"###### Done! ##########################################################
 
    runShellCommands(commands, 'prepare_cassandra_hss_build: preparing Cassandra/HSS build',
                     'actions.prepare-cassandra-hss-build', 'hsscharm.prepared-cassandra-hss-build')
-   #try:
-       #stdout, stderr = execute(commands)
-   #except subprocess.CalledProcessError as e:
-       #exc_type, exc_value, exc_traceback = sys.exc_info()
-       #err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       #message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       #action_fail(message.encode('utf-8'))
-       #status_set('active', 'prepare-cassandra-hss-build: preparing Cassandra/HSS build FAILED!')
-   #except:
-       #exc_type, exc_value, exc_traceback = sys.exc_info()
-       #err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       #action_fail('Command execution failed: ' + str(err))
-       #status_set('active', 'prepare-cassandra-hss-build: preparing Cassandra/HSS build FAILED!')
-   #else:
-      #set_flag('hsscharm.prepared-cassandra-hss-build')
-      ## action_set( { 'output': stdout.encode('utf-8') } )
-      #status_set('active', 'prepare-cassandra-hss-build: preparing Cassandra/HSS build COMPLETED')
-   #finally:
-      #clear_flag('actions.prepare-cassandra-hss-build')
 
 
 # ###### configure-cassandra function #######################################
@@ -279,25 +260,6 @@ echo \\\"###### Done! ##########################################################
 
    runShellCommands(commands, 'configure_cassandra: configuring Cassandra',
                     'actions.configure-cassandra', 'hsscharm.configured-cassandra')
-   #try:
-       #stdout, stderr = execute(commands)
-   #except subprocess.CalledProcessError as e:
-       #exc_type, exc_value, exc_traceback = sys.exc_info()
-       #err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       #message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       #action_fail(message.encode('utf-8'))
-       #status_set('active', 'confiigure-cassandra: configuring Cassandra FAILED!')
-   #except:
-       #exc_type, exc_value, exc_traceback = sys.exc_info()
-       #err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       #action_fail('Command execution failed: ' + str(err))
-       #status_set('active', 'confiigure-cassandra: configuring Cassandra FAILED!')
-   #else:
-      #set_flag('hsscharm.configured-cassandra')
-      ## action_set( { 'output': stdout.encode('utf-8') } )
-      #status_set('active', 'confiigure-cassandra: configuring Cassandra COMPLETED')
-   #finally:
-      #clear_flag('actions.configure-cassandra')
 
 
 # ###### configure-hss function #############################################
@@ -376,24 +338,6 @@ echo \\\"###### Done! ##########################################################
 
    runShellCommands(commands, 'configure_hss: configuring HSS',
                     'actions.configure-hss', 'hsscharm.configured-hss')
-   #try:
-       #stdout, stderr = execute(commands)
-   #except subprocess.CalledProcessError as e:
-       #exc_type, exc_value, exc_traceback = sys.exc_info()
-       #err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       #message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       #action_fail(message.encode('utf-8'))
-       #status_set('active', 'confiigure-hss: configuring HSS FAILED!')
-   #except:
-       #exc_type, exc_value, exc_traceback = sys.exc_info()
-       #err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       #action_fail('Command execution failed: ' + str(err))
-       #status_set('active', 'confiigure-hss: configuring HSS FAILED!')
-   #else:
-      ## action_set( { 'output': stdout.encode('utf-8') } )
-      #status_set('active', 'confiigure-hss: configuring HSS COMPLETED')
-   #finally:
-      #clear_flag('actions.configure-hss')
 
 
 # ###### restart-hss function ###############################################
@@ -401,8 +345,7 @@ echo \\\"###### Done! ##########################################################
 @when('hsscharm.configured-hss')
 def restart_hss():
    commands = 'touch /tmp/restart-hss'
-   if execute(commands) == True:
-      clear_flag('actions.restart-hss')
+   runShellCommands(commands, 'restart_hss: restarting HSS', 'actions.restart-hss')
 
 
 # FIXME!
