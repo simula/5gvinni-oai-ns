@@ -56,6 +56,31 @@ def execute(commands):
    return charms.sshproxy._run(commands)
 
 
+# ###### Run shell commands, handle exceptions, and upage status flags ######
+def runShellCommands(commands, comment, actionFlagToClear, successFlagToSet = None):
+   status_set('active', comment + ' ...')
+   try:
+       stdout, stderr = execute(commands)
+   except subprocess.CalledProcessError as e:
+       exc_type, exc_value, exc_traceback = sys.exc_info()
+       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
+       action_fail(message.encode('utf-8'))
+       status_set('active', comment + ' COMMANDS FAILED!')
+   except:
+       exc_type, exc_value, exc_traceback = sys.exc_info()
+       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       action_fail('Command execution failed: ' + str(err))
+       status_set('active', comment + ' FAILED!')
+   else:
+      if successFlagToSet != None:
+         set_flag(successFlagToSet)
+      # action_set( { 'output': stdout.encode('utf-8') } )
+      status_set('active', comment + ' COMPLETED')
+   finally:
+      clear_flag(actionFlagToClear)
+
+
 # ######  Get /etc/network/interfaces setup for interface ###################
 def configureInterface(name,
                        ipv4Interface = IPv4Interface('0.0.0.0/0'), ipv4Gateway = None,
@@ -178,24 +203,26 @@ echo \\\"###### Done! ##########################################################
       configurationS5S8_PGW  = configurationS5S8_PGW
    )
 
-   try:
-       stdout, stderr = execute(commands)
-   except subprocess.CalledProcessError as e:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       action_fail(message.encode('utf-8'))
-       status_set('active', 'prepare-spgwc-build: preparing SPGW-C build FAILED!')
-   except:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       action_fail('Command execution failed: ' + str(err))
-       status_set('active', 'prepare-spgwc-build: preparing SPGW-C build FAILED!')
-   else:
-      set_flag('spgwccharm.prepared-spgwc-build')
-      clear_flag('actions.prepare-spgwc-build')
-      # action_set( { 'output': stdout.encode('utf-8') } )
-      status_set('active', 'prepare-spgwc-build: preparing SPGW-C build COMPLETED')
+   runShellCommands(commands, 'prepare_spgwc_build: preparing SPGW-C build',
+                    'actions.prepare-spgwc-build', 'spgwccharm.prepared-spgwc-build')
+   #try:
+       #stdout, stderr = execute(commands)
+   #except subprocess.CalledProcessError as e:
+       #exc_type, exc_value, exc_traceback = sys.exc_info()
+       #err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       #message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
+       #action_fail(message.encode('utf-8'))
+       #status_set('active', 'prepare-spgwc-build: preparing SPGW-C build FAILED!')
+   #except:
+       #exc_type, exc_value, exc_traceback = sys.exc_info()
+       #err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       #action_fail('Command execution failed: ' + str(err))
+       #status_set('active', 'prepare-spgwc-build: preparing SPGW-C build FAILED!')
+   #else:
+      #set_flag('spgwccharm.prepared-spgwc-build')
+      #clear_flag('actions.prepare-spgwc-build')
+      ## action_set( { 'output': stdout.encode('utf-8') } )
+      #status_set('active', 'prepare-spgwc-build: preparing SPGW-C build COMPLETED')
 
 
 # ###### configure-spgwc function ###########################################
@@ -263,23 +290,25 @@ echo \\\"###### Done! ##########################################################
       spgwcS5S8_PGW_IfName = spgwcS5S8_PGW_IfName
    )
 
-   try:
-       stdout, stderr = execute(commands)
-   except subprocess.CalledProcessError as e:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       action_fail(message.encode('utf-8'))
-       status_set('active', 'confiigure-spgwc: configuring SPGW-C FAILED!')
-   except:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       action_fail('Command execution failed: ' + str(err))
-       status_set('active', 'confiigure-spgwc: configuring SPGW-C FAILED!')
-   else:
-      clear_flag('actions.configure-spgwc')
-      # action_set( { 'output': stdout.encode('utf-8') } )
-      status_set('active', 'confiigure-spgwc: configuring SPGW-C COMPLETED')
+   runShellCommands(commands, 'configure_spgwc: configuring SPGW-C',
+                    'actions.configure-spgwc', 'spgwccharm.configured-spgwc')
+   #try:
+       #stdout, stderr = execute(commands)
+   #except subprocess.CalledProcessError as e:
+       #exc_type, exc_value, exc_traceback = sys.exc_info()
+       #err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       #message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
+       #action_fail(message.encode('utf-8'))
+       #status_set('active', 'confiigure-spgwc: configuring SPGW-C FAILED!')
+   #except:
+       #exc_type, exc_value, exc_traceback = sys.exc_info()
+       #err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       #action_fail('Command execution failed: ' + str(err))
+       #status_set('active', 'confiigure-spgwc: configuring SPGW-C FAILED!')
+   #else:
+      #clear_flag('actions.configure-spgwc')
+      ## action_set( { 'output': stdout.encode('utf-8') } )
+      #status_set('active', 'confiigure-spgwc: configuring SPGW-C COMPLETED')
 
 
 # ###### restart-spgwc function #############################################

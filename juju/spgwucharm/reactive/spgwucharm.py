@@ -56,6 +56,31 @@ def execute(commands):
    return charms.sshproxy._run(commands)
 
 
+# ###### Run shell commands, handle exceptions, and upage status flags ######
+def runShellCommands(commands, comment, actionFlagToClear, successFlagToSet = None):
+   status_set('active', comment + ' ...')
+   try:
+       stdout, stderr = execute(commands)
+   except subprocess.CalledProcessError as e:
+       exc_type, exc_value, exc_traceback = sys.exc_info()
+       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
+       action_fail(message.encode('utf-8'))
+       status_set('active', comment + ' COMMANDS FAILED!')
+   except:
+       exc_type, exc_value, exc_traceback = sys.exc_info()
+       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       action_fail('Command execution failed: ' + str(err))
+       status_set('active', comment + ' FAILED!')
+   else:
+      if successFlagToSet != None:
+         set_flag(successFlagToSet)
+      # action_set( { 'output': stdout.encode('utf-8') } )
+      status_set('active', comment + ' COMPLETED')
+   finally:
+      clear_flag(actionFlagToClear)
+
+
 # ######  Get /etc/network/interfaces setup for interface ###################
 def configureInterface(name,
                        ipv4Interface = IPv4Interface('0.0.0.0/0'), ipv4Gateway = None,
@@ -180,24 +205,26 @@ echo \\\"###### Done! ##########################################################
       configurationSGi  = configurationSGi
    )
 
-   try:
-       stdout, stderr = execute(commands)
-   except subprocess.CalledProcessError as e:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       action_fail(message.encode('utf-8'))
-       status_set('active', 'prepare-spgwu-build: preparing SPGW-U build FAILED!')
-   except:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       action_fail('Command execution failed: ' + str(err))
-       status_set('active', 'prepare-spgwu-build: preparing SPGW-U build FAILED!')
-   else:
-      set_flag('spgwucharm.prepared-spgwu-build')
-      clear_flag('actions.prepare-spgwu-build')
-      # action_set( { 'output': stdout.encode('utf-8') } )
-      status_set('active', 'prepare-spgwu-build: preparing SPGW-U build COMPLETED')
+   runShellCommands(commands, 'prepare_spgwu_build: preparing SPGW-U build',
+                    'actions.prepare-spgwu-build', 'spgwucharm.prepared-spgwu-build')
+   #try:
+       #stdout, stderr = execute(commands)
+   #except subprocess.CalledProcessError as e:
+       #exc_type, exc_value, exc_traceback = sys.exc_info()
+       #err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       #message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
+       #action_fail(message.encode('utf-8'))
+       #status_set('active', 'prepare-spgwu-build: preparing SPGW-U build FAILED!')
+   #except:
+       #exc_type, exc_value, exc_traceback = sys.exc_info()
+       #err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       #action_fail('Command execution failed: ' + str(err))
+       #status_set('active', 'prepare-spgwu-build: preparing SPGW-U build FAILED!')
+   #else:
+      #set_flag('spgwucharm.prepared-spgwu-build')
+      #clear_flag('actions.prepare-spgwu-build')
+      ## action_set( { 'output': stdout.encode('utf-8') } )
+      #status_set('active', 'prepare-spgwu-build: preparing SPGW-U build COMPLETED')
 
 
 # ###### configure-spgwu function ###########################################
@@ -253,23 +280,25 @@ echo \\\"###### Done! ##########################################################
       spgwuSGi_IfName  = spgwuSGi_IfName
    )
 
-   try:
-       stdout, stderr = execute(commands)
-   except subprocess.CalledProcessError as e:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       action_fail(message.encode('utf-8'))
-       status_set('active', 'confiigure-spgwu: configuring SPGW-U FAILED!')
-   except:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       action_fail('Command execution failed: ' + str(err))
-       status_set('active', 'confiigure-spgwu: configuring SPGW-U FAILED!')
-   else:
-      clear_flag('actions.configure-spgwu')
-      # action_set( { 'output': stdout.encode('utf-8') } )
-      status_set('active', 'confiigure-spgwu: configuring SPGW-U COMPLETED')
+   runShellCommands(commands, 'configure_spgwu: configuring SPGW-U',
+                    'actions.configure-spgwu', 'spgwucharm.configured-spgwu')
+   #try:
+       #stdout, stderr = execute(commands)
+   #except subprocess.CalledProcessError as e:
+       #exc_type, exc_value, exc_traceback = sys.exc_info()
+       #err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       #message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
+       #action_fail(message.encode('utf-8'))
+       #status_set('active', 'confiigure-spgwu: configuring SPGW-U FAILED!')
+   #except:
+       #exc_type, exc_value, exc_traceback = sys.exc_info()
+       #err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       #action_fail('Command execution failed: ' + str(err))
+       #status_set('active', 'confiigure-spgwu: configuring SPGW-U FAILED!')
+   #else:
+      #clear_flag('actions.configure-spgwu')
+      ## action_set( { 'output': stdout.encode('utf-8') } )
+      #status_set('active', 'confiigure-spgwu: configuring SPGW-U COMPLETED')
 
 
 # ###### restart-spgwu function #############################################

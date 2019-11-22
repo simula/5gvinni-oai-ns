@@ -452,21 +452,21 @@ vnfd:vnfd-catalog:
 
 
       # ###### Juju Charm ###################################################
-      #vnf-configuration:
-        #juju:
-          #charm: simple
-        #initial-config-primitive:
-          #- seq: '1'
-            #name: config
-            #parameter:
-              #- name: ssh-hostname
-                #value: <rw_mgmt_ip>
-              #- name: ssh-username
-                #value: nornetpp
-              #- name: ssh-password
-                #value: osm4u
-          #- seq: '2'
-            #name: touch
-            #parameter:
-              #- name: filename
-                #value: /tmp/touch1
+      # vnf-configuration:
+        # juju:
+          # charm: simple
+        # initial-config-primitive:
+          # - seq: '1'
+            # name: config
+            # parameter:
+              # - name: ssh-hostname
+                # value: <rw_mgmt_ip>
+              # - name: ssh-username
+                # value: nornetpp
+              # - name: ssh-password
+                # value: osm4u
+          # - seq: '2'
+            # name: touch
+            # parameter:
+              # - name: filename
+                # value: /tmp/touch1
