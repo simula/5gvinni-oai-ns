@@ -209,8 +209,10 @@ vnfd:vnfd-catalog:
                   - name: network-realm
                     value: simula.nornet
                   - name: network-mcc
+                    data-type: INTEGER
                     value: 242
                   - name: network-mnc
+                    data-type: INTEGER
                     value: 88
                   - name: network-lte_k
                     value: 449c4b91aeacd0ace182cf3a5a72bfa1
@@ -221,6 +223,7 @@ vnfd:vnfd-catalog:
                   - name: network-msisdn-first
                     value: 24288880000000
                   - name: network-users
+                    data-type: INTEGER
                     value: 1024
               - seq: '4'
                 name: restart-mme
