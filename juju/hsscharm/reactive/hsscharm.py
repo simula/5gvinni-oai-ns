@@ -65,6 +65,31 @@ def execute(commands):
    return charms.sshproxy._run(commands)
 
 
+# ###### Run shell commands, handle exceptions, and upage status flags ######
+def runShellCommands(commands, comment, actionFlagToClear, successFlagToSet = None):
+   status_set('active', comment + ' ...')
+   try:
+       stdout, stderr = execute(commands)
+   except subprocess.CalledProcessError as e:
+       exc_type, exc_value, exc_traceback = sys.exc_info()
+       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
+       action_fail(message.encode('utf-8'))
+       status_set('active', comment + ' COMMANDS FAILED!')
+   except:
+       exc_type, exc_value, exc_traceback = sys.exc_info()
+       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       action_fail('Command execution failed: ' + str(err))
+       status_set('active', comment + ' FAILED!')
+   else:
+      if successFlagToSet != None:
+         set_flag(successFlagToSet)
+      # action_set( { 'output': stdout.encode('utf-8') } )
+      status_set('active', comment + ' COMPLETED')
+   finally:
+      clear_flag(actionFlagToClear)
+
+
 # ######  Get /etc/network/interfaces setup for interface ###################
 def configureInterface(name,
                        ipv4Interface = IPv4Interface('0.0.0.0/0'), ipv4Gateway = None,
@@ -176,25 +201,27 @@ echo \\\"###### Done! ##########################################################
       configurationS6a = configurationS6a
    )
 
-   try:
-       stdout, stderr = execute(commands)
-   except subprocess.CalledProcessError as e:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       action_fail(message.encode('utf-8'))
-       status_set('active', 'prepare-cassandra-hss-build: preparing Cassandra/HSS build FAILED!')
-   except:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       action_fail('Command execution failed: ' + str(err))
-       status_set('active', 'prepare-cassandra-hss-build: preparing Cassandra/HSS build FAILED!')
-   else:
-      set_flag('hsscharm.prepared-cassandra-hss-build')
-      # action_set( { 'output': stdout.encode('utf-8') } )
-      status_set('active', 'prepare-cassandra-hss-build: preparing Cassandra/HSS build COMPLETED')
-   finally:
-      clear_flag('actions.prepare-cassandra-hss-build')
+   runShellCommands(commands, 'prepare_cassandra_hss_build: preparing Cassandra/HSS build',
+                    'prepare-cassandra-hss-build', 'hsscharm.prepared-cassandra-hss-build')
+   #try:
+       #stdout, stderr = execute(commands)
+   #except subprocess.CalledProcessError as e:
+       #exc_type, exc_value, exc_traceback = sys.exc_info()
+       #err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       #message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
+       #action_fail(message.encode('utf-8'))
+       #status_set('active', 'prepare-cassandra-hss-build: preparing Cassandra/HSS build FAILED!')
+   #except:
+       #exc_type, exc_value, exc_traceback = sys.exc_info()
+       #err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       #action_fail('Command execution failed: ' + str(err))
+       #status_set('active', 'prepare-cassandra-hss-build: preparing Cassandra/HSS build FAILED!')
+   #else:
+      #set_flag('hsscharm.prepared-cassandra-hss-build')
+      ## action_set( { 'output': stdout.encode('utf-8') } )
+      #status_set('active', 'prepare-cassandra-hss-build: preparing Cassandra/HSS build COMPLETED')
+   #finally:
+      #clear_flag('actions.prepare-cassandra-hss-build')
 
 
 # ###### configure-cassandra function #######################################
@@ -250,25 +277,27 @@ echo \\\"###### Done! ##########################################################
       cassandraServerIP = cassandraServerIP
    )
 
-   try:
-       stdout, stderr = execute(commands)
-   except subprocess.CalledProcessError as e:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       action_fail(message.encode('utf-8'))
-       status_set('active', 'confiigure-cassandra: configuring Cassandra FAILED!')
-   except:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       action_fail('Command execution failed: ' + str(err))
-       status_set('active', 'confiigure-cassandra: configuring Cassandra FAILED!')
-   else:
-      set_flag('hsscharm.configured-cassandra')
-      # action_set( { 'output': stdout.encode('utf-8') } )
-      status_set('active', 'confiigure-cassandra: configuring Cassandra COMPLETED')
-   finally:
-      clear_flag('actions.configure-cassandra')
+   runShellCommands(commands, 'configure_cassandra: configuring Cassandra',
+                    'actions.configure-cassandra', 'hsscharm.configured-cassandra')
+   #try:
+       #stdout, stderr = execute(commands)
+   #except subprocess.CalledProcessError as e:
+       #exc_type, exc_value, exc_traceback = sys.exc_info()
+       #err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       #message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
+       #action_fail(message.encode('utf-8'))
+       #status_set('active', 'confiigure-cassandra: configuring Cassandra FAILED!')
+   #except:
+       #exc_type, exc_value, exc_traceback = sys.exc_info()
+       #err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       #action_fail('Command execution failed: ' + str(err))
+       #status_set('active', 'confiigure-cassandra: configuring Cassandra FAILED!')
+   #else:
+      #set_flag('hsscharm.configured-cassandra')
+      ## action_set( { 'output': stdout.encode('utf-8') } )
+      #status_set('active', 'confiigure-cassandra: configuring Cassandra COMPLETED')
+   #finally:
+      #clear_flag('actions.configure-cassandra')
 
 
 # ###### configure-hss function #############################################
@@ -345,24 +374,26 @@ echo \\\"###### Done! ##########################################################
       networkUsers       = networkUsers
    )
 
-   try:
-       stdout, stderr = execute(commands)
-   except subprocess.CalledProcessError as e:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       action_fail(message.encode('utf-8'))
-       status_set('active', 'confiigure-hss: configuring HSS FAILED!')
-   except:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       action_fail('Command execution failed: ' + str(err))
-       status_set('active', 'confiigure-hss: configuring HSS FAILED!')
-   else:
-      # action_set( { 'output': stdout.encode('utf-8') } )
-      status_set('active', 'confiigure-hss: configuring HSS COMPLETED')
-   finally:
-      clear_flag('actions.configure-hss')
+   runShellCommands(commands, 'configure_hss: configuring HSS',
+                    'actions.configure-hss', 'hsscharm.configured-hss')
+   #try:
+       #stdout, stderr = execute(commands)
+   #except subprocess.CalledProcessError as e:
+       #exc_type, exc_value, exc_traceback = sys.exc_info()
+       #err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       #message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
+       #action_fail(message.encode('utf-8'))
+       #status_set('active', 'confiigure-hss: configuring HSS FAILED!')
+   #except:
+       #exc_type, exc_value, exc_traceback = sys.exc_info()
+       #err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       #action_fail('Command execution failed: ' + str(err))
+       #status_set('active', 'confiigure-hss: configuring HSS FAILED!')
+   #else:
+      ## action_set( { 'output': stdout.encode('utf-8') } )
+      #status_set('active', 'confiigure-hss: configuring HSS COMPLETED')
+   #finally:
+      #clear_flag('actions.configure-hss')
 
 
 # ###### restart-hss function ###############################################
