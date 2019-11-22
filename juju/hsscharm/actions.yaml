@@ -76,7 +76,7 @@ configure-hss:
       default: 24288880000000
     network-users:
       description: Number of users
-      type: integer
+      type: string
       default: 1024
   required:
     - network-realm

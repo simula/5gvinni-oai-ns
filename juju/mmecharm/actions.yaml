@@ -82,11 +82,11 @@ configure-mme:
       default: simula.nornet
     network-mcc:
       description: Mobile Country Code (MCC)
-      data-type: integer
+      data-type: string
       default: 242
     network-mnc:
       description: Mobile Network Code (MNC)
-      data-type: integer
+      data-type: string
       default: 88
     network-lte_k:
       description: LTE_K
@@ -106,7 +106,7 @@ configure-mme:
       default: 24288880000000
     network-users:
       description: Number of users
-      type: integer
+      type: string
       default: 1024
   required:
     - mme-S1C-ipv4-interface
