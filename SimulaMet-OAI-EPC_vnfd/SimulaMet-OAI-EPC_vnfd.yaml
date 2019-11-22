@@ -372,17 +372,20 @@ vnfd:vnfd-catalog:
                     value: https://github.com/OPENAIRINTERFACE/openair-cn-cups.git
                   - name: spgwu-git-commit
                     value: develop
+                  - name: spgwu-S1U-ipv4-interface
+                    value: 192.168.248.159/24
+                  - name: spgwu-S1U-ipv4-gateway
+                    value: 0.0.0.0
+                  - name: spgwu-SGi-ipv4-interface
+                    value: 10.254.1.203/24
+                  - name: spgwu-SGi-ipv4-gateway
+                    value: 10.254.1.1
+                  - name: spgwu-SGi-ipv6-interface
+                    value: 3ffe::2/64
+                  - name: spgwu-SGi-ipv6-gateway
+                    value: 3ffe::1
               - seq: '3'
                 name: configure-spgwu
-                parameter:
-                  - name: network-realm
-                    value: simula.nornet
-                  - name: network-dns1
-                    value: 10.1.1.1
-                  - name: network-dns2
-                    value: 10.1.2.1
-              - seq: '4'
-                name: restart-spgwu
 
 
       # ###### Internal VLDs ################################################

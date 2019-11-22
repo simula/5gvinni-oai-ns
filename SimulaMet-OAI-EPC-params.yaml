@@ -56,6 +56,12 @@ additionalParamsForVnf:
       # ====== SPGW-U =======================================================
       spgwu-git-repository: https://github.com/OPENAIRINTERFACE/openair-cn-cups.git
       spgwu-git-commit: develop
+      spgwu-S1U-ipv4-interface: 192.168.248.159/24
+      spgwu-S1U-ipv4-gateway: 0.0.0.0
+      spgwu-SGi-ipv4-interface: 10.254.1.203/24
+      spgwu-SGi-ipv4-gateway: 10.254.1.1
+      spgwu-SGi-ipv6-interface: 3ffe::2/64
+      spgwu-SGi-ipv6-gateway: 3ffe::1
 
       # ====== Other ========================================================
       password: osm4us

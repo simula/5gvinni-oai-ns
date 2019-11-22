@@ -130,27 +130,27 @@ def prepare_spgwu_build():
    # For a documentation of the installation procedure, see:
    # https://github.com/OPENAIRINTERFACE/openair-cn-cups/wiki/OpenAirSoftwareSupport#install-spgw-u
 
-   gitRepository            = 'https://github.com/OPENAIRINTERFACE/openair-cn-cups.git'
-   gitDirectory             = 'openair-cn-cups'
-   gitCommit                = 'develop'
+   gitRepository          = 'https://github.com/OPENAIRINTERFACE/openair-cn-cups.git'
+   gitDirectory           = 'openair-cn-cups'
+   gitCommit              = 'develop'
 
-   networkS1U_IPv4Interface = IPv4Interface('192.168.248.159/24')
-   networkS1U_IPv4Gateway   = IPv4Address('0.0.0.0')
+   spgwuS1U_IPv4Interface = IPv4Interface('192.168.248.159/24')
+   spgwuS1U_IPv4Gateway   = IPv4Address('0.0.0.0')
 
-   networkSGi_IPv4Interface = IPv4Interface('10.254.1.203/24')
-   networkSGi_IPv4Gateway   = IPv4Address('10.254.1.1')
-   networkSGi_IPv6Interface = IPv6Interface('3ffe::2/64')
-   networkSGi_IPv6Gateway   = IPv6Address('3ffe::1')
+   spgwuSGi_IPv4Interface = IPv4Interface('10.254.1.203/24')
+   spgwuSGi_IPv4Gateway   = IPv4Address('10.254.1.1')
+   spgwuSGi_IPv6Interface = IPv6Interface('3ffe::2/64')
+   spgwuSGi_IPv6Gateway   = IPv6Address('3ffe::1')
 
    # Prepare network configurations:
-   spgwuSXab_IfName         = 'ens4'
-   spgwuS1U_IfName          = 'ens5'
-   spgwuSGi_IfName          = 'ens6'
+   spgwuSXab_IfName       = 'ens4'
+   spgwuS1U_IfName        = 'ens5'
+   spgwuSGi_IfName        = 'ens6'
 
    configurationSXab = configureInterface(spgwuSXab_IfName, IPv4Interface('0.0.0.0/0'))
-   configurationS1U  = configureInterface(spgwuS1U_IfName, networkS1U_IPv4Interface, networkS1U_IPv4Gateway)
-   configurationSGi  = configureInterface(spgwuSGi_IfName, networkSGi_IPv4Interface, networkSGi_IPv4Gateway,
-                                                           networkSGi_IPv6Interface, networkSGi_IPv6Gateway)
+   configurationS1U  = configureInterface(spgwuS1U_IfName, spgwuS1U_IPv4Interface, spgwuS1U_IPv4Gateway)
+   configurationSGi  = configureInterface(spgwuSGi_IfName, spgwuSGi_IPv4Interface, spgwuSGi_IPv4Gateway,
+                                                           spgwuSGi_IPv6Interface, spgwuSGi_IPv6Gateway)
 
    # NOTE:
    # Double escaping is required for \ and " in "command" string!
@@ -210,10 +210,9 @@ def configure_spgwu():
    # For a documentation of the installation procedure, see:
    # https://github.com/OPENAIRINTERFACE/openair-cn-cups/wiki/OpenAirSoftwareSupport#install-spgw-u
 
-   gitRepository    = 'https://github.com/OPENAIRINTERFACE/openair-cn-cups.git'
    gitDirectory     = 'openair-cn-cups'
-   gitCommit        = 'develop'
 
+   # Prepare network configurations:
    spgwuSXab_IfName = 'ens4'
    spgwuS1U_IfName  = 'ens5'
    spgwuSGi_IfName  = 'ens6'
@@ -248,12 +247,10 @@ SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_SX@]='{spgwuSXab_IfName}' && \\
 SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_SGI@]='{spgwuSGi_IfName}' && \\
 for K in \\\"\${{!SPGWU_CONF[@]}}\\\"; do sudo egrep -lRZ \\\"\$K\\\" \$PREFIX | xargs -0 -l sudo sed -i -e \\\"s|\$K|\${{SPGWU_CONF[\$K]}}|g\\\" ; ret=\$?;[[ ret -ne 0 ]] && echo \\\"Tried to replace \$K with \${{SPGWU_CONF[\$K]}}\\\" || true ; done && \\
 echo \\\"###### Done! ##########################################################\\\"""".format(
-      gitRepository     = gitRepository,
-      gitDirectory      = gitDirectory,
-      gitCommit         = gitCommit,
-      spgwuSXab_IfName  = spgwuSXab_IfName,
-      spgwuS1U_IfName   = spgwuS1U_IfName,
-      spgwuSGi_IfName   = spgwuSGi_IfName,
+      gitDirectory     = gitDirectory,
+      spgwuSXab_IfName = spgwuSXab_IfName,
+      spgwuS1U_IfName  = spgwuS1U_IfName,
+      spgwuSGi_IfName  = spgwuSGi_IfName
    )
 
    try:
