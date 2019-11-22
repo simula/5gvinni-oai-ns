@@ -134,10 +134,6 @@ def prepare_spgwu_build():
    gitDirectory             = 'openair-cn-cups'
    gitCommit                = 'develop'
 
-   spgwuSXab_IfName         = 'ens4'
-   spgwuS1U_IfName          = 'ens5'
-   spgwuSGi_IfName          = 'ens6'
-
    networkS1U_IPv4Interface = IPv4Interface('192.168.248.159/24')
    networkS1U_IPv4Gateway   = IPv4Address('0.0.0.0')
 
@@ -147,6 +143,10 @@ def prepare_spgwu_build():
    networkSGi_IPv6Gateway   = IPv6Address('3ffe::1')
 
    # Prepare network configurations:
+   spgwuSXab_IfName         = 'ens4'
+   spgwuS1U_IfName          = 'ens5'
+   spgwuSGi_IfName          = 'ens6'
+
    configurationSXab = configureInterface(spgwuSXab_IfName, IPv4Interface('0.0.0.0/0'))
    configurationS1U  = configureInterface(spgwuS1U_IfName, networkS1U_IPv4Interface, networkS1U_IPv4Gateway)
    configurationSGi  = configureInterface(spgwuSGi_IfName, networkSGi_IPv4Interface, networkSGi_IPv4Gateway,

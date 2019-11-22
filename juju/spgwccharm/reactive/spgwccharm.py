@@ -213,6 +213,7 @@ def configure_spgwc():
    networkDNS1_IPv4     = IPv4Address('10.1.1.1')
    networkDNS2_IPv4     = IPv4Address('10.1.2.1')
 
+   # Prepare network configurations:
    spgwcSXab_IfName     = 'ens4'
    spgwcS11_IfName      = 'ens5'
    spgwcS5S8_SGW_IfName = 'dummy0:s5c'

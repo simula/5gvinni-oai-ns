@@ -146,7 +146,7 @@ def prepare_cassandra_hss_build():
 
    writeToFile('/tmp/y1', 'prepare-cassandra-hss-build ' + str(gitRepository) + ' ' + str(gitCommit))   # FIXME!
 
-   # Prepare network configurations:
+   # Prepare network configuration:
    hssS6a_IfName    = 'ens4'
    configurationS6a = configureInterface(hssS6a_IfName, IPv4Interface('0.0.0.0/0'))
 

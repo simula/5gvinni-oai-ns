@@ -32,7 +32,7 @@ prepare-mme-build:
     mme-git-repository:
       description: MME Git repository
       type: string
-      default: https://github.com/OPENAIRINTERFACE/openair-cn-cups.git
+      default: https://github.com/OPENAIRINTERFACE/openair-cn.git
     mme-git-commit:
       description: MME Git commit
       type: string

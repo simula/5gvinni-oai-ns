@@ -286,21 +286,19 @@ vnfd:vnfd-catalog:
               - seq: '2'
                 name: prepare-spgwc-build
                 parameter:
-                  - name: mme-s1c-ip
-                    data-type: STRING
-                    value: <mme_s1c_ip>
-                  - name: spgwu-s1u-ip
-                    data-type: STRING
-                    value: <spgwu_s1u_ip>
+                  - name: spgwc-git-repository
+                    value: https://github.com/OPENAIRINTERFACE/openair-cn-cups.git
+                  - name: spgwc-git-commit
+                    value: develop
               - seq: '3'
                 name: configure-spgwc
                 parameter:
-                  - name: mme-s1c-ip
-                    data-type: STRING
-                    value: <mme_s1c_ip>
-                  - name: spgwu-s1u-ip
-                    data-type: STRING
-                    value: <spgwu_s1u_ip>
+                  - name: network-realm
+                    value: simula.nornet
+                  - name: network-dns1
+                    value: 10.1.1.1
+                  - name: network-dns2
+                    value: 10.1.2.1
               - seq: '4'
                 name: restart-spgwc
 
@@ -370,21 +368,19 @@ vnfd:vnfd-catalog:
               - seq: '2'
                 name: prepare-spgwu-build
                 parameter:
-                  - name: mme-s1c-ip
-                    data-type: STRING
-                    value: <mme_s1c_ip>
-                  - name: spgwu-s1u-ip
-                    data-type: STRING
-                    value: <spgwu_s1u_ip>
+                  - name: spgwu-git-repository
+                    value: https://github.com/OPENAIRINTERFACE/openair-cn-cups.git
+                  - name: spgwu-git-commit
+                    value: develop
               - seq: '3'
                 name: configure-spgwu
                 parameter:
-                  - name: mme-s1c-ip
-                    data-type: STRING
-                    value: <mme_s1c_ip>
-                  - name: spgwu-s1u-ip
-                    data-type: STRING
-                    value: <spgwu_s1u_ip>
+                  - name: network-realm
+                    value: simula.nornet
+                  - name: network-dns1
+                    value: 10.1.1.1
+                  - name: network-dns2
+                    value: 10.1.2.1
               - seq: '4'
                 name: restart-spgwu
 

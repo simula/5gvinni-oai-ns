@@ -48,11 +48,14 @@ additionalParamsForVnf:
       network-mnc: 88
 
       # ====== SPGW-C =======================================================
+      spgwc-git-repository: https://github.com/OPENAIRINTERFACE/openair-cn-cups.git
+      spgwc-git-commit: develop
+      network-dns1: 10.1.1.1
+      network-dns2: 10.1.2.1
 
       # ====== SPGW-U =======================================================
-
-      mme_s1c_ip: 192.168.247.102
-      spgwu_s1u_ip: 192.168.248.159
+      spgwu-git-repository: https://github.com/OPENAIRINTERFACE/openair-cn-cups.git
+      spgwu-git-commit: develop
 
       # ====== Other ========================================================
       password: osm4us

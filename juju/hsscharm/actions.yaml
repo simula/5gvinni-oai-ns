@@ -32,7 +32,7 @@ prepare-cassandra-hss-build:
     hss-git-repository:
       description: HSS Git repository
       type: string
-      default: https://github.com/OPENAIRINTERFACE/openair-cn-cups.git
+      default: https://github.com/OPENAIRINTERFACE/openair-cn.git
     hss-git-commit:
       description: HSS Git commit
       type: string
