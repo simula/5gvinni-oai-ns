@@ -79,6 +79,11 @@ MESSAGE("Charms: ${CHARM_SOURCE_LIST}")
 # REQUIREMENTS
 #############################################################################
 
+FIND_PROGRAM(CHARM charm)
+IF(NOT CHARM)
+   MESSAGE(FATAL_ERROR "charm (Ubuntu/Debian: sudo snap install charm --classic) not found!")
+ENDIF()
+
 FIND_PROGRAM(YAMLLINT yamllint)
 IF(NOT YAMLLINT)
    MESSAGE(FATAL_ERROR "yamllint (Ubuntu/Debian: yamllint) not found!")
@@ -162,7 +167,7 @@ FOREACH(charmName IN LISTS CHARM_SOURCE_LIST)
    SET(timestampFile "${charmOutputDirectory}.stamp")
    ADD_CUSTOM_COMMAND(OUTPUT  ${timestampFile}
                       COMMAND rm -rf ${charmOutputDirectory}
-                      COMMAND charm build --build-dir ${charmBuildDirectory}
+                      COMMAND ${CHARM} build --build-dir ${charmBuildDirectory}
                       # FIXME!
                       # COMMAND sed -e "s#^import shlex#import shlex\\\\nimport traceback#g" -i ${charmOutputDirectory}/lib/charms/sshproxy.py
                       COMMAND touch ${timestampFile}
