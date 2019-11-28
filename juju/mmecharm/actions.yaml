@@ -29,32 +29,97 @@
 prepare-mme-build:
   description: Prepares MME sources
   params:
-    mme-s1c-ip:
-      description: MME S1-C IP
-      data-type: string
+    mme-git-repository:
+      description: MME Git repository
+      type: string
+      default: https://github.com/OPENAIRINTERFACE/openair-cn.git
+    mme-git-commit:
+      description: MME Git commit
+      type: string
+      default: develop
+    mme-S1C-ipv4-interface:
+      description: MME S1C IPv4 interface
+      type: string
+      default: 192.168.247.102/24
+    mme-S1C-ipv4-gateway:
+      description: MME S1C IPv4 gateway
+      type: string
       default: 0.0.0.0
-    spgwu-s1u-ip:
-      description: SPGW-U S1-U IP
-      data-type: string
-      default: 0.0.0.0
+    mme-S1C-ipv6-interface:
+      description: MME S1C IPv6 interface
+      type: string
+      default: ""
+    mme-S1C-ipv6-gateway:
+      description: MME S1C IPv6 gateway
+      type: string
+      default: ""
   required:
-    - mme-s1c-ip
-    - spgwu-s1u-ip
+    - mme-git-repository
+    - mme-git-commit
+    - mme-S1C-ipv4-interface
+    - mme-S1C-ipv4-gateway
+    - mme-S1C-ipv6-interface
+    - mme-S1C-ipv6-gateway
 
 configure-mme:
   description: Configures the MME
   params:
-    mme-s1c-ip:
-      description: MME S1-C IP
+    mme-S1C-ipv4-interface:
+      description: MME S1C IPv4 interface
+      type: string
+      default: 192.168.247.102/24
+    mme-S11-ipv4-interface:
+      description: MME S11 IPv4 interface
+      type: string
+      default: 172.16.1.102/24
+    spgwc-S11-ipv4-interface:
+      description: SPGW-C S11 IPv4 interface
+      type: string
+      default: 172.16.1.104/24
+    network-realm:
+      description: Network realm
+      type: string
+      default: simula.nornet
+    network-mcc:
+      description: Mobile Country Code (MCC)
       data-type: string
-      default: 0.0.0.0
-    spgwu-s1u-ip:
-      description: SPGW-U S1-U IP
+      default: 242
+    network-mnc:
+      description: Mobile Network Code (MNC)
       data-type: string
-      default: 0.0.0.0
+      default: 88
+    network-lte_k:
+      description: LTE_K
+      type: string
+      default: 449c4b91aeacd0ace182cf3a5a72bfa1
+    network-op-k:
+      description: OP_K
+      type: string
+      default: 1006020f0a478bf6b699f15c062e42b3
+    network-imsi-first:
+      description: First IMSI
+      type: string
+      default: 242881234500000
+    network-msisdn-first:
+      description: First MSISDN
+      type: string
+      default: 24288880000000
+    network-users:
+      description: Number of users
+      type: string
+      default: 1024
   required:
-    - mme-s1c-ip
-    - spgwu-s1u-ip
+    - mme-S1C-ipv4-interface
+    - mme-S11-ipv4-interface
+    - spgwc-S11-ipv4-interface
+    - network-realm
+    - network-mcc
+    - network-mnc
+    - network-lte_k
+    - network-op-k
+    - network-imsi-first
+    - network-msisdn-first
+    - network-users
 
 restart-mme:
   description: Restarts the MME

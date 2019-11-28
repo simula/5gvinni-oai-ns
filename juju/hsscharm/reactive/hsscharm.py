@@ -51,9 +51,43 @@ from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
 # #### Helper functions                                                  ####
 # ###########################################################################
 
+# ###### Write debug output to file #########################################
+def writeToFile(filename, content):
+   cmd = [ 'echo "{content}" >{filename}'.format(
+      filename = filename,
+      content  = content
+   ) ]
+   result, err = charms.sshproxy._run(cmd)
+
+
 # ###### Execute command ####################################################
 def execute(commands):
    return charms.sshproxy._run(commands)
+
+
+# ###### Run shell commands, handle exceptions, and upage status flags ######
+def runShellCommands(commands, comment, actionFlagToClear, successFlagToSet = None):
+   status_set('active', comment + ' ...')
+   try:
+       stdout, stderr = execute(commands)
+   except subprocess.CalledProcessError as e:
+       exc_type, exc_value, exc_traceback = sys.exc_info()
+       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
+       action_fail(message.encode('utf-8'))
+       status_set('active', comment + ' COMMANDS FAILED!')
+   except:
+       exc_type, exc_value, exc_traceback = sys.exc_info()
+       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       action_fail('Command execution failed: ' + str(err))
+       status_set('active', comment + ' FAILED!')
+   else:
+      if successFlagToSet != None:
+         set_flag(successFlagToSet)
+      # action_set( { 'output': stdout.encode('utf-8') } )
+      status_set('active', comment + ' COMPLETED')
+   finally:
+      clear_flag(actionFlagToClear)
 
 
 # ######  Get /etc/network/interfaces setup for interface ###################
@@ -124,19 +158,24 @@ def install_hsscharm_proxy_charm():
 @when('hsscharm.installed')
 @when_not('hsscharm.prepared-cassandra-hss-build')
 def prepare_cassandra_hss_build():
-   status_set('active', 'prepare-cassandra-hss-build: preparing Cassandra/HSS build ...')
 
    # ====== Install Cassandra and the HSS ===================================
    # For a documentation of the installation procedure, see:
    # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
 
-   gitRepository = 'https://github.com/OPENAIRINTERFACE/openair-cn.git'
-   gitDirectory  = 'openair-cn'
-   gitCommit     = 'develop'
+   writeToFile('/tmp/y0', 'prepare-cassandra-hss-build')   # FIXME!
 
-   # Prepare network configurations:
+   gitRepository = action_get('hss-git-repository')
+   gitCommit     = action_get('hss-git-commit')
+   gitDirectory  = 'openair-cn'
+
+   writeToFile('/tmp/y1', 'prepare-cassandra-hss-build ' + str(gitRepository) + ' ' + str(gitCommit))   # FIXME!
+
+   # Prepare network configuration:
    hssS6a_IfName    = 'ens4'
    configurationS6a = configureInterface(hssS6a_IfName, IPv4Interface('0.0.0.0/0'))
+
+   status_set('active', 'prepare-cassandra-hss-build: preparing Cassandra/HSS build ...')
 
    # NOTE:
    # Double escaping is required for \ and " in "command" string!
@@ -162,38 +201,27 @@ echo \\\"###### Done! ##########################################################
       configurationS6a = configurationS6a
    )
 
-   try:
-       stdout, stderr = execute(commands)
-   except subprocess.CalledProcessError as e:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       action_fail(message.encode('utf-8'))
-       status_set('active', 'prepare-cassandra-hss-build: preparing Cassandra/HSS build FAILED!')
-   except:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       action_fail('Command execution failed: ' + str(err))
-       status_set('active', 'prepare-cassandra-hss-build: preparing Cassandra/HSS build FAILED!')
-   else:
-      set_flag('hsscharm.prepared-cassandra-hss-build')
-      clear_flag('actions.prepare-cassandra-hss-build')
-      action_set( { 'output': stdout.encode('utf-8') } )
-      status_set('active', 'prepare-cassandra-hss-build: preparing Cassandra/HSS build COMPLETED')
+   runShellCommands(commands, 'prepare_cassandra_hss_build: preparing Cassandra/HSS build',
+                    'actions.prepare-cassandra-hss-build', 'hsscharm.prepared-cassandra-hss-build')
 
 
 # ###### configure-cassandra function #######################################
 @when('actions.configure-cassandra')
 @when('hsscharm.prepared-cassandra-hss-build')
 def configure_cassandra():
-   status_set('active', 'configure-cassandra: configuring Cassandra ...')
 
    # ====== Install Cassandra and the HSS ===================================
    # For a documentation of the installation procedure, see:
    # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
 
+   writeToFile('/tmp/x0', 'configure_cassandra')   # FIXME!
+
    gitDirectory      = 'openair-cn'
-   cassandraServerIP = '172.16.6.129'
+   cassandraServerIP = action_get('cassandra-server-ip')
+
+   writeToFile('/tmp/x1', 'configure_cassandra ' + str(cassandraServerIP))   # FIXME!
+
+   status_set('active', 'configure-cassandra: configuring Cassandra ...')
 
    # NOTE:
    # Double escaping is required for \ and " in "command" string!
@@ -230,23 +258,8 @@ echo \\\"###### Done! ##########################################################
       cassandraServerIP = cassandraServerIP
    )
 
-   try:
-       stdout, stderr = execute(commands)
-   except subprocess.CalledProcessError as e:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       action_fail(message.encode('utf-8'))
-       status_set('active', 'confiigure-cassandra: configuring Cassandra FAILED!')
-   except:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       action_fail('Command execution failed: ' + str(err))
-       status_set('active', 'confiigure-cassandra: configuring Cassandra FAILED!')
-   else:
-      clear_flag('actions.configure-cassandra')
-      action_set( { 'output': stdout.encode('utf-8') } )
-      status_set('active', 'confiigure-cassandra: configuring Cassandra COMPLETED')
+   runShellCommands(commands, 'configure_cassandra: configuring Cassandra',
+                    'actions.configure-cassandra', 'hsscharm.configured-cassandra')
 
 
 # ###### configure-hss function #############################################
@@ -323,23 +336,8 @@ echo \\\"###### Done! ##########################################################
       networkUsers       = networkUsers
    )
 
-   try:
-       stdout, stderr = execute(commands)
-   except subprocess.CalledProcessError as e:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       action_fail(message.encode('utf-8'))
-       status_set('active', 'confiigure-hss: configuring HSS FAILED!')
-   except:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       action_fail('Command execution failed: ' + str(err))
-       status_set('active', 'confiigure-hss: configuring HSS FAILED!')
-   else:
-      clear_flag('actions.configure-hss')
-      action_set( { 'output': stdout.encode('utf-8') } )
-      status_set('active', 'confiigure-hss: configuring HSS COMPLETED')
+   runShellCommands(commands, 'configure_hss: configuring HSS',
+                    'actions.configure-hss', 'hsscharm.configured-hss')
 
 
 # ###### restart-hss function ###############################################
@@ -347,5 +345,29 @@ echo \\\"###### Done! ##########################################################
 @when('hsscharm.configured-hss')
 def restart_hss():
    commands = 'touch /tmp/restart-hss'
-   if execute(commands) == True:
-      clear_flag('actions.restart-hss')
+   runShellCommands(commands, 'restart_hss: restarting HSS', 'actions.restart-hss')
+
+
+# FIXME!
+@when('actions.touch')
+def touch():
+   gitDirectory      = 'openair-cn'
+   cassandraServerIP = action_get('cassandra-server-ip')
+
+   status_set('active', 'configure-cassandra: configuring Cassandra ...')
+
+   err = ''
+   try:
+       filename = '/tmp/x0'
+       cmd = [ 'echo "{cassandraServerIP}" >{filename}'.format(
+          filename          = filename,
+          cassandraServerIP = cassandraServerIP
+       ) ]
+       result, err = charms.sshproxy._run(cmd)
+   except:
+       action_fail('command failed:' + err)
+   else:
+       action_set({'outout': result})
+   finally:
+       clear_flag('actions.touch')
+# FIXME!

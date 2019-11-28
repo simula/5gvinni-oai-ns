@@ -42,90 +42,6 @@ vnfd:vnfd-catalog:
 
       vdu:
 
-        # ###### VDU: SPGW-U ################################################
-        # (Serving & Packet Data Network Gateway -- User Plane)
-        - id: SPGW-U
-          name: SPGW-U
-          description: SPGW-U
-          count: 1
-
-          # ====== VDU VM Configuration =====================================
-          vm-flavor:
-            vcpu-count: 4
-            memory-mb: 4096
-            storage-gb: 24
-          image: Template-Ubuntu-5gVINNI-Development-Bionic
-          cloud-init-file: spgwu-init
-          # guest-epa:
-          #     cpu-pinning-policy: DEDICATED
-          #     mempage-size: LARGE
-
-          # ====== Interfaces ===============================================
-          interface:
-            - name: eth0
-              type: EXTERNAL
-              mgmt-interface: true
-              virtual-interface:
-                type: PARAVIRT
-              external-connection-point-ref: spgwu-mgmt
-            - name: eth1
-              type: INTERNAL
-              virtual-interface:
-                type: PARAVIRT
-              internal-connection-point-ref: spgwu-sxab
-            - name: eth2
-              type: EXTERNAL
-              virtual-interface:
-                type: PARAVIRT
-              external-connection-point-ref: spgwu-s1u
-            - name: eth3
-              type: EXTERNAL
-              virtual-interface:
-                type: PARAVIRT
-              external-connection-point-ref: spgwu-sgi
-
-          # ====== Internal Connection Points ===============================
-          internal-connection-point:
-            - id: spgwu-sxab
-              name: spgwu-sxab
-              type: VPORT
-
-          # ====== Juju Charm ===============================================
-          vdu-configuration:
-            juju:
-              charm: spgwucharm
-            initial-config-primitive:
-              - seq: '1'
-                name: config
-                parameter:
-                  - name: ssh-hostname
-                    value: <rw_mgmt_ip>
-                  - name: ssh-username
-                    value: nornetpp
-                  - name: ssh-password
-                    value: <password>
-              - seq: '2'
-                name: prepare-spgwu-build
-                parameter:
-                  - name: mme-s1c-ip
-                    data-type: STRING
-                    value: <mme_s1c_ip>
-                  - name: spgwu-s1u-ip
-                    data-type: STRING
-                    value: <spgwu_s1u_ip>
-              - seq: '3'
-                name: configure-spgwu
-                parameter:
-                  - name: mme-s1c-ip
-                    data-type: STRING
-                    value: <mme_s1c_ip>
-                  - name: spgwu-s1u-ip
-                    data-type: STRING
-                    value: <spgwu_s1u_ip>
-              - seq: '4'
-                name: restart-spgwu
-
-
         # ###### VDU: HSS (Home Subscriber Server) ##########################
         - id: HSS
           name: HSS
@@ -177,30 +93,30 @@ vnfd:vnfd-catalog:
               - seq: '2'
                 name: prepare-cassandra-hss-build
                 parameter:
-                  - name: mme-s1c-ip
-                    data-type: STRING
-                    value: <mme_s1c_ip>
-                  - name: spgwu-s1u-ip
-                    data-type: STRING
-                    value: <spgwu_s1u_ip>
+                  - name: hss-git-repository
+                    value: https://github.com/OPENAIRINTERFACE/openair-cn.git
+                  - name: hss-git-commit
+                    value: develop
               - seq: '3'
                 name: configure-cassandra
                 parameter:
-                  - name: mme-s1c-ip
-                    data-type: STRING
-                    value: <mme_s1c_ip>
-                  - name: spgwu-s1u-ip
-                    data-type: STRING
-                    value: <spgwu_s1u_ip>
+                  - name: cassandra-server-ip
+                    value: 172.16.6.129
               - seq: '4'
                 name: configure-hss
                 parameter:
-                  - name: mme-s1c-ip
-                    data-type: STRING
-                    value: <mme_s1c_ip>
-                  - name: spgwu-s1u-ip
-                    data-type: STRING
-                    value: <spgwu_s1u_ip>
+                  - name: network-realm
+                    value: simula.nornet
+                  - name: network-lte_k
+                    value: 449c4b91aeacd0ace182cf3a5a72bfa1
+                  - name: network-op-k
+                    value: 1006020f0a478bf6b699f15c062e42b3
+                  - name: network-imsi-first
+                    value: 242881234500000
+                  - name: network-msisdn-first
+                    value: 24288880000000
+                  - name: network-users
+                    value: 1024
               - seq: '5'
                 name: restart-hss
 
@@ -269,21 +185,43 @@ vnfd:vnfd-catalog:
               - seq: '2'
                 name: prepare-mme-build
                 parameter:
-                  - name: mme-s1c-ip
-                    data-type: STRING
-                    value: <mme_s1c_ip>
-                  - name: spgwu-s1u-ip
-                    data-type: STRING
-                    value: <spgwu_s1u_ip>
+                  - name: mme-git-repository
+                    value: https://github.com/OPENAIRINTERFACE/openair-cn.git
+                  - name: mme-git-commit
+                    value: develop
+                  - name: mme-S1C-ipv4-interface
+                    value: 192.168.247.102/24
+                  - name: mme-S1C-ipv4-gateway
+                    value: 0.0.0.0
+                  - name: mme-S1C-ipv6-interface
+                    value: ""
+                  - name: mme-S1C-ipv6-gateway
+                    value: ""
               - seq: '3'
                 name: configure-mme
                 parameter:
-                  - name: mme-s1c-ip
-                    data-type: STRING
-                    value: <mme_s1c_ip>
-                  - name: spgwu-s1u-ip
-                    data-type: STRING
-                    value: <spgwu_s1u_ip>
+                  - name: mme-S1C-ipv4-interface
+                    value: 192.168.247.102/24
+                  - name: mme-S11-ipv4-interface
+                    value: 172.16.1.102/24
+                  - name: spgwc-S11-ipv4-interface
+                    value: 172.16.1.104/24
+                  - name: network-realm
+                    value: simula.nornet
+                  - name: network-mcc
+                    value: 242
+                  - name: network-mnc
+                    value: 88
+                  - name: network-lte_k
+                    value: 449c4b91aeacd0ace182cf3a5a72bfa1
+                  - name: network-op-k
+                    value: 1006020f0a478bf6b699f15c062e42b3
+                  - name: network-imsi-first
+                    value: 242881234500000
+                  - name: network-msisdn-first
+                    value: 24288880000000
+                  - name: network-users
+                    value: 1024
               - seq: '4'
                 name: restart-mme
 
@@ -348,23 +286,106 @@ vnfd:vnfd-catalog:
               - seq: '2'
                 name: prepare-spgwc-build
                 parameter:
-                  - name: mme-s1c-ip
-                    data-type: STRING
-                    value: <mme_s1c_ip>
-                  - name: spgwu-s1u-ip
-                    data-type: STRING
-                    value: <spgwu_s1u_ip>
+                  - name: spgwc-git-repository
+                    value: https://github.com/OPENAIRINTERFACE/openair-cn-cups.git
+                  - name: spgwc-git-commit
+                    value: develop
               - seq: '3'
                 name: configure-spgwc
                 parameter:
-                  - name: mme-s1c-ip
-                    data-type: STRING
-                    value: <mme_s1c_ip>
-                  - name: spgwu-s1u-ip
-                    data-type: STRING
-                    value: <spgwu_s1u_ip>
+                  - name: network-realm
+                    value: simula.nornet
+                  - name: network-dns1
+                    value: 10.1.1.1
+                  - name: network-dns2
+                    value: 10.1.2.1
               - seq: '4'
                 name: restart-spgwc
+
+
+        # ###### VDU: SPGW-U ################################################
+        # (Serving & Packet Data Network Gateway -- User Plane)
+        - id: SPGW-U
+          name: SPGW-U
+          description: SPGW-U
+          count: 1
+
+          # ====== VDU VM Configuration =====================================
+          vm-flavor:
+            vcpu-count: 4
+            memory-mb: 4096
+            storage-gb: 24
+          image: Template-Ubuntu-5gVINNI-Development-Bionic
+          cloud-init-file: spgwu-init
+          # guest-epa:
+          #     cpu-pinning-policy: DEDICATED
+          #     mempage-size: LARGE
+
+          # ====== Interfaces ===============================================
+          interface:
+            - name: eth0
+              type: EXTERNAL
+              mgmt-interface: true
+              virtual-interface:
+                type: PARAVIRT
+              external-connection-point-ref: spgwu-mgmt
+            - name: eth1
+              type: INTERNAL
+              virtual-interface:
+                type: PARAVIRT
+              internal-connection-point-ref: spgwu-sxab
+            - name: eth2
+              type: EXTERNAL
+              virtual-interface:
+                type: PARAVIRT
+              external-connection-point-ref: spgwu-s1u
+            - name: eth3
+              type: EXTERNAL
+              virtual-interface:
+                type: PARAVIRT
+              external-connection-point-ref: spgwu-sgi
+
+          # ====== Internal Connection Points ===============================
+          internal-connection-point:
+            - id: spgwu-sxab
+              name: spgwu-sxab
+              type: VPORT
+
+          # ====== Juju Charm ===============================================
+          vdu-configuration:
+            juju:
+              charm: spgwucharm
+            initial-config-primitive:
+              - seq: '1'
+                name: config
+                parameter:
+                  - name: ssh-hostname
+                    value: <rw_mgmt_ip>
+                  - name: ssh-username
+                    value: nornetpp
+                  - name: ssh-password
+                    value: <password>
+              - seq: '2'
+                name: prepare-spgwu-build
+                parameter:
+                  - name: spgwu-git-repository
+                    value: https://github.com/OPENAIRINTERFACE/openair-cn-cups.git
+                  - name: spgwu-git-commit
+                    value: develop
+                  - name: spgwu-S1U-ipv4-interface
+                    value: 192.168.248.159/24
+                  - name: spgwu-S1U-ipv4-gateway
+                    value: 0.0.0.0
+                  - name: spgwu-SGi-ipv4-interface
+                    value: 10.254.1.203/24
+                  - name: spgwu-SGi-ipv4-gateway
+                    value: 10.254.1.1
+                  - name: spgwu-SGi-ipv6-interface
+                    value: 3ffe::2/64
+                  - name: spgwu-SGi-ipv6-gateway
+                    value: 3ffe::1
+              - seq: '3'
+                name: configure-spgwu
 
 
       # ###### Internal VLDs ################################################
@@ -429,7 +450,7 @@ vnfd:vnfd-catalog:
       # ###### Juju Charm ###################################################
       # vnf-configuration:
         # juju:
-          # charm: epccharm
+          # charm: simple
         # initial-config-primitive:
           # - seq: '1'
             # name: config
@@ -441,13 +462,7 @@ vnfd:vnfd-catalog:
               # - name: ssh-password
                 # value: osm4u
           # - seq: '2'
-            # name: configure-epc
+            # name: touch
             # parameter:
-              # - name: mme-s1c-ip
-                # data-type: STRING
-                # value: <mme_s1c_ip>
-              # - name: spgwu-s1u-ip
-                # data-type: STRING
-                # value: <spgwu_s1u_ip>
-          # - seq: '3'
-            # name: restart-epc
+              # - name: filename
+                # value: /tmp/touch1

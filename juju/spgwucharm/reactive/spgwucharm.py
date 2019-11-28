@@ -56,6 +56,31 @@ def execute(commands):
    return charms.sshproxy._run(commands)
 
 
+# ###### Run shell commands, handle exceptions, and upage status flags ######
+def runShellCommands(commands, comment, actionFlagToClear, successFlagToSet = None):
+   status_set('active', comment + ' ...')
+   try:
+       stdout, stderr = execute(commands)
+   except subprocess.CalledProcessError as e:
+       exc_type, exc_value, exc_traceback = sys.exc_info()
+       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
+       action_fail(message.encode('utf-8'))
+       status_set('active', comment + ' COMMANDS FAILED!')
+   except:
+       exc_type, exc_value, exc_traceback = sys.exc_info()
+       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       action_fail('Command execution failed: ' + str(err))
+       status_set('active', comment + ' FAILED!')
+   else:
+      if successFlagToSet != None:
+         set_flag(successFlagToSet)
+      # action_set( { 'output': stdout.encode('utf-8') } )
+      status_set('active', comment + ' COMPLETED')
+   finally:
+      clear_flag(actionFlagToClear)
+
+
 # ######  Get /etc/network/interfaces setup for interface ###################
 def configureInterface(name,
                        ipv4Interface = IPv4Interface('0.0.0.0/0'), ipv4Gateway = None,
@@ -130,25 +155,27 @@ def prepare_spgwu_build():
    # For a documentation of the installation procedure, see:
    # https://github.com/OPENAIRINTERFACE/openair-cn-cups/wiki/OpenAirSoftwareSupport#install-spgw-u
 
-   gitRepository            = 'https://github.com/OPENAIRINTERFACE/openair-cn-cups.git'
-   gitDirectory             = 'openair-cn-cups'
-   gitCommit                = 'develop'
+   gitRepository          = 'https://github.com/OPENAIRINTERFACE/openair-cn-cups.git'
+   gitDirectory           = 'openair-cn-cups'
+   gitCommit              = 'develop'
 
-   spgwuSXab_IfName         = 'ens4'
-   spgwuS1U_IfName          = 'ens5'
-   spgwuSGi_IfName          = 'ens6'
+   spgwuS1U_IPv4Interface = IPv4Interface('192.168.248.159/24')
+   spgwuS1U_IPv4Gateway   = IPv4Address('0.0.0.0')
 
-   networkS1U_IPv4Interface = IPv4Interface('192.168.248.159/24')
-   networkSGi_IPv4Interface = IPv4Interface('10.254.1.203/24')
-   networkSGi_IPv4Gateway   = IPv4Address('10.254.1.1')
-   networkSGi_IPv6Interface = IPv6Interface('3ffe::2/64')
-   networkSGi_IPv6Gateway   = IPv6Address('3ffe::1')
+   spgwuSGi_IPv4Interface = IPv4Interface('10.254.1.203/24')
+   spgwuSGi_IPv4Gateway   = IPv4Address('10.254.1.1')
+   spgwuSGi_IPv6Interface = IPv6Interface('3ffe::2/64')
+   spgwuSGi_IPv6Gateway   = IPv6Address('3ffe::1')
 
    # Prepare network configurations:
+   spgwuSXab_IfName       = 'ens4'
+   spgwuS1U_IfName        = 'ens5'
+   spgwuSGi_IfName        = 'ens6'
+
    configurationSXab = configureInterface(spgwuSXab_IfName, IPv4Interface('0.0.0.0/0'))
-   configurationS1U  = configureInterface(spgwuS1U_IfName, networkS1U_IPv4Interface, IPv4Address('0.0.0.0'))
-   configurationSGi  = configureInterface(spgwuSGi_IfName, networkSGi_IPv4Interface, networkSGi_IPv4Gateway,
-                                                           networkSGi_IPv6Interface, networkSGi_IPv6Gateway)
+   configurationS1U  = configureInterface(spgwuS1U_IfName, spgwuS1U_IPv4Interface, spgwuS1U_IPv4Gateway)
+   configurationSGi  = configureInterface(spgwuSGi_IfName, spgwuSGi_IPv4Interface, spgwuSGi_IPv4Gateway,
+                                                           spgwuSGi_IPv6Interface, spgwuSGi_IPv6Gateway)
 
    # NOTE:
    # Double escaping is required for \ and " in "command" string!
@@ -178,24 +205,26 @@ echo \\\"###### Done! ##########################################################
       configurationSGi  = configurationSGi
    )
 
-   try:
-       stdout, stderr = execute(commands)
-   except subprocess.CalledProcessError as e:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       action_fail(message.encode('utf-8'))
-       status_set('active', 'prepare-spgwu-build: preparing SPGW-U build FAILED!')
-   except:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       action_fail('Command execution failed: ' + str(err))
-       status_set('active', 'prepare-spgwu-build: preparing SPGW-U build FAILED!')
-   else:
-      set_flag('spgwucharm.prepared-spgwu-build')
-      clear_flag('actions.prepare-spgwu-build')
-      action_set( { 'output': stdout.encode('utf-8') } )
-      status_set('active', 'prepare-spgwu-build: preparing SPGW-U build COMPLETED')
+   runShellCommands(commands, 'prepare_spgwu_build: preparing SPGW-U build',
+                    'actions.prepare-spgwu-build', 'spgwucharm.prepared-spgwu-build')
+   #try:
+       #stdout, stderr = execute(commands)
+   #except subprocess.CalledProcessError as e:
+       #exc_type, exc_value, exc_traceback = sys.exc_info()
+       #err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       #message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
+       #action_fail(message.encode('utf-8'))
+       #status_set('active', 'prepare-spgwu-build: preparing SPGW-U build FAILED!')
+   #except:
+       #exc_type, exc_value, exc_traceback = sys.exc_info()
+       #err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       #action_fail('Command execution failed: ' + str(err))
+       #status_set('active', 'prepare-spgwu-build: preparing SPGW-U build FAILED!')
+   #else:
+      #set_flag('spgwucharm.prepared-spgwu-build')
+      #clear_flag('actions.prepare-spgwu-build')
+      ## action_set( { 'output': stdout.encode('utf-8') } )
+      #status_set('active', 'prepare-spgwu-build: preparing SPGW-U build COMPLETED')
 
 
 # ###### configure-spgwu function ###########################################
@@ -208,10 +237,9 @@ def configure_spgwu():
    # For a documentation of the installation procedure, see:
    # https://github.com/OPENAIRINTERFACE/openair-cn-cups/wiki/OpenAirSoftwareSupport#install-spgw-u
 
-   gitRepository    = 'https://github.com/OPENAIRINTERFACE/openair-cn-cups.git'
    gitDirectory     = 'openair-cn-cups'
-   gitCommit        = 'develop'
 
+   # Prepare network configurations:
    spgwuSXab_IfName = 'ens4'
    spgwuS1U_IfName  = 'ens5'
    spgwuSGi_IfName  = 'ens6'
@@ -246,31 +274,31 @@ SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_SX@]='{spgwuSXab_IfName}' && \\
 SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_SGI@]='{spgwuSGi_IfName}' && \\
 for K in \\\"\${{!SPGWU_CONF[@]}}\\\"; do sudo egrep -lRZ \\\"\$K\\\" \$PREFIX | xargs -0 -l sudo sed -i -e \\\"s|\$K|\${{SPGWU_CONF[\$K]}}|g\\\" ; ret=\$?;[[ ret -ne 0 ]] && echo \\\"Tried to replace \$K with \${{SPGWU_CONF[\$K]}}\\\" || true ; done && \\
 echo \\\"###### Done! ##########################################################\\\"""".format(
-      gitRepository     = gitRepository,
-      gitDirectory      = gitDirectory,
-      gitCommit         = gitCommit,
-      spgwuSXab_IfName  = spgwuSXab_IfName,
-      spgwuS1U_IfName   = spgwuS1U_IfName,
-      spgwuSGi_IfName   = spgwuSGi_IfName,
+      gitDirectory     = gitDirectory,
+      spgwuSXab_IfName = spgwuSXab_IfName,
+      spgwuS1U_IfName  = spgwuS1U_IfName,
+      spgwuSGi_IfName  = spgwuSGi_IfName
    )
 
-   try:
-       stdout, stderr = execute(commands)
-   except subprocess.CalledProcessError as e:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       action_fail(message.encode('utf-8'))
-       status_set('active', 'confiigure-spgwu: configuring SPGW-U FAILED!')
-   except:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       action_fail('Command execution failed: ' + str(err))
-       status_set('active', 'confiigure-spgwu: configuring SPGW-U FAILED!')
-   else:
-      clear_flag('actions.configure-spgwu')
-      action_set( { 'output': stdout.encode('utf-8') } )
-      status_set('active', 'confiigure-spgwu: configuring SPGW-U COMPLETED')
+   runShellCommands(commands, 'configure_spgwu: configuring SPGW-U',
+                    'actions.configure-spgwu', 'spgwucharm.configured-spgwu')
+   #try:
+       #stdout, stderr = execute(commands)
+   #except subprocess.CalledProcessError as e:
+       #exc_type, exc_value, exc_traceback = sys.exc_info()
+       #err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       #message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
+       #action_fail(message.encode('utf-8'))
+       #status_set('active', 'confiigure-spgwu: configuring SPGW-U FAILED!')
+   #except:
+       #exc_type, exc_value, exc_traceback = sys.exc_info()
+       #err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       #action_fail('Command execution failed: ' + str(err))
+       #status_set('active', 'confiigure-spgwu: configuring SPGW-U FAILED!')
+   #else:
+      #clear_flag('actions.configure-spgwu')
+      ## action_set( { 'output': stdout.encode('utf-8') } )
+      #status_set('active', 'confiigure-spgwu: configuring SPGW-U COMPLETED')
 
 
 # ###### restart-spgwu function #############################################

@@ -39,8 +39,12 @@ PROJECT(SimulaMet-OAI-EPC C)
 # OPTIONS
 #############################################################################
 
-SET(VALIDATE_DESCRIPTOR_SCRIPT "devops/descriptor-packages/tools/validate_descriptor.py")
-SET(GENERATE_DESCRIPTOR_SCRIPT "devops/descriptor-packages/tools/generate_descriptor_pkg.sh")
+# Installed scripts:
+SET(VALIDATE_DESCRIPTOR_SCRIPT "/usr/share/osm-devops/descriptor-packages/tools/validate_descriptor.py")
+SET(GENERATE_DESCRIPTOR_SCRIPT "/usr/share/osm-devops/descriptor-packages/tools/generate_descriptor_pkg.sh")
+# Local scripts (NOTE: make sure to use scripts compatible with the current OSM setup!):
+# SET(VALIDATE_DESCRIPTOR_SCRIPT "devops/descriptor-packages/tools/validate_descriptor.py")
+# SET(GENERATE_DESCRIPTOR_SCRIPT "devops/descriptor-packages/tools/generate_descriptor_pkg.sh")
 
 # Automatically obtain list of VNFDs:
 EXECUTE_PROCESS(COMMAND git ls-files
@@ -91,12 +95,12 @@ ENDIF()
 
 FIND_PROGRAM(VALIDATE_DESCRIPTOR ${VALIDATE_DESCRIPTOR_SCRIPT})
 IF(NOT VALIDATE_DESCRIPTOR)
-   MESSAGE(FATAL_ERROR "validate_descriptor.py (${VALIDATE_DESCRIPTOR_SCRIPT}) not found!")
+   MESSAGE(FATAL_ERROR "validate_descriptor.py (Ubuntu: osm-devops python-osm-im) not found!")
 ENDIF()
 
 FIND_PROGRAM(GENERATE_DESCRIPTOR ${GENERATE_DESCRIPTOR_SCRIPT})
 IF(NOT GENERATE_DESCRIPTOR)
-   MESSAGE(FATAL_ERROR "validate_descriptor.py (${GENERATE_DESCRIPTOR_SCRIPT}) not found!")
+   MESSAGE(FATAL_ERROR "validate_descriptor.py (Ubuntu: osm-devops python-osm-im) not found!")
 ENDIF()
 
 
@@ -143,7 +147,8 @@ FOREACH(yamlFile IN LISTS yamlFiles)
 
    SET(timestampFile ".${validate_yaml}.stamp")
    ADD_CUSTOM_COMMAND(OUTPUT ${timestampFile}
-                      COMMAND ${YAMLLINT} -d '{extends: default, rules: {document-start: {present: no}}}' ${yamlFile}
+                      # COMMAND ${YAMLLINT} -d '{extends: default, rules: {document-start: {present: no}, line-length: {max: 80, allow-non-breakable-words: true, allow-non-breakable-inline-mappings: true}}}' ${yamlFile}
+                      COMMAND ${YAMLLINT} -d '{extends: default, rules: {document-start: {present: no}, line-length: {max: 4096}, comments-indentation: disable}}' ${yamlFile}
                       COMMAND touch ${timestampFile}
                       DEPENDS ${yamlFile})
    ADD_CUSTOM_TARGET(${validate_yaml} DEPENDS ${timestampFile})
