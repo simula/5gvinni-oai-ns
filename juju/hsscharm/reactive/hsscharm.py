@@ -150,7 +150,7 @@ def configureInterface(name,
 @when_not('hsscharm.installed')
 def install_hsscharm_proxy_charm():
    set_flag('hsscharm.installed')
-   status_set('active', 'Ready!')
+   status_set('active', 'install_hsscharm_proxy_charm: SSH proxy charm is READY')
 
 
 # ###### prepare-cassandra-hss-build function ###############################

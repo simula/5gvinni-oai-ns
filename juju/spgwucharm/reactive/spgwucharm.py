@@ -149,7 +149,6 @@ def install_spgwucharm_proxy_charm():
 @when('spgwucharm.installed')
 @when_not('spgwucharm.prepared-spgwu-build')
 def prepare_spgwu_build():
-   status_set('active', 'prepare-spgwu-build: preparing SPGW-U build ...')
 
    # ====== Install SPGW-U ==================================================
    # For a documentation of the installation procedure, see:
@@ -207,31 +206,12 @@ echo \\\"###### Done! ##########################################################
 
    runShellCommands(commands, 'prepare_spgwu_build: preparing SPGW-U build',
                     'actions.prepare-spgwu-build', 'spgwucharm.prepared-spgwu-build')
-   #try:
-       #stdout, stderr = execute(commands)
-   #except subprocess.CalledProcessError as e:
-       #exc_type, exc_value, exc_traceback = sys.exc_info()
-       #err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       #message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       #action_fail(message.encode('utf-8'))
-       #status_set('active', 'prepare-spgwu-build: preparing SPGW-U build FAILED!')
-   #except:
-       #exc_type, exc_value, exc_traceback = sys.exc_info()
-       #err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       #action_fail('Command execution failed: ' + str(err))
-       #status_set('active', 'prepare-spgwu-build: preparing SPGW-U build FAILED!')
-   #else:
-      #set_flag('spgwucharm.prepared-spgwu-build')
-      #clear_flag('actions.prepare-spgwu-build')
-      ## action_set( { 'output': stdout.encode('utf-8') } )
-      #status_set('active', 'prepare-spgwu-build: preparing SPGW-U build COMPLETED')
 
 
 # ###### configure-spgwu function ###########################################
 @when('actions.configure-spgwu')
 @when('spgwucharm.prepared-spgwu-build')
 def configure_spgwu():
-   status_set('active', 'configure-spgwu: configuring SPGW-U ...')
 
    # ====== Install SPGW-U ==================================================
    # For a documentation of the installation procedure, see:
@@ -282,23 +262,6 @@ echo \\\"###### Done! ##########################################################
 
    runShellCommands(commands, 'configure_spgwu: configuring SPGW-U',
                     'actions.configure-spgwu', 'spgwucharm.configured-spgwu')
-   #try:
-       #stdout, stderr = execute(commands)
-   #except subprocess.CalledProcessError as e:
-       #exc_type, exc_value, exc_traceback = sys.exc_info()
-       #err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       #message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       #action_fail(message.encode('utf-8'))
-       #status_set('active', 'confiigure-spgwu: configuring SPGW-U FAILED!')
-   #except:
-       #exc_type, exc_value, exc_traceback = sys.exc_info()
-       #err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       #action_fail('Command execution failed: ' + str(err))
-       #status_set('active', 'confiigure-spgwu: configuring SPGW-U FAILED!')
-   #else:
-      #clear_flag('actions.configure-spgwu')
-      ## action_set( { 'output': stdout.encode('utf-8') } )
-      #status_set('active', 'confiigure-spgwu: configuring SPGW-U COMPLETED')
 
 
 # ###### restart-spgwu function #############################################

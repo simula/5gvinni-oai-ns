@@ -141,7 +141,7 @@ def configureInterface(name,
 @when_not('mmecharm.installed')
 def install_mmecharm_proxy_charm():
    set_flag('mmecharm.installed')
-   status_set('active', 'Ready!')
+   status_set('active', 'install_mmecharm_proxy_charm: SSH proxy charm is READY')
 
 
 # ###### prepare-mme-build function #########################################
