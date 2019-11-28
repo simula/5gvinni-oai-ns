@@ -94,9 +94,9 @@ vnfd:vnfd-catalog:
                 name: prepare-cassandra-hss-build
                 parameter:
                   - name: hss-git-repository
-                    value: https://github.com/OPENAIRINTERFACE/openair-cn.git
+                    value: <hss_git_repository>
                   - name: hss-git-commit
-                    value: develop
+                    value: <hss_git_commit>
               - seq: '3'
                 name: configure-cassandra
                 parameter:
@@ -188,9 +188,9 @@ vnfd:vnfd-catalog:
                 name: prepare-mme-build
                 parameter:
                   - name: mme-git-repository
-                    value: https://github.com/OPENAIRINTERFACE/openair-cn.git
+                    value: <mme_git_repository>
                   - name: mme-git-commit
-                    value: develop
+                    value: <mme_git_commit>
                   - name: mme-S1C-ipv4-interface
                     value: 192.168.247.102/24
                   - name: mme-S1C-ipv4-gateway
