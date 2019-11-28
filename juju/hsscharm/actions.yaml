@@ -58,7 +58,7 @@ configure-hss:
       description: Network realm
       type: string
       default: simula.nornet
-    network-lte_k:
+    network-lte-k:
       description: LTE_K
       type: string
       default: 449c4b91aeacd0ace182cf3a5a72bfa1
@@ -80,7 +80,7 @@ configure-hss:
       default: 1024
   required:
     - network-realm
-    - network-lte_k
+    - network-lte-k
     - network-op-k
     - network-imsi-first
     - network-msisdn-first

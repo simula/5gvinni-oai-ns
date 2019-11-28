@@ -163,13 +163,9 @@ def prepare_cassandra_hss_build():
    # For a documentation of the installation procedure, see:
    # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
 
-   writeToFile('/tmp/y0', 'prepare-cassandra-hss-build')   # FIXME!
-
    gitRepository = action_get('hss-git-repository')
    gitCommit     = action_get('hss-git-commit')
    gitDirectory  = 'openair-cn'
-
-   writeToFile('/tmp/y1', 'prepare-cassandra-hss-build ' + str(gitRepository) + ' ' + str(gitCommit))   # FIXME!
 
    # Prepare network configuration:
    hssS6a_IfName    = 'ens4'
@@ -214,12 +210,8 @@ def configure_cassandra():
    # For a documentation of the installation procedure, see:
    # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
 
-   writeToFile('/tmp/x0', 'configure_cassandra')   # FIXME!
-
    gitDirectory      = 'openair-cn'
    cassandraServerIP = action_get('cassandra-server-ip')
-
-   writeToFile('/tmp/x1', 'configure_cassandra ' + str(cassandraServerIP))   # FIXME!
 
    status_set('active', 'configure-cassandra: configuring Cassandra ...')
 
@@ -266,20 +258,21 @@ echo \\\"###### Done! ##########################################################
 @when('actions.configure-hss')
 @when('hsscharm.configured-cassandra')
 def configure_hss():
-   status_set('active', 'configure-hss: configuring HSS ...')
 
    # ====== Install Cassandra and the HSS ===================================
    # For a documentation of the installation procedure, see:
    # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
 
    gitDirectory       = 'openair-cn'
-   cassandraServerIP  = '172.16.6.129'
-   networkRealm       = 'simula.nornet'
-   networkLTE_K       = '449c4b91aeacd0ace182cf3a5a72bfa1'
-   networkOP_K        = '1006020f0a478bf6b699f15c062e42b3'
-   networkIMSIFirst   = '242881234500000'
-   networkMSISDNFirst = '24288880000000'
-   networkUsers       = 1024
+   cassandraServerIP = action_get('cassandra-server-ip')
+   networkRealm       = action_get('network-realm')
+   networkLTE_K       = action_get('network-lte-k')
+   networkOP_K        = action_get('network-op-k')
+   networkIMSIFirst   = action_get('network-imsi-first')
+   networkMSISDNFirst = action_get('network-msisdn-first')
+   networkUsers       = int(action_get('network-users'))
+
+   status_set('active', 'configure-hss: configuring HSS ...')
 
    # NOTE:
    # Double escaping is required for \ and " in "command" string!
