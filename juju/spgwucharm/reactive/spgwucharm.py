@@ -158,13 +158,13 @@ def prepare_spgwu_build():
    gitCommit              = action_get('spgwu-git-commit')
    gitDirectory           = 'openair-cn-cups'
 
-   spgwuS1U_IPv4Interface = IPv4Interface('192.168.248.159/24')
-   spgwuS1U_IPv4Gateway   = IPv4Address('0.0.0.0')
+   spgwuS1U_IPv4Interface = IPv4Interface(action_get('spgwu-S1U-ipv4-interface'))
+   spgwuS1U_IPv4Gateway   = IPv4Address(action_get('spgwu-S1U-ipv4-gateway'))
 
-   spgwuSGi_IPv4Interface = IPv4Interface('10.254.1.203/24')
-   spgwuSGi_IPv4Gateway   = IPv4Address('10.254.1.1')
-   spgwuSGi_IPv6Interface = IPv6Interface('3ffe::2/64')
-   spgwuSGi_IPv6Gateway   = IPv6Address('3ffe::1')
+   spgwuSGi_IPv4Interface = IPv4Interface(action_get('spgwu-SGi-ipv4-interface'))
+   spgwuSGi_IPv4Gateway   = IPv4Address(action_get('spgwu-SGi-ipv4-gateway'))
+   spgwuSGi_IPv6Interface = IPv6Interface(action_get('spgwu-SGi-ipv6-interface'))
+   spgwuSGi_IPv6Gateway   = IPv6Address(action_get('spgwu-SGi-ipv6-gateway'))
 
    # Prepare network configurations:
    spgwuSXab_IfName       = 'ens4'
