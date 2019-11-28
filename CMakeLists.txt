@@ -85,22 +85,22 @@ MESSAGE("Charms: ${CHARM_SOURCE_LIST}")
 
 FIND_PROGRAM(CHARM charm)
 IF(NOT CHARM)
-   MESSAGE(FATAL_ERROR "charm (Ubuntu/Debian: sudo snap install charm --classic) not found!")
+   MESSAGE(FATAL_ERROR "charm (Ubuntu: sudo snap install charm --classic) not found!")
 ENDIF()
 
 FIND_PROGRAM(YAMLLINT yamllint)
 IF(NOT YAMLLINT)
-   MESSAGE(FATAL_ERROR "yamllint (Ubuntu/Debian: yamllint) not found!")
+   MESSAGE(FATAL_ERROR "yamllint (Ubuntu: sudo apt install -y yamllint) not found!")
 ENDIF()
 
 FIND_PROGRAM(VALIDATE_DESCRIPTOR ${VALIDATE_DESCRIPTOR_SCRIPT})
 IF(NOT VALIDATE_DESCRIPTOR)
-   MESSAGE(FATAL_ERROR "validate_descriptor.py (Ubuntu: osm-devops python-osm-im) not found!")
+   MESSAGE(FATAL_ERROR "validate_descriptor.py (Ubuntu: sudo apt install -y osm-devops python-osm-im) not found!")
 ENDIF()
 
 FIND_PROGRAM(GENERATE_DESCRIPTOR ${GENERATE_DESCRIPTOR_SCRIPT})
 IF(NOT GENERATE_DESCRIPTOR)
-   MESSAGE(FATAL_ERROR "validate_descriptor.py (Ubuntu: osm-devops python-osm-im) not found!")
+   MESSAGE(FATAL_ERROR "validate_descriptor.py (Ubuntu: sudo apt install -y osm-devops python-osm-im) not found!")
 ENDIF()
 
 
