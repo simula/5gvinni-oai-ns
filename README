@@ -1,0 +1,17 @@
+==== Install development tools ====
+
+Juju Charm build tools:
+ sudo snap install charm --classic
+
+Other tools:
+ sudo apt install -y cmake yamllint python-pip
+
+OSM Information Model (IM) packages:
+ RELEASE=ReleaseSIX   # !!! Update release here !!!
+ REPOSITORY=stable    # !!! Update repository here !!!
+ sudo apt-key adv --recv-key 6112814124E7559F
+ sudo add-apt-repository -y "deb [arch=amd64] https://osm-download.etsi.org/repository/osm/debian/${RELEASE} ${REPOSITORY} IM"
+ sudo apt-get update
+ sudo apt-get install -y python-osm-im
+
+ sudo -H pip install pyangbind
