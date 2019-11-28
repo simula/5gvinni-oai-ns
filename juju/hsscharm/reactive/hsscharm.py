@@ -171,8 +171,6 @@ def prepare_cassandra_hss_build():
    hssS6a_IfName    = 'ens4'
    configurationS6a = configureInterface(hssS6a_IfName, IPv4Interface('0.0.0.0/0'))
 
-   status_set('active', 'prepare-cassandra-hss-build: preparing Cassandra/HSS build ...')
-
    # NOTE:
    # Double escaping is required for \ and " in "command" string!
    # 1. Python
@@ -212,8 +210,6 @@ def configure_cassandra():
 
    gitDirectory      = 'openair-cn'
    cassandraServerIP = action_get('cassandra-server-ip')
-
-   status_set('active', 'configure-cassandra: configuring Cassandra ...')
 
    # NOTE:
    # Double escaping is required for \ and " in "command" string!
@@ -271,8 +267,6 @@ def configure_hss():
    networkIMSIFirst   = action_get('network-imsi-first')
    networkMSISDNFirst = action_get('network-msisdn-first')
    networkUsers       = int(action_get('network-users'))
-
-   status_set('active', 'configure-hss: configuring HSS ...')
 
    # NOTE:
    # Double escaping is required for \ and " in "command" string!
