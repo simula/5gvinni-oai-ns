@@ -116,7 +116,7 @@ configure-mme:
     - mme-S1C-ipv4-interface
     - mme-S11-ipv4-interface
     - spgwc-S11-ipv4-interface
-    - cassandra-server-ip
+    - hss-s6a-address
     - network-realm
     - network-mcc
     - network-mnc
