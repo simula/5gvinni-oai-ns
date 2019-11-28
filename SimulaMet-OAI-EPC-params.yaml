@@ -46,6 +46,7 @@ additionalParamsForVnf:
       mme_S1C_ipv4_interface: 192.168.247.102/24
       mme_S11_ipv4_interface: 172.16.1.102/24
       spgwc_S11_ipv4_interface: 172.16.1.104/24
+      hss-s6a-address: 172.16.6.129
       network_mcc: 242
       network_mnc: 88
 

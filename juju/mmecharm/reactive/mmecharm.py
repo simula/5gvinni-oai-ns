@@ -155,13 +155,20 @@ def prepare_mme_build():
    # For a documentation of the installation procedure, see:
    # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-mme
 
-   gitRepository        = 'https://github.com/OPENAIRINTERFACE/openair-cn.git'
+   gitRepository        = action_get('mme-git-repository')
+   gitCommit            = action_get('mme-git-commit')
    gitDirectory         = 'openair-cn'
-   gitCommit            = 'develop'
-   mmeS1C_IPv4Interface = IPv4Interface('192.168.247.102/24')
-   mmeS1C_IPv4Gateway   = IPv4Address('0.0.0.0')
-   mmeS1C_IPv6Interface = None
-   mmeS1C_IPv6Gateway   = None
+
+   mmeS1C_IPv4Interface = IPv4Interface(action_get('mme-S1C-ipv4-interface'))
+   mmeS1C_IPv4Gateway   = IPv4Address(action_get('mme-S1C-ipv4-gateway'))
+   if action_get('mme-S1C-ipv6-interface') != '':
+      mmeS1C_IPv6Interface = IPv6Interface(action_get('mme-S1C-ipv6-interface'))
+   else:
+      mmeS1C_IPv6Interface = None
+   if action_get('mme-S1C-ipv6-gateway') != '':
+      mmeS1C_IPv6Gateway   = IPv6Address(action_get('mme-S1C-ipv6-gateway'))
+   else:
+      mmeS1C_IPv6Gateway = None
 
    # Prepare network configurations:
    mmeS6a_IfName = 'ens4'
@@ -216,19 +223,19 @@ def configure_mme():
    # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-mme
 
    gitDirectory           = 'openair-cn'
-   gitCommit              = 'develop'
-   hssS6a_IPv4Address     = '172.16.6.129'
-   mmeS1C_IPv4Interface   = IPv4Interface('192.168.247.102/24')
-   mmeS11_IPv4Interface   = IPv4Interface('172.16.1.102/24')
-   spwgcS11_IPv4Interface = IPv4Interface('172.16.1.104/24')
-   networkRealm           = 'simula.nornet'
-   networkMCC             = 242
-   networkMNC             = 88
-   networkLTE_K           = '449c4b91aeacd0ace182cf3a5a72bfa1'
-   networkOP_K            = '1006020f0a478bf6b699f15c062e42b3'
-   networkIMSIFirst       = '242881234500000'
-   networkMSISDNFirst     = '24288880000000'
-   networkUsers           = 1024
+
+   hssS6a_IPv4Address     = IPv4Address(action_get('hss-s6a-address'))
+   mmeS1C_IPv4Interface   = IPv4Interface(action_get('mme-S1C-ipv4-interface'))
+   mmeS11_IPv4Interface   = IPv4Interface(action_get('mme-S11-ipv4-interface'))
+   spwgcS11_IPv4Interface = IPv4Interface(action_get('spgwc-S11-ipv4-interface'))
+   networkRealm           = action_get('network-realm')
+   networkMCC             = int(action_get('network-mcc'))
+   networkMNC             = int(action_get('network-mnc'))
+   networkLTE_K           = action_get('network-lte-k')
+   networkOP_K            = action_get('network-op-k')
+   networkIMSIFirst       = action_get('network-imsi-first')
+   networkMSISDNFirst     = action_get('network-msisdn-first')
+   networkUsers           = int(action_get('network-users'))
 
    TAC_SGW_TEST = 7
    TAC_SGW_0    = 600

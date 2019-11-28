@@ -208,6 +208,8 @@ vnfd:vnfd-catalog:
                     value: 172.16.1.102/24
                   - name: spgwc-S11-ipv4-interface
                     value: 172.16.1.104/24
+                  - name: hss-s6a-address
+                    value: 172.16.6.129
                   - name: network-realm
                     value: simula.nornet
                   - name: network-mcc
