@@ -54,6 +54,10 @@ configure-cassandra:
 configure-hss:
   description: Configures the HSS
   params:
+    cassandra-server-ip:
+      description: Cassandra Server IP
+      type: string
+      default: 172.16.6.129
     network-realm:
       description: Network realm
       type: string
@@ -79,6 +83,7 @@ configure-hss:
       type: string
       default: 1024
   required:
+    - cassandra-server-ip
     - network-realm
     - network-lte-k
     - network-op-k

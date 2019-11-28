@@ -264,7 +264,7 @@ def configure_hss():
    # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
 
    gitDirectory       = 'openair-cn'
-   cassandraServerIP = action_get('cassandra-server-ip')
+   cassandraServerIP  = action_get('cassandra-server-ip')
    networkRealm       = action_get('network-realm')
    networkLTE_K       = action_get('network-lte-k')
    networkOP_K        = action_get('network-op-k')
@@ -291,7 +291,7 @@ echo \\\"====== Building dependencies ... ======\\\" && \\
 ./build_hss_rel14 --check-installed-software --force >logs/build_hss_rel14-1.log 2>&1 && \\
 echo \\\"====== Building service ... ======\\\" && \\
 ./build_hss_rel14 --clean >logs/build_hss_rel14-2.log 2>&1 && \\
-cqlsh --file ../src/hss_rel14/db/oai_db.cql {cassandraServerIP} && \\
+cqlsh --file ../src/hss_rel14/db/oai_db.cql {cassandraServerIP} >logs/oai_db.log 2>&1 && \\
 echo \\\"====== Provisioning users ... ======\\\" && \\
 ./data_provisioning_users --apn default.{networkRealm} --apn2 internet.{networkRealm} --key {networkLTE_K} --imsi-first {networkIMSIFirst} --msisdn-first {networkMSISDNFirst} --mme-identity mme.{networkRealm} --no-of-users {networkUsers} --realm {networkRealm} --truncate True  --verbose True --cassandra-cluster {cassandraServerIP} >logs/data_provisioning_users.log 2>&1 && \\
 echo \\\"====== Provisioning MME ... ======\\\" && \\
