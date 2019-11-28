@@ -155,9 +155,9 @@ def prepare_spgwu_build():
    # For a documentation of the installation procedure, see:
    # https://github.com/OPENAIRINTERFACE/openair-cn-cups/wiki/OpenAirSoftwareSupport#install-spgw-u
 
-   gitRepository          = 'https://github.com/OPENAIRINTERFACE/openair-cn-cups.git'
+   gitRepository          = action_get('spgwu-git-repository')
+   gitCommit              = action_get('spgwu-git-commit')
    gitDirectory           = 'openair-cn-cups'
-   gitCommit              = 'develop'
 
    spgwuS1U_IPv4Interface = IPv4Interface('192.168.248.159/24')
    spgwuS1U_IPv4Gateway   = IPv4Address('0.0.0.0')

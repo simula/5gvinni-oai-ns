@@ -48,18 +48,18 @@ configure-spgwc:
       description: Network realm
       type: string
       default: simula.nornet
-    network-dns1:
+    network-ipv4-dns1:
       description: Network DNS 1
       data-type: string
       default: 10.1.1.1
-    network-dns2:
+    network-ipv4-dns2:
       description: Network DNS 2
       data-type: string
       default: 10.1.2.1
   required:
     - network-realm
-    - network-dns1
-    - network-dns2
+    - network-ipv4-dns1
+    - network-ipv4-dns2
 
 restart-spgwc:
   description: Restarts the SPGW-C

@@ -155,15 +155,15 @@ def prepare_spgwc_build():
    # For a documentation of the installation procedure, see:
    # https://github.com/OPENAIRINTERFACE/openair-cn-cups/wiki/OpenAirSoftwareSupport#install-spgw-c
 
-   gitRepository         = 'https://github.com/OPENAIRINTERFACE/openair-cn-cups.git'
-   gitDirectory          = 'openair-cn-cups'
-   gitCommit             = 'develop'
+   gitRepository     = action_get('spgwc-git-repository')
+   gitCommit         = action_get('spgwc-git-commit')
+   gitDirectory      = 'openair-cn-cups'
 
    # Prepare network configurations:
-   spgwcS11_IfName       = 'ens5'
-   spgwcSXab_IfName      = 'ens4'
-   configurationS11      = configureInterface(spgwcS11_IfName,  IPv4Interface('0.0.0.0/0'))
-   configurationSXab     = configureInterface(spgwcSXab_IfName, IPv4Interface('0.0.0.0/0'))
+   spgwcS11_IfName   = 'ens5'
+   spgwcSXab_IfName  = 'ens4'
+   configurationS11  = configureInterface(spgwcS11_IfName,  IPv4Interface('0.0.0.0/0'))
+   configurationSXab = configureInterface(spgwcSXab_IfName, IPv4Interface('0.0.0.0/0'))
 
    # S5S8 dummy interfaces:
    spgwcS5S8_SGW_IfName  = 'dummy0:s5c'
@@ -205,24 +205,6 @@ echo \\\"###### Done! ##########################################################
 
    runShellCommands(commands, 'prepare_spgwc_build: preparing SPGW-C build',
                     'actions.prepare-spgwc-build', 'spgwccharm.prepared-spgwc-build')
-   #try:
-       #stdout, stderr = execute(commands)
-   #except subprocess.CalledProcessError as e:
-       #exc_type, exc_value, exc_traceback = sys.exc_info()
-       #err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       #message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       #action_fail(message.encode('utf-8'))
-       #status_set('active', 'prepare-spgwc-build: preparing SPGW-C build FAILED!')
-   #except:
-       #exc_type, exc_value, exc_traceback = sys.exc_info()
-       #err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       #action_fail('Command execution failed: ' + str(err))
-       #status_set('active', 'prepare-spgwc-build: preparing SPGW-C build FAILED!')
-   #else:
-      #set_flag('spgwccharm.prepared-spgwc-build')
-      #clear_flag('actions.prepare-spgwc-build')
-      ## action_set( { 'output': stdout.encode('utf-8') } )
-      #status_set('active', 'prepare-spgwc-build: preparing SPGW-C build COMPLETED')
 
 
 # ###### configure-spgwc function ###########################################
@@ -236,9 +218,10 @@ def configure_spgwc():
    # https://github.com/OPENAIRINTERFACE/openair-cn-cups/wiki/OpenAirSoftwareSupport#install-spgw-c
 
    gitDirectory         = 'openair-cn-cups'
-   networkRealm         = 'simula.nornet'
-   networkDNS1_IPv4     = IPv4Address('10.1.1.1')
-   networkDNS2_IPv4     = IPv4Address('10.1.2.1')
+
+   networkRealm         = action_get('network-realm')
+   networkDNS1_IPv4     = IPv4Address(action_get('network-ipv4-dns1'))
+   networkDNS2_IPv4     = IPv4Address(action_get('network-ipv4-dns2'))
 
    # Prepare network configurations:
    spgwcSXab_IfName     = 'ens4'
@@ -292,23 +275,6 @@ echo \\\"###### Done! ##########################################################
 
    runShellCommands(commands, 'configure_spgwc: configuring SPGW-C',
                     'actions.configure-spgwc', 'spgwccharm.configured-spgwc')
-   #try:
-       #stdout, stderr = execute(commands)
-   #except subprocess.CalledProcessError as e:
-       #exc_type, exc_value, exc_traceback = sys.exc_info()
-       #err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       #message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       #action_fail(message.encode('utf-8'))
-       #status_set('active', 'confiigure-spgwc: configuring SPGW-C FAILED!')
-   #except:
-       #exc_type, exc_value, exc_traceback = sys.exc_info()
-       #err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       #action_fail('Command execution failed: ' + str(err))
-       #status_set('active', 'confiigure-spgwc: configuring SPGW-C FAILED!')
-   #else:
-      #clear_flag('actions.configure-spgwc')
-      ## action_set( { 'output': stdout.encode('utf-8') } )
-      #status_set('active', 'confiigure-spgwc: configuring SPGW-C COMPLETED')
 
 
 # ###### restart-spgwc function #############################################

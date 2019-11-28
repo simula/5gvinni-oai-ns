@@ -299,9 +299,9 @@ vnfd:vnfd-catalog:
                 parameter:
                   - name: network-realm
                     value: simula.nornet
-                  - name: network-dns1
+                  - name: network-ipv4-dns1
                     value: 10.1.1.1
-                  - name: network-dns2
+                  - name: network-ipv4-dns2
                     value: 10.1.2.1
               - seq: '4'
                 name: restart-spgwc
