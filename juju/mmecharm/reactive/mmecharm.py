@@ -155,9 +155,9 @@ def prepare_mme_build():
    # For a documentation of the installation procedure, see:
    # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-mme
 
-   gitRepository            = 'https://github.com/OPENAIRINTERFACE/openair-cn.git'
-   gitDirectory             = 'openair-cn'
-   gitCommit                = 'develop'
+   gitRepository        = 'https://github.com/OPENAIRINTERFACE/openair-cn.git'
+   gitDirectory         = 'openair-cn'
+   gitCommit            = 'develop'
    mmeS1C_IPv4Interface = IPv4Interface('192.168.247.102/24')
    mmeS1C_IPv4Gateway   = IPv4Address('0.0.0.0')
    mmeS1C_IPv6Interface = None
@@ -203,25 +203,6 @@ echo \\\"###### Done! ##########################################################
 
    runShellCommands(commands, 'prepare_mme_build: preparing MME build',
                     'actions.prepare-mme-build', 'mmecharm.prepared-mme-build')
-   #try:
-       #stdout, stderr = execute(commands)
-   #except subprocess.CalledProcessError as e:
-       #exc_type, exc_value, exc_traceback = sys.exc_info()
-       #err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       #message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       #action_fail(message.encode('utf-8'))
-       #status_set('active', 'prepare-mme-build: preparing MME build FAILED!')
-   #except:
-       #exc_type, exc_value, exc_traceback = sys.exc_info()
-       #err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       #action_fail('Command execution failed: ' + str(err))
-       #status_set('active', 'prepare-mme-build: preparing MME build FAILED!')
-   #else:
-      #set_flag('mmecharm.prepared-mme-build')
-      ## action_set( { 'output': stdout.encode('utf-8') } )
-      #status_set('active', 'prepare-mme-build: preparing MME build COMPLETED')
-   #finally:
-      #clear_flag('actions.prepare-mme-build')
 
 
 # ###### configure-mme function #############################################
@@ -234,6 +215,7 @@ def configure_mme():
    # For a documentation of the installation procedure, see:
    # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-mme
 
+   gitDirectory           = 'openair-cn'
    gitCommit              = 'develop'
    hssS6a_IPv4Address     = '172.16.6.129'
    mmeS1C_IPv4Interface   = IPv4Interface('192.168.247.102/24')
@@ -361,24 +343,6 @@ echo \\\"###### Done! ##########################################################
 
    runShellCommands(commands, 'configure_mme: configuring MME',
                     'actions.configure-mme', 'mmecharm.configured-mme')
-   #try:
-       #stdout, stderr = execute(commands)
-   #except subprocess.CalledProcessError as e:
-       #exc_type, exc_value, exc_traceback = sys.exc_info()
-       #err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       #message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       #action_fail(message.encode('utf-8'))
-       #status_set('active', 'confiigure-mme: configuring MME FAILED!')
-   #except:
-       #exc_type, exc_value, exc_traceback = sys.exc_info()
-       #err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       #action_fail('Command execution failed: ' + str(err))
-       #status_set('active', 'confiigure-mme: configuring MME FAILED!')
-   #else:
-      ## action_set( { 'output': stdout.encode('utf-8') } )
-      #status_set('active', 'confiigure-mme: configuring MME COMPLETED')
-   #finally:
-      #clear_flag('actions.configure-mme')
 
 
 # ###### restart-mme function ###############################################
