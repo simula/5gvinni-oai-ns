@@ -65,23 +65,23 @@ configure-hss:
     network-lte-k:
       description: LTE_K
       type: string
-      default: 449c4b91aeacd0ace182cf3a5a72bfa1
+      default: '449c4b91aeacd0ace182cf3a5a72bfa1'
     network-op-k:
       description: OP_K
       type: string
-      default: 1006020f0a478bf6b699f15c062e42b3
+      default: '1006020f0a478bf6b699f15c062e42b3'
     network-imsi-first:
       description: First IMSI
       type: string
-      default: 242881234500000
+      default: '242881234500000'
     network-msisdn-first:
       description: First MSISDN
       type: string
-      default: 24288880000000
+      default: '24288880000000'
     network-users:
       description: Number of users
       type: string
-      default: 1024
+      default: '1024'
   required:
     - cassandra-server-ip
     - network-realm
