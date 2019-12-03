@@ -70,10 +70,10 @@ nsd:nsd-catalog:
           short-name: SimulaMet-OAI-EPC_nsd-S1C
           type: ELAN
           vim-network-name: nornet-simula
-          #vnfd-connection-point-ref:
-            #- member-vnf-index-ref: 1
-              #vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
-              #vnfd-connection-point-ref: mme-s1c-cp
+          vnfd-connection-point-ref:
+            - member-vnf-index-ref: 1
+              vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
+              vnfd-connection-point-ref: mme-s1c-cp
               #ip-address: 192.168.247.102
 
         # ====== S1-U =======================================================
@@ -82,10 +82,10 @@ nsd:nsd-catalog:
           short-name: SimulaMet-OAI-EPC_nsd-S1U
           type: ELAN
           vim-network-name: nornet-simula
-          #vnfd-connection-point-ref:
-            #- member-vnf-index-ref: 1
-              #vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
-              #vnfd-connection-point-ref: spgwu-s1u-cp
+          vnfd-connection-point-ref:
+            - member-vnf-index-ref: 1
+              vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
+              vnfd-connection-point-ref: spgwu-s1u-cp
               #ip-address: 192.168.248.159
 
         # ====== SGi ========================================================
@@ -94,7 +94,7 @@ nsd:nsd-catalog:
           short-name: SimulaMet-OAI-EPC_nsd-SGi
           type: ELAN
           vim-network-name: nornet-simula
-          #vnfd-connection-point-ref:
-            #- member-vnf-index-ref: 1
-              #vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
-              #vnfd-connection-point-ref: spgwu-sgi-cp
+          vnfd-connection-point-ref:
+            - member-vnf-index-ref: 1
+              vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
+              vnfd-connection-point-ref: spgwu-sgi-cp
