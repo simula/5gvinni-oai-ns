@@ -72,7 +72,7 @@ additionalParamsForVnf:
 
 # ###### VNF External Addresses #############################################
 vld:
-  - name: management
+  - name: SimulaMet-OAI-EPC_nsd-Management
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '1'
         vnfd-connection-point-ref: hss-mgmt-cp
