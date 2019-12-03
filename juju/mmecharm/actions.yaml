@@ -92,7 +92,7 @@ configure-mme:
       description: Mobile Network Code (MNC)
       data-type: string
       default: 88
-    network-lte_k:
+    network-lte-k:
       description: LTE_K
       type: string
       default: 449c4b91aeacd0ace182cf3a5a72bfa1
@@ -120,7 +120,7 @@ configure-mme:
     - network-realm
     - network-mcc
     - network-mnc
-    - network-lte_k
+    - network-lte-k
     - network-op-k
     - network-imsi-first
     - network-msisdn-first

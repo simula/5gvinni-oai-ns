@@ -203,29 +203,29 @@ vnfd:vnfd-catalog:
                 name: configure-mme
                 parameter:
                   - name: mme-S1C-ipv4-interface
-                    value: 192.168.247.102/24
+                    value: <mme_S1C_ipv4_interface>
                   - name: mme-S11-ipv4-interface
-                    value: 172.16.1.102/24
+                    value: <mme_S11_ipv4_interface>
                   - name: spgwc-S11-ipv4-interface
-                    value: 172.16.1.104/24
+                    value: <spgwc_S11_ipv4_interface>
                   - name: hss-s6a-address
-                    value: 172.16.6.129
+                    value: <hss_s6a_address>
                   - name: network-realm
-                    value: simula.nornet
+                    value: <network_realm>
                   - name: network-mcc
-                    value: 242
+                    value: <network_mcc>
                   - name: network-mnc
-                    value: 88
-                  - name: network-lte_k
-                    value: 449c4b91aeacd0ace182cf3a5a72bfa1
+                    value: <network_mnc>
+                  - name: network-lte-k
+                    value: <network_lte_k>
                   - name: network-op-k
-                    value: 1006020f0a478bf6b699f15c062e42b3
+                    value: <network_op_k>
                   - name: network-imsi-first
-                    value: 242881234500000
+                    value: <network_imsi_first>
                   - name: network-msisdn-first
-                    value: 24288880000000
+                    value: <network_msisdn_first>
                   - name: network-users
-                    value: 1024
+                    value: <network_users>
               - seq: '4'
                 name: restart-mme
 
@@ -298,11 +298,11 @@ vnfd:vnfd-catalog:
                 name: configure-spgwc
                 parameter:
                   - name: network-realm
-                    value: simula.nornet
+                    value: <network_realm>
                   - name: network-ipv4-dns1
-                    value: 10.1.1.1
+                    value: <network_ipv4_dns1>
                   - name: network-ipv4-dns2
-                    value: 10.1.2.1
+                    value: <network_ipv4_dns2>
               - seq: '4'
                 name: restart-spgwc
 
