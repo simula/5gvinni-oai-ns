@@ -4,6 +4,7 @@
 import functools
 import os
 import re
+import subprocess
 import sys
 import traceback
 from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
@@ -28,13 +29,56 @@ def status_set(tag, value):
 
 
 # ###### Dummy function #####################################################
+MyParameters = {
+   # ====== HSS =============================================================
+   'hss-git-repository': 'https://github.com/OPENAIRINTERFACE/openair-cn.git',
+   'hss-git-commit': '2019.w45',
+   'network-realm': 'simula.nornet',
+   'network-lte-k': '449c4b91aeacd0ace182cf3a5a72bfa1',
+   'network-op-k': '1006020f0a478bf6b699f15c062e42b3',
+   'network-imsi-first': '242881234500000',
+   'network-msisdn-first': '24288880000000',
+   'network-users': '1024',
+   'cassandra-server-ip': '172.16.6.129',
+
+   # ====== MME =============================================================
+   'mme-git-repository': 'https://github.com/OPENAIRINTERFACE/openair-cn.git',
+   'mme-git-commit': '2019.w45',
+   'mme-S1C-ipv4-interface': '192.168.247.102/24',
+   'mme-S11-ipv4-interface': '172.16.1.102/24',
+   'spgwc-S11-ipv4-interface': '172.16.1.104/24',
+   'hss-s6a-address': '172.16.6.129',
+   'network-mcc': '242',
+   'network-mnc': '88',
+
+   # ====== SPGW-C ==========================================================
+   'spgwc-git-repository': 'https://github.com/OPENAIRINTERFACE/openair-cn-cups.git',
+   'spgwc-git-commit': 'develop',
+   'network-ipv4-dns1': '10.1.1.1',
+   'network-ipv4-dns2': '10.1.2.1',
+
+   # ====== SPGW-U ==========================================================
+   'spgwu-git-repository': 'https://github.com/OPENAIRINTERFACE/openair-cn-cups.git',
+   'spgwu-git-commit': 'develop',
+   'spgwu-S1U-ipv4-interface': '192.168.248.159/24',
+   'spgwu-S1U-ipv4-gateway': '0.0.0.0',
+   'spgwu-SGi-ipv4-interface': '10.254.1.203/24',
+   'spgwu-SGi-ipv4-gateway': '10.254.1.1',
+   'spgwu-SGi-ipv6-interface': '3ffe::2/64',
+   'spgwu-SGi-ipv6-gateway': '3ffe::1'
+}
+def function_get(flag):
+   return MyParameters[flag]
+
+
+# ###### Dummy function #####################################################
 def function_set(values):
    # Nothing to do!
    pass
 
 
 # ###### Dummy function #####################################################
-def function_fail(tag, value):
+def function_fail(message):
    # Nothing to do!
    pass
 
@@ -47,6 +91,7 @@ def when(*flags):
             return func(*args, **kwargs)
         return wrapper_when
     return decorator_when
+
 
 # ###### Dummy decorator ####################################################
 def when_not(*flags):
@@ -62,7 +107,32 @@ def when_not(*flags):
 def execute(commands):
    sys.stdout.write('-----------------------------------------------------------------------------\n')
    sys.stdout.write('time bash -c "' + commands + '"\n')
-   return [ '', '' ]
+   return [ ', ' ]
+
+
+# ###### Run shell commands, handle exceptions, and upage status flags ######
+def runShellCommands(commands, comment, actionFlagToClear, successFlagToSet = None):
+   status_set('active', comment + ' ...')
+   try:
+       stdout, stderr = execute(commands)
+   except subprocess.CalledProcessError as e:
+       exc_type, exc_value, exc_traceback = sys.exc_info()
+       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
+       function_fail(message.encode('utf-8'))
+       status_set('active', comment + ' COMMANDS FAILED!')
+   except:
+       exc_type, exc_value, exc_traceback = sys.exc_info()
+       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       function_fail('Command execution failed: ' + str(err))
+       status_set('active', comment + ' FAILED!')
+   else:
+      if successFlagToSet != None:
+         set_flag(successFlagToSet)
+      # function_set( { 'output': stdout.encode('utf-8') } )
+      status_set('active', comment + ' COMPLETED')
+   finally:
+      clear_flag(actionFlagToClear)
 
 
 # ######  Get /etc/network/interfaces setup for interface ###################
@@ -131,17 +201,16 @@ def install_hsscharm_proxy_charm():
 @when('hsscharm.installed')
 @when_not('hsscharm.prepared-cassandra-hss-build')
 def prepare_cassandra_hss_build():
-   status_set('active', 'prepare-cassandra-hss-build: preparing Cassandra/HSS build ...')
 
    # ====== Install Cassandra and the HSS ===================================
    # For a documentation of the installation procedure, see:
    # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
 
-   gitRepository = 'https://github.com/OPENAIRINTERFACE/openair-cn.git'
+   gitRepository = function_get('hss-git-repository')
+   gitCommit     = function_get('hss-git-commit')
    gitDirectory  = 'openair-cn'
-   gitCommit     = 'develop'
 
-   # Prepare network configurations:
+   # Prepare network configuration:
    hssS6a_IfName    = 'ens4'
    configurationS6a = configureInterface(hssS6a_IfName, IPv4Interface('0.0.0.0/0'))
 
@@ -169,38 +238,21 @@ echo \\\"###### Done! ##########################################################
       configurationS6a = configurationS6a
    )
 
-   try:
-       stdout, stderr = execute(commands)
-   except subprocess.CalledProcessError as e:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       function_fail(message.encode('utf-8'))
-       status_set('active', 'prepare-cassandra-hss-build: preparing Cassandra/HSS build FAILED!')
-   except:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       function_fail('Command execution failed: ' + str(err))
-       status_set('active', 'prepare-cassandra-hss-build: preparing Cassandra/HSS build FAILED!')
-   else:
-      set_flag('hsscharm.prepared-cassandra-hss-build')
-      clear_flag('actions.prepare-cassandra-hss-build')
-      function_set( { 'output': stdout.encode('utf-8') } )
-      status_set('active', 'prepare-cassandra-hss-build: preparing Cassandra/HSS build COMPLETED')
+   runShellCommands(commands, 'prepare_cassandra_hss_build: preparing Cassandra/HSS build',
+                    'actions.prepare-cassandra-hss-build', 'hsscharm.prepared-cassandra-hss-build')
 
 
 # ###### configure-cassandra function #######################################
 @when('actions.configure-cassandra')
 @when('hsscharm.prepared-cassandra-hss-build')
 def configure_cassandra():
-   status_set('active', 'configure-cassandra: configuring Cassandra ...')
 
    # ====== Install Cassandra and the HSS ===================================
    # For a documentation of the installation procedure, see:
    # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
 
    gitDirectory      = 'openair-cn'
-   cassandraServerIP = '172.16.6.129'
+   cassandraServerIP = function_get('cassandra-server-ip')
 
    # NOTE:
    # Double escaping is required for \ and " in "command" string!
@@ -237,43 +289,27 @@ echo \\\"###### Done! ##########################################################
       cassandraServerIP = cassandraServerIP
    )
 
-   try:
-       stdout, stderr = execute(commands)
-   except subprocess.CalledProcessError as e:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       function_fail(message.encode('utf-8'))
-       status_set('active', 'confiigure-cassandra: configuring Cassandra FAILED!')
-   except:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       function_fail('Command execution failed: ' + str(err))
-       status_set('active', 'confiigure-cassandra: configuring Cassandra FAILED!')
-   else:
-      clear_flag('actions.configure-cassandra')
-      function_set( { 'output': stdout.encode('utf-8') } )
-      status_set('active', 'confiigure-cassandra: configuring Cassandra COMPLETED')
+   runShellCommands(commands, 'configure_cassandra: configuring Cassandra',
+                    'actions.configure-cassandra', 'hsscharm.configured-cassandra')
 
 
 # ###### configure-hss function #############################################
 @when('actions.configure-hss')
 @when('hsscharm.configured-cassandra')
 def configure_hss():
-   status_set('active', 'configure-hss: configuring HSS ...')
 
    # ====== Install Cassandra and the HSS ===================================
    # For a documentation of the installation procedure, see:
    # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
 
    gitDirectory       = 'openair-cn'
-   cassandraServerIP  = '172.16.6.129'
-   networkRealm       = 'simula.nornet'
-   networkLTE_K       = '449c4b91aeacd0ace182cf3a5a72bfa1'
-   networkOP_K        = '1006020f0a478bf6b699f15c062e42b3'
-   networkIMSIFirst   = '242881234500000'
-   networkMSISDNFirst = '24288880000000'
-   networkUsers       = 1024
+   cassandraServerIP  = function_get('cassandra-server-ip')
+   networkRealm       = function_get('network-realm')
+   networkLTE_K       = function_get('network-lte-k')
+   networkOP_K        = function_get('network-op-k')
+   networkIMSIFirst   = function_get('network-imsi-first')
+   networkMSISDNFirst = function_get('network-msisdn-first')
+   networkUsers       = int(function_get('network-users'))
 
    # NOTE:
    # Double escaping is required for \ and " in "command" string!
@@ -292,7 +328,7 @@ echo \\\"====== Building dependencies ... ======\\\" && \\
 ./build_hss_rel14 --check-installed-software --force >logs/build_hss_rel14-1.log 2>&1 && \\
 echo \\\"====== Building service ... ======\\\" && \\
 ./build_hss_rel14 --clean >logs/build_hss_rel14-2.log 2>&1 && \\
-cqlsh --file ../src/hss_rel14/db/oai_db.cql {cassandraServerIP} && \\
+cqlsh --file ../src/hss_rel14/db/oai_db.cql {cassandraServerIP} >logs/oai_db.log 2>&1 && \\
 echo \\\"====== Provisioning users ... ======\\\" && \\
 ./data_provisioning_users --apn default.{networkRealm} --apn2 internet.{networkRealm} --key {networkLTE_K} --imsi-first {networkIMSIFirst} --msisdn-first {networkMSISDNFirst} --mme-identity mme.{networkRealm} --no-of-users {networkUsers} --realm {networkRealm} --truncate True  --verbose True --cassandra-cluster {cassandraServerIP} >logs/data_provisioning_users.log 2>&1 && \\
 echo \\\"====== Provisioning MME ... ======\\\" && \\
@@ -330,23 +366,8 @@ echo \\\"###### Done! ##########################################################
       networkUsers       = networkUsers
    )
 
-   try:
-       stdout, stderr = execute(commands)
-   except subprocess.CalledProcessError as e:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       function_fail(message.encode('utf-8'))
-       status_set('active', 'confiigure-hss: configuring HSS FAILED!')
-   except:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       function_fail('Command execution failed: ' + str(err))
-       status_set('active', 'confiigure-hss: configuring HSS FAILED!')
-   else:
-      clear_flag('actions.configure-hss')
-      function_set( { 'output': stdout.encode('utf-8') } )
-      status_set('active', 'confiigure-hss: configuring HSS COMPLETED')
+   runShellCommands(commands, 'configure_hss: configuring HSS',
+                    'actions.configure-hss', 'hsscharm.configured-hss')
 
 
 
@@ -905,15 +926,15 @@ echo \\\"###### Done! ##########################################################
 
 
 # ###########################################################################
-#prepare_cassandra_hss_build()
-#configure_cassandra()
-#configure_hss()
+prepare_cassandra_hss_build()
+configure_cassandra()
+configure_hss()
 
-#prepare_mme_build()
-#configure_mme()
+prepare_mme_build()
+configure_mme()
 
-#prepare_spgwu_build()
-#configure_spgwu()
+prepare_spgwu_build()
+configure_spgwu()
 
 prepare_spgwc_build()
 configure_spgwc()

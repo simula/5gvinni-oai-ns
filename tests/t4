@@ -32,16 +32,16 @@ def function_set(values):
 
 
 # ###### Dummy function #####################################################
-def function_fail(value):
+def function_fail(message):
    # Nothing to do!
-   print('function_fail: ' + value)
+   pass
 
 
 # ###### Execute command ####################################################
 def execute(commands):
    sys.stdout.write('-----------------------------------------------------------------------------\n')
    sys.stdout.write('time bash -c "' + commands + '"\n')
-   return [ '', '' ]
+   return [ ', ' ]
 
 
 # ###### Run shell commands, handle exceptions, and upage status flags ######
