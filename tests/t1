@@ -282,7 +282,7 @@ sudo yq w -i /etc/cassandra/cassandra.yaml \\\"listen_address\\\" \\\"{cassandra
 sudo yq w -i /etc/cassandra/cassandra.yaml \\\"rpc_address\\\" \\\"{cassandraServerIP}\\\" && \\
 sudo yq w -i /etc/cassandra/cassandra.yaml \\\"endpoint_snitch\\\" \\\"GossipingPropertyFileSnitch\\\" && \\
 sudo service cassandra start && \\
-sleep 10 && \\
+sleep 30 && \\
 sudo service cassandra status | cat && \\
 echo \\\"###### Done! ##########################################################\\\"""".format(
       gitDirectory      = gitDirectory,
@@ -930,11 +930,11 @@ prepare_cassandra_hss_build()
 configure_cassandra()
 configure_hss()
 
-prepare_mme_build()
-configure_mme()
+#prepare_mme_build()
+#configure_mme()
 
-prepare_spgwu_build()
-configure_spgwu()
+#prepare_spgwu_build()
+#configure_spgwu()
 
-prepare_spgwc_build()
-configure_spgwc()
+#prepare_spgwc_build()
+#configure_spgwc()
