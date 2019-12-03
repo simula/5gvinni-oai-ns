@@ -1,7 +1,7 @@
 from charmhelpers.core.hookenv import (
-    action_get,
-    action_fail,
-    action_set,
+    function_get,
+    function_fail,
+    function_set,
     status_set,
 )
 from charms.reactive import (
@@ -24,12 +24,12 @@ def install_simple_proxy_charm():
 def touch():
     err = ''
     try:
-        filename = action_get('filename')
+        filename = function_get('filename')
         cmd = ['touch {}'.format(filename)]
         result, err = charms.sshproxy._run(cmd)
     except:
-        action_fail('command failed:' + err)
+        function_fail('command failed:' + err)
     else:
-        action_set({'outout': result})
+        function_set({'outout': result})
     finally:
         clear_flag('actions.touch')
