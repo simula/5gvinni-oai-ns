@@ -75,16 +75,16 @@ vld:
   - name: management
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '1'
-        vnfd-connection-point-ref: hss-mgmt
+        vnfd-connection-point-ref: hss-mgmt-cp
         ip-address: 10.208.0.200
       - member-vnf-index-ref: '1'
-        vnfd-connection-point-ref: mme-mgmt
+        vnfd-connection-point-ref: mme-mgmt-cp
         ip-address: 10.208.0.201
       - member-vnf-index-ref: '1'
-        vnfd-connection-point-ref: spgwc-mgmt
+        vnfd-connection-point-ref: spgwc-mgmt-cp
         ip-address: 10.208.0.202
       - member-vnf-index-ref: '1'
-        vnfd-connection-point-ref: spgwu-mgmt
+        vnfd-connection-point-ref: spgwu-mgmt-cp
         ip-address: 10.208.0.203
 
 
