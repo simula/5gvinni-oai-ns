@@ -38,7 +38,7 @@ vnfd:vnfd-catalog:
 
       # ###### Management Interface #########################################
       mgmt-interface:
-        cp: mme-mgmt
+        cp: mme-mgmt-cp
 
       vdu:
 
@@ -63,17 +63,17 @@ vnfd:vnfd-catalog:
               mgmt-interface: true
               virtual-interface:
                 type: PARAVIRT
-              external-connection-point-ref: hss-mgmt
+              external-connection-point-ref: hss-mgmt-cp
             - name: eth1
               type: INTERNAL
               virtual-interface:
                 type: PARAVIRT
-              internal-connection-point-ref: hss-s6a
+              internal-connection-point-ref: hss-s6a-cp
 
           # ====== Internal Connection Points ===============================
           internal-connection-point:
-            - id: hss-s6a
-              name: hss-s6a
+            - id: hss-s6a-cp
+              name: hss-s6a-cp
               type: VPORT
 
           # ====== Juju Charm ===============================================
@@ -144,30 +144,30 @@ vnfd:vnfd-catalog:
               mgmt-interface: true
               virtual-interface:
                 type: PARAVIRT
-              external-connection-point-ref: mme-mgmt
+              external-connection-point-ref: mme-mgmt-cp
             - name: eth1
               type: INTERNAL
               virtual-interface:
                 type: PARAVIRT
-              internal-connection-point-ref: mme-s6a
+              internal-connection-point-ref: mme-s6a-cp
             - name: eth2
               type: INTERNAL
               virtual-interface:
                 type: PARAVIRT
-              internal-connection-point-ref: mme-s11
+              internal-connection-point-ref: mme-s11-cp
             - name: eth3
               type: EXTERNAL
               virtual-interface:
                 type: PARAVIRT
-              external-connection-point-ref: mme-s1c
+              external-connection-point-ref: mme-s1c-cp
 
           # ====== Internal Connection Points ===============================
           internal-connection-point:
-            - id: mme-s6a
-              name: mme-s6a
+            - id: mme-s6a-cp
+              name: mme-s6a-cp
               type: VPORT
-            - id: mme-s11
-              name: mme-s11
+            - id: mme-s11-cp
+              name: mme-s11-cp
               type: VPORT
 
           # ====== Juju Charm ===============================================
@@ -208,7 +208,7 @@ vnfd:vnfd-catalog:
                     value: <mme_S11_ipv4_interface>
                   - name: spgwc-S11-ipv4-interface
                     value: <spgwc_S11_ipv4_interface>
-                  - name: hss-s6a-address
+                  - name: hss-s6a-cp-address
                     value: <hss_s6a_address>
                   - name: network-realm
                     value: <network_realm>
@@ -252,25 +252,25 @@ vnfd:vnfd-catalog:
               mgmt-interface: true
               virtual-interface:
                 type: PARAVIRT
-              external-connection-point-ref: spgwc-mgmt
+              external-connection-point-ref: spgwc-mgmt-cp
             - name: eth1
               type: INTERNAL
               virtual-interface:
                 type: PARAVIRT
-              internal-connection-point-ref: spgwc-sxab
+              internal-connection-point-ref: spgwc-sxab-cp
             - name: eth2
               type: INTERNAL
               virtual-interface:
                 type: PARAVIRT
-              internal-connection-point-ref: spgwc-s11
+              internal-connection-point-ref: spgwc-s11-cp
 
           # ====== Internal Connection Points ===============================
           internal-connection-point:
-            - id: spgwc-sxab
-              name: spgwc-sxab
+            - id: spgwc-sxab-cp
+              name: spgwc-sxab-cp
               type: VPORT
-            - id: spgwc-s11
-              name: spgwc-s11
+            - id: spgwc-s11-cp
+              name: spgwc-s11-cp
               type: VPORT
 
           # ====== Juju Charm ===============================================
@@ -332,27 +332,27 @@ vnfd:vnfd-catalog:
               mgmt-interface: true
               virtual-interface:
                 type: PARAVIRT
-              external-connection-point-ref: spgwu-mgmt
+              external-connection-point-ref: spgwu-mgmt-cp
             - name: eth1
               type: INTERNAL
               virtual-interface:
                 type: PARAVIRT
-              internal-connection-point-ref: spgwu-sxab
+              internal-connection-point-ref: spgwu-sxab-cp
             - name: eth2
               type: EXTERNAL
               virtual-interface:
                 type: PARAVIRT
-              external-connection-point-ref: spgwu-s1u
+              external-connection-point-ref: spgwu-s1u-cp
             - name: eth3
               type: EXTERNAL
               virtual-interface:
                 type: PARAVIRT
-              external-connection-point-ref: spgwu-sgi
+              external-connection-point-ref: spgwu-sgi-cp
 
           # ====== Internal Connection Points ===============================
           internal-connection-point:
-            - id: spgwu-sxab
-              name: spgwu-sxab
+            - id: spgwu-sxab-cp
+              name: spgwu-sxab-cp
               type: VPORT
 
           # ====== Juju Charm ===============================================
@@ -424,31 +424,31 @@ vnfd:vnfd-catalog:
           ip-profile-ref: S6a
           name: S6a
           internal-connection-point:
-            - id-ref: mme-s6a
-            - id-ref: hss-s6a
+            - id-ref: mme-s6a-cp
+            - id-ref: hss-s6a-cp
         - id: s11
           name: S11
           ip-profile-ref: S11
           internal-connection-point:
-            - id-ref: mme-s11
-            - id-ref: spgwc-s11
+            - id-ref: mme-s11-cp
+            - id-ref: spgwc-s11-cp
         - id: sxab
           name: SXab
           ip-profile-ref: SXab
           internal-connection-point:
-            - id-ref: spgwu-sxab
-            - id-ref: spgwc-sxab
+            - id-ref: spgwu-sxab-cp
+            - id-ref: spgwc-sxab-cp
 
 
       # ###### External Connection Points ###################################
       connection-point:
-        - name: mme-mgmt
-        - name: mme-s1c
-        - name: hss-mgmt
-        - name: spgwc-mgmt
-        - name: spgwu-mgmt
-        - name: spgwu-s1u
-        - name: spgwu-sgi
+        - name: mme-mgmt-cp
+        - name: mme-s1c-cp
+        - name: hss-mgmt-cp
+        - name: spgwc-mgmt-cp
+        - name: spgwu-mgmt-cp
+        - name: spgwu-s1u-cp
+        - name: spgwu-sgi-cp
 
 
       # ###### Juju Charm ###################################################

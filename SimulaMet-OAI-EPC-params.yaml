@@ -76,19 +76,19 @@ vnf:
     internal-vld:
       - name: S6a
         internal-connection-point:
-          - id-ref: mme-s6a
+          - id-ref: mme-s6a-cp
             ip-address: 172.16.6.2
-          - id-ref: hss-s6a
+          - id-ref: hss-s6a-cp
             ip-address: 172.16.6.129
       - name: S11
         internal-connection-point:
-          - id-ref: mme-s11
+          - id-ref: mme-s11-cp
             ip-address: 172.16.1.102
-          - id-ref: spgwc-s11
+          - id-ref: spgwc-s11-cp
             ip-address: 172.16.1.104
       - name: SXab
         internal-connection-point:
-          - id-ref: spgwu-sxab
+          - id-ref: spgwu-sxab-cp
             ip-address: 172.55.55.102
-          - id-ref: spgwc-sxab
+          - id-ref: spgwc-sxab-cp
             ip-address: 172.55.55.101
