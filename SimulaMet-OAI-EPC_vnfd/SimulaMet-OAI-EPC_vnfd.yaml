@@ -208,7 +208,7 @@ vnfd:vnfd-catalog:
                     value: <mme_S11_ipv4_interface>
                   - name: spgwc-S11-ipv4-interface
                     value: <spgwc_S11_ipv4_interface>
-                  - name: hss-s6a-cp-address
+                  - name: hss-s6a-address
                     value: <hss_s6a_address>
                   - name: network-realm
                     value: <network_realm>
