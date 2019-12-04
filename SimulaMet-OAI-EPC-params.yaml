@@ -44,8 +44,10 @@ additionalParamsForVnf:
       mme_git_repository: https://github.com/OPENAIRINTERFACE/openair-cn.git
       mme_git_commit: 2019.w45
       mme_S1C_ipv4_interface: 192.168.247.102/24
+      mme_S1C_ipv4_gateway: 0.0.0.0
+      mme_S1C_ipv6_interface: ''
+      mme_S1C_ipv6_gateway: ''
       mme_S11_ipv4_interface: 172.16.1.102/24
-      spgwc_S11_ipv4_interface: 172.16.1.104/24
       hss_s6a_address: 172.16.6.129
       network_mcc: '242'
       network_mnc: '88'
@@ -65,6 +67,7 @@ additionalParamsForVnf:
       spgwu_SGi_ipv4_gateway: 10.254.1.1
       spgwu_SGi_ipv6_interface: 3ffe::2/64
       spgwu_SGi_ipv6_gateway: 3ffe::1
+      spgwc_S11_ipv4_interface: 172.16.1.104/24
 
       # ====== Other ========================================================
       password: osm4us
