@@ -45,7 +45,10 @@ MyParameters = {
    'mme-git-repository': 'https://github.com/OPENAIRINTERFACE/openair-cn.git',
    'mme-git-commit': '2019.w45',
    'mme-S1C-ipv4-interface': '192.168.247.102/24',
+   'mme-S1C-ipv4-gateway': '0.0.0.0',
    'mme-S11-ipv4-interface': '172.16.1.102/24',
+   'mme-S1C-ipv6-interface': '',
+   'mme-S1C-ipv6-gateway': '',
    'spgwc-S11-ipv4-interface': '172.16.1.104/24',
    'hss-s6a-address': '172.16.6.129',
    'network-mcc': '242',
@@ -377,19 +380,25 @@ echo \\\"###### Done! ##########################################################
 @when('mmecharm.installed')
 @when_not('mmecharm.prepared-mme-build')
 def prepare_mme_build():
-   status_set('active', 'prepare-mme-build: preparing MME build ...')
 
    # ====== Install MME =====================================================
    # For a documentation of the installation procedure, see:
    # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-mme
 
-   gitRepository            = 'https://github.com/OPENAIRINTERFACE/openair-cn.git'
-   gitDirectory             = 'openair-cn'
-   gitCommit                = 'develop'
-   networkS1C_IPv4Interface = IPv4Interface('192.168.247.102/24')
-   networkS1C_IPv4Gateway   = IPv4Address('0.0.0.0')
-   networkS1C_IPv6Interface = None
-   networkS1C_IPv6Gateway   = None
+   gitRepository        = function_get('mme-git-repository')
+   gitCommit            = function_get('mme-git-commit')
+   gitDirectory         = 'openair-cn'
+
+   mmeS1C_IPv4Interface = IPv4Interface(function_get('mme-S1C-ipv4-interface'))
+   mmeS1C_IPv4Gateway   = IPv4Address(function_get('mme-S1C-ipv4-gateway'))
+   if function_get('mme-S1C-ipv6-interface') != '':
+      mmeS1C_IPv6Interface = IPv6Interface(function_get('mme-S1C-ipv6-interface'))
+   else:
+      mmeS1C_IPv6Interface = None
+   if function_get('mme-S1C-ipv6-gateway') != '':
+      mmeS1C_IPv6Gateway   = IPv6Address(function_get('mme-S1C-ipv6-gateway'))
+   else:
+      mmeS1C_IPv6Gateway = None
 
    # Prepare network configurations:
    mmeS6a_IfName = 'ens4'
@@ -398,7 +407,8 @@ def prepare_mme_build():
 
    configurationS6a = configureInterface(mmeS6a_IfName, IPv4Interface('0.0.0.0/0'))
    configurationS11 = configureInterface(mmeS11_IfName, IPv4Interface('0.0.0.0/0'))
-   configurationS1C = configureInterface(mmeS1C_IfName, networkS1C_IPv4Interface, networkS1C_IPv4Gateway)
+   configurationS1C = configureInterface(mmeS1C_IfName, mmeS1C_IPv4Interface, mmeS1C_IPv4Gateway,
+                                                        mmeS1C_IPv6Interface, mmeS1C_IPv6Gateway)
 
    # NOTE:
    # Double escaping is required for \ and " in "command" string!
@@ -428,53 +438,33 @@ echo \\\"###### Done! ##########################################################
       configurationS1C = configurationS1C
    )
 
-   try:
-       stdout, stderr = execute(commands)
-   except subprocess.CalledProcessError as e:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       function_fail(message.encode('utf-8'))
-       status_set('active', 'prepare-mme-build: preparing MME build FAILED!')
-   except:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       function_fail('Command execution failed: ' + str(err))
-       status_set('active', 'prepare-mme-build: preparing MME build FAILED!')
-   else:
-      set_flag('mmecharm.prepared-mme-build')
-      clear_flag('actions.prepare-mme-build')
-      function_set( { 'output': stdout.encode('utf-8') } )
-      status_set('active', 'prepare-mme-build: preparing MME build COMPLETED')
+   runShellCommands(commands, 'prepare_mme_build: preparing MME build',
+                    'actions.prepare-mme-build', 'mmecharm.prepared-mme-build')
 
 
 # ###### configure-mme function #############################################
 @when('actions.configure-mme')
 @when('mmecharm.prepared-mme-build')
 def configure_mme():
-   status_set('active', 'configure-mme: configuring MME ...')
 
    # ====== Install MME =====================================================
    # For a documentation of the installation procedure, see:
    # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-mme
 
-   gitRepository          = 'https://github.com/OPENAIRINTERFACE/openair-cn.git'
    gitDirectory           = 'openair-cn'
-   gitCommit              = 'develop'
-   hssS6a_IPv4Address     = '172.16.6.129'
-   mmeS1C_IPv4IfName      = 'ens6'
-   mmeS1C_IPv4Interface   = IPv4Interface('192.168.247.102/24')
-   mmeS11_IPv4IfName      = 'ens5'
-   mmeS11_IPv4Interface   = IPv4Interface('172.16.1.102/24')
-   spwgcS11_IPv4Interface = IPv4Interface('172.16.1.104/24')
-   networkRealm           = 'simula.nornet'
-   networkMCC             = 242
-   networkMNC             = 88
-   networkLTE_K           = '449c4b91aeacd0ace182cf3a5a72bfa1'
-   networkOP_K            = '1006020f0a478bf6b699f15c062e42b3'
-   networkIMSIFirst       = '242881234500000'
-   networkMSISDNFirst     = '24288880000000'
-   networkUsers           = 1024
+
+   hssS6a_IPv4Address     = IPv4Address(function_get('hss-s6a-address'))
+   mmeS1C_IPv4Interface   = IPv4Interface(function_get('mme-S1C-ipv4-interface'))
+   mmeS11_IPv4Interface   = IPv4Interface(function_get('mme-S11-ipv4-interface'))
+   spwgcS11_IPv4Interface = IPv4Interface(function_get('spgwc-S11-ipv4-interface'))
+   networkRealm           = function_get('network-realm')
+   networkMCC             = int(function_get('network-mcc'))
+   networkMNC             = int(function_get('network-mnc'))
+   networkLTE_K           = function_get('network-lte-k')
+   networkOP_K            = function_get('network-op-k')
+   networkIMSIFirst       = function_get('network-imsi-first')
+   networkMSISDNFirst     = function_get('network-msisdn-first')
+   networkUsers           = int(function_get('network-users'))
 
    TAC_SGW_TEST = 7
    TAC_SGW_0    = 600
@@ -485,6 +475,11 @@ def configure_mme():
    tac_sgw_0    = '{:04x}'.format(TAC_SGW_0)
    tac_mme_0    = '{:04x}'.format(TAC_MME_0)
    tac_mme_1    = '{:04x}'.format(TAC_MME_1)
+
+   # Prepare network configurations:
+   mmeS6a_IfName = 'ens4'
+   mmeS11_IfName = 'ens5'
+   mmeS1C_IfName = 'ens6'
 
    # NOTE:
    # Double escaping is required for \ and " in "command" string!
@@ -528,9 +523,9 @@ MME_CONF[@MME_CODE@]='3' && \\
 MME_CONF[@TAC_0@]='600' && \\
 MME_CONF[@TAC_1@]='601' && \\
 MME_CONF[@TAC_2@]='602' && \\
-MME_CONF[@MME_INTERFACE_NAME_FOR_S1_MME@]='{mmeS1C_IPv4IfName}' && \\
+MME_CONF[@MME_INTERFACE_NAME_FOR_S1_MME@]='{mmeS1C_IfName}' && \\
 MME_CONF[@MME_IPV4_ADDRESS_FOR_S1_MME@]='{mmeS1C_IPv4Interface}' && \\
-MME_CONF[@MME_INTERFACE_NAME_FOR_S11@]='{mmeS11_IPv4IfName}' && \\
+MME_CONF[@MME_INTERFACE_NAME_FOR_S11@]='{mmeS11_IfName}' && \\
 MME_CONF[@MME_IPV4_ADDRESS_FOR_S11@]='{mmeS11_IPv4Interface}' && \\
 MME_CONF[@MME_INTERFACE_NAME_FOR_S10@]='eth0:m10' && \\
 MME_CONF[@MME_IPV4_ADDRESS_FOR_S10@]='192.168.10.110/24' && \\
@@ -556,13 +551,11 @@ MME_CONF[@TAC-HB_MME_1@]={tac_mme_1_lo} && \\
 for K in \\\"\${{!MME_CONF[@]}}\\\"; do sudo egrep -lRZ \\\"\$K\\\" \$PREFIX | xargs -0 -l sudo sed -i -e \\\"s|\$K|\${{MME_CONF[\$K]}}|g\\\" ; ret=\$?;[[ ret -ne 0 ]] && echo \\\"Tried to replace \$K with \${{MME_CONF[\$K]}}\\\" || true ; done && \\
 sudo ./check_mme_s6a_certificate \$PREFIX/freeDiameter mme.{networkRealm} >logs/check_mme_s6a_certificate.log 2>&1 && \\
 echo \\\"###### Done! ##########################################################\\\"""".format(
-      gitRepository          = gitRepository,
       gitDirectory           = gitDirectory,
-      gitCommit              = gitCommit,
       hssS6a_IPv4Address     = hssS6a_IPv4Address,
-      mmeS1C_IPv4IfName      = mmeS1C_IPv4IfName,
+      mmeS1C_IfName          = mmeS1C_IfName,
       mmeS1C_IPv4Interface   = mmeS1C_IPv4Interface,
-      mmeS11_IPv4IfName      = mmeS11_IPv4IfName,
+      mmeS11_IfName          = mmeS11_IfName,
       mmeS11_IPv4Interface   = mmeS11_IPv4Interface,
       spwgcS11_IPv4Interface = spwgcS11_IPv4Interface,
       networkRealm           = networkRealm,
@@ -584,23 +577,8 @@ echo \\\"###### Done! ##########################################################
       tac_mme_1_lo           = tac_mme_1[2:4]
    )
 
-   try:
-       stdout, stderr = execute(commands)
-   except subprocess.CalledProcessError as e:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       function_fail(message.encode('utf-8'))
-       status_set('active', 'confiigure-mme: configuring MME FAILED!')
-   except:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       function_fail('Command execution failed: ' + str(err))
-       status_set('active', 'confiigure-mme: configuring MME FAILED!')
-   else:
-      clear_flag('actions.configure-mme')
-      function_set( { 'output': stdout.encode('utf-8') } )
-      status_set('active', 'confiigure-mme: configuring MME COMPLETED')
+   runShellCommands(commands, 'configure_mme: configuring MME',
+                    'actions.configure-mme', 'mmecharm.configured-mme')
 
 
 
@@ -926,12 +904,12 @@ echo \\\"###### Done! ##########################################################
 
 
 # ###########################################################################
-prepare_cassandra_hss_build()
-configure_cassandra()
-configure_hss()
+#prepare_cassandra_hss_build()
+#configure_cassandra()
+#configure_hss()
 
-#prepare_mme_build()
-#configure_mme()
+prepare_mme_build()
+configure_mme()
 
 #prepare_spgwu_build()
 #configure_spgwu()
