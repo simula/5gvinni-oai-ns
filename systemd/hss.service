@@ -1,0 +1,15 @@
+[Unit]
+Description=Home Subscriber Server (HSS)
+After=ssh.target
+
+[Service]
+ExecStart=/usr/local/bin/oai_hss -j /usr/local/etc/oai/hss_rel14.json
+KillMode=process
+Restart=on-failure
+RestartPreventExitStatus=255
+WorkingDirectory=/home/nornetpp/src/openair-cn/scripts
+StandardOutput=file:/var/log/hss.log
+StandardError=inherit
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,15 @@
+[Unit]
+Description=Serving and Packet Data Network Gateway -- User Plane (SPGW-U)
+After=ssh.target
+
+[Service]
+ExecStart=/usr/local/bin/spgwu -c /usr/local/etc/oai/spgw_u.conf
+KillMode=process
+Restart=on-failure
+RestartPreventExitStatus=255
+WorkingDirectory=/home/nornetpp/src/openair-cn-cups/build/scripts
+StandardOutput=file:/var/log/spgwu.log
+StandardError=inherit
+
+[Install]
+WantedBy=multi-user.target
