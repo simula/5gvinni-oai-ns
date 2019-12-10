@@ -291,6 +291,7 @@ echo \\\"====== Provisioning users ... ======\\\" && \\
 echo \\\"====== Provisioning MME ... ======\\\" && \\
 ./data_provisioning_mme --id 3 --mme-identity mme.{networkRealm} --realm {networkRealm} --ue-reachability 1 --truncate True  --verbose True -C {cassandraServerIP} >logs/data_provisioning_mme.log 2>&1 && \\
 echo \\\"###### Creating HSS configuration files ###############################\\\" && \\
+echo "127.0.1.1        hss.{networkRealm} hss" | sudo tee -a /etc/hosts && \\
 openssl rand -out \$HOME/.rnd 128 && \\
 echo \\\"====== Configuring Diameter ... ======\\\" && \\
 PREFIX='/usr/local/etc/oai' && \\
@@ -323,7 +324,8 @@ echo \\\"KillMode=process\\\" && \\
 echo \\\"Restart=on-failure\\\" && \\
 echo \\\"RestartPreventExitStatus=255\\\" && \\
 echo \\\"WorkingDirectory=/home/nornetpp/src/openair-cn/scripts\\\" && \\
-echo \\\"RuntimeDirectoryMode=0755\\\" && \\
+echo \\\"StandardOutput=file:/var/log/hss.log\\\" && \\
+echo \\\"StandardError=inherit\\\" && \\
 echo \\\"\\\" && \\
 echo \\\"[Install]\\\" && \\
 echo \\\"WantedBy=multi-user.target\\\" ) >//lib/systemd/system/hss.service && \\
