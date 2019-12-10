@@ -312,6 +312,22 @@ for K in \\\"\${{!HSS_CONF[@]}}\\\"; do echo \\\"K=\$K ...\\\" && sudo egrep -lR
 ../src/hss_rel14/bin/make_certs.sh hss {networkRealm} \$PREFIX && \\
 echo \\\"====== Updating key ... ======\\\" && \\
 oai_hss -j \$PREFIX/hss_rel14.json --onlyloadkey >logs/onlyloadkey.log 2>&1 && \\
+echo \\\"====== Preparing SystemD Unit ... ======\\\" && \\
+( echo \\\"[Unit]\\\" && \\
+echo \\\"Description=Home Subscriber Server (HSS)\\\" && \\
+echo \\\"After=ssh.target\\\" && \\
+echo \\\"\\\" && \\
+echo \\\"[Service]\\\" && \\
+echo \\\"ExecStart=/usr/local/bin/oai_hss -j /usr/local/etc/oai/hss_rel14.json\\\" && \\
+echo \\\"KillMode=process\\\" && \\
+echo \\\"Restart=on-failure\\\" && \\
+echo \\\"RestartPreventExitStatus=255\\\" && \\
+echo \\\"WorkingDirectory=/home/nornetpp/src/openair-cn/scripts\\\" && \\
+echo \\\"RuntimeDirectoryMode=0755\\\" && \\
+echo \\\"\\\" && \\
+echo \\\"[Install]\\\" && \\
+echo \\\"WantedBy=multi-user.target\\\" ) >//lib/systemd/system/hss.service && \\
+sudo systemctl daemon-reload \\
 echo \\\"###### Done! ##########################################################\\\"""".format(
       gitDirectory       = gitDirectory,
       cassandraServerIP  = cassandraServerIP,
@@ -331,7 +347,7 @@ echo \\\"###### Done! ##########################################################
 @when('actions.restart-hss')
 @when('hsscharm.configured-hss')
 def restart_hss():
-   commands = 'touch /tmp/restart-hss'
+   commands = 'sudo service hss restart'
    runShellCommands(commands, 'restart_hss: restarting HSS', 'actions.restart-hss')
 
 
