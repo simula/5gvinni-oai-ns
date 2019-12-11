@@ -68,7 +68,8 @@ MyParameters = {
    'spgwu-SGi-ipv4-interface': '10.254.1.203/24',
    'spgwu-SGi-ipv4-gateway': '10.254.1.1',
    'spgwu-SGi-ipv6-interface': '3ffe::2/64',
-   'spgwu-SGi-ipv6-gateway': '3ffe::1'
+   'spgwu-SGi-ipv6-gateway': '3ffe::1',
+   'spgwu-spgwc-list': '172.55.55.101'
 }
 def action_get(flag):
    return MyParameters[flag]
@@ -717,6 +718,15 @@ def configure_spgwu():
    spgwuS1U_IfName  = 'ens5'
    spgwuSGi_IfName  = 'ens6'
 
+   spgwcListString  = action_get('spgwu-spgwc-list').split(',')
+   spgwcList        = ''
+   for spgwc in spgwcListString:
+      print(spgwc)
+      spgwcAddress = IPv4Address(spgwc)
+      if len(spgwcList) > 0:
+         spgwcList = spgwcList + ', '
+      spgwcList = spgwcList + '{{ IPV4_ADDRESS=\\\\\\"{spgwcAddress}\\\\\\"; }}'.format(spgwcAddress = str(spgwcAddress))
+
    # NOTE:
    # Double escaping is required for \ and " in "command" string!
    # 1. Python
@@ -746,6 +756,7 @@ SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_S1U_S12_S4_UP@]='{spgwuS1U_IfName}' && \\
 SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_SX@]='{spgwuSXab_IfName}' && \\
 SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_SGI@]='{spgwuSGi_IfName}' && \\
 for K in \\\"\${{!SPGWU_CONF[@]}}\\\"; do sudo egrep -lRZ \\\"\$K\\\" \$PREFIX | xargs -0 -l sudo sed -i -e \\\"s|\$K|\${{SPGWU_CONF[\$K]}}|g\\\" ; ret=\$?;[[ ret -ne 0 ]] && echo \\\"Tried to replace \$K with \${{SPGWU_CONF[\$K]}}\\\" || true ; done && \\
+sudo sed -e \\\"s/{{.*IPV4_ADDRESS=\\\\\\"192.168.160.100\\\\\\".*;.*}}/{spgwcList}/g\\\" -i /usr/local/etc/oai/spgw_u.conf && \\
 echo \\\"====== Preparing SystemD Unit ... ======\\\" && \\
 ( echo \\\"[Unit]\\\" && \\
 echo \\\"Description=Serving and Packet Data Network Gateway -- User Plane (SPGW-U)\\\" && \\
@@ -770,6 +781,7 @@ echo \\\"###### Done! ##########################################################
       spgwuSXab_IfName  = spgwuSXab_IfName,
       spgwuS1U_IfName   = spgwuS1U_IfName,
       spgwuSGi_IfName   = spgwuSGi_IfName,
+      spgwcList         = spgwcList
    )
 
    try:
@@ -985,7 +997,7 @@ echo \\\"###### Done! ##########################################################
 #configure_mme()
 
 #prepare_spgwu_build()
-#configure_spgwu()
+configure_spgwu()
 
-prepare_spgwc_build()
-configure_spgwc()
+#prepare_spgwc_build()
+#configure_spgwc()
