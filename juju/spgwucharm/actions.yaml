@@ -61,6 +61,10 @@ prepare-spgwu-build:
       description: SPGW-U SGi IPv6 gateway
       type: string
       default: 3ffe::1
+    spgwu-spgwc-list:
+      description: SPGW-U SPGW-C list (comma-separated)
+      type: string
+      default: 172.55.55.101
   required:
     - spgwu-git-repository
     - spgwu-git-commit
@@ -70,6 +74,7 @@ prepare-spgwu-build:
     - spgwu-SGi-ipv4-gateway
     - spgwu-SGi-ipv6-interface
     - spgwu-SGi-ipv6-gateway
+    - spgwu-spgwc-list
 
 configure-spgwu:
   description: Configures the SPGW-U

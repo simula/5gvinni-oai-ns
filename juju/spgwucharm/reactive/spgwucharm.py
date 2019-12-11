@@ -212,17 +212,28 @@ echo \\\"###### Done! ##########################################################
 @when('actions.configure-spgwu')
 @when('spgwucharm.prepared-spgwu-build')
 def configure_spgwu():
+   status_set('active', 'configure-spgwu: configuring SPGW-U ...')
 
    # ====== Install SPGW-U ==================================================
    # For a documentation of the installation procedure, see:
    # https://github.com/OPENAIRINTERFACE/openair-cn-cups/wiki/OpenAirSoftwareSupport#install-spgw-u
 
+   gitRepository    = 'https://github.com/OPENAIRINTERFACE/openair-cn-cups.git'
    gitDirectory     = 'openair-cn-cups'
+   gitCommit        = 'develop'
 
-   # Prepare network configurations:
    spgwuSXab_IfName = 'ens4'
    spgwuS1U_IfName  = 'ens5'
    spgwuSGi_IfName  = 'ens6'
+
+   spgwcListString  = action_get('spgwu-spgwc-list').split(',')
+   spgwcList        = ''
+   for spgwc in spgwcListString:
+      print(spgwc)
+      spgwcAddress = IPv4Address(spgwc)
+      if len(spgwcList) > 0:
+         spgwcList = spgwcList + ', '
+      spgwcList = spgwcList + '{{ IPV4_ADDRESS=\\\\\\"{spgwcAddress}\\\\\\"; }}'.format(spgwcAddress = str(spgwcAddress))
 
    # NOTE:
    # Double escaping is required for \ and " in "command" string!
@@ -253,6 +264,7 @@ SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_S1U_S12_S4_UP@]='{spgwuS1U_IfName}' && \\
 SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_SX@]='{spgwuSXab_IfName}' && \\
 SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_SGI@]='{spgwuSGi_IfName}' && \\
 for K in \\\"\${{!SPGWU_CONF[@]}}\\\"; do sudo egrep -lRZ \\\"\$K\\\" \$PREFIX | xargs -0 -l sudo sed -i -e \\\"s|\$K|\${{SPGWU_CONF[\$K]}}|g\\\" ; ret=\$?;[[ ret -ne 0 ]] && echo \\\"Tried to replace \$K with \${{SPGWU_CONF[\$K]}}\\\" || true ; done && \\
+sudo sed -e \\\"s/{{.*IPV4_ADDRESS=\\\\\\"192.168.160.100\\\\\\".*;.*}}/{spgwcList}/g\\\" -i /usr/local/etc/oai/spgw_u.conf && \\
 echo \\\"====== Preparing SystemD Unit ... ======\\\" && \\
 ( echo \\\"[Unit]\\\" && \\
 echo \\\"Description=Serving and Packet Data Network Gateway -- User Plane (SPGW-U)\\\" && \\
@@ -271,14 +283,32 @@ echo \\\"[Install]\\\" && \\
 echo \\\"WantedBy=multi-user.target\\\" ) | sudo tee /lib/systemd/system/spgwu.service && \\
 sudo systemctl daemon-reload \\
 echo \\\"###### Done! ##########################################################\\\"""".format(
-      gitDirectory     = gitDirectory,
-      spgwuSXab_IfName = spgwuSXab_IfName,
-      spgwuS1U_IfName  = spgwuS1U_IfName,
-      spgwuSGi_IfName  = spgwuSGi_IfName
+      gitRepository     = gitRepository,
+      gitDirectory      = gitDirectory,
+      gitCommit         = gitCommit,
+      spgwuSXab_IfName  = spgwuSXab_IfName,
+      spgwuS1U_IfName   = spgwuS1U_IfName,
+      spgwuSGi_IfName   = spgwuSGi_IfName,
+      spgwcList         = spgwcList
    )
 
-   runShellCommands(commands, 'configure_spgwu: configuring SPGW-U',
-                    'actions.configure-spgwu', 'spgwucharm.configured-spgwu')
+   try:
+       stdout, stderr = execute(commands)
+   except subprocess.CalledProcessError as e:
+       exc_type, exc_value, exc_traceback = sys.exc_info()
+       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
+       action_fail(message.encode('utf-8'))
+       status_set('active', 'confiigure-spgwu: configuring SPGW-U FAILED!')
+   except:
+       exc_type, exc_value, exc_traceback = sys.exc_info()
+       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       action_fail('Command execution failed: ' + str(err))
+       status_set('active', 'confiigure-spgwu: configuring SPGW-U FAILED!')
+   else:
+      clear_flag('actions.configure-spgwu')
+      action_set( { 'output': stdout.encode('utf-8') } )
+      status_set('active', 'confiigure-spgwu: configuring SPGW-U COMPLETED')
 
 
 # ###### restart-spgwu function #############################################
