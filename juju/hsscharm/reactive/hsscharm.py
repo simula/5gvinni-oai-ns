@@ -314,9 +314,6 @@ for K in \\\"\${{!HSS_CONF[@]}}\\\"; do echo \\\"K=\$K ...\\\" && sudo egrep -lR
 echo \\\"====== Updating key ... ======\\\" && \\
 oai_hss -j \$PREFIX/hss_rel14.json --onlyloadkey >logs/onlyloadkey.log 2>&1 && \\
 echo \\\"====== Preparing SystemD Unit ... ======\\\" && \\
-echo \\\"A\\\" >/tmp/A.txt && \\
-echo \\\"B\\\" | tee /tmp/B.txt && \\
-echo \\\"C\\\" | sudo tee /tmp/C.txt && \\
 ( echo \\\"[Unit]\\\" && \\
 echo \\\"Description=Home Subscriber Server (HSS)\\\" && \\
 echo \\\"After=ssh.target\\\" && \\

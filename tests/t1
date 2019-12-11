@@ -70,18 +70,18 @@ MyParameters = {
    'spgwu-SGi-ipv6-interface': '3ffe::2/64',
    'spgwu-SGi-ipv6-gateway': '3ffe::1'
 }
-def function_get(flag):
+def action_get(flag):
    return MyParameters[flag]
 
 
 # ###### Dummy function #####################################################
-def function_set(values):
+def action_set(values):
    # Nothing to do!
    pass
 
 
 # ###### Dummy function #####################################################
-def function_fail(message):
+def action_fail(message):
    # Nothing to do!
    pass
 
@@ -122,17 +122,17 @@ def runShellCommands(commands, comment, actionFlagToClear, successFlagToSet = No
        exc_type, exc_value, exc_traceback = sys.exc_info()
        err = traceback.format_exception(exc_type, exc_value, exc_traceback)
        message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       function_fail(message.encode('utf-8'))
+       action_fail(message.encode('utf-8'))
        status_set('active', comment + ' COMMANDS FAILED!')
    except:
        exc_type, exc_value, exc_traceback = sys.exc_info()
        err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       function_fail('Command execution failed: ' + str(err))
+       action_fail('Command execution failed: ' + str(err))
        status_set('active', comment + ' FAILED!')
    else:
       if successFlagToSet != None:
          set_flag(successFlagToSet)
-      # function_set( { 'output': stdout.encode('utf-8') } )
+      # action_set( { 'output': stdout.encode('utf-8') } )
       status_set('active', comment + ' COMPLETED')
    finally:
       clear_flag(actionFlagToClear)
@@ -209,8 +209,8 @@ def prepare_cassandra_hss_build():
    # For a documentation of the installation procedure, see:
    # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
 
-   gitRepository = function_get('hss-git-repository')
-   gitCommit     = function_get('hss-git-commit')
+   gitRepository = action_get('hss-git-repository')
+   gitCommit     = action_get('hss-git-commit')
    gitDirectory  = 'openair-cn'
 
    # Prepare network configuration:
@@ -255,7 +255,7 @@ def configure_cassandra():
    # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
 
    gitDirectory      = 'openair-cn'
-   cassandraServerIP = function_get('cassandra-server-ip')
+   cassandraServerIP = action_get('cassandra-server-ip')
 
    # NOTE:
    # Double escaping is required for \ and " in "command" string!
@@ -306,13 +306,13 @@ def configure_hss():
    # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
 
    gitDirectory       = 'openair-cn'
-   cassandraServerIP  = function_get('cassandra-server-ip')
-   networkRealm       = function_get('network-realm')
-   networkLTE_K       = function_get('network-lte-k')
-   networkOP_K        = function_get('network-op-k')
-   networkIMSIFirst   = function_get('network-imsi-first')
-   networkMSISDNFirst = function_get('network-msisdn-first')
-   networkUsers       = int(function_get('network-users'))
+   cassandraServerIP  = action_get('cassandra-server-ip')
+   networkRealm       = action_get('network-realm')
+   networkLTE_K       = action_get('network-lte-k')
+   networkOP_K        = action_get('network-op-k')
+   networkIMSIFirst   = action_get('network-imsi-first')
+   networkMSISDNFirst = action_get('network-msisdn-first')
+   networkUsers       = int(action_get('network-users'))
 
    # NOTE:
    # Double escaping is required for \ and " in "command" string!
@@ -337,6 +337,7 @@ echo \\\"====== Provisioning users ... ======\\\" && \\
 echo \\\"====== Provisioning MME ... ======\\\" && \\
 ./data_provisioning_mme --id 3 --mme-identity mme.{networkRealm} --realm {networkRealm} --ue-reachability 1 --truncate True  --verbose True -C {cassandraServerIP} >logs/data_provisioning_mme.log 2>&1 && \\
 echo \\\"###### Creating HSS configuration files ###############################\\\" && \\
+echo "127.0.1.1        hss.{networkRealm} hss" | sudo tee -a /etc/hosts && \\
 openssl rand -out \$HOME/.rnd 128 && \\
 echo \\\"====== Configuring Diameter ... ======\\\" && \\
 PREFIX='/usr/local/etc/oai' && \\
@@ -358,6 +359,23 @@ for K in \\\"\${{!HSS_CONF[@]}}\\\"; do echo \\\"K=\$K ...\\\" && sudo egrep -lR
 ../src/hss_rel14/bin/make_certs.sh hss {networkRealm} \$PREFIX && \\
 echo \\\"====== Updating key ... ======\\\" && \\
 oai_hss -j \$PREFIX/hss_rel14.json --onlyloadkey >logs/onlyloadkey.log 2>&1 && \\
+echo \\\"====== Preparing SystemD Unit ... ======\\\" && \\
+( echo \\\"[Unit]\\\" && \\
+echo \\\"Description=Home Subscriber Server (HSS)\\\" && \\
+echo \\\"After=ssh.target\\\" && \\
+echo \\\"\\\" && \\
+echo \\\"[Service]\\\" && \\
+echo \\\"ExecStart=/usr/local/bin/oai_hss -j /usr/local/etc/oai/hss_rel14.json\\\" && \\
+echo \\\"KillMode=process\\\" && \\
+echo \\\"Restart=on-failure\\\" && \\
+echo \\\"RestartPreventExitStatus=255\\\" && \\
+echo \\\"WorkingDirectory=/home/nornetpp/src/openair-cn/scripts\\\" && \\
+echo \\\"StandardOutput=file:/var/log/hss.log\\\" && \\
+echo \\\"StandardError=inherit\\\" && \\
+echo \\\"\\\" && \\
+echo \\\"[Install]\\\" && \\
+echo \\\"WantedBy=multi-user.target\\\" ) >//lib/systemd/system/hss.service && \\
+sudo systemctl daemon-reload \\
 echo \\\"###### Done! ##########################################################\\\"""".format(
       gitDirectory       = gitDirectory,
       cassandraServerIP  = cassandraServerIP,
@@ -385,18 +403,18 @@ def prepare_mme_build():
    # For a documentation of the installation procedure, see:
    # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-mme
 
-   gitRepository        = function_get('mme-git-repository')
-   gitCommit            = function_get('mme-git-commit')
+   gitRepository        = action_get('mme-git-repository')
+   gitCommit            = action_get('mme-git-commit')
    gitDirectory         = 'openair-cn'
 
-   mmeS1C_IPv4Interface = IPv4Interface(function_get('mme-S1C-ipv4-interface'))
-   mmeS1C_IPv4Gateway   = IPv4Address(function_get('mme-S1C-ipv4-gateway'))
-   if function_get('mme-S1C-ipv6-interface') != '':
-      mmeS1C_IPv6Interface = IPv6Interface(function_get('mme-S1C-ipv6-interface'))
+   mmeS1C_IPv4Interface = IPv4Interface(action_get('mme-S1C-ipv4-interface'))
+   mmeS1C_IPv4Gateway   = IPv4Address(action_get('mme-S1C-ipv4-gateway'))
+   if action_get('mme-S1C-ipv6-interface') != '':
+      mmeS1C_IPv6Interface = IPv6Interface(action_get('mme-S1C-ipv6-interface'))
    else:
       mmeS1C_IPv6Interface = None
-   if function_get('mme-S1C-ipv6-gateway') != '':
-      mmeS1C_IPv6Gateway   = IPv6Address(function_get('mme-S1C-ipv6-gateway'))
+   if action_get('mme-S1C-ipv6-gateway') != '':
+      mmeS1C_IPv6Gateway   = IPv6Address(action_get('mme-S1C-ipv6-gateway'))
    else:
       mmeS1C_IPv6Gateway = None
 
@@ -453,18 +471,18 @@ def configure_mme():
 
    gitDirectory           = 'openair-cn'
 
-   hssS6a_IPv4Address     = IPv4Address(function_get('hss-s6a-address'))
-   mmeS1C_IPv4Interface   = IPv4Interface(function_get('mme-S1C-ipv4-interface'))
-   mmeS11_IPv4Interface   = IPv4Interface(function_get('mme-S11-ipv4-interface'))
-   spwgcS11_IPv4Interface = IPv4Interface(function_get('spgwc-S11-ipv4-interface'))
-   networkRealm           = function_get('network-realm')
-   networkMCC             = int(function_get('network-mcc'))
-   networkMNC             = int(function_get('network-mnc'))
-   networkLTE_K           = function_get('network-lte-k')
-   networkOP_K            = function_get('network-op-k')
-   networkIMSIFirst       = function_get('network-imsi-first')
-   networkMSISDNFirst     = function_get('network-msisdn-first')
-   networkUsers           = int(function_get('network-users'))
+   hssS6a_IPv4Address     = IPv4Address(action_get('hss-s6a-address'))
+   mmeS1C_IPv4Interface   = IPv4Interface(action_get('mme-S1C-ipv4-interface'))
+   mmeS11_IPv4Interface   = IPv4Interface(action_get('mme-S11-ipv4-interface'))
+   spwgcS11_IPv4Interface = IPv4Interface(action_get('spgwc-S11-ipv4-interface'))
+   networkRealm           = action_get('network-realm')
+   networkMCC             = int(action_get('network-mcc'))
+   networkMNC             = int(action_get('network-mnc'))
+   networkLTE_K           = action_get('network-lte-k')
+   networkOP_K            = action_get('network-op-k')
+   networkIMSIFirst       = action_get('network-imsi-first')
+   networkMSISDNFirst     = action_get('network-msisdn-first')
+   networkUsers           = int(action_get('network-users'))
 
    TAC_SGW_TEST = 7
    TAC_SGW_0    = 600
@@ -648,17 +666,17 @@ echo \\\"###### Done! ##########################################################
        exc_type, exc_value, exc_traceback = sys.exc_info()
        err = traceback.format_exception(exc_type, exc_value, exc_traceback)
        message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       function_fail(message.encode('utf-8'))
+       action_fail(message.encode('utf-8'))
        status_set('active', 'prepare-spgwu-build: preparing SPGW-U build FAILED!')
    except:
        exc_type, exc_value, exc_traceback = sys.exc_info()
        err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       function_fail('Command execution failed: ' + str(err))
+       action_fail('Command execution failed: ' + str(err))
        status_set('active', 'prepare-spgwu-build: preparing SPGW-U build FAILED!')
    else:
       set_flag('spgwucharm.prepared-spgwu-build')
       clear_flag('actions.prepare-spgwu-build')
-      function_set( { 'output': stdout.encode('utf-8') } )
+      action_set( { 'output': stdout.encode('utf-8') } )
       status_set('active', 'prepare-spgwu-build: preparing SPGW-U build COMPLETED')
 
 
@@ -724,16 +742,16 @@ echo \\\"###### Done! ##########################################################
        exc_type, exc_value, exc_traceback = sys.exc_info()
        err = traceback.format_exception(exc_type, exc_value, exc_traceback)
        message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       function_fail(message.encode('utf-8'))
+       action_fail(message.encode('utf-8'))
        status_set('active', 'confiigure-spgwu: configuring SPGW-U FAILED!')
    except:
        exc_type, exc_value, exc_traceback = sys.exc_info()
        err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       function_fail('Command execution failed: ' + str(err))
+       action_fail('Command execution failed: ' + str(err))
        status_set('active', 'confiigure-spgwu: configuring SPGW-U FAILED!')
    else:
       clear_flag('actions.configure-spgwu')
-      function_set( { 'output': stdout.encode('utf-8') } )
+      action_set( { 'output': stdout.encode('utf-8') } )
       status_set('active', 'confiigure-spgwu: configuring SPGW-U COMPLETED')
 
 
@@ -804,17 +822,17 @@ echo \\\"###### Done! ##########################################################
        exc_type, exc_value, exc_traceback = sys.exc_info()
        err = traceback.format_exception(exc_type, exc_value, exc_traceback)
        message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       function_fail(message.encode('utf-8'))
+       action_fail(message.encode('utf-8'))
        status_set('active', 'prepare-spgwc-build: preparing SPGW-C build FAILED!')
    except:
        exc_type, exc_value, exc_traceback = sys.exc_info()
        err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       function_fail('Command execution failed: ' + str(err))
+       action_fail('Command execution failed: ' + str(err))
        status_set('active', 'prepare-spgwc-build: preparing SPGW-C build FAILED!')
    else:
       set_flag('spgwccharm.prepared-spgwc-build')
       clear_flag('actions.prepare-spgwc-build')
-      function_set( { 'output': stdout.encode('utf-8') } )
+      action_set( { 'output': stdout.encode('utf-8') } )
       status_set('active', 'prepare-spgwc-build: preparing SPGW-C build COMPLETED')
 
 
@@ -888,28 +906,28 @@ echo \\\"###### Done! ##########################################################
        exc_type, exc_value, exc_traceback = sys.exc_info()
        err = traceback.format_exception(exc_type, exc_value, exc_traceback)
        message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       function_fail(message.encode('utf-8'))
+       action_fail(message.encode('utf-8'))
        status_set('active', 'confiigure-spgwc: configuring SPGW-C FAILED!')
    except:
        exc_type, exc_value, exc_traceback = sys.exc_info()
        err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       function_fail('Command execution failed: ' + str(err))
+       action_fail('Command execution failed: ' + str(err))
        status_set('active', 'confiigure-spgwc: configuring SPGW-C FAILED!')
    else:
       clear_flag('actions.configure-spgwc')
-      function_set( { 'output': stdout.encode('utf-8') } )
+      action_set( { 'output': stdout.encode('utf-8') } )
       status_set('active', 'confiigure-spgwc: configuring SPGW-C COMPLETED')
 
 
 
 
 # ###########################################################################
-#prepare_cassandra_hss_build()
-#configure_cassandra()
-#configure_hss()
+prepare_cassandra_hss_build()
+configure_cassandra()
+configure_hss()
 
-prepare_mme_build()
-configure_mme()
+#prepare_mme_build()
+#configure_mme()
 
 #prepare_spgwu_build()
 #configure_spgwu()
