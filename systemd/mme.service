@@ -3,7 +3,7 @@ Description=Mobility Management Entity (MME)
 After=ssh.target
 
 [Service]
-ExecStart=/home/nornetpp/src/openair-cn/scripts/run_mme --config-file /usr/local/etc/oai/mme.conf --set-virt-if
+ExecStart=ExecStart=/usr/local/bin/mme -c /usr/local/etc/oai/mme.conf
 KillMode=process
 Restart=on-failure
 RestartPreventExitStatus=255
