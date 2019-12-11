@@ -268,6 +268,8 @@ echo \\\"====== Building dependencies ... ======\\\" && \\
 echo \\\"====== Building service ... ======\\\" && \\
 ./build_mme --clean >logs/build_mme-2.log 2>&1 && \\
 echo \\\"###### Creating MME configuration files ###############################\\\" && \\
+echo \\\"127.0.1.1        mme.{networkRealm} mme\\\" | sudo tee -a /etc/hosts && \\
+echo \\\"{hssS6a_IPv4Address}     hss.{networkRealm} hss\\\" | sudo tee -a /etc/hosts && \\
 openssl rand -out \$HOME/.rnd 128 && \\
 INSTANCE=1 && \\
 PREFIX='/usr/local/etc/oai' && \\

@@ -517,6 +517,8 @@ echo \\\"====== Building dependencies ... ======\\\" && \\
 echo \\\"====== Building service ... ======\\\" && \\
 ./build_mme --clean >logs/build_mme-2.log 2>&1 && \\
 echo \\\"###### Creating MME configuration files ###############################\\\" && \\
+echo \\\"127.0.1.1        mme.{networkRealm} mme\\\" | sudo tee -a /etc/hosts && \\
+echo \\\"{hssS6a_IPv4Address}     hss.{networkRealm} hss\\\" | sudo tee -a /etc/hosts && \\
 openssl rand -out \$HOME/.rnd 128 && \\
 INSTANCE=1 && \\
 PREFIX='/usr/local/etc/oai' && \\
@@ -923,6 +925,8 @@ SPGWC_CONF[@PGW_INTERFACE_NAME_FOR_SX@]='{spgwcSXab_IfName}' && \\
 SPGWC_CONF[@DEFAULT_DNS_IPV4_ADDRESS@]='{networkDNS1_IPv4}' && \\
 SPGWC_CONF[@DEFAULT_DNS_SEC_IPV4_ADDRESS@]='{networkDNS2_IPv4}' && \\
 for K in \\\"\${{!SPGWC_CONF[@]}}\\\"; do sudo egrep -lRZ \\\"\$K\\\" \$PREFIX | xargs -0 -l sudo sed -i -e \\\"s|\$K|\${{SPGWC_CONF[\$K]}}|g\\\" ; ret=\$?;[[ ret -ne 0 ]] && echo \\\"Tried to replace \$K with \${{SPGWC_CONF[\$K]}}\\\" || true ; done && \\
+sudo sed -e \\\"s/APN_NI = \\\\\\"default\\\\\\"/APN_NI = \\\\\\"default.{networkRealm}\\\\\\"/g\\\" -i /usr/local/etc/oai/spgw_c.conf && \\
+sudo sed -e \\\"s/APN_NI = \\\\\\"apn1\\\\\\"/APN_NI = \\\\\\"internet.{networkRealm}\\\\\\"/g\\\" -i /usr/local/etc/oai/spgw_c.conf && \\
 echo \\\"====== Preparing SystemD Unit ... ======\\\" && \\
 ( echo \\\"[Unit]\\\" && \\
 echo \\\"Description=Serving and Packet Data Network Gateway -- Control Plane (SPGW-C)\\\" && \\
@@ -973,15 +977,15 @@ echo \\\"###### Done! ##########################################################
 
 
 # ###########################################################################
-prepare_cassandra_hss_build()
-configure_cassandra()
-configure_hss()
+#prepare_cassandra_hss_build()
+#configure_cassandra()
+#configure_hss()
 
-prepare_mme_build()
-configure_mme()
+#prepare_mme_build()
+#configure_mme()
 
-prepare_spgwu_build()
-configure_spgwu()
+#prepare_spgwu_build()
+#configure_spgwu()
 
 prepare_spgwc_build()
 configure_spgwc()
