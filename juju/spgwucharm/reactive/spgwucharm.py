@@ -253,6 +253,23 @@ SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_S1U_S12_S4_UP@]='{spgwuS1U_IfName}' && \\
 SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_SX@]='{spgwuSXab_IfName}' && \\
 SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_SGI@]='{spgwuSGi_IfName}' && \\
 for K in \\\"\${{!SPGWU_CONF[@]}}\\\"; do sudo egrep -lRZ \\\"\$K\\\" \$PREFIX | xargs -0 -l sudo sed -i -e \\\"s|\$K|\${{SPGWU_CONF[\$K]}}|g\\\" ; ret=\$?;[[ ret -ne 0 ]] && echo \\\"Tried to replace \$K with \${{SPGWU_CONF[\$K]}}\\\" || true ; done && \\
+echo \\\"====== Preparing SystemD Unit ... ======\\\" && \\
+( echo \\\"[Unit]\\\" && \\
+echo \\\"Description=Serving and Packet Data Network Gateway -- User Plane (SPGW-U)\\\" && \\
+echo \\\"After=ssh.target\\\" && \\
+echo \\\"\\\" && \\
+echo \\\"[Service]\\\" && \\
+echo \\\"ExecStart=/usr/local/bin/spgwu -c /usr/local/etc/oai/spgw_u.conf\\\" && \\
+echo \\\"KillMode=process\\\" && \\
+echo \\\"Restart=on-failure\\\" && \\
+echo \\\"RestartPreventExitStatus=255\\\" && \\
+echo \\\"WorkingDirectory=/home/nornetpp/src/openair-cn-cups/build/scripts\\\" && \\
+echo \\\"StandardOutput=file:/var/log/spgwu.log\\\" && \\
+echo \\\"StandardError=inherit\\\" && \\
+echo \\\"\\\" && \\
+echo \\\"[Install]\\\" && \\
+echo \\\"WantedBy=multi-user.target\\\" ) | sudo tee /lib/systemd/system/spgwu.service && \\
+sudo systemctl daemon-reload \\
 echo \\\"###### Done! ##########################################################\\\"""".format(
       gitDirectory     = gitDirectory,
       spgwuSXab_IfName = spgwuSXab_IfName,

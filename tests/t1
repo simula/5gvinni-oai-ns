@@ -374,7 +374,7 @@ echo \\\"StandardOutput=file:/var/log/hss.log\\\" && \\
 echo \\\"StandardError=inherit\\\" && \\
 echo \\\"\\\" && \\
 echo \\\"[Install]\\\" && \\
-echo \\\"WantedBy=multi-user.target\\\" ) >//lib/systemd/system/hss.service && \\
+echo \\\"WantedBy=multi-user.target\\\" ) | sudo tee /lib/systemd/system/hss.service && \\
 sudo systemctl daemon-reload \\
 echo \\\"###### Done! ##########################################################\\\"""".format(
       gitDirectory       = gitDirectory,
@@ -568,6 +568,23 @@ MME_CONF[@TAC-LB_MME_1@]={tac_mme_1_hi} && \\
 MME_CONF[@TAC-HB_MME_1@]={tac_mme_1_lo} && \\
 for K in \\\"\${{!MME_CONF[@]}}\\\"; do sudo egrep -lRZ \\\"\$K\\\" \$PREFIX | xargs -0 -l sudo sed -i -e \\\"s|\$K|\${{MME_CONF[\$K]}}|g\\\" ; ret=\$?;[[ ret -ne 0 ]] && echo \\\"Tried to replace \$K with \${{MME_CONF[\$K]}}\\\" || true ; done && \\
 sudo ./check_mme_s6a_certificate \$PREFIX/freeDiameter mme.{networkRealm} >logs/check_mme_s6a_certificate.log 2>&1 && \\
+echo \\\"====== Preparing SystemD Unit ... ======\\\" && \\
+( echo \\\"[Unit]\\\" && \\
+echo \\\"Description=Mobility Management Entity (MME)\\\" && \\
+echo \\\"After=ssh.target\\\" && \\
+echo \\\"\\\" && \\
+echo \\\"[Service]\\\" && \\
+echo \\\"ExecStart=/home/nornetpp/src/openair-cn/scripts/run_mme --config-file /usr/local/etc/oai/mme.conf --set-virt-if\\\" && \\
+echo \\\"KillMode=process\\\" && \\
+echo \\\"Restart=on-failure\\\" && \\
+echo \\\"RestartPreventExitStatus=255\\\" && \\
+echo \\\"WorkingDirectory=/home/nornetpp/src/openair-cn/scripts\\\" && \\
+echo \\\"StandardOutput=file:/var/log/mme.log\\\" && \\
+echo \\\"StandardError=inherit\\\" && \\
+echo \\\"\\\" && \\
+echo \\\"[Install]\\\" && \\
+echo \\\"WantedBy=multi-user.target\\\" ) | sudo tee /lib/systemd/system/mme.service && \\
+sudo systemctl daemon-reload \\
 echo \\\"###### Done! ##########################################################\\\"""".format(
       gitDirectory           = gitDirectory,
       hssS6a_IPv4Address     = hssS6a_IPv4Address,
@@ -727,6 +744,23 @@ SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_S1U_S12_S4_UP@]='{spgwuS1U_IfName}' && \\
 SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_SX@]='{spgwuSXab_IfName}' && \\
 SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_SGI@]='{spgwuSGi_IfName}' && \\
 for K in \\\"\${{!SPGWU_CONF[@]}}\\\"; do sudo egrep -lRZ \\\"\$K\\\" \$PREFIX | xargs -0 -l sudo sed -i -e \\\"s|\$K|\${{SPGWU_CONF[\$K]}}|g\\\" ; ret=\$?;[[ ret -ne 0 ]] && echo \\\"Tried to replace \$K with \${{SPGWU_CONF[\$K]}}\\\" || true ; done && \\
+echo \\\"====== Preparing SystemD Unit ... ======\\\" && \\
+( echo \\\"[Unit]\\\" && \\
+echo \\\"Description=Serving and Packet Data Network Gateway -- User Plane (SPGW-U)\\\" && \\
+echo \\\"After=ssh.target\\\" && \\
+echo \\\"\\\" && \\
+echo \\\"[Service]\\\" && \\
+echo \\\"ExecStart=/usr/local/bin/spgwu -c /usr/local/etc/oai/spgw_u.conf\\\" && \\
+echo \\\"KillMode=process\\\" && \\
+echo \\\"Restart=on-failure\\\" && \\
+echo \\\"RestartPreventExitStatus=255\\\" && \\
+echo \\\"WorkingDirectory=/home/nornetpp/src/openair-cn-cups/build/scripts\\\" && \\
+echo \\\"StandardOutput=file:/var/log/spgwu.log\\\" && \\
+echo \\\"StandardError=inherit\\\" && \\
+echo \\\"\\\" && \\
+echo \\\"[Install]\\\" && \\
+echo \\\"WantedBy=multi-user.target\\\" ) | sudo tee /lib/systemd/system/spgwu.service && \\
+sudo systemctl daemon-reload \\
 echo \\\"###### Done! ##########################################################\\\"""".format(
       gitRepository     = gitRepository,
       gitDirectory      = gitDirectory,
@@ -889,6 +923,23 @@ SPGWC_CONF[@PGW_INTERFACE_NAME_FOR_SX@]='{spgwcSXab_IfName}' && \\
 SPGWC_CONF[@DEFAULT_DNS_IPV4_ADDRESS@]='{networkDNS1_IPv4}' && \\
 SPGWC_CONF[@DEFAULT_DNS_SEC_IPV4_ADDRESS@]='{networkDNS2_IPv4}' && \\
 for K in \\\"\${{!SPGWC_CONF[@]}}\\\"; do sudo egrep -lRZ \\\"\$K\\\" \$PREFIX | xargs -0 -l sudo sed -i -e \\\"s|\$K|\${{SPGWC_CONF[\$K]}}|g\\\" ; ret=\$?;[[ ret -ne 0 ]] && echo \\\"Tried to replace \$K with \${{SPGWC_CONF[\$K]}}\\\" || true ; done && \\
+echo \\\"====== Preparing SystemD Unit ... ======\\\" && \\
+( echo \\\"[Unit]\\\" && \\
+echo \\\"Description=Serving and Packet Data Network Gateway -- Control Plane (SPGW-C)\\\" && \\
+echo \\\"After=ssh.target\\\" && \\
+echo \\\"\\\" && \\
+echo \\\"[Service]\\\" && \\
+echo \\\"ExecStart=/usr/local/bin/spgwc -c /usr/local/etc/oai/spgw_c.conf\\\" && \\
+echo \\\"KillMode=process\\\" && \\
+echo \\\"Restart=on-failure\\\" && \\
+echo \\\"RestartPreventExitStatus=255\\\" && \\
+echo \\\"WorkingDirectory=/home/nornetpp/src/openair-cn-cups/build/scripts\\\" && \\
+echo \\\"StandardOutput=file:/var/log/spgwc.log\\\" && \\
+echo \\\"StandardError=inherit\\\" && \\
+echo \\\"\\\" && \\
+echo \\\"[Install]\\\" && \\
+echo \\\"WantedBy=multi-user.target\\\" ) | sudo tee /lib/systemd/system/spgwc.service && \\
+sudo systemctl daemon-reload \\
 echo \\\"###### Done! ##########################################################\\\"""".format(
       gitDirectory         = gitDirectory,
       networkRealm         = networkRealm,
@@ -926,11 +977,11 @@ prepare_cassandra_hss_build()
 configure_cassandra()
 configure_hss()
 
-#prepare_mme_build()
-#configure_mme()
+prepare_mme_build()
+configure_mme()
 
-#prepare_spgwu_build()
-#configure_spgwu()
+prepare_spgwu_build()
+configure_spgwu()
 
-#prepare_spgwc_build()
-#configure_spgwc()
+prepare_spgwc_build()
+configure_spgwc()

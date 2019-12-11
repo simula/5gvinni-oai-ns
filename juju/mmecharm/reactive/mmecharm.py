@@ -319,6 +319,23 @@ MME_CONF[@TAC-LB_MME_1@]={tac_mme_1_hi} && \\
 MME_CONF[@TAC-HB_MME_1@]={tac_mme_1_lo} && \\
 for K in \\\"\${{!MME_CONF[@]}}\\\"; do sudo egrep -lRZ \\\"\$K\\\" \$PREFIX | xargs -0 -l sudo sed -i -e \\\"s|\$K|\${{MME_CONF[\$K]}}|g\\\" ; ret=\$?;[[ ret -ne 0 ]] && echo \\\"Tried to replace \$K with \${{MME_CONF[\$K]}}\\\" || true ; done && \\
 sudo ./check_mme_s6a_certificate \$PREFIX/freeDiameter mme.{networkRealm} >logs/check_mme_s6a_certificate.log 2>&1 && \\
+echo \\\"====== Preparing SystemD Unit ... ======\\\" && \\
+( echo \\\"[Unit]\\\" && \\
+echo \\\"Description=Mobility Management Entity (MME)\\\" && \\
+echo \\\"After=ssh.target\\\" && \\
+echo \\\"\\\" && \\
+echo \\\"[Service]\\\" && \\
+echo \\\"ExecStart=/home/nornetpp/src/openair-cn/scripts/run_mme --config-file /usr/local/etc/oai/mme.conf --set-virt-if\\\" && \\
+echo \\\"KillMode=process\\\" && \\
+echo \\\"Restart=on-failure\\\" && \\
+echo \\\"RestartPreventExitStatus=255\\\" && \\
+echo \\\"WorkingDirectory=/home/nornetpp/src/openair-cn/scripts\\\" && \\
+echo \\\"StandardOutput=file:/var/log/mme.log\\\" && \\
+echo \\\"StandardError=inherit\\\" && \\
+echo \\\"\\\" && \\
+echo \\\"[Install]\\\" && \\
+echo \\\"WantedBy=multi-user.target\\\" ) | sudo tee /lib/systemd/system/mme.service && \\
+sudo systemctl daemon-reload \\
 echo \\\"###### Done! ##########################################################\\\"""".format(
       gitDirectory           = gitDirectory,
       hssS6a_IPv4Address     = hssS6a_IPv4Address,
