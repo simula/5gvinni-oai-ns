@@ -100,18 +100,18 @@ vld:
         ip-address: 192.168.247.102
 
   # ====== S1-U =============================================================
-#  - name: SimulaMet-OAI-EPC_nsd-S1U
-#    vnfd-connection-point-ref:
-#      - member-vnf-index-ref: '1'
-#        vnfd-connection-point-ref: spgwu-s1u-cp
-#        ip-address: 192.168.248.159
+ - name: SimulaMet-OAI-EPC_nsd-S1U
+    vnfd-connection-point-ref:
+      - member-vnf-index-ref: '1'
+       vnfd-connection-point-ref: spgwu-s1u-cp
+       ip-address: 192.168.248.159
 
   # ====== SGi ==============================================================
-#  - name: SimulaMet-OAI-EPC_nsd-SGi
-#    vnfd-connection-point-ref:
-#      - member-vnf-index-ref: '1'
-#        vnfd-connection-point-ref: spgwu-sgi-cp
-#        ip-address: 10.254.1.203
+ - name: SimulaMet-OAI-EPC_nsd-SGi
+   vnfd-connection-point-ref:
+     - member-vnf-index-ref: '1'
+       vnfd-connection-point-ref: spgwu-sgi-cp
+       ip-address: 10.254.1.203
 
 
 # ###### VNF-Internal Addresses #############################################
