@@ -37,6 +37,13 @@ prepare-spgwu-build:
       description: SPGW-U Git commit
       type: string
       default: develop
+  required:
+    - spgwu-git-repository
+    - spgwu-git-commit
+
+configure-spgwu:
+  description: Configures the SPGW-U
+  params:
     spgwu-S1U-ipv4-interface:
       description: SPGW-U S1U IPv4 interface
       type: string
@@ -66,8 +73,6 @@ prepare-spgwu-build:
       type: string
       default: 172.55.55.101
   required:
-    - spgwu-git-repository
-    - spgwu-git-commit
     - spgwu-S1U-ipv4-interface
     - spgwu-S1U-ipv4-gateway
     - spgwu-SGi-ipv4-interface
@@ -75,9 +80,6 @@ prepare-spgwu-build:
     - spgwu-SGi-ipv6-interface
     - spgwu-SGi-ipv6-gateway
     - spgwu-spgwc-list
-
-configure-spgwu:
-  description: Configures the SPGW-U
 
 restart-spgwu:
   description: Restarts the SPGW-U

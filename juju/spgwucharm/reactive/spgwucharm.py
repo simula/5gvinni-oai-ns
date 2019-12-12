@@ -229,7 +229,6 @@ def configure_spgwu():
    spgwcListString  = action_get('spgwu-spgwc-list').split(',')
    spgwcList        = ''
    for spgwc in spgwcListString:
-      print(spgwc)
       spgwcAddress = IPv4Address(spgwc)
       if len(spgwcList) > 0:
          spgwcList = spgwcList + ', '
