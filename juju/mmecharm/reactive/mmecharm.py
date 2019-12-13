@@ -373,14 +373,5 @@ echo \\\"###### Done! ##########################################################
 @when('actions.restart-mme')
 @when('mmecharm.installed')
 def restart_mme():
-   err = ''
-   try:
-      # filename = action_get('filename')
-      cmd = [ 'touch /tmp/restart-mme' ]
-      result, err = charms.sshproxy._run(cmd)
-   except:
-      action_fail('command failed:' + err)
-   else:
-      action_set({'outout': result})
-
-   clear_flag('actions.restart-mme')
+   commands = 'sudo service mme restart'
+   runShellCommands(commands, 'restart_mme: restarting MME', 'actions.restart-mme')

@@ -314,6 +314,5 @@ echo \\\"###### Done! ##########################################################
 @when('actions.restart-spgwu')
 @when('spgwucharm.installed')
 def restart_spgwu():
-   commands = 'touch /tmp/restart-spgwu'
-   if execute(commands) == True:
-      clear_flag('actions.restart-spgwu')
+   commands = 'sudo service spgwu restart'
+   runShellCommands(commands, 'restart_spgwu: restarting SPGW-U', 'actions.restart-spgwu')
