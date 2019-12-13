@@ -384,7 +384,7 @@ echo \\\"###### Done! ##########################################################
 
 # ###### restart-mme function ###############################################
 @when('actions.restart-mme')
-@when('mmecharm.installed')
+@when('mmecharm.configured-mme')
 def restart_mme():
    commands = 'sudo service mme restart'
    runShellCommands(commands, 'restart_mme: restarting MME', 'actions.restart-mme')

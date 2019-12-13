@@ -296,7 +296,7 @@ echo \\\"###### Done! ##########################################################
 
 # ###### restart-spgwc function #############################################
 @when('actions.restart-spgwc')
-@when('spgwccharm.installed')
+@when('spgwccharm.configured-spgwc')
 def restart_spgwc():
    commands = 'sudo service spgwc restart'
    runShellCommands(commands, 'restart_spgwc: restarting SPGW-C', 'actions.restart-spgwc')

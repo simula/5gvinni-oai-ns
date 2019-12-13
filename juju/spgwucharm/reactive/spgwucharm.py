@@ -310,28 +310,13 @@ echo \\\"###### Done! ##########################################################
       spgwcList         = spgwcList
    )
 
-   try:
-       stdout, stderr = execute(commands)
-   except subprocess.CalledProcessError as e:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       action_fail(message.encode('utf-8'))
-       status_set('active', 'confiigure-spgwu: configuring SPGW-U FAILED!')
-   except:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       action_fail('Command execution failed: ' + str(err))
-       status_set('active', 'confiigure-spgwu: configuring SPGW-U FAILED!')
-   else:
-      clear_flag('actions.configure-spgwu')
-      action_set( { 'output': stdout.encode('utf-8') } )
-      status_set('active', 'confiigure-spgwu: configuring SPGW-U COMPLETED')
+   runShellCommands(commands, 'configure_spgwu: configuring SPGW-U',
+                    'actions.configure-spgwu', 'spgwucharm.configured-spgwu')
 
 
 # ###### restart-spgwu function #############################################
 @when('actions.restart-spgwu')
-@when('spgwucharm.installed')
+@when('spgwucharm.configured-spgw')
 def restart_spgwu():
    commands = 'sudo service spgwu restart'
    runShellCommands(commands, 'restart_spgwu: restarting SPGW-U', 'actions.restart-spgwu')
