@@ -85,14 +85,28 @@ def runShellCommands(commands, comment, actionFlagToClear, successFlagToSet = No
 def configureInterface(name,
                        ipv4Interface = IPv4Interface('0.0.0.0/0'), ipv4Gateway = None,
                        ipv6Interface = None,                       ipv6Gateway = None,
-                       metric = 1):
+                       metric = 1, pdnInterface = None):
 
    # NOTE:
    # Double escaping is required for \ and " in "configuration" string!
    # 1. Python
    # 2. bash -c "<command>"
+   # That is: $ => \$ ; \ => \\ ; " => \\\"
 
    configuration = 'auto ' + name + '\\\\n'
+
+   # ====== Helper function =================================================
+   def makePDNRules(pdnInterface, interface, gateway):
+      rules = \
+         '\\\\tpost-up /bin/ip rule add from ' + str(interface.network) + ' lookup 1000 pref 100\\\\n' + \
+         '\\\\tpost-up /bin/ip rule add iif pdn lookup 1000 pref 100\\\\n' + \
+         '\\\\tpost-up /bin/ip route add ' + str(interface.network) + ' scope link dev ' + name + ' table 1000\\\\n' + \
+         '\\\\tpost-up /bin/ip route add default via ' + str(gateway) + ' dev ' + name + ' table 1000\\\\n' + \
+         '\\\\tpre-down /bin/ip route del default via ' + str(gateway) + ' dev ' + name + ' table 1000 || true\\\\n' + \
+         '\\\\tpre-down /bin/ip route del ' + str(interface.network) + ' scope link dev ' + name + ' table 1000 || true\\\\n' + \
+         '\\\\tpre-down /bin/ip rule del iif pdn lookup 1000 pref 100 || true\\\\n' + \
+         '\\\\tpre-down /bin/ip rule del from ' + str(interface.network) + ' lookup 1000 pref 100 || true\\\\n'
+      return rules
 
    # ====== IPv4 ============================================================
    if ipv4Interface == IPv4Interface('0.0.0.0/0'):
@@ -106,6 +120,8 @@ def configureInterface(name,
          configuration = configuration + \
             '\\\\tgateway ' + str(ipv4Gateway) + '\\\\n' + \
             '\\\\tmetric '  + str(metric)      + '\\\\n'
+      if pdnInterface != None:
+         configuration = configuration + makePDNRules(pdnInterface, ipv4Interface, ipv4Gateway)
       configuration = configuration + '\\\\n'
 
    # ====== IPv6 ============================================================
@@ -127,6 +143,8 @@ def configureInterface(name,
          configuration = configuration + \
             '\\\\tgateway ' + str(ipv6Gateway) + '\\\\n' + \
             '\\\\tmetric '  + str(metric)      + '\\\\n'
+      if pdnInterface != None:
+         configuration = configuration + makePDNRules(pdnInterface, ipv4Interface, ipv4Gateway)
 
    return configuration
 
@@ -171,10 +189,11 @@ def prepare_spgwu_build():
    spgwuS1U_IfName        = 'ens5'
    spgwuSGi_IfName        = 'ens6'
 
-   configurationSXab = configureInterface(spgwuSXab_IfName, IPv4Interface('0.0.0.0/0'))
-   configurationS1U  = configureInterface(spgwuS1U_IfName, spgwuS1U_IPv4Interface, spgwuS1U_IPv4Gateway)
+   configurationSXab = configureInterface(spgwuSXab_IfName, IPv4Interface('0.0.0.0/0'), metric=61)
+   configurationS1U  = configureInterface(spgwuS1U_IfName, spgwuS1U_IPv4Interface, spgwuS1U_IPv4Gateway, metric=62)
    configurationSGi  = configureInterface(spgwuSGi_IfName, spgwuSGi_IPv4Interface, spgwuSGi_IPv4Gateway,
-                                                           spgwuSGi_IPv6Interface, spgwuSGi_IPv6Gateway)
+                                                           spgwuSGi_IPv6Interface, spgwuSGi_IPv6Gateway,
+                                                           metric=1, pdnInterface = 'pdn')
 
    # NOTE:
    # Double escaping is required for \ and " in "command" string!
