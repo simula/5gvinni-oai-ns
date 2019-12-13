@@ -270,7 +270,7 @@ echo \\\"Description=Serving and Packet Data Network Gateway -- User Plane (SPGW
 echo \\\"After=ssh.target\\\" && \\
 echo \\\"\\\" && \\
 echo \\\"[Service]\\\" && \\
-echo \\\"ExecStart=/usr/local/bin/spgwu -c /usr/local/etc/oai/spgw_u.conf\\\" && \\
+echo \\\"ExecStart=/usr/local/bin/spgwu -c /usr/local/etc/oai/spgw_u.conf -o\\\" && \\
 echo \\\"KillMode=process\\\" && \\
 echo \\\"Restart=on-failure\\\" && \\
 echo \\\"RestartPreventExitStatus=255\\\" && \\

@@ -268,7 +268,7 @@ echo \\\"Description=Serving and Packet Data Network Gateway -- Control Plane (S
 echo \\\"After=ssh.target\\\" && \\
 echo \\\"\\\" && \\
 echo \\\"[Service]\\\" && \\
-echo \\\"ExecStart=/usr/local/bin/spgwc -c /usr/local/etc/oai/spgw_c.conf\\\" && \\
+echo \\\"ExecStart=/usr/local/bin/spgwc -c /usr/local/etc/oai/spgw_c.conf -o\\\" && \\
 echo \\\"KillMode=process\\\" && \\
 echo \\\"Restart=on-failure\\\" && \\
 echo \\\"RestartPreventExitStatus=255\\\" && \\

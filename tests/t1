@@ -747,7 +747,7 @@ echo \\\"Description=Serving and Packet Data Network Gateway -- User Plane (SPGW
 echo \\\"After=ssh.target\\\" && \\
 echo \\\"\\\" && \\
 echo \\\"[Service]\\\" && \\
-echo \\\"ExecStart=/usr/local/bin/spgwu -c /usr/local/etc/oai/spgw_u.conf\\\" && \\
+echo \\\"ExecStart=/usr/local/bin/spgwu -c /usr/local/etc/oai/spgw_u.conf -o\\\" && \\
 echo \\\"KillMode=process\\\" && \\
 echo \\\"Restart=on-failure\\\" && \\
 echo \\\"RestartPreventExitStatus=255\\\" && \\
@@ -913,7 +913,7 @@ echo \\\"Description=Serving and Packet Data Network Gateway -- Control Plane (S
 echo \\\"After=ssh.target\\\" && \\
 echo \\\"\\\" && \\
 echo \\\"[Service]\\\" && \\
-echo \\\"ExecStart=/usr/local/bin/spgwc -c /usr/local/etc/oai/spgw_c.conf\\\" && \\
+echo \\\"ExecStart=/usr/local/bin/spgwc -c /usr/local/etc/oai/spgw_c.conf -o\\\" && \\
 echo \\\"KillMode=process\\\" && \\
 echo \\\"Restart=on-failure\\\" && \\
 echo \\\"RestartPreventExitStatus=255\\\" && \\
@@ -942,15 +942,15 @@ echo \\\"###### Done! ##########################################################
 
 
 # ###########################################################################
-#prepare_cassandra_hss_build()
-#configure_cassandra()
-#configure_hss()
+prepare_cassandra_hss_build()
+configure_cassandra()
+configure_hss()
 
 #prepare_mme_build()
 #configure_mme()
 
-prepare_spgwu_build()
-configure_spgwu()
+#prepare_spgwu_build()
+#configure_spgwu()
 
 #prepare_spgwc_build()
 #configure_spgwc()
