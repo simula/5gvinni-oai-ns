@@ -1,0 +1,6 @@
+#!/bin/sh
+
+HOST="10.208.0.200"
+
+ssh-keygen -q -R ${HOST}
+ssh -oStrictHostKeyChecking=no nornetpp@${HOST}
