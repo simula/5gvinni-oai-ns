@@ -144,7 +144,7 @@ def configureInterface(name,
             '\\\\tgateway ' + str(ipv6Gateway) + '\\\\n' + \
             '\\\\tmetric '  + str(metric)      + '\\\\n'
       if pdnInterface != None:
-         configuration = configuration + makePDNRules(pdnInterface, ipv4Interface, ipv4Gateway)
+         configuration = configuration + makePDNRules(pdnInterface, ipv6Interface, ipv6Gateway)
 
    return configuration
 
