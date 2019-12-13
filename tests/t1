@@ -429,6 +429,10 @@ def prepare_mme_build():
    configurationS1C = configureInterface(mmeS1C_IfName, mmeS1C_IPv4Interface, mmeS1C_IPv4Gateway,
                                                         mmeS1C_IPv6Interface, mmeS1C_IPv6Gateway)
 
+   # S10 dummy interface:
+   mmeS10_IfName    = 'dummy0:m10'
+   configurationS10 = configureInterface(mmeS10_IfName, IPv4Interface('192.168.10.110/24'))
+
    # NOTE:
    # Double escaping is required for \ and " in "command" string!
    # 1. Python
@@ -440,6 +444,8 @@ echo \\\"###### Preparing system ###############################################
 echo -e \\\"{configurationS6a}\\\" | sudo tee /etc/network/interfaces.d/61-{mmeS6a_IfName} && sudo ifup {mmeS6a_IfName} || true && \\
 echo -e \\\"{configurationS11}\\\" | sudo tee /etc/network/interfaces.d/62-{mmeS11_IfName} && sudo ifup {mmeS11_IfName} || true && \\
 echo -e \\\"{configurationS1C}\\\" | sudo tee /etc/network/interfaces.d/63-{mmeS1C_IfName} && sudo ifup {mmeS1C_IfName} || true && \\
+sudo ip link add dummy0 type dummy || true && \\
+echo -e \\\"{configurationS10}\\\" | sudo tee /etc/network/interfaces.d/64-{mmeS10_IfName} && sudo ifup {mmeS10_IfName} || true && \\
 echo \\\"###### Preparing sources ##############################################\\\" && \\
 cd /home/nornetpp/src && \\
 if [ ! -d \\\"{gitDirectory}\\\" ] ; then git clone --quiet {gitRepository} {gitDirectory} && cd {gitDirectory} ; else cd {gitDirectory} && git pull ; fi && \\
@@ -452,9 +458,11 @@ echo \\\"###### Done! ##########################################################
       mmeS6a_IfName    = mmeS6a_IfName,
       mmeS11_IfName    = mmeS11_IfName,
       mmeS1C_IfName    = mmeS1C_IfName,
+      mmeS10_IfName    = mmeS10_IfName,
       configurationS6a = configurationS6a,
       configurationS11 = configurationS11,
-      configurationS1C = configurationS1C
+      configurationS1C = configurationS1C,
+      configurationS10 = configurationS10
    )
 
    runShellCommands(commands, 'prepare_mme_build: preparing MME build',
@@ -475,6 +483,7 @@ def configure_mme():
    hssS6a_IPv4Address     = IPv4Address(action_get('hss-s6a-address'))
    mmeS1C_IPv4Interface   = IPv4Interface(action_get('mme-S1C-ipv4-interface'))
    mmeS11_IPv4Interface   = IPv4Interface(action_get('mme-S11-ipv4-interface'))
+   mmeS10_IPv4Interface   = IPv4Interface('192.168.10.110/24')
    spwgcS11_IPv4Interface = IPv4Interface(action_get('spgwc-S11-ipv4-interface'))
    networkRealm           = action_get('network-realm')
    networkMCC             = int(action_get('network-mcc'))
@@ -499,6 +508,7 @@ def configure_mme():
    mmeS6a_IfName = 'ens4'
    mmeS11_IfName = 'ens5'
    mmeS1C_IfName = 'ens6'
+   mmeS10_IfName    = 'dummy0:m10'
 
    # NOTE:
    # Double escaping is required for \ and " in "command" string!
@@ -548,8 +558,8 @@ MME_CONF[@MME_INTERFACE_NAME_FOR_S1_MME@]='{mmeS1C_IfName}' && \\
 MME_CONF[@MME_IPV4_ADDRESS_FOR_S1_MME@]='{mmeS1C_IPv4Interface}' && \\
 MME_CONF[@MME_INTERFACE_NAME_FOR_S11@]='{mmeS11_IfName}' && \\
 MME_CONF[@MME_IPV4_ADDRESS_FOR_S11@]='{mmeS11_IPv4Interface}' && \\
-MME_CONF[@MME_INTERFACE_NAME_FOR_S10@]='eth0:m10' && \\
-MME_CONF[@MME_IPV4_ADDRESS_FOR_S10@]='192.168.10.110/24' && \\
+MME_CONF[@MME_INTERFACE_NAME_FOR_S10@]='{mmeS10_IfName}' && \\
+MME_CONF[@MME_IPV4_ADDRESS_FOR_S10@]='{mmeS10_IPv4Interface}' && \\
 MME_CONF[@OUTPUT@]='CONSOLE' && \\
 MME_CONF[@SGW_IPV4_ADDRESS_FOR_S11_TEST_0@]='{spwgcS11_IPv4Interface}' && \\
 MME_CONF[@SGW_IPV4_ADDRESS_FOR_S11_0@]='{spwgcS11_IPv4Interface}' && \\
@@ -595,6 +605,9 @@ echo \\\"###### Done! ##########################################################
       mmeS1C_IPv4Interface   = mmeS1C_IPv4Interface,
       mmeS11_IfName          = mmeS11_IfName,
       mmeS11_IPv4Interface   = mmeS11_IPv4Interface,
+      mmeS10_IfName          = mmeS10_IfName,
+      mmeS10_IPv4Interface   = mmeS10_IPv4Interface,
+
       spwgcS11_IPv4Interface = spwgcS11_IPv4Interface,
       networkRealm           = networkRealm,
       networkMCC             = networkMCC,
@@ -942,12 +955,12 @@ echo \\\"###### Done! ##########################################################
 
 
 # ###########################################################################
-prepare_cassandra_hss_build()
-configure_cassandra()
-configure_hss()
+#prepare_cassandra_hss_build()
+#configure_cassandra()
+#configure_hss()
 
-#prepare_mme_build()
-#configure_mme()
+prepare_mme_build()
+configure_mme()
 
 #prepare_spgwu_build()
 #configure_spgwu()
