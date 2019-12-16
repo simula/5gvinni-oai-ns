@@ -359,8 +359,8 @@ echo \\\"====== Provisioning users ... ======\\\" && \\
 echo \\\"====== Provisioning MME ... ======\\\" && \\
 ./data_provisioning_mme --id 3 --mme-identity mme.{networkRealm} --realm {networkRealm} --ue-reachability 1 --truncate True  --verbose True -C {cassandraServerIP} >logs/data_provisioning_mme.log 2>&1 && \\
 echo \\\"###### Creating HSS configuration files ###############################\\\" && \\
-echo "{hssS6a_IPv4Address}   hss.{networkRealm} hss" | sudo tee -a /etc/hosts && \\
-echo "{mmeS6a_IPv4Address}   mme.{networkRealm} mme" | sudo tee -a /etc/hosts && \\
+echo \\\"{hssS6a_IPv4Address}   hss.{networkRealm} hss\\\" | sudo tee -a /etc/hosts && \\
+echo \\\"{mmeS6a_IPv4Address}   mme.{networkRealm} mme\\\" | sudo tee -a /etc/hosts && \\
 openssl rand -out \$HOME/.rnd 128 && \\
 echo \\\"====== Configuring Diameter ... ======\\\" && \\
 PREFIX='/usr/local/etc/oai' && \\
