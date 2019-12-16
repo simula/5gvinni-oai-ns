@@ -58,6 +58,14 @@ configure-hss:
       description: Cassandra Server IP
       type: string
       default: 172.16.6.129
+    hss-s6a-address:
+      description: HSS S6A IPv4 Interface
+      type: string
+      default: 172.16.6.129
+    mme-s6a-address:
+      description: MME S6A IPv4 Interface
+      type: string
+      default: 172.16.6.2
     network-realm:
       description: Network realm
       type: string
@@ -84,6 +92,8 @@ configure-hss:
       default: '1024'
   required:
     - cassandra-server-ip
+    - hss-s6a-address
+    - mme-s6a-address
     - network-realm
     - network-lte-k
     - network-op-k

@@ -268,6 +268,9 @@ def configure_hss():
    networkMSISDNFirst = action_get('network-msisdn-first')
    networkUsers       = int(action_get('network-users'))
 
+   hssS6a_IPv4Address = IPv4Address(action_get('hss-s6a-address'))
+   mmeS6a_IPv4Address = IPv4Address(action_get('mme-s6a-address'))
+
    # NOTE:
    # Double escaping is required for \ and " in "command" string!
    # 1. Python
@@ -291,7 +294,8 @@ echo \\\"====== Provisioning users ... ======\\\" && \\
 echo \\\"====== Provisioning MME ... ======\\\" && \\
 ./data_provisioning_mme --id 3 --mme-identity mme.{networkRealm} --realm {networkRealm} --ue-reachability 1 --truncate True  --verbose True -C {cassandraServerIP} >logs/data_provisioning_mme.log 2>&1 && \\
 echo \\\"###### Creating HSS configuration files ###############################\\\" && \\
-echo "127.0.1.1        hss.{networkRealm} hss" | sudo tee -a /etc/hosts && \\
+echo "{hssS6a_IPv4Address}   hss.{networkRealm} hss" | sudo tee -a /etc/hosts && \\
+echo "{mmeS6a_IPv4Address}   mme.{networkRealm} mme" | sudo tee -a /etc/hosts && \\
 openssl rand -out \$HOME/.rnd 128 && \\
 echo \\\"====== Configuring Diameter ... ======\\\" && \\
 PREFIX='/usr/local/etc/oai' && \\
@@ -333,6 +337,8 @@ sudo systemctl daemon-reload && \\
 echo \\\"###### Done! ##########################################################\\\"""".format(
       gitDirectory       = gitDirectory,
       cassandraServerIP  = cassandraServerIP,
+      hssS6a_IPv4Address = hssS6a_IPv4Address,
+      mmeS6a_IPv4Address = mmeS6a_IPv4Address,
       networkRealm       = networkRealm,
       networkLTE_K       = networkLTE_K,
       networkOP_K        = networkOP_K,
