@@ -314,7 +314,7 @@ echo \\\"###### Done! ##########################################################
 
 # ###### restart-spgwu function #############################################
 @when('actions.restart-spgwu')
-@when('spgwucharm.configured-spgw')
+@when('spgwucharm.configured-spgwu')
 def restart_spgwu():
    commands = 'sudo service spgwu restart'
    runShellCommands(commands, 'restart_spgwu: restarting SPGW-U', 'actions.restart-spgwu')
