@@ -268,13 +268,11 @@ echo \\\"Description=Serving and Packet Data Network Gateway -- Control Plane (S
 echo \\\"After=ssh.target\\\" && \\
 echo \\\"\\\" && \\
 echo \\\"[Service]\\\" && \\
-echo \\\"ExecStart=/usr/local/bin/spgwc -c /usr/local/etc/oai/spgw_c.conf -o\\\" && \\
+echo \\\"ExecStart=/bin/sh -c '/usr/local/bin/spgwc -c /usr/local/etc/oai/spgw_c.conf -o >>/var/log/spgwc.log 2>&1'\\\" && \\
 echo \\\"KillMode=process\\\" && \\
 echo \\\"Restart=on-failure\\\" && \\
 echo \\\"RestartPreventExitStatus=255\\\" && \\
 echo \\\"WorkingDirectory=/home/nornetpp/src/openair-cn-cups/build/scripts\\\" && \\
-echo \\\"StandardOutput=file:/var/log/spgwc.log\\\" && \\
-echo \\\"StandardError=inherit\\\" && \\
 echo \\\"\\\" && \\
 echo \\\"[Install]\\\" && \\
 echo \\\"WantedBy=multi-user.target\\\" ) | sudo tee /lib/systemd/system/spgwc.service && \\

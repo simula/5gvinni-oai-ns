@@ -337,13 +337,11 @@ echo \\\"Description=Mobility Management Entity (MME)\\\" && \\
 echo \\\"After=ssh.target\\\" && \\
 echo \\\"\\\" && \\
 echo \\\"[Service]\\\" && \\
-echo \\\"ExecStart=/usr/local/bin/mme -c /usr/local/etc/oai/mme.conf\\\" && \\
+echo \\\"ExecStart=/bin/sh -c '/usr/local/bin/mme -c /usr/local/etc/oai/mme.conf >>/var/log/mme.log 2>&1'\\\" && \\
 echo \\\"KillMode=process\\\" && \\
 echo \\\"Restart=on-failure\\\" && \\
 echo \\\"RestartPreventExitStatus=255\\\" && \\
 echo \\\"WorkingDirectory=/home/nornetpp/src/openair-cn/scripts\\\" && \\
-echo \\\"StandardOutput=file:/var/log/mme.log\\\" && \\
-echo \\\"StandardError=inherit\\\" && \\
 echo \\\"\\\" && \\
 echo \\\"[Install]\\\" && \\
 echo \\\"WantedBy=multi-user.target\\\" ) | sudo tee /lib/systemd/system/mme.service && \\

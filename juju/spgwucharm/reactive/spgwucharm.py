@@ -289,13 +289,11 @@ echo \\\"Description=Serving and Packet Data Network Gateway -- User Plane (SPGW
 echo \\\"After=ssh.target\\\" && \\
 echo \\\"\\\" && \\
 echo \\\"[Service]\\\" && \\
-echo \\\"ExecStart=/usr/local/bin/spgwu -c /usr/local/etc/oai/spgw_u.conf -o\\\" && \\
+echo \\\"ExecStart=/bin/sh -c '/usr/local/bin/spgwu -c /usr/local/etc/oai/spgw_u.conf -o >>/var/log/spgwu.log 2>&1'\\\" && \\
 echo \\\"KillMode=process\\\" && \\
 echo \\\"Restart=on-failure\\\" && \\
 echo \\\"RestartPreventExitStatus=255\\\" && \\
 echo \\\"WorkingDirectory=/home/nornetpp/src/openair-cn-cups/build/scripts\\\" && \\
-echo \\\"StandardOutput=file:/var/log/spgwu.log\\\" && \\
-echo \\\"StandardError=inherit\\\" && \\
 echo \\\"\\\" && \\
 echo \\\"[Install]\\\" && \\
 echo \\\"WantedBy=multi-user.target\\\" ) | sudo tee /lib/systemd/system/spgwu.service && \\
