@@ -33,7 +33,7 @@ additionalParamsForVnf:
       # ====== HSS ==========================================================
       hss_git_repository: https://github.com/OPENAIRINTERFACE/openair-cn.git
       hss_git_commit: 2019.w45
-      hss_s6a_address: 172.16.6.129
+      hss_S6a_address: 172.16.6.129
       network_realm: simula.nornet
       network_lte_k: 449c4b91aeacd0ace182cf3a5a72bfa1
       network_op_k: 1006020f0a478bf6b699f15c062e42b3
@@ -49,7 +49,7 @@ additionalParamsForVnf:
       mme_S1C_ipv6_interface: ''
       mme_S1C_ipv6_gateway: ''
       mme_S11_ipv4_interface: 172.16.1.102/24
-      mme_s6a_address: 172.16.6.2
+      mme_S6a_address: 172.16.6.2
       network_mcc: '242'
       network_mnc: '88'
 

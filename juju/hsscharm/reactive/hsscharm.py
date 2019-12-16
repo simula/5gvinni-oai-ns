@@ -268,8 +268,8 @@ def configure_hss():
    networkMSISDNFirst = action_get('network-msisdn-first')
    networkUsers       = int(action_get('network-users'))
 
-   hssS6a_IPv4Address = IPv4Address(action_get('hss-s6a-address'))
-   mmeS6a_IPv4Address = IPv4Address(action_get('mme-s6a-address'))
+   hssS6a_IPv4Address = IPv4Address(action_get('hss-S6a-address'))
+   mmeS6a_IPv4Address = IPv4Address(action_get('mme-S6a-address'))
 
    # NOTE:
    # Double escaping is required for \ and " in "command" string!

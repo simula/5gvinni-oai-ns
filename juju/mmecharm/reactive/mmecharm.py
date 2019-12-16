@@ -230,7 +230,7 @@ def configure_mme():
 
    gitDirectory           = 'openair-cn'
 
-   hssS6a_IPv4Address     = IPv4Address(action_get('hss-s6a-address'))
+   hssS6a_IPv4Address     = IPv4Address(action_get('hss-S6a-address'))
    mmeS1C_IPv4Interface   = IPv4Interface(action_get('mme-S1C-ipv4-interface'))
    mmeS11_IPv4Interface   = IPv4Interface(action_get('mme-S11-ipv4-interface'))
    mmeS10_IPv4Interface   = IPv4Interface('192.168.10.110/24')

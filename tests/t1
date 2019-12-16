@@ -33,7 +33,7 @@ MyParameters = {
    # ====== HSS =============================================================
    'hss-git-repository': 'https://github.com/OPENAIRINTERFACE/openair-cn.git',
    'hss-git-commit': '2019.w45',
-   'hss-s6a-address': '172.16.6.129',
+   'hss-S6a-address': '172.16.6.129',
    'network-realm': 'simula.nornet',
    'network-lte-k': '449c4b91aeacd0ace182cf3a5a72bfa1',
    'network-op-k': '1006020f0a478bf6b699f15c062e42b3',
@@ -50,7 +50,7 @@ MyParameters = {
    'mme-S11-ipv4-interface': '172.16.1.102/24',
    'mme-S1C-ipv6-interface': '',
    'mme-S1C-ipv6-gateway': '',
-   'mme-s6a-address': '172.16.6.2',
+   'mme-S6a-address': '172.16.6.2',
    'spgwc-S11-ipv4-interface': '172.16.1.104/24',
    'network-mcc': '242',
    'network-mnc': '88',
@@ -333,8 +333,8 @@ def configure_hss():
    networkMSISDNFirst = action_get('network-msisdn-first')
    networkUsers       = int(action_get('network-users'))
 
-   hssS6a_IPv4Address = IPv4Address(action_get('hss-s6a-address'))
-   mmeS6a_IPv4Address = IPv4Address(action_get('mme-s6a-address'))
+   hssS6a_IPv4Address = IPv4Address(action_get('hss-S6a-address'))
+   mmeS6a_IPv4Address = IPv4Address(action_get('mme-S6a-address'))
 
    # NOTE:
    # Double escaping is required for \ and " in "command" string!
@@ -504,7 +504,7 @@ def configure_mme():
 
    gitDirectory           = 'openair-cn'
 
-   hssS6a_IPv4Address     = IPv4Address(action_get('hss-s6a-address'))
+   hssS6a_IPv4Address     = IPv4Address(action_get('hss-S6a-address'))
    mmeS1C_IPv4Interface   = IPv4Interface(action_get('mme-S1C-ipv4-interface'))
    mmeS11_IPv4Interface   = IPv4Interface(action_get('mme-S11-ipv4-interface'))
    mmeS10_IPv4Interface   = IPv4Interface('192.168.10.110/24')
