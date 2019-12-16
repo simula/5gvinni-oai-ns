@@ -342,6 +342,33 @@ def configure_hss():
    # 2. bash -c "<command>"
    # That is: $ => \$ ; \ => \\ ; " => \\\"
 
+# ###### configure-hss function #############################################
+@when('actions.configure-hss')
+@when('hsscharm.configured-cassandra')
+def configure_hss():
+
+   # ====== Install Cassandra and the HSS ===================================
+   # For a documentation of the installation procedure, see:
+   # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
+
+   gitDirectory       = 'openair-cn'
+   cassandraServerIP  = action_get('cassandra-server-ip')
+   networkRealm       = action_get('network-realm')
+   networkLTE_K       = action_get('network-lte-k')
+   networkOP_K        = action_get('network-op-k')
+   networkIMSIFirst   = action_get('network-imsi-first')
+   networkMSISDNFirst = action_get('network-msisdn-first')
+   networkUsers       = int(action_get('network-users'))
+
+   hssS6a_IPv4Address = IPv4Address(action_get('hss-S6a-address'))
+   mmeS6a_IPv4Address = IPv4Address(action_get('mme-S6a-address'))
+
+   # NOTE:
+   # Double escaping is required for \ and " in "command" string!
+   # 1. Python
+   # 2. bash -c "<command>"
+   # That is: $ => \$ ; \ => \\ ; " => \\\"
+
    commands = """\
 echo \\\"###### Building HSS ###################################################\\\" && \\
 export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
@@ -388,13 +415,11 @@ echo \\\"Description=Home Subscriber Server (HSS)\\\" && \\
 echo \\\"After=ssh.target\\\" && \\
 echo \\\"\\\" && \\
 echo \\\"[Service]\\\" && \\
-echo \\\"ExecStart=/usr/local/bin/oai_hss -j /usr/local/etc/oai/hss_rel14.json\\\" && \\
+echo \\\"ExecStart=/bin/sh -c '/usr/local/bin/oai_hss -j /usr/local/etc/oai/hss_rel14.json >>/var/log/hss.log 2>&1'\\\" && \\
 echo \\\"KillMode=process\\\" && \\
 echo \\\"Restart=on-failure\\\" && \\
 echo \\\"RestartPreventExitStatus=255\\\" && \\
 echo \\\"WorkingDirectory=/home/nornetpp/src/openair-cn/scripts\\\" && \\
-echo \\\"StandardOutput=file:/var/log/hss.log\\\" && \\
-echo \\\"StandardError=inherit\\\" && \\
 echo \\\"\\\" && \\
 echo \\\"[Install]\\\" && \\
 echo \\\"WantedBy=multi-user.target\\\" ) | sudo tee /lib/systemd/system/hss.service && \\
