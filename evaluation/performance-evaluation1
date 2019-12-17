@@ -33,7 +33,7 @@ DIRECTORY="results-performance-evaluation1"
 # INTERFACE="ppp0"
 DESTINATION="localhost"
 INTERFACE="lo"
-RUNTIME=3
+RUNTIME=1
 
 
 # ====== Initialise =========================================================
@@ -46,21 +46,31 @@ mkdir -p ${DIRECTORY}
 SUMMARY_OLD="${DIRECTORY}/results.summary"
 SUMMARY_NEW="${DIRECTORY}/results.summary.new"
 SUMMARY_UPDATED="${DIRECTORY}/results.summary.updated"
-
 (
-   echo "--varnames=\"Protocol FlowParameters\""
+   echo "--varnames=\"Scenario Protocol FlowParameters\""
    echo "--resultsdirectory=${DIRECTORY}"
 ) >${SUMMARY_NEW}
 
 
 # ====== Run measurements ===================================================
-for flowParameters in "const10:const1460:const10:const1460" ; do
+for scenario in Bidirectional Upload Download ; do
    for protocol in tcp sctp ; do
+      if [ "${scenario}" == "Bidirectional" ] ; then
+          flowParameters="const10:const1460:const10:const1460"
+       elif [ "${scenario}" == "Upload" ] ; then
+          flowParameters="const10:const1460:const0:const0"
+       elif [ "${scenario}" == "Download" ] ; then
+          flowParameters="const0:const0:const10:const1460"
+       else
+          echo >&2 "ERROR: Bad scenario ${scenario}!"
+          exit 1
+       fi
+
       now=`env LANG=en date`
       echo ""
       echo "====== ${now}: ${protocol^^}, ${flowParameters} ======"
 
-      values="\"${protocol^^}\" \"${flowParameters}\""
+      values="${scenario} ${protocol^^} ${flowParameters}"
       id=`echo "${now}: ${values}" | sha256 -x`
       scalarFile="${DIRECTORY}/${id}.sca"
       scalarFileA="${DIRECTORY}/${id}-active.sca"
