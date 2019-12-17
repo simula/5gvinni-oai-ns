@@ -3,13 +3,11 @@ Description=Mobility Management Entity (MME)
 After=ssh.target
 
 [Service]
-ExecStart=ExecStart=/usr/local/bin/mme -c /usr/local/etc/oai/mme.conf
+ExecStart=/bin/sh -c 'exec /usr/local/bin/mme -c /usr/local/etc/oai/mme.conf >>/var/log/mme.log 2>&1'
 KillMode=process
 Restart=on-failure
 RestartPreventExitStatus=255
 WorkingDirectory=/home/nornetpp/src/openair-cn/scripts
-StandardOutput=file:/var/log/mme.log
-StandardError=inherit
 
 [Install]
 WantedBy=multi-user.target
