@@ -45,7 +45,7 @@ name <- "Measurement1"
 # plotColours <- topo.colors(2)
 # c("royal blue", "blue",
 #                  "orange","salmon", "red", "black", "gray")
-plotColours <- c("royal blue", "orange")
+plotColours <- c("royal blue", "orange", "gray")
 
 
 
@@ -61,7 +61,7 @@ makePlot <- function(node)
    pdf(paste(sep="", "Results-", name, "-", node, ".pdf"),
        width=20, height=10, family="Helvetica", pointsize=22)
 
-   numberOfRuns <- length(levels(factor(allResults$TimeStamp)))
+   numberOfRuns <- length(levels(factor(allResults$Protocol)))
    title <- ""
 
    pSet   <- allResults$Protocol

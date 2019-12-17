@@ -47,7 +47,7 @@ SUMMARY_OLD="${DIRECTORY}/results.summary"
 SUMMARY_NEW="${DIRECTORY}/results.summary.new"
 SUMMARY_UPDATED="${DIRECTORY}/results.summary.updated"
 (
-   echo "--varnames=\"Scenario Protocol FlowParameters\""
+   echo "--varnames=\"TimeStamp Scenario Protocol FlowParameters\""
    echo "--resultsdirectory=${DIRECTORY}"
 ) >${SUMMARY_NEW}
 
@@ -66,11 +66,11 @@ for scenario in Bidirectional Upload Download ; do
           exit 1
        fi
 
-      now=`env LANG=en date`
+      now=`date +%FT%H:%M:%S.%N`
       echo ""
       echo "====== ${now}: ${protocol^^}, ${flowParameters} ======"
 
-      values="${scenario} ${protocol^^} ${flowParameters}"
+      values="${now} ${scenario} ${protocol^^} ${flowParameters}"
       id=`echo "${now}: ${values}" | sha256 -x`
       scalarFile="${DIRECTORY}/${id}.sca"
       scalarFileA="${DIRECTORY}/${id}-active.sca"
