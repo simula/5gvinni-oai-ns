@@ -54,13 +54,13 @@ SUMMARY_UPDATED="${DIRECTORY}/results.summary.updated"
 
 # ====== Run measurements ===================================================
 for scenario in Bidirectional Upload Download ; do
-   for protocol in tcp sctp ; do
+   for protocol in tcp sctp dccp ; do
       if [ "${scenario}" == "Bidirectional" ] ; then
-          flowParameters="const10:const1460:const10:const1460"
+          flowParameters="const0:const1400:const0:const1400"
        elif [ "${scenario}" == "Upload" ] ; then
-          flowParameters="const10:const1460:const0:const0"
+          flowParameters="const0:const1400:const0:const0"
        elif [ "${scenario}" == "Download" ] ; then
-          flowParameters="const0:const0:const10:const1460"
+          flowParameters="const0:const0:const0:const1400"
        else
           echo >&2 "ERROR: Bad scenario ${scenario}!"
           exit 1
