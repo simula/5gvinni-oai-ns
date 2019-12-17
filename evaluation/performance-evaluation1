@@ -1,0 +1,106 @@
+#!/bin/bash -e
+# =====================================================================
+#     #######  #####          #     #   ###   #     # #     #   ###
+#     #       #     #         #     #    #    ##    # ##    #    #
+#     #       #               #     #    #    # #   # # #   #    #
+#      #####  #  ####  #####  #     #    #    #  #  # #  #  #    #
+#           # #     #          #   #     #    #   # # #   # #    #
+#     #     # #     #           # #      #    #    ## #    ##    #
+#      #####   #####             #      ###   #     # #     #   ###
+# =====================================================================
+#
+# SimulaMet OpenAirInterface Evolved Packet Core VNF and NS
+# Copyright (C) 2019 by Thomas Dreibholz
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Contact: dreibh@simula.no
+
+
+DIRECTORY="results-performance-evaluation1"
+# DESTINATION="10.1.1.247:9000"
+# INTERFACE="ppp0"
+DESTINATION="localhost"
+INTERFACE="lo"
+RUNTIME=3
+
+
+# ====== Initialise =========================================================
+if [ "${SUDO_UID}:${SUDO_GID}" == ":" ] ; then
+   echo >&2 "ERROR: Run this script with sudo, since it has to start tcpdump!"
+   exit 1
+fi
+
+mkdir -p ${DIRECTORY}
+SUMMARY_OLD="${DIRECTORY}/results.summary"
+SUMMARY_NEW="${DIRECTORY}/results.summary.new"
+SUMMARY_UPDATED="${DIRECTORY}/results.summary.updated"
+
+(
+   echo "--varnames=\"Protocol FlowParameters\""
+   echo "--resultsdirectory=${DIRECTORY}"
+) >${SUMMARY_NEW}
+
+
+# ====== Run measurements ===================================================
+for flowParameters in "const10:const1460:const10:const1460" ; do
+   for protocol in tcp sctp ; do
+      now=`env LANG=en date`
+      echo ""
+      echo "====== ${now}: ${protocol^^}, ${flowParameters} ======"
+
+      values="\"${protocol^^}\" \"${flowParameters}\""
+      id=`echo "${now}: ${values}" | sha256 -x`
+      scalarFile="${DIRECTORY}/${id}.sca"
+      scalarFileA="${DIRECTORY}/${id}-active.sca"
+      scalarFileP="${DIRECTORY}/${id}-passive.sca"
+      vectorFile="${DIRECTORY}/${id}.vec"
+      pcapFile="${DIRECTORY}/${id}.pcap"
+
+      (
+         echo "--values=${values}"
+         echo "--input=${scalarFileA}"
+         echo "--values=${values}"
+         echo "--input=${scalarFileP}"
+      ) >>${SUMMARY_NEW}
+
+
+      echo "Starting tcpdump ..."
+      tcpdump -i ${INTERFACE} -w "${pcapFile}" -s 65536 &
+
+      echo "Starting NetPerfMeter ..."
+      sudo -u#${SUDO_UID} -g#${SUDO_GID} netperfmeter ${DESTINATION} \
+         -quiet -runtime=${RUNTIME} \
+         -vector="${vectorFile}" -scalar="${scalarFile}" \
+         -${protocol} ${flowParameters}
+
+      echo "Stopping tcpdump ..."
+      killall tcpdump
+      wait
+
+      chown ${SUDO_UID}:${SUDO_GID} ${DIRECTORY}/${id}*
+      xz -T0 "${pcapFile}"
+   done
+done
+
+
+# ====== Prepare results ====================================================
+cat ${SUMMARY_NEW} >${SUMMARY_UPDATED}
+if [ -e "${SUMMARY_OLD}" ] ; then
+   grep -v ^--varnames= ${SUMMARY_OLD} | grep -v ^--resultsdirectory= >>${SUMMARY_UPDATED}
+fi
+mv ${SUMMARY_UPDATED} ${SUMMARY_OLD}
+chown ${SUDO_UID}:${SUDO_GID} ${SUMMARY_OLD} ${SUMMARY_NEW}
+
+sudo -u#${SUDO_UID} -g#${SUDO_GID} createsummary xy -ignore-scalar-file-errors <${SUMMARY_OLD}
