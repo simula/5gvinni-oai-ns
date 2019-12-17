@@ -29,11 +29,11 @@
 
 
 DIRECTORY="Measurement1"
-# DESTINATION="10.1.1.247:9000"
-# INTERFACE="ppp0"
-DESTINATION="localhost"
-INTERFACE="lo"
-RUNTIME=1
+DESTINATION="10.1.1.247:9000"
+INTERFACE="wwp0s20f0u1i3"
+# DESTINATION="localhost"
+# INTERFACE="lo"
+RUNTIME=10
 
 
 # ====== Initialise =========================================================
@@ -42,21 +42,21 @@ if [ "${SUDO_UID}:${SUDO_GID}" == ":" ] ; then
    exit 1
 fi
 
-mkdir -p ${DIRECTORY}
+sudo -u#${SUDO_UID} -g#${SUDO_GID} mkdir -p ${DIRECTORY}
 SUMMARY_OLD="${DIRECTORY}/results.summary"
 SUMMARY_NEW="${DIRECTORY}/results.summary.new"
 SUMMARY_UPDATED="${DIRECTORY}/results.summary.updated"
 (
-   echo "--varnames=\"Scenario Protocol FlowParameters\""
+   echo "--varnames=\"Scenario Protocol Runtime FlowParameters\""
    echo "--resultsdirectory=${DIRECTORY}"
 ) >${SUMMARY_NEW}
 
 
 # ====== Run measurements ===================================================
-for scenario in Bidirectional Upload Download ; do
-   for protocol in tcp sctp ; do
+for scenario in Bidirectional ; do   # Upload Download
+   for protocol in dccp ; do
       if [ "${scenario}" == "Bidirectional" ] ; then
-          flowParameters="const10:const1460:const10:const1460"
+          flowParameters="const10:const1440:const10:const1440"
        elif [ "${scenario}" == "Upload" ] ; then
           flowParameters="const10:const1460:const0:const0"
        elif [ "${scenario}" == "Download" ] ; then
@@ -70,7 +70,7 @@ for scenario in Bidirectional Upload Download ; do
       echo ""
       echo "====== ${now}: ${protocol^^}, ${flowParameters} ======"
 
-      values="${scenario} ${protocol^^} ${flowParameters}"
+      values="${scenario} ${protocol^^} ${RUNTIME} ${flowParameters}"
       id=`echo "${now}: ${values}" | sha256 -x`
       scalarFile="${DIRECTORY}/${id}.sca"
       scalarFileA="${DIRECTORY}/${id}-active.sca"
