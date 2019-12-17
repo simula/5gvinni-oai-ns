@@ -30,10 +30,10 @@
 
 DIRECTORY="Measurement1"
 # DESTINATION="10.1.1.247:9000"
-# INTERFACE="ppp0"
+# INTERFACE="wwp0s20f0u1i3"
 DESTINATION="localhost"
 INTERFACE="lo"
-RUNTIME=1
+RUNTIME=10
 
 
 # ====== Initialise =========================================================
@@ -42,12 +42,12 @@ if [ "${SUDO_UID}:${SUDO_GID}" == ":" ] ; then
    exit 1
 fi
 
-mkdir -p ${DIRECTORY}
+sudo -u#${SUDO_UID} -g#${SUDO_GID} mkdir -p ${DIRECTORY}
 SUMMARY_OLD="${DIRECTORY}/results.summary"
 SUMMARY_NEW="${DIRECTORY}/results.summary.new"
 SUMMARY_UPDATED="${DIRECTORY}/results.summary.updated"
 (
-   echo "--varnames=\"TimeStamp Scenario Protocol FlowParameters\""
+   echo "--varnames=\"TimeStamp Scenario Protocol Runtime FlowParameters\""
    echo "--resultsdirectory=${DIRECTORY}"
 ) >${SUMMARY_NEW}
 
@@ -70,7 +70,7 @@ for scenario in Bidirectional Upload Download ; do
       echo ""
       echo "====== ${now}: ${protocol^^}, ${flowParameters} ======"
 
-      values="${now} ${scenario} ${protocol^^} ${flowParameters}"
+      values="${now} ${scenario} ${protocol^^} ${RUNTIME} ${flowParameters}"
       id=`echo "${now}: ${values}" | sha256 -x`
       scalarFile="${DIRECTORY}/${id}.sca"
       scalarFileA="${DIRECTORY}/${id}-active.sca"

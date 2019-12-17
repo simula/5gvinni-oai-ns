@@ -67,7 +67,7 @@ makePlot <- function(node)
    pSet   <- allResults$Protocol
    pTitle <- "Protocol"
 
-   xTitle <- "Path Manager/Congestion Control"
+   xTitle <- "Transport Protocol"
 
    if(node == "passive") {
       ySet   <- allResults$passive.flow.ReceivedBitRate / 1000000
