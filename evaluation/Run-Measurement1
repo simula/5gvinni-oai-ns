@@ -28,7 +28,7 @@
 # Contact: dreibh@simula.no
 
 
-DIRECTORY="results-performance-evaluation1"
+DIRECTORY="Measurement1"
 # DESTINATION="10.1.1.247:9000"
 # INTERFACE="ppp0"
 DESTINATION="localhost"
