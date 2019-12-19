@@ -29,11 +29,11 @@
 
 
 DIRECTORY="Measurement1"
-DESTINATION="10.1.1.247:9000"
+DESTINATION="10.1.1.249:9000"
 INTERFACE="any"
 # DESTINATION="localhost"
 # INTERFACE="lo"
-RUNTIME=10
+RUNTIME=20
 
 
 # ====== Initialise =========================================================
@@ -53,14 +53,14 @@ SUMMARY_UPDATED="${DIRECTORY}/results.summary.updated"
 
 
 # ====== Run measurements ===================================================
-for scenario in Bidirectional Upload Download ; do
-   for protocol in tcp sctp dccp ; do
+for scenario in Upload Download ; do   # Bidirectional
+   for protocol in tcp sctp ; do
       if [ "${scenario}" == "Bidirectional" ] ; then
-          flowParameters="const0:const1400:const0:const1400"
+          flowParameters="const0:const1400:const0:const1400:sndbuf=0,rcvbuf=0"
        elif [ "${scenario}" == "Upload" ] ; then
-          flowParameters="const0:const1400:const0:const0"
+          flowParameters="const0:const1400:const0:const0:sndbuf=0,rcvbuf=0"
        elif [ "${scenario}" == "Download" ] ; then
-          flowParameters="const0:const0:const0:const1400"
+          flowParameters="const0:const0:const0:const1400:sndbuf=0,rcvbuf=0"
        else
           echo >&2 "ERROR: Bad scenario ${scenario}!"
           exit 1
