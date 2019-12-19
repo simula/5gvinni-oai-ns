@@ -32,7 +32,7 @@
 library(ggplot2)
 library(Hmisc)
 
-source("plotter.R")
+source("/usr/share/netperfmeter/plotter.R")
 
 
 name <- "Measurement1"
@@ -62,7 +62,7 @@ makePlot <- function(node)
        width=20, height=10, family="Helvetica", pointsize=22)
 
    numberOfRuns <- length(levels(factor(allResults$Protocol)))
-   title <- ""
+   title <- node
 
    pSet   <- allResults$Protocol
    pTitle <- "Protocol"
