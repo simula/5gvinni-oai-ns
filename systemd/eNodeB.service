@@ -3,7 +3,7 @@ Description=Evolved Node B (eNodeB)
 After=ssh.target
 
 [Service]
-ExecStart=/bin/sh -c 'exec /home/nornetpp/src/openairinterface5g/cmake_targets/ran_build/build/lte-softmodem -O /home/nornetpp/src/openairinterface5g/targets/PROJECTS/GENERIC-LTE-EPC/CONF/enb.band7.tm1.50PRB.usrpb210.conf >>/var/log/eNodeB.log 2>&1'
+ExecStart=/bin/sh -c 'exec nice --adjustment=-20 /home/nornetpp/src/openairinterface5g/cmake_targets/ran_build/build/lte-softmodem -O /home/nornetpp/src/openairinterface5g/targets/PROJECTS/GENERIC-LTE-EPC/CONF/enb.band7.tm1.50PRB.usrpb210.conf >>/var/log/eNodeB.log 2>&1'
 KillMode=process
 Restart=on-failure
 RestartPreventExitStatus=255
