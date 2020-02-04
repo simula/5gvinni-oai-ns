@@ -206,6 +206,7 @@ echo \\\"###### Preparing system ###############################################
 echo -e \\\"{configurationSXab}\\\" | sudo tee /etc/network/interfaces.d/61-{spgwuSXab_IfName} && sudo ifup {spgwuSXab_IfName} || true && \\
 echo -e \\\"{configurationS1U}\\\" | sudo tee /etc/network/interfaces.d/62-{spgwuS1U_IfName} && sudo ifup {spgwuS1U_IfName} || true && \\
 echo -e \\\"{configurationSGi}\\\" | sudo tee /etc/network/interfaces.d/63-{spgwuSGi_IfName} && sudo ifup {spgwuSGi_IfName} || true && \\
+DEBIAN_FRONTEND=noninteractive sudo apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends libfmt-dev && \\
 echo \\\"###### Preparing sources ##############################################\\\" && \\
 cd /home/nornetpp/src && \\
 if [ ! -d \\\"{gitDirectory}\\\" ] ; then git clone --quiet {gitRepository} {gitDirectory} && cd {gitDirectory} ; else cd {gitDirectory} && git pull ; fi && \\
