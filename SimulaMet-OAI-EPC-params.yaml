@@ -31,48 +31,48 @@ additionalParamsForVnf:
   - member-vnf-index: '1'
     additionalParams:
       # ====== HSS ==========================================================
-      hss_git_repository: 'https://github.com/OPENAIRINTERFACE/openair-cn.git'
-      hss_git_commit: 'v1.0.2'
-      hss_S6a_address: '172.16.6.129'
-      network_realm: 'simula.nornet'
-      network_lte_k: '449c4b91aeacd0ace182cf3a5a72bfa1'
-      network_op_k: '1006020f0a478bf6b699f15c062e42b3'
+      hss_git_repository: https://github.com/OPENAIRINTERFACE/openair-cn.git
+      hss_git_commit: v1.0.2
+      hss_S6a_address: 172.16.6.129
+      network_realm: simula.nornet
+      network_lte_k: 449c4b91aeacd0ace182cf3a5a72bfa1
+      network_op_k: 1006020f0a478bf6b699f15c062e42b3
       network_imsi_first: '242881234500000'
       network_msisdn_first: '24288880000000'
       network_users: '1024'
 
       # ====== MME ==========================================================
-      mme_git_repository: 'https://github.com/OPENAIRINTERFACE/openair-cn.git'
-      mme_git_commit: 'v1.0.2'
-      mme_S1C_ipv4_interface: '192.168.247.102/24'
-      mme_S1C_ipv4_gateway: '0.0.0.0'
+      mme_git_repository: https://github.com/OPENAIRINTERFACE/openair-cn.git
+      mme_git_commit: v1.0.2
+      mme_S1C_ipv4_interface: 192.168.247.102/24
+      mme_S1C_ipv4_gateway: 0.0.0.0
       mme_S1C_ipv6_interface: ''
       mme_S1C_ipv6_gateway: ''
-      mme_S11_ipv4_interface: '172.16.1.102/24'
-      mme_S6a_address: '172.16.6.2'
+      mme_S11_ipv4_interface: 172.16.1.102/24
+      mme_S6a_address: 172.16.6.2
       network_mcc: '242'
       network_mnc: '88'
 
       # ====== SPGW_C =======================================================
-      spgwc_git_repository: 'https://github.com/OPENAIRINTERFACE/openair-cn-cups.git'
-      spgwc_git_commit: 'v1.0.0'
-      spgwc_S11_ipv4_interface: '172.16.1.104/24'
-      network_ipv4_dns1: '10.1.1.1'
-      network_ipv4_dns2: '10.1.2.1'
+      spgwc_git_repository: https://github.com/OPENAIRINTERFACE/openair-cn-cups.git
+      spgwc_git_commit: v1.0.0
+      spgwc_S11_ipv4_interface: 172.16.1.104/24
+      network_ipv4_dns1: 10.1.1.1
+      network_ipv4_dns2: 10.1.2.1
 
       # ====== SPGW_U =======================================================
-      spgwu_git_repository: 'https://github.com/OPENAIRINTERFACE/openair-cn-cups.git'
-      spgwu_git_commit: 'v1.0.0'
-      spgwu_S1U_ipv4_interface: '192.168.248.159/24'
-      spgwu_S1U_ipv4_gateway: '0.0.0.0'
-      spgwu_SGi_ipv4_interface: '10.254.1.203/24'
-      spgwu_SGi_ipv4_gateway: '10.254.1.1'
+      spgwu_git_repository: https://github.com/OPENAIRINTERFACE/openair-cn-cups.git
+      spgwu_git_commit: v1.0.0
+      spgwu_S1U_ipv4_interface: 192.168.248.159/24
+      spgwu_S1U_ipv4_gateway: 0.0.0.0
+      spgwu_SGi_ipv4_interface: 10.254.1.203/24
+      spgwu_SGi_ipv4_gateway: 10.254.1.1
       spgwu_SGi_ipv6_interface: ''
       spgwu_SGi_ipv6_gateway: ''
-      spgwu_spgwc_list: '172.55.55.101'
+      spgwu_spgwc_list: 172.55.55.101
 
       # ====== Other ========================================================
-      password: 'osm4us'
+      password: osm4us
 
 
 # ###### VNF External Addresses #############################################
