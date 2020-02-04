@@ -38,9 +38,11 @@ RUNTIME=20
 
 # ====== Initialise =========================================================
 if [ "${SUDO_UID}:${SUDO_GID}" == ":" ] ; then
-   echo >&2 "ERROR: Run this script with sudo, since it has to start tcpdump!"
+   echo >&2 "ERROR: Run this script with sudo, since it has to enable ECN and start tcpdump!"
    exit 1
 fi
+
+sudo sysctl net.ipv4.tcp_ecn=1
 
 sudo -u#${SUDO_UID} -g#${SUDO_GID} mkdir -p ${DIRECTORY}
 SUMMARY_OLD="${DIRECTORY}/results.summary"
