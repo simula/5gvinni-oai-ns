@@ -29,9 +29,9 @@
 # Contact: dreibh@simula.no
 
 from charmhelpers.core.hookenv import (
-    action_get,
-    action_fail,
-    action_set,
+    function_get,
+    function_fail,
+    function_set,
     status_set
 )
 from charms.reactive import (
@@ -65,17 +65,17 @@ def runShellCommands(commands, comment, actionFlagToClear, successFlagToSet = No
        exc_type, exc_value, exc_traceback = sys.exc_info()
        err = traceback.format_exception(exc_type, exc_value, exc_traceback)
        message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       action_fail(message.encode('utf-8'))
+       function_fail(message.encode('utf-8'))
        status_set('active', comment + ' COMMANDS FAILED!')
    except:
        exc_type, exc_value, exc_traceback = sys.exc_info()
        err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       action_fail('Command execution failed: ' + str(err))
+       function_fail('Command execution failed: ' + str(err))
        status_set('active', comment + ' FAILED!')
    else:
       if successFlagToSet != None:
          set_flag(successFlagToSet)
-      # action_set( { 'output': stdout.encode('utf-8') } )
+      # function_set( { 'output': stdout.encode('utf-8') } )
       status_set('active', comment + ' COMPLETED')
    finally:
       clear_flag(actionFlagToClear)
@@ -172,23 +172,23 @@ def prepare_spgwu_build():
    # For a documentation of the installation procedure, see:
    # https://github.com/OPENAIRINTERFACE/openair-cn-cups/wiki/OpenAirSoftwareSupport#install-spgw-u
 
-   gitRepository          = action_get('spgwu-git-repository')
-   gitCommit              = action_get('spgwu-git-commit')
+   gitRepository          = function_get('spgwu-git-repository')
+   gitCommit              = function_get('spgwu-git-commit')
    gitDirectory           = 'openair-cn-cups'
 
-   spgwuS1U_IPv4Interface = IPv4Interface(action_get('spgwu-S1U-ipv4-interface'))
-   spgwuS1U_IPv4Gateway   = IPv4Address(action_get('spgwu-S1U-ipv4-gateway'))
+   spgwuS1U_IPv4Interface = IPv4Interface(function_get('spgwu-S1U-ipv4-interface'))
+   spgwuS1U_IPv4Gateway   = IPv4Address(function_get('spgwu-S1U-ipv4-gateway'))
 
-   spgwuSGi_IPv4Interface = IPv4Interface(action_get('spgwu-SGi-ipv4-interface'))
-   spgwuSGi_IPv4Gateway   = IPv4Address(action_get('spgwu-SGi-ipv4-gateway'))
-   if action_get('spgwu-SGi-ipv6-interface') == '':
+   spgwuSGi_IPv4Interface = IPv4Interface(function_get('spgwu-SGi-ipv4-interface'))
+   spgwuSGi_IPv4Gateway   = IPv4Address(function_get('spgwu-SGi-ipv4-gateway'))
+   if function_get('spgwu-SGi-ipv6-interface') == '':
       spgwuSGi_IPv6Interface = None
    else:
-      spgwuSGi_IPv6Interface = IPv6Interface(action_get('spgwu-SGi-ipv6-interface'))
-   if action_get('spgwu-SGi-ipv6-gateway') == '':
+      spgwuSGi_IPv6Interface = IPv6Interface(function_get('spgwu-SGi-ipv6-interface'))
+   if function_get('spgwu-SGi-ipv6-gateway') == '':
       spgwuSGi_IPv6Gateway = None
    else:
-      spgwuSGi_IPv6Gateway = IPv6Address(action_get('spgwu-SGi-ipv6-gateway'))
+      spgwuSGi_IPv6Gateway = IPv6Address(function_get('spgwu-SGi-ipv6-gateway'))
 
    # Prepare network configurations:
    spgwuSXab_IfName       = 'ens4'
@@ -253,7 +253,7 @@ def configure_spgwu():
    spgwuS1U_IfName  = 'ens5'
    spgwuSGi_IfName  = 'ens6'
 
-   spgwcListString  = action_get('spgwu-spgwc-list').split(',')
+   spgwcListString  = function_get('spgwu-spgwc-list').split(',')
    spgwcList        = ''
    for spgwc in spgwcListString:
       spgwcAddress = IPv4Address(spgwc)

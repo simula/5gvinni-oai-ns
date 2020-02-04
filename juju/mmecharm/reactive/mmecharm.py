@@ -29,9 +29,9 @@
 # Contact: dreibh@simula.no
 
 from charmhelpers.core.hookenv import (
-    action_get,
-    action_fail,
-    action_set,
+    function_get,
+    function_fail,
+    function_set,
     status_set
 )
 from charms.reactive import (
@@ -65,17 +65,17 @@ def runShellCommands(commands, comment, actionFlagToClear, successFlagToSet = No
        exc_type, exc_value, exc_traceback = sys.exc_info()
        err = traceback.format_exception(exc_type, exc_value, exc_traceback)
        message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       action_fail(message.encode('utf-8'))
+       function_fail(message.encode('utf-8'))
        status_set('active', comment + ' COMMANDS FAILED!')
    except:
        exc_type, exc_value, exc_traceback = sys.exc_info()
        err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       action_fail('Command execution failed: ' + str(err))
+       function_fail('Command execution failed: ' + str(err))
        status_set('active', comment + ' FAILED!')
    else:
       if successFlagToSet != None:
          set_flag(successFlagToSet)
-      # action_set( { 'output': stdout.encode('utf-8') } )
+      # function_set( { 'output': stdout.encode('utf-8') } )
       status_set('active', comment + ' COMPLETED')
    finally:
       clear_flag(actionFlagToClear)
@@ -154,18 +154,18 @@ def prepare_mme_build():
    # For a documentation of the installation procedure, see:
    # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-mme
 
-   gitRepository        = action_get('mme-git-repository')
-   gitCommit            = action_get('mme-git-commit')
+   gitRepository        = function_get('mme-git-repository')
+   gitCommit            = function_get('mme-git-commit')
    gitDirectory         = 'openair-cn'
 
-   mmeS1C_IPv4Interface = IPv4Interface(action_get('mme-S1C-ipv4-interface'))
-   mmeS1C_IPv4Gateway   = IPv4Address(action_get('mme-S1C-ipv4-gateway'))
-   if action_get('mme-S1C-ipv6-interface') != '':
-      mmeS1C_IPv6Interface = IPv6Interface(action_get('mme-S1C-ipv6-interface'))
+   mmeS1C_IPv4Interface = IPv4Interface(function_get('mme-S1C-ipv4-interface'))
+   mmeS1C_IPv4Gateway   = IPv4Address(function_get('mme-S1C-ipv4-gateway'))
+   if function_get('mme-S1C-ipv6-interface') != '':
+      mmeS1C_IPv6Interface = IPv6Interface(function_get('mme-S1C-ipv6-interface'))
    else:
       mmeS1C_IPv6Interface = None
-   if action_get('mme-S1C-ipv6-gateway') != '':
-      mmeS1C_IPv6Gateway   = IPv6Address(action_get('mme-S1C-ipv6-gateway'))
+   if function_get('mme-S1C-ipv6-gateway') != '':
+      mmeS1C_IPv6Gateway   = IPv6Address(function_get('mme-S1C-ipv6-gateway'))
    else:
       mmeS1C_IPv6Gateway = None
 
@@ -230,19 +230,19 @@ def configure_mme():
 
    gitDirectory           = 'openair-cn'
 
-   hssS6a_IPv4Address     = IPv4Address(action_get('hss-S6a-address'))
-   mmeS1C_IPv4Interface   = IPv4Interface(action_get('mme-S1C-ipv4-interface'))
-   mmeS11_IPv4Interface   = IPv4Interface(action_get('mme-S11-ipv4-interface'))
+   hssS6a_IPv4Address     = IPv4Address(function_get('hss-S6a-address'))
+   mmeS1C_IPv4Interface   = IPv4Interface(function_get('mme-S1C-ipv4-interface'))
+   mmeS11_IPv4Interface   = IPv4Interface(function_get('mme-S11-ipv4-interface'))
    mmeS10_IPv4Interface   = IPv4Interface('192.168.10.110/24')
-   spwgcS11_IPv4Interface = IPv4Interface(action_get('spgwc-S11-ipv4-interface'))
-   networkRealm           = action_get('network-realm')
-   networkMCC             = int(action_get('network-mcc'))
-   networkMNC             = int(action_get('network-mnc'))
-   networkLTE_K           = action_get('network-lte-k')
-   networkOP_K            = action_get('network-op-k')
-   networkIMSIFirst       = action_get('network-imsi-first')
-   networkMSISDNFirst     = action_get('network-msisdn-first')
-   networkUsers           = int(action_get('network-users'))
+   spwgcS11_IPv4Interface = IPv4Interface(function_get('spgwc-S11-ipv4-interface'))
+   networkRealm           = function_get('network-realm')
+   networkMCC             = int(function_get('network-mcc'))
+   networkMNC             = int(function_get('network-mnc'))
+   networkLTE_K           = function_get('network-lte-k')
+   networkOP_K            = function_get('network-op-k')
+   networkIMSIFirst       = function_get('network-imsi-first')
+   networkMSISDNFirst     = function_get('network-msisdn-first')
+   networkUsers           = int(function_get('network-users'))
 
    TAC_SGW_TEST = 7
    TAC_SGW_0    = 600

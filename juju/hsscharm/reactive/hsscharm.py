@@ -29,9 +29,9 @@
 # Contact: dreibh@simula.no
 
 from charmhelpers.core.hookenv import (
-    action_get,
-    action_fail,
-    action_set,
+    function_get,
+    function_fail,
+    function_set,
     status_set
 )
 from charms.reactive import (
@@ -74,17 +74,17 @@ def runShellCommands(commands, comment, actionFlagToClear, successFlagToSet = No
        exc_type, exc_value, exc_traceback = sys.exc_info()
        err = traceback.format_exception(exc_type, exc_value, exc_traceback)
        message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       action_fail(message.encode('utf-8'))
+       function_fail(message.encode('utf-8'))
        status_set('active', comment + ' COMMANDS FAILED!')
    except:
        exc_type, exc_value, exc_traceback = sys.exc_info()
        err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       action_fail('Command execution failed: ' + str(err))
+       function_fail('Command execution failed: ' + str(err))
        status_set('active', comment + ' FAILED!')
    else:
       if successFlagToSet != None:
          set_flag(successFlagToSet)
-      # action_set( { 'output': stdout.encode('utf-8') } )
+      # function_set( { 'output': stdout.encode('utf-8') } )
       status_set('active', comment + ' COMPLETED')
    finally:
       clear_flag(actionFlagToClear)
@@ -163,8 +163,8 @@ def prepare_cassandra_hss_build():
    # For a documentation of the installation procedure, see:
    # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
 
-   gitRepository = action_get('hss-git-repository')
-   gitCommit     = action_get('hss-git-commit')
+   gitRepository = function_get('hss-git-repository')
+   gitCommit     = function_get('hss-git-commit')
    gitDirectory  = 'openair-cn'
 
    # Prepare network configuration:
@@ -210,7 +210,7 @@ def configure_cassandra():
    # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
 
    gitDirectory      = 'openair-cn'
-   cassandraServerIP = action_get('cassandra-server-ip')
+   cassandraServerIP = function_get('cassandra-server-ip')
 
    # NOTE:
    # Double escaping is required for \ and " in "command" string!
@@ -261,16 +261,16 @@ def configure_hss():
    # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
 
    gitDirectory       = 'openair-cn'
-   cassandraServerIP  = action_get('cassandra-server-ip')
-   networkRealm       = action_get('network-realm')
-   networkLTE_K       = action_get('network-lte-k')
-   networkOP_K        = action_get('network-op-k')
-   networkIMSIFirst   = action_get('network-imsi-first')
-   networkMSISDNFirst = action_get('network-msisdn-first')
-   networkUsers       = int(action_get('network-users'))
+   cassandraServerIP  = function_get('cassandra-server-ip')
+   networkRealm       = function_get('network-realm')
+   networkLTE_K       = function_get('network-lte-k')
+   networkOP_K        = function_get('network-op-k')
+   networkIMSIFirst   = function_get('network-imsi-first')
+   networkMSISDNFirst = function_get('network-msisdn-first')
+   networkUsers       = int(function_get('network-users'))
 
-   hssS6a_IPv4Address = IPv4Address(action_get('hss-S6a-address'))
-   mmeS6a_IPv4Address = IPv4Address(action_get('mme-S6a-address'))
+   hssS6a_IPv4Address = IPv4Address(function_get('hss-S6a-address'))
+   mmeS6a_IPv4Address = IPv4Address(function_get('mme-S6a-address'))
 
    # NOTE:
    # Double escaping is required for \ and " in "command" string!
@@ -362,7 +362,7 @@ def restart_hss():
 @when('actions.touch')
 def touch():
    gitDirectory      = 'openair-cn'
-   cassandraServerIP = action_get('cassandra-server-ip')
+   cassandraServerIP = function_get('cassandra-server-ip')
 
    status_set('active', 'configure-cassandra: configuring Cassandra ...')
 
@@ -375,9 +375,9 @@ def touch():
        ) ]
        result, err = charms.sshproxy._run(cmd)
    except:
-       action_fail('command failed:' + err)
+       function_fail('command failed:' + err)
    else:
-       action_set({'outout': result})
+       function_set({'outout': result})
    finally:
        clear_flag('actions.touch')
 # FIXME!
