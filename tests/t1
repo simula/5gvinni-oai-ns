@@ -68,8 +68,8 @@ MyParameters = {
    'spgwu-S1U-ipv4-gateway': '0.0.0.0',
    'spgwu-SGi-ipv4-interface': '10.254.1.203/24',
    'spgwu-SGi-ipv4-gateway': '10.254.1.1',
-   'spgwu-SGi-ipv6-interface': '3ffe::2/64',
-   'spgwu-SGi-ipv6-gateway': '3ffe::1',
+   'spgwu-SGi-ipv6-interface': '',
+   'spgwu-SGi-ipv6-gateway': '',
    'spgwu-spgwc-list': '172.55.55.101'
 }
 def action_get(flag):
@@ -246,6 +246,7 @@ def prepare_cassandra_hss_build():
 echo \\\"###### Preparing system ###############################################\\\" && \\
 echo -e \\\"{configurationS6a}\\\" | sudo tee /etc/network/interfaces.d/61-{hssS6a_IfName} && sudo ifup {hssS6a_IfName} || true && \\
 if [ \\\"`find /etc/apt/sources.list.d -name 'rmescandon-ubuntu-yq-*.list'`\\\" == \\\"\\\" ] ; then sudo add-apt-repository -y ppa:rmescandon/yq ; fi && \\
+sudo apt update && \
 DEBIAN_FRONTEND=noninteractive sudo apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends yq && \\
 echo \\\"###### Preparing sources ##############################################\\\" && \\
 cd /home/nornetpp/src && \\
@@ -673,8 +674,14 @@ def prepare_spgwu_build():
 
    spgwuSGi_IPv4Interface = IPv4Interface(action_get('spgwu-SGi-ipv4-interface'))
    spgwuSGi_IPv4Gateway   = IPv4Address(action_get('spgwu-SGi-ipv4-gateway'))
-   spgwuSGi_IPv6Interface = IPv6Interface(action_get('spgwu-SGi-ipv6-interface'))
-   spgwuSGi_IPv6Gateway   = IPv6Address(action_get('spgwu-SGi-ipv6-gateway'))
+   if action_get('spgwu-SGi-ipv6-interface') == '':
+      spgwuSGi_IPv6Interface = None
+   else:
+      spgwuSGi_IPv6Interface = IPv6Interface(action_get('spgwu-SGi-ipv6-interface'))
+   if action_get('spgwu-SGi-ipv6-gateway') == '':
+      spgwuSGi_IPv6Gateway = None
+   else:
+      spgwuSGi_IPv6Gateway = IPv6Address(action_get('spgwu-SGi-ipv6-gateway'))
 
    # Prepare network configurations:
    spgwuSXab_IfName       = 'ens4'
@@ -698,6 +705,7 @@ echo \\\"###### Preparing system ###############################################
 echo -e \\\"{configurationSXab}\\\" | sudo tee /etc/network/interfaces.d/61-{spgwuSXab_IfName} && sudo ifup {spgwuSXab_IfName} || true && \\
 echo -e \\\"{configurationS1U}\\\" | sudo tee /etc/network/interfaces.d/62-{spgwuS1U_IfName} && sudo ifup {spgwuS1U_IfName} || true && \\
 echo -e \\\"{configurationSGi}\\\" | sudo tee /etc/network/interfaces.d/63-{spgwuSGi_IfName} && sudo ifup {spgwuSGi_IfName} || true && \\
+sudo apt update && \
 DEBIAN_FRONTEND=noninteractive sudo apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends libfmt-dev && \\
 echo \\\"###### Preparing sources ##############################################\\\" && \\
 cd /home/nornetpp/src && \\

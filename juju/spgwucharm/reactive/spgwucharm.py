@@ -181,8 +181,14 @@ def prepare_spgwu_build():
 
    spgwuSGi_IPv4Interface = IPv4Interface(action_get('spgwu-SGi-ipv4-interface'))
    spgwuSGi_IPv4Gateway   = IPv4Address(action_get('spgwu-SGi-ipv4-gateway'))
-   spgwuSGi_IPv6Interface = IPv6Interface(action_get('spgwu-SGi-ipv6-interface'))
-   spgwuSGi_IPv6Gateway   = IPv6Address(action_get('spgwu-SGi-ipv6-gateway'))
+   if action_get('spgwu-SGi-ipv6-interface') == '':
+      spgwuSGi_IPv6Interface = None
+   else:
+      spgwuSGi_IPv6Interface = IPv6Interface(action_get('spgwu-SGi-ipv6-interface'))
+   if action_get('spgwu-SGi-ipv6-gateway') == '':
+      spgwuSGi_IPv6Gateway = None
+   else:
+      spgwuSGi_IPv6Gateway = IPv6Address(action_get('spgwu-SGi-ipv6-gateway'))
 
    # Prepare network configurations:
    spgwuSXab_IfName       = 'ens4'
@@ -206,6 +212,7 @@ echo \\\"###### Preparing system ###############################################
 echo -e \\\"{configurationSXab}\\\" | sudo tee /etc/network/interfaces.d/61-{spgwuSXab_IfName} && sudo ifup {spgwuSXab_IfName} || true && \\
 echo -e \\\"{configurationS1U}\\\" | sudo tee /etc/network/interfaces.d/62-{spgwuS1U_IfName} && sudo ifup {spgwuS1U_IfName} || true && \\
 echo -e \\\"{configurationSGi}\\\" | sudo tee /etc/network/interfaces.d/63-{spgwuSGi_IfName} && sudo ifup {spgwuSGi_IfName} || true && \\
+sudo apt update && \
 DEBIAN_FRONTEND=noninteractive sudo apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends libfmt-dev && \\
 echo \\\"###### Preparing sources ##############################################\\\" && \\
 cd /home/nornetpp/src && \\
