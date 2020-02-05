@@ -35,8 +35,8 @@ MyParameters = {
    'hss-git-commit': '2019.w45',
    'hss-S6a-address': '172.16.6.129',
    'network-realm': 'simula.nornet',
-   'network-lte-k': '449c4b91aeacd0ace182cf3a5a72bfa1',
-   'network-op-k': '1006020f0a478bf6b699f15c062e42b3',
+   'network-ki': '449c4b91aeacd0ace182cf3a5a72bfa1',
+   'network-op': '1006020f0a478bf6b699f15c062e42b3',
    'network-imsi-first': '242881234500000',
    'network-msisdn-first': '24288880000000',
    'network-users': '1024',
@@ -328,8 +328,8 @@ def configure_hss():
    gitDirectory       = 'openair-cn'
    cassandraServerIP  = action_get('cassandra-server-ip')
    networkRealm       = action_get('network-realm')
-   networkLTE_K       = action_get('network-lte-k')
-   networkOP_K        = action_get('network-op-k')
+   networkKi          = action_get('network-ki')
+   networkOP          = action_get('network-op')
    networkIMSIFirst   = action_get('network-imsi-first')
    networkMSISDNFirst = action_get('network-msisdn-first')
    networkUsers       = int(action_get('network-users'))
@@ -356,7 +356,7 @@ echo \\\"====== Building service ... ======\\\" && \\
 ./build_hss_rel14 --clean >logs/build_hss_rel14-2.log 2>&1 && \\
 cqlsh --file ../src/hss_rel14/db/oai_db.cql {cassandraServerIP} >logs/oai_db.log 2>&1 && \\
 echo \\\"====== Provisioning users ... ======\\\" && \\
-./data_provisioning_users --apn default.{networkRealm} --apn2 internet.{networkRealm} --key {networkLTE_K} --imsi-first {networkIMSIFirst} --msisdn-first {networkMSISDNFirst} --mme-identity mme.{networkRealm} --no-of-users {networkUsers} --realm {networkRealm} --truncate True  --verbose True --cassandra-cluster {cassandraServerIP} >logs/data_provisioning_users.log 2>&1 && \\
+./data_provisioning_users --apn default.{networkRealm} --apn2 internet.{networkRealm} --key {networkKi} --imsi-first {networkIMSIFirst} --msisdn-first {networkMSISDNFirst} --mme-identity mme.{networkRealm} --no-of-users {networkUsers} --realm {networkRealm} --truncate True  --verbose True --cassandra-cluster {cassandraServerIP} >logs/data_provisioning_users.log 2>&1 && \\
 echo \\\"====== Provisioning MME ... ======\\\" && \\
 ./data_provisioning_mme --id 3 --mme-identity mme.{networkRealm} --realm {networkRealm} --ue-reachability 1 --truncate True  --verbose True -C {cassandraServerIP} >logs/data_provisioning_mme.log 2>&1 && \\
 echo \\\"###### Creating HSS configuration files ###############################\\\" && \\
@@ -377,7 +377,7 @@ HSS_CONF[@REALM@]='{networkRealm}' && \\
 HSS_CONF[@HSS_FQDN@]='hss.{networkRealm}' && \\
 HSS_CONF[@cassandra_Server_IP@]='{cassandraServerIP}' && \\
 HSS_CONF[@cassandra_IP@]='{cassandraServerIP}' && \\
-HSS_CONF[@OP_KEY@]='{networkOP_K}' && \\
+HSS_CONF[@OPEY@]='{networkOP}' && \\
 HSS_CONF[@ROAMING_ALLOWED@]='true' && \\
 for K in \\\"\${{!HSS_CONF[@]}}\\\"; do echo \\\"K=\$K ...\\\" && sudo egrep -lRZ \\\"\$K\\\" \$PREFIX | xargs -0 -l sudo sed -i -e \\\"s|\$K|\${{HSS_CONF[\$K]}}|g\\\" ; done && \\
 ../src/hss_rel14/bin/make_certs.sh hss {networkRealm} \$PREFIX && \\
@@ -404,8 +404,8 @@ echo \\\"###### Done! ##########################################################
       hssS6a_IPv4Address = hssS6a_IPv4Address,
       mmeS6a_IPv4Address = mmeS6a_IPv4Address,
       networkRealm       = networkRealm,
-      networkLTE_K       = networkLTE_K,
-      networkOP_K        = networkOP_K,
+      networkKi       = networkKi,
+      networkOP        = networkOP,
       networkIMSIFirst   = networkIMSIFirst,
       networkMSISDNFirst = networkMSISDNFirst,
       networkUsers       = networkUsers
@@ -511,8 +511,8 @@ def configure_mme():
    networkRealm           = action_get('network-realm')
    networkMCC             = int(action_get('network-mcc'))
    networkMNC             = int(action_get('network-mnc'))
-   networkLTE_K           = action_get('network-lte-k')
-   networkOP_K            = action_get('network-op-k')
+   networkKi              = action_get('network-ki')
+   networkOP              = action_get('network-op')
    networkIMSIFirst       = action_get('network-imsi-first')
    networkMSISDNFirst     = action_get('network-msisdn-first')
    networkUsers           = int(action_get('network-users'))
@@ -633,8 +633,8 @@ echo \\\"###### Done! ##########################################################
       networkRealm           = networkRealm,
       networkMCC             = networkMCC,
       networkMNC             = networkMNC,
-      networkLTE_K           = networkLTE_K,
-      networkOP_K            = networkOP_K,
+      networkKi           = networkKi,
+      networkOP            = networkOP,
       networkIMSIFirst       = networkIMSIFirst,
       networkMSISDNFirst     = networkMSISDNFirst,
       networkUsers           = networkUsers,
@@ -981,15 +981,15 @@ echo \\\"###### Done! ##########################################################
 
 
 # ###########################################################################
-#prepare_cassandra_hss_build()
-#configure_cassandra()
-#configure_hss()
+prepare_cassandra_hss_build()
+configure_cassandra()
+configure_hss()
 
-#prepare_mme_build()
-#configure_mme()
+prepare_mme_build()
+configure_mme()
 
 prepare_spgwu_build()
 configure_spgwu()
 
-#prepare_spgwc_build()
-#configure_spgwc()
+prepare_spgwc_build()
+configure_spgwc()

@@ -113,10 +113,10 @@ vnfd:vnfd-catalog:
                     value: <mme_S6a_address>
                   - name: network-realm
                     value: <network_realm>
-                  - name: network-lte-k
-                    value: <network_lte_k>
-                  - name: network-op-k
-                    value: <network_op_k>
+                  - name: network-ki
+                    value: <network_ki>
+                  - name: network-op
+                    value: <network_op>
                   - name: network-imsi-first
                     value: <network_imsi_first>
                   - name: network-msisdn-first
@@ -220,10 +220,10 @@ vnfd:vnfd-catalog:
                     value: <network_mcc>
                   - name: network-mnc
                     value: <network_mnc>
-                  - name: network-lte-k
-                    value: <network_lte_k>
-                  - name: network-op-k
-                    value: <network_op_k>
+                  - name: network-ki
+                    value: <network_ki>
+                  - name: network-op
+                    value: <network_op>
                   - name: network-imsi-first
                     value: <network_imsi_first>
                   - name: network-msisdn-first
