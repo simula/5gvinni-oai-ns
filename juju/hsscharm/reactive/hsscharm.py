@@ -263,8 +263,8 @@ def configure_hss():
    gitDirectory       = 'openair-cn'
    cassandraServerIP  = action_get('cassandra-server-ip')
    networkRealm       = action_get('network-realm')
-   networkKi          = action_get('network-ki')
    networkOP          = action_get('network-op')
+   networkK           = action_get('network-k')
    networkIMSIFirst   = action_get('network-imsi-first')
    networkMSISDNFirst = action_get('network-msisdn-first')
    networkUsers       = int(action_get('network-users'))
@@ -291,7 +291,7 @@ echo \\\"====== Building service ... ======\\\" && \\
 ./build_hss_rel14 --clean >logs/build_hss_rel14-2.log 2>&1 && \\
 cqlsh --file ../src/hss_rel14/db/oai_db.cql {cassandraServerIP} >logs/oai_db.log 2>&1 && \\
 echo \\\"====== Provisioning users ... ======\\\" && \\
-./data_provisioning_users --apn default.{networkRealm} --apn2 internet.{networkRealm} --key {networkKi} --imsi-first {networkIMSIFirst} --msisdn-first {networkMSISDNFirst} --mme-identity mme.{networkRealm} --no-of-users {networkUsers} --realm {networkRealm} --truncate True  --verbose True --cassandra-cluster {cassandraServerIP} >logs/data_provisioning_users.log 2>&1 && \\
+./data_provisioning_users --apn default.{networkRealm} --apn2 internet.{networkRealm} --key {networkK} --imsi-first {networkIMSIFirst} --msisdn-first {networkMSISDNFirst} --mme-identity mme.{networkRealm} --no-of-users {networkUsers} --realm {networkRealm} --truncate True  --verbose True --cassandra-cluster {cassandraServerIP} >logs/data_provisioning_users.log 2>&1 && \\
 echo \\\"====== Provisioning MME ... ======\\\" && \\
 ./data_provisioning_mme --id 3 --mme-identity mme.{networkRealm} --realm {networkRealm} --ue-reachability 1 --truncate True  --verbose True -C {cassandraServerIP} >logs/data_provisioning_mme.log 2>&1 && \\
 echo \\\"###### Creating HSS configuration files ###############################\\\" && \\
@@ -339,8 +339,8 @@ echo \\\"###### Done! ##########################################################
       hssS6a_IPv4Address = hssS6a_IPv4Address,
       mmeS6a_IPv4Address = mmeS6a_IPv4Address,
       networkRealm       = networkRealm,
-      networkKi       = networkKi,
-      networkOP        = networkOP,
+      networkOP          = networkOP,
+      networkK           = networkK,
       networkIMSIFirst   = networkIMSIFirst,
       networkMSISDNFirst = networkMSISDNFirst,
       networkUsers       = networkUsers

@@ -35,7 +35,7 @@ MyParameters = {
    'hss-git-commit': '2019.w45',
    'hss-S6a-address': '172.16.6.129',
    'network-realm': 'simula.nornet',
-   'network-ki': '449c4b91aeacd0ace182cf3a5a72bfa1',
+   'network-k': '449c4b91aeacd0ace182cf3a5a72bfa1',
    'network-op': '1006020f0a478bf6b699f15c062e42b3',
    'network-imsi-first': '242881234500000',
    'network-msisdn-first': '24288880000000',
@@ -328,7 +328,7 @@ def configure_hss():
    gitDirectory       = 'openair-cn'
    cassandraServerIP  = action_get('cassandra-server-ip')
    networkRealm       = action_get('network-realm')
-   networkKi          = action_get('network-ki')
+   networkK           = action_get('network-k')
    networkOP          = action_get('network-op')
    networkIMSIFirst   = action_get('network-imsi-first')
    networkMSISDNFirst = action_get('network-msisdn-first')
@@ -356,7 +356,7 @@ echo \\\"====== Building service ... ======\\\" && \\
 ./build_hss_rel14 --clean >logs/build_hss_rel14-2.log 2>&1 && \\
 cqlsh --file ../src/hss_rel14/db/oai_db.cql {cassandraServerIP} >logs/oai_db.log 2>&1 && \\
 echo \\\"====== Provisioning users ... ======\\\" && \\
-./data_provisioning_users --apn default.{networkRealm} --apn2 internet.{networkRealm} --key {networkKi} --imsi-first {networkIMSIFirst} --msisdn-first {networkMSISDNFirst} --mme-identity mme.{networkRealm} --no-of-users {networkUsers} --realm {networkRealm} --truncate True  --verbose True --cassandra-cluster {cassandraServerIP} >logs/data_provisioning_users.log 2>&1 && \\
+./data_provisioning_users --apn default.{networkRealm} --apn2 internet.{networkRealm} --key {networkK} --imsi-first {networkIMSIFirst} --msisdn-first {networkMSISDNFirst} --mme-identity mme.{networkRealm} --no-of-users {networkUsers} --realm {networkRealm} --truncate True  --verbose True --cassandra-cluster {cassandraServerIP} >logs/data_provisioning_users.log 2>&1 && \\
 echo \\\"====== Provisioning MME ... ======\\\" && \\
 ./data_provisioning_mme --id 3 --mme-identity mme.{networkRealm} --realm {networkRealm} --ue-reachability 1 --truncate True  --verbose True -C {cassandraServerIP} >logs/data_provisioning_mme.log 2>&1 && \\
 echo \\\"###### Creating HSS configuration files ###############################\\\" && \\
@@ -404,8 +404,8 @@ echo \\\"###### Done! ##########################################################
       hssS6a_IPv4Address = hssS6a_IPv4Address,
       mmeS6a_IPv4Address = mmeS6a_IPv4Address,
       networkRealm       = networkRealm,
-      networkKi       = networkKi,
-      networkOP        = networkOP,
+      networkK           = networkK,
+      networkOP          = networkOP,
       networkIMSIFirst   = networkIMSIFirst,
       networkMSISDNFirst = networkMSISDNFirst,
       networkUsers       = networkUsers
@@ -511,7 +511,7 @@ def configure_mme():
    networkRealm           = action_get('network-realm')
    networkMCC             = int(action_get('network-mcc'))
    networkMNC             = int(action_get('network-mnc'))
-   networkKi              = action_get('network-ki')
+   networkK               = action_get('network-k')
    networkOP              = action_get('network-op')
    networkIMSIFirst       = action_get('network-imsi-first')
    networkMSISDNFirst     = action_get('network-msisdn-first')
@@ -633,8 +633,8 @@ echo \\\"###### Done! ##########################################################
       networkRealm           = networkRealm,
       networkMCC             = networkMCC,
       networkMNC             = networkMNC,
-      networkKi           = networkKi,
-      networkOP            = networkOP,
+      networkK               = networkK,
+      networkOP              = networkOP,
       networkIMSIFirst       = networkIMSIFirst,
       networkMSISDNFirst     = networkMSISDNFirst,
       networkUsers           = networkUsers,

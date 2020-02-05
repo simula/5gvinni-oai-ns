@@ -92,14 +92,14 @@ configure-mme:
       description: Mobile Network Code (MNC)
       data-type: string
       default: '88'
-    network-ki:
-      description: Ki
-      type: string
-      default: '449c4b91aeacd0ace182cf3a5a72bfa1'
     network-op:
       description: OP
       type: string
       default: '1006020f0a478bf6b699f15c062e42b3'
+    network-k:
+      description: K
+      type: string
+      default: '449c4b91aeacd0ace182cf3a5a72bfa1'
     network-imsi-first:
       description: First IMSI
       type: string
@@ -120,8 +120,8 @@ configure-mme:
     - network-realm
     - network-mcc
     - network-mnc
-    - network-ki
     - network-op
+    - network-k
     - network-imsi-first
     - network-msisdn-first
     - network-users
