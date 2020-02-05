@@ -55,7 +55,7 @@ SUMMARY_UPDATED="${DIRECTORY}/results.summary.updated"
 
 
 # ====== Run measurements ===================================================
-for scenario in Upload Download ; do   # Bidirectional
+for scenario in Upload Download Bidirectional ; do   # Bidirectional
    for protocol in tcp sctp ; do
       if [ "${scenario}" == "Bidirectional" ] ; then
           flowParameters="const0:const1400:const0:const1400:sndbuf=0,rcvbuf=0"
