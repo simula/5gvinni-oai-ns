@@ -35,8 +35,8 @@ MyParameters = {
    'hss-git-commit': '2019.w45',
    'hss-S6a-address': '172.16.6.129',
    'network-realm': 'simula.nornet',
-   'network-k': '449c4b91aeacd0ace182cf3a5a72bfa1',
-   'network-op': '1006020f0a478bf6b699f15c062e42b3',
+   'network-k': '449C4B91AEACD0ACE182CF3A5A72BFA1',
+   'network-op': '1006020F0A478BF6B699F15C062E42B3',
    'network-imsi-first': '242881234500000',
    'network-msisdn-first': '24288880000000',
    'network-users': '1024',
@@ -377,7 +377,7 @@ HSS_CONF[@REALM@]='{networkRealm}' && \\
 HSS_CONF[@HSS_FQDN@]='hss.{networkRealm}' && \\
 HSS_CONF[@cassandra_Server_IP@]='{cassandraServerIP}' && \\
 HSS_CONF[@cassandra_IP@]='{cassandraServerIP}' && \\
-HSS_CONF[@OPEY@]='{networkOP}' && \\
+HSS_CONF[@OP_KEY@]='{networkOP}' && \\
 HSS_CONF[@ROAMING_ALLOWED@]='true' && \\
 for K in \\\"\${{!HSS_CONF[@]}}\\\"; do echo \\\"K=\$K ...\\\" && sudo egrep -lRZ \\\"\$K\\\" \$PREFIX | xargs -0 -l sudo sed -i -e \\\"s|\$K|\${{HSS_CONF[\$K]}}|g\\\" ; done && \\
 ../src/hss_rel14/bin/make_certs.sh hss {networkRealm} \$PREFIX && \\
@@ -985,15 +985,15 @@ echo \\\"###### Done! ##########################################################
 
 
 # ###########################################################################
-prepare_cassandra_hss_build()
-configure_cassandra()
+#prepare_cassandra_hss_build()
+#configure_cassandra()
 configure_hss()
 
-prepare_mme_build()
-configure_mme()
+#prepare_mme_build()
+#configure_mme()
 
-prepare_spgwu_build()
-configure_spgwu()
+#prepare_spgwu_build()
+#configure_spgwu()
 
-prepare_spgwc_build()
-configure_spgwc()
+#prepare_spgwc_build()
+#configure_spgwc()
