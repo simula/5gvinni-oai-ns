@@ -32,7 +32,7 @@ additionalParamsForVnf:
     additionalParams:
       # ====== HSS ==========================================================
       hss_git_repository: 'https://github.com/OPENAIRINTERFACE/openair-cn.git'
-      hss_git_commit: '2019.w45'
+      hss_git_commit: 'develop'
       hss_S6a_address: '172.16.6.129'
       network_realm: 'simula.nornet'
       network_k: '449c4b91aeacd0ace182cf3a5a72bfa1'
@@ -43,7 +43,7 @@ additionalParamsForVnf:
 
       # ====== MME ==========================================================
       mme_git_repository: 'https://github.com/OPENAIRINTERFACE/openair-cn.git'
-      mme_git_commit: '2019.w45'
+      mme_git_commit: 'develop'
       mme_S1C_ipv4_interface: '192.168.247.102/24'
       mme_S1C_ipv4_gateway: '0.0.0.0'
       mme_S1C_ipv6_interface: ''
