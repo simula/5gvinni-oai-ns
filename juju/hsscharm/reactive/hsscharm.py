@@ -181,6 +181,7 @@ def prepare_cassandra_hss_build():
 echo \\\"###### Preparing system ###############################################\\\" && \\
 echo -e \\\"{configurationS6a}\\\" | sudo tee /etc/network/interfaces.d/61-{hssS6a_IfName} && sudo ifup {hssS6a_IfName} || true && \\
 if [ \\\"`find /etc/apt/sources.list.d -name 'rmescandon-ubuntu-yq-*.list'`\\\" == \\\"\\\" ] ; then sudo add-apt-repository -y ppa:rmescandon/yq ; fi && \\
+sudo apt update && \
 DEBIAN_FRONTEND=noninteractive sudo apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends yq && \\
 echo \\\"###### Preparing sources ##############################################\\\" && \\
 cd /home/nornetpp/src && \\
@@ -262,8 +263,8 @@ def configure_hss():
    gitDirectory       = 'openair-cn'
    cassandraServerIP  = action_get('cassandra-server-ip')
    networkRealm       = action_get('network-realm')
-   networkLTE_K       = action_get('network-lte-k')
-   networkOP_K        = action_get('network-op-k')
+   networkOP          = action_get('network-op')
+   networkK           = action_get('network-k')
    networkIMSIFirst   = action_get('network-imsi-first')
    networkMSISDNFirst = action_get('network-msisdn-first')
    networkUsers       = int(action_get('network-users'))
@@ -290,7 +291,7 @@ echo \\\"====== Building service ... ======\\\" && \\
 ./build_hss_rel14 --clean >logs/build_hss_rel14-2.log 2>&1 && \\
 cqlsh --file ../src/hss_rel14/db/oai_db.cql {cassandraServerIP} >logs/oai_db.log 2>&1 && \\
 echo \\\"====== Provisioning users ... ======\\\" && \\
-./data_provisioning_users --apn default.{networkRealm} --apn2 internet.{networkRealm} --key {networkLTE_K} --imsi-first {networkIMSIFirst} --msisdn-first {networkMSISDNFirst} --mme-identity mme.{networkRealm} --no-of-users {networkUsers} --realm {networkRealm} --truncate True  --verbose True --cassandra-cluster {cassandraServerIP} >logs/data_provisioning_users.log 2>&1 && \\
+./data_provisioning_users --apn default.{networkRealm} --apn2 internet.{networkRealm} --key {networkK} --imsi-first {networkIMSIFirst} --msisdn-first {networkMSISDNFirst} --mme-identity mme.{networkRealm} --no-of-users {networkUsers} --realm {networkRealm} --truncate True  --verbose True --cassandra-cluster {cassandraServerIP} >logs/data_provisioning_users.log 2>&1 && \\
 echo \\\"====== Provisioning MME ... ======\\\" && \\
 ./data_provisioning_mme --id 3 --mme-identity mme.{networkRealm} --realm {networkRealm} --ue-reachability 1 --truncate True  --verbose True -C {cassandraServerIP} >logs/data_provisioning_mme.log 2>&1 && \\
 echo \\\"###### Creating HSS configuration files ###############################\\\" && \\
@@ -311,7 +312,7 @@ HSS_CONF[@REALM@]='{networkRealm}' && \\
 HSS_CONF[@HSS_FQDN@]='hss.{networkRealm}' && \\
 HSS_CONF[@cassandra_Server_IP@]='{cassandraServerIP}' && \\
 HSS_CONF[@cassandra_IP@]='{cassandraServerIP}' && \\
-HSS_CONF[@OP_KEY@]='{networkOP_K}' && \\
+HSS_CONF[@OP_KEY@]='{networkOP}' && \\
 HSS_CONF[@ROAMING_ALLOWED@]='true' && \\
 for K in \\\"\${{!HSS_CONF[@]}}\\\"; do echo \\\"K=\$K ...\\\" && sudo egrep -lRZ \\\"\$K\\\" \$PREFIX | xargs -0 -l sudo sed -i -e \\\"s|\$K|\${{HSS_CONF[\$K]}}|g\\\" ; done && \\
 ../src/hss_rel14/bin/make_certs.sh hss {networkRealm} \$PREFIX && \\
@@ -338,8 +339,8 @@ echo \\\"###### Done! ##########################################################
       hssS6a_IPv4Address = hssS6a_IPv4Address,
       mmeS6a_IPv4Address = mmeS6a_IPv4Address,
       networkRealm       = networkRealm,
-      networkLTE_K       = networkLTE_K,
-      networkOP_K        = networkOP_K,
+      networkOP          = networkOP,
+      networkK           = networkK,
       networkIMSIFirst   = networkIMSIFirst,
       networkMSISDNFirst = networkMSISDNFirst,
       networkUsers       = networkUsers

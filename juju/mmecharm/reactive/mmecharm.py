@@ -238,8 +238,8 @@ def configure_mme():
    networkRealm           = action_get('network-realm')
    networkMCC             = int(action_get('network-mcc'))
    networkMNC             = int(action_get('network-mnc'))
-   networkLTE_K           = action_get('network-lte-k')
-   networkOP_K            = action_get('network-op-k')
+   networkOP              = action_get('network-op')
+   networkK               = action_get('network-k')
    networkIMSIFirst       = action_get('network-imsi-first')
    networkMSISDNFirst     = action_get('network-msisdn-first')
    networkUsers           = int(action_get('network-users'))
@@ -360,8 +360,8 @@ echo \\\"###### Done! ##########################################################
       networkRealm           = networkRealm,
       networkMCC             = networkMCC,
       networkMNC             = networkMNC,
-      networkLTE_K           = networkLTE_K,
-      networkOP_K            = networkOP_K,
+      networkOP              = networkOP,
+      networkK               = networkK,
       networkIMSIFirst       = networkIMSIFirst,
       networkMSISDNFirst     = networkMSISDNFirst,
       networkUsers           = networkUsers,
