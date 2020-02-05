@@ -42,37 +42,37 @@ additionalParamsForVnf:
       network_users: '1024'
 
       # ====== MME ==========================================================
-      mme_git_repository: https://github.com/OPENAIRINTERFACE/openair-cn.git
-      mme_git_commit: 2019.w45
-      mme_S1C_ipv4_interface: 192.168.247.102/24
-      mme_S1C_ipv4_gateway: 0.0.0.0
+      mme_git_repository: 'https://github.com/OPENAIRINTERFACE/openair-cn.git'
+      mme_git_commit: '2019.w45'
+      mme_S1C_ipv4_interface: '192.168.247.102/24'
+      mme_S1C_ipv4_gateway: '0.0.0.0'
       mme_S1C_ipv6_interface: ''
       mme_S1C_ipv6_gateway: ''
-      mme_S11_ipv4_interface: 172.16.1.102/24
-      mme_S6a_address: 172.16.6.2
+      mme_S11_ipv4_interface: '172.16.1.102/24'
+      mme_S6a_address: '172.16.6.2'
       network_mcc: '242'
       network_mnc: '88'
 
       # ====== SPGW_C =======================================================
-      spgwc_git_repository: https://github.com/OPENAIRINTERFACE/openair-cn-cups.git
-      spgwc_git_commit: v1.0.0
-      spgwc_S11_ipv4_interface: 172.16.1.104/24
-      network_ipv4_dns1: 10.1.1.1
-      network_ipv4_dns2: 10.1.2.1
+      spgwc_git_repository: 'https://github.com/OPENAIRINTERFACE/openair-cn-cups.git'
+      spgwc_git_commit: 'develop'
+      spgwc_S11_ipv4_interface: '172.16.1.104/24'
+      network_ipv4_dns1: '10.1.1.1'
+      network_ipv4_dns2: '10.1.2.1'
 
       # ====== SPGW_U =======================================================
-      spgwu_git_repository: https://github.com/OPENAIRINTERFACE/openair-cn-cups.git
-      spgwu_git_commit: v1.0.0
-      spgwu_S1U_ipv4_interface: 192.168.248.159/24
-      spgwu_S1U_ipv4_gateway: 0.0.0.0
-      spgwu_SGi_ipv4_interface: 10.254.1.203/24
-      spgwu_SGi_ipv4_gateway: 10.254.1.1
+      spgwu_git_repository: 'https://github.com/OPENAIRINTERFACE/openair-cn-cups.git'
+      spgwu_git_commit: 'develop'
+      spgwu_S1U_ipv4_interface: '192.168.248.159/24'
+      spgwu_S1U_ipv4_gateway: '0.0.0.0'
+      spgwu_SGi_ipv4_interface: '10.254.1.203/24'
+      spgwu_SGi_ipv4_gateway: '10.254.1.1'
       spgwu_SGi_ipv6_interface: ''
       spgwu_SGi_ipv6_gateway: ''
-      spgwu_spgwc_list: 172.55.55.101
+      spgwu_spgwc_list: '172.55.55.101'
 
       # ====== Other ========================================================
-      password: osm4us
+      password: 'osm4us'
 
 
 # ###### VNF External Addresses #############################################
