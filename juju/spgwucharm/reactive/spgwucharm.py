@@ -218,6 +218,7 @@ echo \\\"###### Preparing sources ##############################################
 cd /home/nornetpp/src && \\
 if [ ! -d \\\"{gitDirectory}\\\" ] ; then git clone --quiet {gitRepository} {gitDirectory} && cd {gitDirectory} ; else cd {gitDirectory} && git pull ; fi && \\
 git checkout {gitCommit} && \\
+git cherry-pick edc530acafc8084e518eef829a2344e08928409d || true && \\
 cd build/scripts && \\
 echo \\\"###### Done! ##########################################################\\\"""".format(
       gitRepository     = gitRepository,
