@@ -29,9 +29,9 @@
 # Contact: dreibh@simula.no
 
 from charmhelpers.core.hookenv import (
-    function_get,
-    function_fail,
-    function_set,
+    action_get,
+    action_fail,
+    action_set,
     status_set
 )
 from charms.reactive import (
@@ -74,17 +74,17 @@ def runShellCommands(commands, comment, actionFlagToClear, successFlagToSet = No
        exc_type, exc_value, exc_traceback = sys.exc_info()
        err = traceback.format_exception(exc_type, exc_value, exc_traceback)
        message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       function_fail(message.encode('utf-8'))
+       action_fail(message.encode('utf-8'))
        status_set('active', comment + ' COMMANDS FAILED!')
    except:
        exc_type, exc_value, exc_traceback = sys.exc_info()
        err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       function_fail('Command execution failed: ' + str(err))
+       action_fail('Command execution failed: ' + str(err))
        status_set('active', comment + ' FAILED!')
    else:
       if successFlagToSet != None:
          set_flag(successFlagToSet)
-      # function_set( { 'output': stdout.encode('utf-8') } )
+      # action_set( { 'output': stdout.encode('utf-8') } )
       status_set('active', comment + ' COMPLETED')
    finally:
       clear_flag(actionFlagToClear)
@@ -163,8 +163,8 @@ def prepare_cassandra_hss_build():
    # For a documentation of the installation procedure, see:
    # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
 
-   gitRepository = function_get('hss-git-repository')
-   gitCommit     = function_get('hss-git-commit')
+   gitRepository = action_get('hss-git-repository')
+   gitCommit     = action_get('hss-git-commit')
    gitDirectory  = 'openair-cn'
 
    # Prepare network configuration:
@@ -181,6 +181,7 @@ def prepare_cassandra_hss_build():
 echo \\\"###### Preparing system ###############################################\\\" && \\
 echo -e \\\"{configurationS6a}\\\" | sudo tee /etc/network/interfaces.d/61-{hssS6a_IfName} && sudo ifup {hssS6a_IfName} || true && \\
 if [ \\\"`find /etc/apt/sources.list.d -name 'rmescandon-ubuntu-yq-*.list'`\\\" == \\\"\\\" ] ; then sudo add-apt-repository -y ppa:rmescandon/yq ; fi && \\
+sudo apt update && \
 DEBIAN_FRONTEND=noninteractive sudo apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends yq && \\
 echo \\\"###### Preparing sources ##############################################\\\" && \\
 cd /home/nornetpp/src && \\
@@ -209,7 +210,7 @@ def configure_cassandra():
    # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
 
    gitDirectory      = 'openair-cn'
-   cassandraServerIP = function_get('cassandra-server-ip')
+   cassandraServerIP = action_get('cassandra-server-ip')
 
    # NOTE:
    # Double escaping is required for \ and " in "command" string!
@@ -260,13 +261,16 @@ def configure_hss():
    # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
 
    gitDirectory       = 'openair-cn'
-   cassandraServerIP  = function_get('cassandra-server-ip')
-   networkRealm       = function_get('network-realm')
-   networkLTE_K       = function_get('network-lte-k')
-   networkOP_K        = function_get('network-op-k')
-   networkIMSIFirst   = function_get('network-imsi-first')
-   networkMSISDNFirst = function_get('network-msisdn-first')
-   networkUsers       = int(function_get('network-users'))
+   cassandraServerIP  = action_get('cassandra-server-ip')
+   networkRealm       = action_get('network-realm')
+   networkOP          = action_get('network-op')
+   networkK           = action_get('network-k')
+   networkIMSIFirst   = action_get('network-imsi-first')
+   networkMSISDNFirst = action_get('network-msisdn-first')
+   networkUsers       = int(action_get('network-users'))
+
+   hssS6a_IPv4Address = IPv4Address(action_get('hss-S6a-address'))
+   mmeS6a_IPv4Address = IPv4Address(action_get('mme-S6a-address'))
 
    # NOTE:
    # Double escaping is required for \ and " in "command" string!
@@ -287,10 +291,12 @@ echo \\\"====== Building service ... ======\\\" && \\
 ./build_hss_rel14 --clean >logs/build_hss_rel14-2.log 2>&1 && \\
 cqlsh --file ../src/hss_rel14/db/oai_db.cql {cassandraServerIP} >logs/oai_db.log 2>&1 && \\
 echo \\\"====== Provisioning users ... ======\\\" && \\
-./data_provisioning_users --apn default.{networkRealm} --apn2 internet.{networkRealm} --key {networkLTE_K} --imsi-first {networkIMSIFirst} --msisdn-first {networkMSISDNFirst} --mme-identity mme.{networkRealm} --no-of-users {networkUsers} --realm {networkRealm} --truncate True  --verbose True --cassandra-cluster {cassandraServerIP} >logs/data_provisioning_users.log 2>&1 && \\
+./data_provisioning_users --apn default.{networkRealm} --apn2 internet.{networkRealm} --key {networkK} --imsi-first {networkIMSIFirst} --msisdn-first {networkMSISDNFirst} --mme-identity mme.{networkRealm} --no-of-users {networkUsers} --realm {networkRealm} --truncate True  --verbose True --cassandra-cluster {cassandraServerIP} >logs/data_provisioning_users.log 2>&1 && \\
 echo \\\"====== Provisioning MME ... ======\\\" && \\
 ./data_provisioning_mme --id 3 --mme-identity mme.{networkRealm} --realm {networkRealm} --ue-reachability 1 --truncate True  --verbose True -C {cassandraServerIP} >logs/data_provisioning_mme.log 2>&1 && \\
 echo \\\"###### Creating HSS configuration files ###############################\\\" && \\
+echo \\\"{hssS6a_IPv4Address}   hss.{networkRealm} hss\\\" | sudo tee -a /etc/hosts && \\
+echo \\\"{mmeS6a_IPv4Address}   mme.{networkRealm} mme\\\" | sudo tee -a /etc/hosts && \\
 openssl rand -out \$HOME/.rnd 128 && \\
 echo \\\"====== Configuring Diameter ... ======\\\" && \\
 PREFIX='/usr/local/etc/oai' && \\
@@ -306,18 +312,35 @@ HSS_CONF[@REALM@]='{networkRealm}' && \\
 HSS_CONF[@HSS_FQDN@]='hss.{networkRealm}' && \\
 HSS_CONF[@cassandra_Server_IP@]='{cassandraServerIP}' && \\
 HSS_CONF[@cassandra_IP@]='{cassandraServerIP}' && \\
-HSS_CONF[@OP_KEY@]='{networkOP_K}' && \\
+HSS_CONF[@OP_KEY@]='{networkOP}' && \\
 HSS_CONF[@ROAMING_ALLOWED@]='true' && \\
 for K in \\\"\${{!HSS_CONF[@]}}\\\"; do echo \\\"K=\$K ...\\\" && sudo egrep -lRZ \\\"\$K\\\" \$PREFIX | xargs -0 -l sudo sed -i -e \\\"s|\$K|\${{HSS_CONF[\$K]}}|g\\\" ; done && \\
 ../src/hss_rel14/bin/make_certs.sh hss {networkRealm} \$PREFIX && \\
 echo \\\"====== Updating key ... ======\\\" && \\
 oai_hss -j \$PREFIX/hss_rel14.json --onlyloadkey >logs/onlyloadkey.log 2>&1 && \\
+echo \\\"====== Preparing SystemD Unit ... ======\\\" && \\
+( echo \\\"[Unit]\\\" && \\
+echo \\\"Description=Home Subscriber Server (HSS)\\\" && \\
+echo \\\"After=ssh.target\\\" && \\
+echo \\\"\\\" && \\
+echo \\\"[Service]\\\" && \\
+echo \\\"ExecStart=/bin/sh -c \\\'exec /usr/local/bin/oai_hss -j /usr/local/etc/oai/hss_rel14.json >>/var/log/hss.log 2>&1\\\'\\\" && \\
+echo \\\"KillMode=process\\\" && \\
+echo \\\"Restart=on-failure\\\" && \\
+echo \\\"RestartPreventExitStatus=255\\\" && \\
+echo \\\"WorkingDirectory=/home/nornetpp/src/openair-cn/scripts\\\" && \\
+echo \\\"\\\" && \\
+echo \\\"[Install]\\\" && \\
+echo \\\"WantedBy=multi-user.target\\\" ) | sudo tee /lib/systemd/system/hss.service && \\
+sudo systemctl daemon-reload && \\
 echo \\\"###### Done! ##########################################################\\\"""".format(
       gitDirectory       = gitDirectory,
       cassandraServerIP  = cassandraServerIP,
+      hssS6a_IPv4Address = hssS6a_IPv4Address,
+      mmeS6a_IPv4Address = mmeS6a_IPv4Address,
       networkRealm       = networkRealm,
-      networkLTE_K       = networkLTE_K,
-      networkOP_K        = networkOP_K,
+      networkOP          = networkOP,
+      networkK           = networkK,
       networkIMSIFirst   = networkIMSIFirst,
       networkMSISDNFirst = networkMSISDNFirst,
       networkUsers       = networkUsers
@@ -331,7 +354,7 @@ echo \\\"###### Done! ##########################################################
 @when('actions.restart-hss')
 @when('hsscharm.configured-hss')
 def restart_hss():
-   commands = 'touch /tmp/restart-hss'
+   commands = 'sudo service hss restart'
    runShellCommands(commands, 'restart_hss: restarting HSS', 'actions.restart-hss')
 
 
@@ -339,7 +362,7 @@ def restart_hss():
 @when('actions.touch')
 def touch():
    gitDirectory      = 'openair-cn'
-   cassandraServerIP = function_get('cassandra-server-ip')
+   cassandraServerIP = action_get('cassandra-server-ip')
 
    status_set('active', 'configure-cassandra: configuring Cassandra ...')
 
@@ -352,9 +375,9 @@ def touch():
        ) ]
        result, err = charms.sshproxy._run(cmd)
    except:
-       function_fail('command failed:' + err)
+       action_fail('command failed:' + err)
    else:
-       function_set({'outout': result})
+       action_set({'outout': result})
    finally:
        clear_flag('actions.touch')
 # FIXME!

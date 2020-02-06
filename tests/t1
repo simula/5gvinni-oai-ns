@@ -33,9 +33,10 @@ MyParameters = {
    # ====== HSS =============================================================
    'hss-git-repository': 'https://github.com/OPENAIRINTERFACE/openair-cn.git',
    'hss-git-commit': '2019.w45',
+   'hss-S6a-address': '172.16.6.129',
    'network-realm': 'simula.nornet',
-   'network-lte-k': '449c4b91aeacd0ace182cf3a5a72bfa1',
-   'network-op-k': '1006020f0a478bf6b699f15c062e42b3',
+   'network-k': '449C4B91AEACD0ACE182CF3A5A72BFA1',
+   'network-op': '1006020F0A478BF6B699F15C062E42B3',
    'network-imsi-first': '242881234500000',
    'network-msisdn-first': '24288880000000',
    'network-users': '1024',
@@ -49,8 +50,8 @@ MyParameters = {
    'mme-S11-ipv4-interface': '172.16.1.102/24',
    'mme-S1C-ipv6-interface': '',
    'mme-S1C-ipv6-gateway': '',
+   'mme-S6a-address': '172.16.6.2',
    'spgwc-S11-ipv4-interface': '172.16.1.104/24',
-   'hss-s6a-address': '172.16.6.129',
    'network-mcc': '242',
    'network-mnc': '88',
 
@@ -67,21 +68,22 @@ MyParameters = {
    'spgwu-S1U-ipv4-gateway': '0.0.0.0',
    'spgwu-SGi-ipv4-interface': '10.254.1.203/24',
    'spgwu-SGi-ipv4-gateway': '10.254.1.1',
-   'spgwu-SGi-ipv6-interface': '3ffe::2/64',
-   'spgwu-SGi-ipv6-gateway': '3ffe::1'
+   'spgwu-SGi-ipv6-interface': '',
+   'spgwu-SGi-ipv6-gateway': '',
+   'spgwu-spgwc-list': '172.55.55.101'
 }
-def function_get(flag):
+def action_get(flag):
    return MyParameters[flag]
 
 
 # ###### Dummy function #####################################################
-def function_set(values):
+def action_set(values):
    # Nothing to do!
    pass
 
 
 # ###### Dummy function #####################################################
-def function_fail(message):
+def action_fail(message):
    # Nothing to do!
    pass
 
@@ -122,17 +124,17 @@ def runShellCommands(commands, comment, actionFlagToClear, successFlagToSet = No
        exc_type, exc_value, exc_traceback = sys.exc_info()
        err = traceback.format_exception(exc_type, exc_value, exc_traceback)
        message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       function_fail(message.encode('utf-8'))
+       action_fail(message.encode('utf-8'))
        status_set('active', comment + ' COMMANDS FAILED!')
    except:
        exc_type, exc_value, exc_traceback = sys.exc_info()
        err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       function_fail('Command execution failed: ' + str(err))
+       action_fail('Command execution failed: ' + str(err))
        status_set('active', comment + ' FAILED!')
    else:
       if successFlagToSet != None:
          set_flag(successFlagToSet)
-      # function_set( { 'output': stdout.encode('utf-8') } )
+      # action_set( { 'output': stdout.encode('utf-8') } )
       status_set('active', comment + ' COMPLETED')
    finally:
       clear_flag(actionFlagToClear)
@@ -142,7 +144,7 @@ def runShellCommands(commands, comment, actionFlagToClear, successFlagToSet = No
 def configureInterface(name,
                        ipv4Interface = IPv4Interface('0.0.0.0/0'), ipv4Gateway = None,
                        ipv6Interface = None,                       ipv6Gateway = None,
-                       metric = 1):
+                       metric = 1, pdnInterface = None):
 
    # NOTE:
    # Double escaping is required for \ and " in "configuration" string!
@@ -151,6 +153,19 @@ def configureInterface(name,
    # That is: $ => \$ ; \ => \\ ; " => \\\"
 
    configuration = 'auto ' + name + '\\\\n'
+
+   # ====== Helper function =================================================
+   def makePDNRules(pdnInterface, interface, gateway):
+      rules = \
+         '\\\\tpost-up /bin/ip rule add from ' + str(interface.network) + ' lookup 1000 pref 100\\\\n' + \
+         '\\\\tpost-up /bin/ip rule add iif pdn lookup 1000 pref 100\\\\n' + \
+         '\\\\tpost-up /bin/ip route add ' + str(interface.network) + ' scope link dev ' + name + ' table 1000\\\\n' + \
+         '\\\\tpost-up /bin/ip route add default via ' + str(gateway) + ' dev ' + name + ' table 1000\\\\n' + \
+         '\\\\tpre-down /bin/ip route del default via ' + str(gateway) + ' dev ' + name + ' table 1000 || true\\\\n' + \
+         '\\\\tpre-down /bin/ip route del ' + str(interface.network) + ' scope link dev ' + name + ' table 1000 || true\\\\n' + \
+         '\\\\tpre-down /bin/ip rule del iif pdn lookup 1000 pref 100 || true\\\\n' + \
+         '\\\\tpre-down /bin/ip rule del from ' + str(interface.network) + ' lookup 1000 pref 100 || true\\\\n'
+      return rules
 
    # ====== IPv4 ============================================================
    if ipv4Interface == IPv4Interface('0.0.0.0/0'):
@@ -164,6 +179,8 @@ def configureInterface(name,
          configuration = configuration + \
             '\\\\tgateway ' + str(ipv4Gateway) + '\\\\n' + \
             '\\\\tmetric '  + str(metric)      + '\\\\n'
+      if pdnInterface != None:
+         configuration = configuration + makePDNRules(pdnInterface, ipv4Interface, ipv4Gateway)
       configuration = configuration + '\\\\n'
 
    # ====== IPv6 ============================================================
@@ -185,6 +202,8 @@ def configureInterface(name,
          configuration = configuration + \
             '\\\\tgateway ' + str(ipv6Gateway) + '\\\\n' + \
             '\\\\tmetric '  + str(metric)      + '\\\\n'
+      if pdnInterface != None:
+         configuration = configuration + makePDNRules(pdnInterface, ipv6Interface, ipv6Gateway)
 
    return configuration
 
@@ -209,8 +228,8 @@ def prepare_cassandra_hss_build():
    # For a documentation of the installation procedure, see:
    # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
 
-   gitRepository = function_get('hss-git-repository')
-   gitCommit     = function_get('hss-git-commit')
+   gitRepository = action_get('hss-git-repository')
+   gitCommit     = action_get('hss-git-commit')
    gitDirectory  = 'openair-cn'
 
    # Prepare network configuration:
@@ -227,6 +246,7 @@ def prepare_cassandra_hss_build():
 echo \\\"###### Preparing system ###############################################\\\" && \\
 echo -e \\\"{configurationS6a}\\\" | sudo tee /etc/network/interfaces.d/61-{hssS6a_IfName} && sudo ifup {hssS6a_IfName} || true && \\
 if [ \\\"`find /etc/apt/sources.list.d -name 'rmescandon-ubuntu-yq-*.list'`\\\" == \\\"\\\" ] ; then sudo add-apt-repository -y ppa:rmescandon/yq ; fi && \\
+sudo apt update && \
 DEBIAN_FRONTEND=noninteractive sudo apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends yq && \\
 echo \\\"###### Preparing sources ##############################################\\\" && \\
 cd /home/nornetpp/src && \\
@@ -255,7 +275,7 @@ def configure_cassandra():
    # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
 
    gitDirectory      = 'openair-cn'
-   cassandraServerIP = function_get('cassandra-server-ip')
+   cassandraServerIP = action_get('cassandra-server-ip')
 
    # NOTE:
    # Double escaping is required for \ and " in "command" string!
@@ -285,7 +305,7 @@ sudo yq w -i /etc/cassandra/cassandra.yaml \\\"listen_address\\\" \\\"{cassandra
 sudo yq w -i /etc/cassandra/cassandra.yaml \\\"rpc_address\\\" \\\"{cassandraServerIP}\\\" && \\
 sudo yq w -i /etc/cassandra/cassandra.yaml \\\"endpoint_snitch\\\" \\\"GossipingPropertyFileSnitch\\\" && \\
 sudo service cassandra start && \\
-sleep 30 && \\
+sleep 10 && \\
 sudo service cassandra status | cat && \\
 echo \\\"###### Done! ##########################################################\\\"""".format(
       gitDirectory      = gitDirectory,
@@ -306,13 +326,16 @@ def configure_hss():
    # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
 
    gitDirectory       = 'openair-cn'
-   cassandraServerIP  = function_get('cassandra-server-ip')
-   networkRealm       = function_get('network-realm')
-   networkLTE_K       = function_get('network-lte-k')
-   networkOP_K        = function_get('network-op-k')
-   networkIMSIFirst   = function_get('network-imsi-first')
-   networkMSISDNFirst = function_get('network-msisdn-first')
-   networkUsers       = int(function_get('network-users'))
+   cassandraServerIP  = action_get('cassandra-server-ip')
+   networkRealm       = action_get('network-realm')
+   networkK           = action_get('network-k')
+   networkOP          = action_get('network-op')
+   networkIMSIFirst   = action_get('network-imsi-first')
+   networkMSISDNFirst = action_get('network-msisdn-first')
+   networkUsers       = int(action_get('network-users'))
+
+   hssS6a_IPv4Address = IPv4Address(action_get('hss-S6a-address'))
+   mmeS6a_IPv4Address = IPv4Address(action_get('mme-S6a-address'))
 
    # NOTE:
    # Double escaping is required for \ and " in "command" string!
@@ -333,10 +356,12 @@ echo \\\"====== Building service ... ======\\\" && \\
 ./build_hss_rel14 --clean >logs/build_hss_rel14-2.log 2>&1 && \\
 cqlsh --file ../src/hss_rel14/db/oai_db.cql {cassandraServerIP} >logs/oai_db.log 2>&1 && \\
 echo \\\"====== Provisioning users ... ======\\\" && \\
-./data_provisioning_users --apn default.{networkRealm} --apn2 internet.{networkRealm} --key {networkLTE_K} --imsi-first {networkIMSIFirst} --msisdn-first {networkMSISDNFirst} --mme-identity mme.{networkRealm} --no-of-users {networkUsers} --realm {networkRealm} --truncate True  --verbose True --cassandra-cluster {cassandraServerIP} >logs/data_provisioning_users.log 2>&1 && \\
+./data_provisioning_users --apn default.{networkRealm} --apn2 internet.{networkRealm} --key {networkK} --imsi-first {networkIMSIFirst} --msisdn-first {networkMSISDNFirst} --mme-identity mme.{networkRealm} --no-of-users {networkUsers} --realm {networkRealm} --truncate True  --verbose True --cassandra-cluster {cassandraServerIP} >logs/data_provisioning_users.log 2>&1 && \\
 echo \\\"====== Provisioning MME ... ======\\\" && \\
 ./data_provisioning_mme --id 3 --mme-identity mme.{networkRealm} --realm {networkRealm} --ue-reachability 1 --truncate True  --verbose True -C {cassandraServerIP} >logs/data_provisioning_mme.log 2>&1 && \\
 echo \\\"###### Creating HSS configuration files ###############################\\\" && \\
+echo \\\"{hssS6a_IPv4Address}   hss.{networkRealm} hss\\\" | sudo tee -a /etc/hosts && \\
+echo \\\"{mmeS6a_IPv4Address}   mme.{networkRealm} mme\\\" | sudo tee -a /etc/hosts && \\
 openssl rand -out \$HOME/.rnd 128 && \\
 echo \\\"====== Configuring Diameter ... ======\\\" && \\
 PREFIX='/usr/local/etc/oai' && \\
@@ -352,18 +377,35 @@ HSS_CONF[@REALM@]='{networkRealm}' && \\
 HSS_CONF[@HSS_FQDN@]='hss.{networkRealm}' && \\
 HSS_CONF[@cassandra_Server_IP@]='{cassandraServerIP}' && \\
 HSS_CONF[@cassandra_IP@]='{cassandraServerIP}' && \\
-HSS_CONF[@OP_KEY@]='{networkOP_K}' && \\
+HSS_CONF[@OP_KEY@]='{networkOP}' && \\
 HSS_CONF[@ROAMING_ALLOWED@]='true' && \\
 for K in \\\"\${{!HSS_CONF[@]}}\\\"; do echo \\\"K=\$K ...\\\" && sudo egrep -lRZ \\\"\$K\\\" \$PREFIX | xargs -0 -l sudo sed -i -e \\\"s|\$K|\${{HSS_CONF[\$K]}}|g\\\" ; done && \\
 ../src/hss_rel14/bin/make_certs.sh hss {networkRealm} \$PREFIX && \\
 echo \\\"====== Updating key ... ======\\\" && \\
 oai_hss -j \$PREFIX/hss_rel14.json --onlyloadkey >logs/onlyloadkey.log 2>&1 && \\
+echo \\\"====== Preparing SystemD Unit ... ======\\\" && \\
+( echo \\\"[Unit]\\\" && \\
+echo \\\"Description=Home Subscriber Server (HSS)\\\" && \\
+echo \\\"After=ssh.target\\\" && \\
+echo \\\"\\\" && \\
+echo \\\"[Service]\\\" && \\
+echo \\\"ExecStart=/bin/sh -c \\\'exec /usr/local/bin/oai_hss -j /usr/local/etc/oai/hss_rel14.json >>/var/log/hss.log 2>&1\\\'\\\" && \\
+echo \\\"KillMode=process\\\" && \\
+echo \\\"Restart=on-failure\\\" && \\
+echo \\\"RestartPreventExitStatus=255\\\" && \\
+echo \\\"WorkingDirectory=/home/nornetpp/src/openair-cn/scripts\\\" && \\
+echo \\\"\\\" && \\
+echo \\\"[Install]\\\" && \\
+echo \\\"WantedBy=multi-user.target\\\" ) | sudo tee /lib/systemd/system/hss.service && \\
+sudo systemctl daemon-reload && \\
 echo \\\"###### Done! ##########################################################\\\"""".format(
       gitDirectory       = gitDirectory,
       cassandraServerIP  = cassandraServerIP,
+      hssS6a_IPv4Address = hssS6a_IPv4Address,
+      mmeS6a_IPv4Address = mmeS6a_IPv4Address,
       networkRealm       = networkRealm,
-      networkLTE_K       = networkLTE_K,
-      networkOP_K        = networkOP_K,
+      networkK           = networkK,
+      networkOP          = networkOP,
       networkIMSIFirst   = networkIMSIFirst,
       networkMSISDNFirst = networkMSISDNFirst,
       networkUsers       = networkUsers
@@ -385,18 +427,18 @@ def prepare_mme_build():
    # For a documentation of the installation procedure, see:
    # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-mme
 
-   gitRepository        = function_get('mme-git-repository')
-   gitCommit            = function_get('mme-git-commit')
+   gitRepository        = action_get('mme-git-repository')
+   gitCommit            = action_get('mme-git-commit')
    gitDirectory         = 'openair-cn'
 
-   mmeS1C_IPv4Interface = IPv4Interface(function_get('mme-S1C-ipv4-interface'))
-   mmeS1C_IPv4Gateway   = IPv4Address(function_get('mme-S1C-ipv4-gateway'))
-   if function_get('mme-S1C-ipv6-interface') != '':
-      mmeS1C_IPv6Interface = IPv6Interface(function_get('mme-S1C-ipv6-interface'))
+   mmeS1C_IPv4Interface = IPv4Interface(action_get('mme-S1C-ipv4-interface'))
+   mmeS1C_IPv4Gateway   = IPv4Address(action_get('mme-S1C-ipv4-gateway'))
+   if action_get('mme-S1C-ipv6-interface') != '':
+      mmeS1C_IPv6Interface = IPv6Interface(action_get('mme-S1C-ipv6-interface'))
    else:
       mmeS1C_IPv6Interface = None
-   if function_get('mme-S1C-ipv6-gateway') != '':
-      mmeS1C_IPv6Gateway   = IPv6Address(function_get('mme-S1C-ipv6-gateway'))
+   if action_get('mme-S1C-ipv6-gateway') != '':
+      mmeS1C_IPv6Gateway   = IPv6Address(action_get('mme-S1C-ipv6-gateway'))
    else:
       mmeS1C_IPv6Gateway = None
 
@@ -410,6 +452,10 @@ def prepare_mme_build():
    configurationS1C = configureInterface(mmeS1C_IfName, mmeS1C_IPv4Interface, mmeS1C_IPv4Gateway,
                                                         mmeS1C_IPv6Interface, mmeS1C_IPv6Gateway)
 
+   # S10 dummy interface:
+   mmeS10_IfName    = 'dummy0:m10'
+   configurationS10 = configureInterface(mmeS10_IfName, IPv4Interface('192.168.10.110/24'))
+
    # NOTE:
    # Double escaping is required for \ and " in "command" string!
    # 1. Python
@@ -421,6 +467,8 @@ echo \\\"###### Preparing system ###############################################
 echo -e \\\"{configurationS6a}\\\" | sudo tee /etc/network/interfaces.d/61-{mmeS6a_IfName} && sudo ifup {mmeS6a_IfName} || true && \\
 echo -e \\\"{configurationS11}\\\" | sudo tee /etc/network/interfaces.d/62-{mmeS11_IfName} && sudo ifup {mmeS11_IfName} || true && \\
 echo -e \\\"{configurationS1C}\\\" | sudo tee /etc/network/interfaces.d/63-{mmeS1C_IfName} && sudo ifup {mmeS1C_IfName} || true && \\
+sudo ip link add dummy0 type dummy || true && \\
+echo -e \\\"{configurationS10}\\\" | sudo tee /etc/network/interfaces.d/64-{mmeS10_IfName} && sudo ifup {mmeS10_IfName} || true && \\
 echo \\\"###### Preparing sources ##############################################\\\" && \\
 cd /home/nornetpp/src && \\
 if [ ! -d \\\"{gitDirectory}\\\" ] ; then git clone --quiet {gitRepository} {gitDirectory} && cd {gitDirectory} ; else cd {gitDirectory} && git pull ; fi && \\
@@ -433,9 +481,11 @@ echo \\\"###### Done! ##########################################################
       mmeS6a_IfName    = mmeS6a_IfName,
       mmeS11_IfName    = mmeS11_IfName,
       mmeS1C_IfName    = mmeS1C_IfName,
+      mmeS10_IfName    = mmeS10_IfName,
       configurationS6a = configurationS6a,
       configurationS11 = configurationS11,
-      configurationS1C = configurationS1C
+      configurationS1C = configurationS1C,
+      configurationS10 = configurationS10
    )
 
    runShellCommands(commands, 'prepare_mme_build: preparing MME build',
@@ -453,18 +503,19 @@ def configure_mme():
 
    gitDirectory           = 'openair-cn'
 
-   hssS6a_IPv4Address     = IPv4Address(function_get('hss-s6a-address'))
-   mmeS1C_IPv4Interface   = IPv4Interface(function_get('mme-S1C-ipv4-interface'))
-   mmeS11_IPv4Interface   = IPv4Interface(function_get('mme-S11-ipv4-interface'))
-   spwgcS11_IPv4Interface = IPv4Interface(function_get('spgwc-S11-ipv4-interface'))
-   networkRealm           = function_get('network-realm')
-   networkMCC             = int(function_get('network-mcc'))
-   networkMNC             = int(function_get('network-mnc'))
-   networkLTE_K           = function_get('network-lte-k')
-   networkOP_K            = function_get('network-op-k')
-   networkIMSIFirst       = function_get('network-imsi-first')
-   networkMSISDNFirst     = function_get('network-msisdn-first')
-   networkUsers           = int(function_get('network-users'))
+   hssS6a_IPv4Address     = IPv4Address(action_get('hss-S6a-address'))
+   mmeS1C_IPv4Interface   = IPv4Interface(action_get('mme-S1C-ipv4-interface'))
+   mmeS11_IPv4Interface   = IPv4Interface(action_get('mme-S11-ipv4-interface'))
+   mmeS10_IPv4Interface   = IPv4Interface('192.168.10.110/24')
+   spwgcS11_IPv4Interface = IPv4Interface(action_get('spgwc-S11-ipv4-interface'))
+   networkRealm           = action_get('network-realm')
+   networkMCC             = int(action_get('network-mcc'))
+   networkMNC             = int(action_get('network-mnc'))
+   networkK               = action_get('network-k')
+   networkOP              = action_get('network-op')
+   networkIMSIFirst       = action_get('network-imsi-first')
+   networkMSISDNFirst     = action_get('network-msisdn-first')
+   networkUsers           = int(action_get('network-users'))
 
    TAC_SGW_TEST = 7
    TAC_SGW_0    = 600
@@ -480,6 +531,7 @@ def configure_mme():
    mmeS6a_IfName = 'ens4'
    mmeS11_IfName = 'ens5'
    mmeS1C_IfName = 'ens6'
+   mmeS10_IfName = 'dummy0:m10'
 
    # NOTE:
    # Double escaping is required for \ and " in "command" string!
@@ -499,6 +551,8 @@ echo \\\"====== Building dependencies ... ======\\\" && \\
 echo \\\"====== Building service ... ======\\\" && \\
 ./build_mme --clean >logs/build_mme-2.log 2>&1 && \\
 echo \\\"###### Creating MME configuration files ###############################\\\" && \\
+echo \\\"127.0.1.1        mme.{networkRealm} mme\\\" | sudo tee -a /etc/hosts && \\
+echo \\\"{hssS6a_IPv4Address}     hss.{networkRealm} hss\\\" | sudo tee -a /etc/hosts && \\
 openssl rand -out \$HOME/.rnd 128 && \\
 INSTANCE=1 && \\
 PREFIX='/usr/local/etc/oai' && \\
@@ -527,29 +581,44 @@ MME_CONF[@MME_INTERFACE_NAME_FOR_S1_MME@]='{mmeS1C_IfName}' && \\
 MME_CONF[@MME_IPV4_ADDRESS_FOR_S1_MME@]='{mmeS1C_IPv4Interface}' && \\
 MME_CONF[@MME_INTERFACE_NAME_FOR_S11@]='{mmeS11_IfName}' && \\
 MME_CONF[@MME_IPV4_ADDRESS_FOR_S11@]='{mmeS11_IPv4Interface}' && \\
-MME_CONF[@MME_INTERFACE_NAME_FOR_S10@]='eth0:m10' && \\
-MME_CONF[@MME_IPV4_ADDRESS_FOR_S10@]='192.168.10.110/24' && \\
+MME_CONF[@MME_INTERFACE_NAME_FOR_S10@]='{mmeS10_IfName}' && \\
+MME_CONF[@MME_IPV4_ADDRESS_FOR_S10@]='{mmeS10_IPv4Interface}' && \\
 MME_CONF[@OUTPUT@]='CONSOLE' && \\
 MME_CONF[@SGW_IPV4_ADDRESS_FOR_S11_TEST_0@]='{spwgcS11_IPv4Interface}' && \\
 MME_CONF[@SGW_IPV4_ADDRESS_FOR_S11_0@]='{spwgcS11_IPv4Interface}' && \\
 MME_CONF[@PEER_MME_IPV4_ADDRESS_FOR_S10_0@]='0.0.0.0/24' && \\
 MME_CONF[@PEER_MME_IPV4_ADDRESS_FOR_S10_1@]='0.0.0.0/24' && \\
-MME_CONF[@TAC-LB_SGW_TEST_0@]={tac_sgw_test_hi} && \\
-MME_CONF[@TAC-HB_SGW_TEST_0@]={tac_sgw_test_lo} && \\
+MME_CONF[@TAC-LB_SGW_TEST_0@]={tac_sgw_test_lo} && \\
+MME_CONF[@TAC-HB_SGW_TEST_0@]={tac_sgw_test_hi} && \\
 MME_CONF[@MCC_SGW_0@]={networkMCC} && \\
 MME_CONF[@MNC3_SGW_0@]={networkMNC:03d} && \\
-MME_CONF[@TAC-LB_SGW_0@]={tac_sgw_0_hi} && \\
-MME_CONF[@TAC-HB_SGW_0@]={tac_sgw_0_lo} && \\
+MME_CONF[@TAC-LB_SGW_0@]={tac_sgw_0_lo} && \\
+MME_CONF[@TAC-HB_SGW_0@]={tac_sgw_0_hi} && \\
 MME_CONF[@MCC_MME_0@]={networkMCC} && \\
 MME_CONF[@MNC3_MME_0@]={networkMNC:03d} && \\
-MME_CONF[@TAC-LB_MME_0@]={tac_mme_0_hi} && \\
-MME_CONF[@TAC-HB_MME_0@]={tac_mme_0_lo} && \\
+MME_CONF[@TAC-LB_MME_0@]={tac_mme_0_lo} && \\
+MME_CONF[@TAC-HB_MME_0@]={tac_mme_0_hi} && \\
 MME_CONF[@MCC_MME_1@]={networkMCC} && \\
 MME_CONF[@MNC3_MME_1@]={networkMNC:03d} && \\
-MME_CONF[@TAC-LB_MME_1@]={tac_mme_1_hi} && \\
-MME_CONF[@TAC-HB_MME_1@]={tac_mme_1_lo} && \\
+MME_CONF[@TAC-LB_MME_1@]={tac_mme_1_lo} && \\
+MME_CONF[@TAC-HB_MME_1@]={tac_mme_1_hi} && \\
 for K in \\\"\${{!MME_CONF[@]}}\\\"; do sudo egrep -lRZ \\\"\$K\\\" \$PREFIX | xargs -0 -l sudo sed -i -e \\\"s|\$K|\${{MME_CONF[\$K]}}|g\\\" ; ret=\$?;[[ ret -ne 0 ]] && echo \\\"Tried to replace \$K with \${{MME_CONF[\$K]}}\\\" || true ; done && \\
 sudo ./check_mme_s6a_certificate \$PREFIX/freeDiameter mme.{networkRealm} >logs/check_mme_s6a_certificate.log 2>&1 && \\
+echo \\\"====== Preparing SystemD Unit ... ======\\\" && \\
+( echo \\\"[Unit]\\\" && \\
+echo \\\"Description=Mobility Management Entity (MME)\\\" && \\
+echo \\\"After=ssh.target\\\" && \\
+echo \\\"\\\" && \\
+echo \\\"[Service]\\\" && \\
+echo \\\"ExecStart=/bin/sh -c \\\'exec /usr/local/bin/mme -c /usr/local/etc/oai/mme.conf >>/var/log/mme.log 2>&1\\\'\\\" && \\
+echo \\\"KillMode=process\\\" && \\
+echo \\\"Restart=on-failure\\\" && \\
+echo \\\"RestartPreventExitStatus=255\\\" && \\
+echo \\\"WorkingDirectory=/home/nornetpp/src/openair-cn/scripts\\\" && \\
+echo \\\"\\\" && \\
+echo \\\"[Install]\\\" && \\
+echo \\\"WantedBy=multi-user.target\\\" ) | sudo tee /lib/systemd/system/mme.service && \\
+sudo systemctl daemon-reload && \\
 echo \\\"###### Done! ##########################################################\\\"""".format(
       gitDirectory           = gitDirectory,
       hssS6a_IPv4Address     = hssS6a_IPv4Address,
@@ -557,12 +626,15 @@ echo \\\"###### Done! ##########################################################
       mmeS1C_IPv4Interface   = mmeS1C_IPv4Interface,
       mmeS11_IfName          = mmeS11_IfName,
       mmeS11_IPv4Interface   = mmeS11_IPv4Interface,
+      mmeS10_IfName          = mmeS10_IfName,
+      mmeS10_IPv4Interface   = mmeS10_IPv4Interface,
+
       spwgcS11_IPv4Interface = spwgcS11_IPv4Interface,
       networkRealm           = networkRealm,
       networkMCC             = networkMCC,
       networkMNC             = networkMNC,
-      networkLTE_K           = networkLTE_K,
-      networkOP_K            = networkOP_K,
+      networkK               = networkK,
+      networkOP              = networkOP,
       networkIMSIFirst       = networkIMSIFirst,
       networkMSISDNFirst     = networkMSISDNFirst,
       networkUsers           = networkUsers,
@@ -588,31 +660,39 @@ echo \\\"###### Done! ##########################################################
 @when('spgwucharm.installed')
 @when_not('spgwucharm.prepared-spgwu-build')
 def prepare_spgwu_build():
-   status_set('active', 'prepare-spgwu-build: preparing SPGW-U build ...')
 
    # ====== Install SPGW-U ==================================================
    # For a documentation of the installation procedure, see:
    # https://github.com/OPENAIRINTERFACE/openair-cn-cups/wiki/OpenAirSoftwareSupport#install-spgw-u
 
-   gitRepository            = 'https://github.com/OPENAIRINTERFACE/openair-cn-cups.git'
-   gitDirectory             = 'openair-cn-cups'
-   gitCommit                = 'develop'
+   gitRepository          = action_get('spgwu-git-repository')
+   gitCommit              = action_get('spgwu-git-commit')
+   gitDirectory           = 'openair-cn-cups'
 
-   spgwuSXab_IfName         = 'ens4'
-   spgwuS1U_IfName          = 'ens5'
-   spgwuSGi_IfName          = 'ens6'
+   spgwuS1U_IPv4Interface = IPv4Interface(action_get('spgwu-S1U-ipv4-interface'))
+   spgwuS1U_IPv4Gateway   = IPv4Address(action_get('spgwu-S1U-ipv4-gateway'))
 
-   networkS1U_IPv4Interface = IPv4Interface('192.168.248.159/24')
-   networkSGi_IPv4Interface = IPv4Interface('10.254.1.203/24')
-   networkSGi_IPv4Gateway   = IPv4Address('10.254.1.1')
-   networkSGi_IPv6Interface = IPv6Interface('3ffe::2/64')
-   networkSGi_IPv6Gateway   = IPv6Address('3ffe::1')
+   spgwuSGi_IPv4Interface = IPv4Interface(action_get('spgwu-SGi-ipv4-interface'))
+   spgwuSGi_IPv4Gateway   = IPv4Address(action_get('spgwu-SGi-ipv4-gateway'))
+   if action_get('spgwu-SGi-ipv6-interface') == '':
+      spgwuSGi_IPv6Interface = None
+   else:
+      spgwuSGi_IPv6Interface = IPv6Interface(action_get('spgwu-SGi-ipv6-interface'))
+   if action_get('spgwu-SGi-ipv6-gateway') == '':
+      spgwuSGi_IPv6Gateway = None
+   else:
+      spgwuSGi_IPv6Gateway = IPv6Address(action_get('spgwu-SGi-ipv6-gateway'))
 
    # Prepare network configurations:
-   configurationSXab = configureInterface(spgwuSXab_IfName, IPv4Interface('0.0.0.0/0'))
-   configurationS1U  = configureInterface(spgwuS1U_IfName, networkS1U_IPv4Interface, IPv4Address('0.0.0.0'))
-   configurationSGi  = configureInterface(spgwuSGi_IfName, networkSGi_IPv4Interface, networkSGi_IPv4Gateway,
-                                                           networkSGi_IPv6Interface, networkSGi_IPv6Gateway)
+   spgwuSXab_IfName       = 'ens4'
+   spgwuS1U_IfName        = 'ens5'
+   spgwuSGi_IfName        = 'ens6'
+
+   configurationSXab = configureInterface(spgwuSXab_IfName, IPv4Interface('0.0.0.0/0'), metric=61)
+   configurationS1U  = configureInterface(spgwuS1U_IfName, spgwuS1U_IPv4Interface, spgwuS1U_IPv4Gateway, metric=62)
+   configurationSGi  = configureInterface(spgwuSGi_IfName, spgwuSGi_IPv4Interface, spgwuSGi_IPv4Gateway,
+                                                           spgwuSGi_IPv6Interface, spgwuSGi_IPv6Gateway,
+                                                           metric=1, pdnInterface = 'pdn')
 
    # NOTE:
    # Double escaping is required for \ and " in "command" string!
@@ -625,10 +705,13 @@ echo \\\"###### Preparing system ###############################################
 echo -e \\\"{configurationSXab}\\\" | sudo tee /etc/network/interfaces.d/61-{spgwuSXab_IfName} && sudo ifup {spgwuSXab_IfName} || true && \\
 echo -e \\\"{configurationS1U}\\\" | sudo tee /etc/network/interfaces.d/62-{spgwuS1U_IfName} && sudo ifup {spgwuS1U_IfName} || true && \\
 echo -e \\\"{configurationSGi}\\\" | sudo tee /etc/network/interfaces.d/63-{spgwuSGi_IfName} && sudo ifup {spgwuSGi_IfName} || true && \\
+sudo apt update && \
+DEBIAN_FRONTEND=noninteractive sudo apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends libfmt-dev && \\
 echo \\\"###### Preparing sources ##############################################\\\" && \\
 cd /home/nornetpp/src && \\
 if [ ! -d \\\"{gitDirectory}\\\" ] ; then git clone --quiet {gitRepository} {gitDirectory} && cd {gitDirectory} ; else cd {gitDirectory} && git pull ; fi && \\
 git checkout {gitCommit} && \\
+git cherry-pick edc530acafc8084e518eef829a2344e08928409d || true && \\
 cd build/scripts && \\
 echo \\\"###### Done! ##########################################################\\\"""".format(
       gitRepository     = gitRepository,
@@ -642,24 +725,8 @@ echo \\\"###### Done! ##########################################################
       configurationSGi  = configurationSGi
    )
 
-   try:
-       stdout, stderr = execute(commands)
-   except subprocess.CalledProcessError as e:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       function_fail(message.encode('utf-8'))
-       status_set('active', 'prepare-spgwu-build: preparing SPGW-U build FAILED!')
-   except:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       function_fail('Command execution failed: ' + str(err))
-       status_set('active', 'prepare-spgwu-build: preparing SPGW-U build FAILED!')
-   else:
-      set_flag('spgwucharm.prepared-spgwu-build')
-      clear_flag('actions.prepare-spgwu-build')
-      function_set( { 'output': stdout.encode('utf-8') } )
-      status_set('active', 'prepare-spgwu-build: preparing SPGW-U build COMPLETED')
+   runShellCommands(commands, 'prepare_spgwu_build: preparing SPGW-U build',
+                    'actions.prepare-spgwu-build', 'spgwucharm.prepared-spgwu-build')
 
 
 # ###### configure-spgwu function ###########################################
@@ -679,6 +746,14 @@ def configure_spgwu():
    spgwuSXab_IfName = 'ens4'
    spgwuS1U_IfName  = 'ens5'
    spgwuSGi_IfName  = 'ens6'
+
+   spgwcListString  = action_get('spgwu-spgwc-list').split(',')
+   spgwcList        = ''
+   for spgwc in spgwcListString:
+      spgwcAddress = IPv4Address(spgwc)
+      if len(spgwcList) > 0:
+         spgwcList = spgwcList + ', '
+      spgwcList = spgwcList + '{{ IPV4_ADDRESS=\\\\\\"{spgwcAddress}\\\\\\"; }}'.format(spgwcAddress = str(spgwcAddress))
 
    # NOTE:
    # Double escaping is required for \ and " in "command" string!
@@ -709,6 +784,22 @@ SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_S1U_S12_S4_UP@]='{spgwuS1U_IfName}' && \\
 SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_SX@]='{spgwuSXab_IfName}' && \\
 SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_SGI@]='{spgwuSGi_IfName}' && \\
 for K in \\\"\${{!SPGWU_CONF[@]}}\\\"; do sudo egrep -lRZ \\\"\$K\\\" \$PREFIX | xargs -0 -l sudo sed -i -e \\\"s|\$K|\${{SPGWU_CONF[\$K]}}|g\\\" ; ret=\$?;[[ ret -ne 0 ]] && echo \\\"Tried to replace \$K with \${{SPGWU_CONF[\$K]}}\\\" || true ; done && \\
+sudo sed -e \\\"s/{{.*IPV4_ADDRESS=\\\\\\"192.168.160.100\\\\\\".*;.*}}/{spgwcList}/g\\\" -i /usr/local/etc/oai/spgw_u.conf && \\
+echo \\\"====== Preparing SystemD Unit ... ======\\\" && \\
+( echo \\\"[Unit]\\\" && \\
+echo \\\"Description=Serving and Packet Data Network Gateway -- User Plane (SPGW-U)\\\" && \\
+echo \\\"After=ssh.target\\\" && \\
+echo \\\"\\\" && \\
+echo \\\"[Service]\\\" && \\
+echo \\\"ExecStart=/bin/sh -c \\\'exec /usr/local/bin/spgwu -c /usr/local/etc/oai/spgw_u.conf -o >>/var/log/spgwu.log 2>&1\\\'\\\" && \\
+echo \\\"KillMode=process\\\" && \\
+echo \\\"Restart=on-failure\\\" && \\
+echo \\\"RestartPreventExitStatus=255\\\" && \\
+echo \\\"WorkingDirectory=/home/nornetpp/src/openair-cn-cups/build/scripts\\\" && \\
+echo \\\"\\\" && \\
+echo \\\"[Install]\\\" && \\
+echo \\\"WantedBy=multi-user.target\\\" ) | sudo tee /lib/systemd/system/spgwu.service && \\
+sudo systemctl daemon-reload && \\
 echo \\\"###### Done! ##########################################################\\\"""".format(
       gitRepository     = gitRepository,
       gitDirectory      = gitDirectory,
@@ -716,6 +807,7 @@ echo \\\"###### Done! ##########################################################
       spgwuSXab_IfName  = spgwuSXab_IfName,
       spgwuS1U_IfName   = spgwuS1U_IfName,
       spgwuSGi_IfName   = spgwuSGi_IfName,
+      spgwcList         = spgwcList
    )
 
    try:
@@ -724,16 +816,16 @@ echo \\\"###### Done! ##########################################################
        exc_type, exc_value, exc_traceback = sys.exc_info()
        err = traceback.format_exception(exc_type, exc_value, exc_traceback)
        message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       function_fail(message.encode('utf-8'))
+       action_fail(message.encode('utf-8'))
        status_set('active', 'confiigure-spgwu: configuring SPGW-U FAILED!')
    except:
        exc_type, exc_value, exc_traceback = sys.exc_info()
        err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       function_fail('Command execution failed: ' + str(err))
+       action_fail('Command execution failed: ' + str(err))
        status_set('active', 'confiigure-spgwu: configuring SPGW-U FAILED!')
    else:
       clear_flag('actions.configure-spgwu')
-      function_set( { 'output': stdout.encode('utf-8') } )
+      action_set( { 'output': stdout.encode('utf-8') } )
       status_set('active', 'confiigure-spgwu: configuring SPGW-U COMPLETED')
 
 
@@ -744,21 +836,20 @@ echo \\\"###### Done! ##########################################################
 @when('spgwccharm.installed')
 @when_not('spgwccharm.prepared-spgwc-build')
 def prepare_spgwc_build():
-   status_set('active', 'prepare-spgwc-build: preparing SPGW-C build ...')
 
    # ====== Install SPGW-C ==================================================
    # For a documentation of the installation procedure, see:
    # https://github.com/OPENAIRINTERFACE/openair-cn-cups/wiki/OpenAirSoftwareSupport#install-spgw-c
 
-   gitRepository         = 'https://github.com/OPENAIRINTERFACE/openair-cn-cups.git'
-   gitDirectory          = 'openair-cn-cups'
-   gitCommit             = 'develop'
+   gitRepository     = action_get('spgwc-git-repository')
+   gitCommit         = action_get('spgwc-git-commit')
+   gitDirectory      = 'openair-cn-cups'
 
    # Prepare network configurations:
-   spgwcS11_IfName       = 'ens5'
-   spgwcSXab_IfName      = 'ens4'
-   configurationS11      = configureInterface(spgwcS11_IfName,  IPv4Interface('0.0.0.0/0'))
-   configurationSXab     = configureInterface(spgwcSXab_IfName, IPv4Interface('0.0.0.0/0'))
+   spgwcS11_IfName   = 'ens5'
+   spgwcSXab_IfName  = 'ens4'
+   configurationS11  = configureInterface(spgwcS11_IfName,  IPv4Interface('0.0.0.0/0'))
+   configurationSXab = configureInterface(spgwcSXab_IfName, IPv4Interface('0.0.0.0/0'))
 
    # S5S8 dummy interfaces:
    spgwcS5S8_SGW_IfName  = 'dummy0:s5c'
@@ -779,10 +870,13 @@ echo -e \\\"{configurationSXab}\\\" | sudo tee /etc/network/interfaces.d/62-{spg
 sudo ip link add dummy0 type dummy || true && \\
 echo -e \\\"{configurationS5S8_SGW}\\\" | sudo tee /etc/network/interfaces.d/63-{spgwcS5S8_SGW_IfName} && sudo ifup {spgwcS5S8_SGW_IfName} || true && \\
 echo -e \\\"{configurationS5S8_PGW}\\\" | sudo tee /etc/network/interfaces.d/64-{spgwcS5S8_PGW_IfName} && sudo ifup {spgwcS5S8_PGW_IfName} || true && \\
+sudo apt update && \
+DEBIAN_FRONTEND=noninteractive sudo apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends libfmt-dev && \\
 echo \\\"###### Preparing sources ##############################################\\\" && \\
 cd /home/nornetpp/src && \\
 if [ ! -d \\\"{gitDirectory}\\\" ] ; then git clone --quiet {gitRepository} {gitDirectory} && cd {gitDirectory} ; else cd {gitDirectory} && git pull ; fi && \\
 git checkout {gitCommit} && \\
+git cherry-pick edc530acafc8084e518eef829a2344e08928409d || true && \\
 cd build/scripts && \\
 echo \\\"###### Done! ##########################################################\\\"""".format(
       gitRepository          = gitRepository,
@@ -798,41 +892,26 @@ echo \\\"###### Done! ##########################################################
       configurationS5S8_PGW  = configurationS5S8_PGW
    )
 
-   try:
-       stdout, stderr = execute(commands)
-   except subprocess.CalledProcessError as e:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       function_fail(message.encode('utf-8'))
-       status_set('active', 'prepare-spgwc-build: preparing SPGW-C build FAILED!')
-   except:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       function_fail('Command execution failed: ' + str(err))
-       status_set('active', 'prepare-spgwc-build: preparing SPGW-C build FAILED!')
-   else:
-      set_flag('spgwccharm.prepared-spgwc-build')
-      clear_flag('actions.prepare-spgwc-build')
-      function_set( { 'output': stdout.encode('utf-8') } )
-      status_set('active', 'prepare-spgwc-build: preparing SPGW-C build COMPLETED')
+   runShellCommands(commands, 'prepare_spgwc_build: preparing SPGW-C build',
+                    'actions.prepare-spgwc-build', 'spgwccharm.prepared-spgwc-build')
 
 
 # ###### configure-spgwc function ###########################################
 @when('actions.configure-spgwc')
 @when('spgwccharm.prepared-spgwc-build')
 def configure_spgwc():
-   status_set('active', 'configure-spgwc: configuring SPGW-C ...')
 
    # ====== Install SPGW-C ==================================================
    # For a documentation of the installation procedure, see:
    # https://github.com/OPENAIRINTERFACE/openair-cn-cups/wiki/OpenAirSoftwareSupport#install-spgw-c
 
    gitDirectory         = 'openair-cn-cups'
-   networkRealm         = 'simula.nornet'
-   networkDNS1_IPv4     = IPv4Address('10.1.1.1')
-   networkDNS2_IPv4     = IPv4Address('10.1.2.1')
 
+   networkRealm         = action_get('network-realm')
+   networkDNS1_IPv4     = IPv4Address(action_get('network-ipv4-dns1'))
+   networkDNS2_IPv4     = IPv4Address(action_get('network-ipv4-dns2'))
+
+   # Prepare network configurations:
    spgwcSXab_IfName     = 'ens4'
    spgwcS11_IfName      = 'ens5'
    spgwcS5S8_SGW_IfName = 'dummy0:s5c'
@@ -871,6 +950,23 @@ SPGWC_CONF[@PGW_INTERFACE_NAME_FOR_SX@]='{spgwcSXab_IfName}' && \\
 SPGWC_CONF[@DEFAULT_DNS_IPV4_ADDRESS@]='{networkDNS1_IPv4}' && \\
 SPGWC_CONF[@DEFAULT_DNS_SEC_IPV4_ADDRESS@]='{networkDNS2_IPv4}' && \\
 for K in \\\"\${{!SPGWC_CONF[@]}}\\\"; do sudo egrep -lRZ \\\"\$K\\\" \$PREFIX | xargs -0 -l sudo sed -i -e \\\"s|\$K|\${{SPGWC_CONF[\$K]}}|g\\\" ; ret=\$?;[[ ret -ne 0 ]] && echo \\\"Tried to replace \$K with \${{SPGWC_CONF[\$K]}}\\\" || true ; done && \\
+sudo sed -e \\\"s/APN_NI = \\\\\\"default\\\\\\"/APN_NI = \\\\\\"default.{networkRealm}\\\\\\"/g\\\" -i /usr/local/etc/oai/spgw_c.conf && \\
+sudo sed -e \\\"s/APN_NI = \\\\\\"apn1\\\\\\"/APN_NI = \\\\\\"internet.{networkRealm}\\\\\\"/g\\\" -i /usr/local/etc/oai/spgw_c.conf && \\
+echo \\\"====== Preparing SystemD Unit ... ======\\\" && \\
+( echo \\\"[Unit]\\\" && \\
+echo \\\"Description=Serving and Packet Data Network Gateway -- Control Plane (SPGW-C)\\\" && \\
+echo \\\"After=ssh.target\\\" && \\
+echo \\\"\\\" && \\
+echo \\\"[Service]\\\" && \\
+echo \\\"ExecStart=/bin/sh -c \\\'exec /usr/local/bin/spgwc -c /usr/local/etc/oai/spgw_c.conf -o >>/var/log/spgwc.log 2>&1\\\'\\\" && \\
+echo \\\"KillMode=process\\\" && \\
+echo \\\"Restart=on-failure\\\" && \\
+echo \\\"RestartPreventExitStatus=255\\\" && \\
+echo \\\"WorkingDirectory=/home/nornetpp/src/openair-cn-cups/build/scripts\\\" && \\
+echo \\\"\\\" && \\
+echo \\\"[Install]\\\" && \\
+echo \\\"WantedBy=multi-user.target\\\" ) | sudo tee /lib/systemd/system/spgwc.service && \\
+sudo systemctl daemon-reload && \\
 echo \\\"###### Done! ##########################################################\\\"""".format(
       gitDirectory         = gitDirectory,
       networkRealm         = networkRealm,
@@ -882,23 +978,8 @@ echo \\\"###### Done! ##########################################################
       spgwcS5S8_PGW_IfName = spgwcS5S8_PGW_IfName
    )
 
-   try:
-       stdout, stderr = execute(commands)
-   except subprocess.CalledProcessError as e:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       function_fail(message.encode('utf-8'))
-       status_set('active', 'confiigure-spgwc: configuring SPGW-C FAILED!')
-   except:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       function_fail('Command execution failed: ' + str(err))
-       status_set('active', 'confiigure-spgwc: configuring SPGW-C FAILED!')
-   else:
-      clear_flag('actions.configure-spgwc')
-      function_set( { 'output': stdout.encode('utf-8') } )
-      status_set('active', 'confiigure-spgwc: configuring SPGW-C COMPLETED')
+   runShellCommands(commands, 'configure_spgwc: configuring SPGW-C',
+                    'actions.configure-spgwc', 'spgwccharm.configured-spgwc')
 
 
 
@@ -906,10 +987,10 @@ echo \\\"###### Done! ##########################################################
 # ###########################################################################
 #prepare_cassandra_hss_build()
 #configure_cassandra()
-#configure_hss()
+configure_hss()
 
-prepare_mme_build()
-configure_mme()
+#prepare_mme_build()
+#configure_mme()
 
 #prepare_spgwu_build()
 #configure_spgwu()

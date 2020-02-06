@@ -29,9 +29,9 @@
 # Contact: dreibh@simula.no
 
 from charmhelpers.core.hookenv import (
-    function_get,
-    function_fail,
-    function_set,
+    action_get,
+    action_fail,
+    action_set,
     status_set
 )
 from charms.reactive import (
@@ -65,17 +65,17 @@ def runShellCommands(commands, comment, actionFlagToClear, successFlagToSet = No
        exc_type, exc_value, exc_traceback = sys.exc_info()
        err = traceback.format_exception(exc_type, exc_value, exc_traceback)
        message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       function_fail(message.encode('utf-8'))
+       action_fail(message.encode('utf-8'))
        status_set('active', comment + ' COMMANDS FAILED!')
    except:
        exc_type, exc_value, exc_traceback = sys.exc_info()
        err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       function_fail('Command execution failed: ' + str(err))
+       action_fail('Command execution failed: ' + str(err))
        status_set('active', comment + ' FAILED!')
    else:
       if successFlagToSet != None:
          set_flag(successFlagToSet)
-      # function_set( { 'output': stdout.encode('utf-8') } )
+      # action_set( { 'output': stdout.encode('utf-8') } )
       status_set('active', comment + ' COMPLETED')
    finally:
       clear_flag(actionFlagToClear)
@@ -154,18 +154,18 @@ def prepare_mme_build():
    # For a documentation of the installation procedure, see:
    # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-mme
 
-   gitRepository        = function_get('mme-git-repository')
-   gitCommit            = function_get('mme-git-commit')
+   gitRepository        = action_get('mme-git-repository')
+   gitCommit            = action_get('mme-git-commit')
    gitDirectory         = 'openair-cn'
 
-   mmeS1C_IPv4Interface = IPv4Interface(function_get('mme-S1C-ipv4-interface'))
-   mmeS1C_IPv4Gateway   = IPv4Address(function_get('mme-S1C-ipv4-gateway'))
-   if function_get('mme-S1C-ipv6-interface') != '':
-      mmeS1C_IPv6Interface = IPv6Interface(function_get('mme-S1C-ipv6-interface'))
+   mmeS1C_IPv4Interface = IPv4Interface(action_get('mme-S1C-ipv4-interface'))
+   mmeS1C_IPv4Gateway   = IPv4Address(action_get('mme-S1C-ipv4-gateway'))
+   if action_get('mme-S1C-ipv6-interface') != '':
+      mmeS1C_IPv6Interface = IPv6Interface(action_get('mme-S1C-ipv6-interface'))
    else:
       mmeS1C_IPv6Interface = None
-   if function_get('mme-S1C-ipv6-gateway') != '':
-      mmeS1C_IPv6Gateway   = IPv6Address(function_get('mme-S1C-ipv6-gateway'))
+   if action_get('mme-S1C-ipv6-gateway') != '':
+      mmeS1C_IPv6Gateway   = IPv6Address(action_get('mme-S1C-ipv6-gateway'))
    else:
       mmeS1C_IPv6Gateway = None
 
@@ -179,6 +179,10 @@ def prepare_mme_build():
    configurationS1C = configureInterface(mmeS1C_IfName, mmeS1C_IPv4Interface, mmeS1C_IPv4Gateway,
                                                         mmeS1C_IPv6Interface, mmeS1C_IPv6Gateway)
 
+   # S10 dummy interface:
+   mmeS10_IfName    = 'dummy0:m10'
+   configurationS10 = configureInterface(mmeS10_IfName, IPv4Interface('192.168.10.110/24'))
+
    # NOTE:
    # Double escaping is required for \ and " in "command" string!
    # 1. Python
@@ -190,6 +194,8 @@ echo \\\"###### Preparing system ###############################################
 echo -e \\\"{configurationS6a}\\\" | sudo tee /etc/network/interfaces.d/61-{mmeS6a_IfName} && sudo ifup {mmeS6a_IfName} || true && \\
 echo -e \\\"{configurationS11}\\\" | sudo tee /etc/network/interfaces.d/62-{mmeS11_IfName} && sudo ifup {mmeS11_IfName} || true && \\
 echo -e \\\"{configurationS1C}\\\" | sudo tee /etc/network/interfaces.d/63-{mmeS1C_IfName} && sudo ifup {mmeS1C_IfName} || true && \\
+sudo ip link add dummy0 type dummy || true && \\
+echo -e \\\"{configurationS10}\\\" | sudo tee /etc/network/interfaces.d/64-{mmeS10_IfName} && sudo ifup {mmeS10_IfName} || true && \\
 echo \\\"###### Preparing sources ##############################################\\\" && \\
 cd /home/nornetpp/src && \\
 if [ ! -d \\\"{gitDirectory}\\\" ] ; then git clone --quiet {gitRepository} {gitDirectory} && cd {gitDirectory} ; else cd {gitDirectory} && git pull ; fi && \\
@@ -202,9 +208,11 @@ echo \\\"###### Done! ##########################################################
       mmeS6a_IfName    = mmeS6a_IfName,
       mmeS11_IfName    = mmeS11_IfName,
       mmeS1C_IfName    = mmeS1C_IfName,
+      mmeS10_IfName    = mmeS10_IfName,
       configurationS6a = configurationS6a,
       configurationS11 = configurationS11,
-      configurationS1C = configurationS1C
+      configurationS1C = configurationS1C,
+      configurationS10 = configurationS10
    )
 
    runShellCommands(commands, 'prepare_mme_build: preparing MME build',
@@ -222,18 +230,19 @@ def configure_mme():
 
    gitDirectory           = 'openair-cn'
 
-   hssS6a_IPv4Address     = IPv4Address(function_get('hss-s6a-address'))
-   mmeS1C_IPv4Interface   = IPv4Interface(function_get('mme-S1C-ipv4-interface'))
-   mmeS11_IPv4Interface   = IPv4Interface(function_get('mme-S11-ipv4-interface'))
-   spwgcS11_IPv4Interface = IPv4Interface(function_get('spgwc-S11-ipv4-interface'))
-   networkRealm           = function_get('network-realm')
-   networkMCC             = int(function_get('network-mcc'))
-   networkMNC             = int(function_get('network-mnc'))
-   networkLTE_K           = function_get('network-lte-k')
-   networkOP_K            = function_get('network-op-k')
-   networkIMSIFirst       = function_get('network-imsi-first')
-   networkMSISDNFirst     = function_get('network-msisdn-first')
-   networkUsers           = int(function_get('network-users'))
+   hssS6a_IPv4Address     = IPv4Address(action_get('hss-S6a-address'))
+   mmeS1C_IPv4Interface   = IPv4Interface(action_get('mme-S1C-ipv4-interface'))
+   mmeS11_IPv4Interface   = IPv4Interface(action_get('mme-S11-ipv4-interface'))
+   mmeS10_IPv4Interface   = IPv4Interface('192.168.10.110/24')
+   spwgcS11_IPv4Interface = IPv4Interface(action_get('spgwc-S11-ipv4-interface'))
+   networkRealm           = action_get('network-realm')
+   networkMCC             = int(action_get('network-mcc'))
+   networkMNC             = int(action_get('network-mnc'))
+   networkOP              = action_get('network-op')
+   networkK               = action_get('network-k')
+   networkIMSIFirst       = action_get('network-imsi-first')
+   networkMSISDNFirst     = action_get('network-msisdn-first')
+   networkUsers           = int(action_get('network-users'))
 
    TAC_SGW_TEST = 7
    TAC_SGW_0    = 600
@@ -249,6 +258,7 @@ def configure_mme():
    mmeS6a_IfName = 'ens4'
    mmeS11_IfName = 'ens5'
    mmeS1C_IfName = 'ens6'
+   mmeS10_IfName = 'dummy0:m10'
 
    # NOTE:
    # Double escaping is required for \ and " in "command" string!
@@ -268,6 +278,8 @@ echo \\\"====== Building dependencies ... ======\\\" && \\
 echo \\\"====== Building service ... ======\\\" && \\
 ./build_mme --clean >logs/build_mme-2.log 2>&1 && \\
 echo \\\"###### Creating MME configuration files ###############################\\\" && \\
+echo \\\"127.0.1.1        mme.{networkRealm} mme\\\" | sudo tee -a /etc/hosts && \\
+echo \\\"{hssS6a_IPv4Address}     hss.{networkRealm} hss\\\" | sudo tee -a /etc/hosts && \\
 openssl rand -out \$HOME/.rnd 128 && \\
 INSTANCE=1 && \\
 PREFIX='/usr/local/etc/oai' && \\
@@ -296,29 +308,44 @@ MME_CONF[@MME_INTERFACE_NAME_FOR_S1_MME@]='{mmeS1C_IfName}' && \\
 MME_CONF[@MME_IPV4_ADDRESS_FOR_S1_MME@]='{mmeS1C_IPv4Interface}' && \\
 MME_CONF[@MME_INTERFACE_NAME_FOR_S11@]='{mmeS11_IfName}' && \\
 MME_CONF[@MME_IPV4_ADDRESS_FOR_S11@]='{mmeS11_IPv4Interface}' && \\
-MME_CONF[@MME_INTERFACE_NAME_FOR_S10@]='eth0:m10' && \\
-MME_CONF[@MME_IPV4_ADDRESS_FOR_S10@]='192.168.10.110/24' && \\
+MME_CONF[@MME_INTERFACE_NAME_FOR_S10@]='{mmeS10_IfName}' && \\
+MME_CONF[@MME_IPV4_ADDRESS_FOR_S10@]='{mmeS10_IPv4Interface}' && \\
 MME_CONF[@OUTPUT@]='CONSOLE' && \\
 MME_CONF[@SGW_IPV4_ADDRESS_FOR_S11_TEST_0@]='{spwgcS11_IPv4Interface}' && \\
 MME_CONF[@SGW_IPV4_ADDRESS_FOR_S11_0@]='{spwgcS11_IPv4Interface}' && \\
 MME_CONF[@PEER_MME_IPV4_ADDRESS_FOR_S10_0@]='0.0.0.0/24' && \\
 MME_CONF[@PEER_MME_IPV4_ADDRESS_FOR_S10_1@]='0.0.0.0/24' && \\
-MME_CONF[@TAC-LB_SGW_TEST_0@]={tac_sgw_test_hi} && \\
-MME_CONF[@TAC-HB_SGW_TEST_0@]={tac_sgw_test_lo} && \\
+MME_CONF[@TAC-LB_SGW_TEST_0@]={tac_sgw_test_lo} && \\
+MME_CONF[@TAC-HB_SGW_TEST_0@]={tac_sgw_test_hi} && \\
 MME_CONF[@MCC_SGW_0@]={networkMCC} && \\
 MME_CONF[@MNC3_SGW_0@]={networkMNC:03d} && \\
-MME_CONF[@TAC-LB_SGW_0@]={tac_sgw_0_hi} && \\
-MME_CONF[@TAC-HB_SGW_0@]={tac_sgw_0_lo} && \\
+MME_CONF[@TAC-LB_SGW_0@]={tac_sgw_0_lo} && \\
+MME_CONF[@TAC-HB_SGW_0@]={tac_sgw_0_hi} && \\
 MME_CONF[@MCC_MME_0@]={networkMCC} && \\
 MME_CONF[@MNC3_MME_0@]={networkMNC:03d} && \\
-MME_CONF[@TAC-LB_MME_0@]={tac_mme_0_hi} && \\
-MME_CONF[@TAC-HB_MME_0@]={tac_mme_0_lo} && \\
+MME_CONF[@TAC-LB_MME_0@]={tac_mme_0_lo} && \\
+MME_CONF[@TAC-HB_MME_0@]={tac_mme_0_hi} && \\
 MME_CONF[@MCC_MME_1@]={networkMCC} && \\
 MME_CONF[@MNC3_MME_1@]={networkMNC:03d} && \\
-MME_CONF[@TAC-LB_MME_1@]={tac_mme_1_hi} && \\
-MME_CONF[@TAC-HB_MME_1@]={tac_mme_1_lo} && \\
+MME_CONF[@TAC-LB_MME_1@]={tac_mme_1_lo} && \\
+MME_CONF[@TAC-HB_MME_1@]={tac_mme_1_hi} && \\
 for K in \\\"\${{!MME_CONF[@]}}\\\"; do sudo egrep -lRZ \\\"\$K\\\" \$PREFIX | xargs -0 -l sudo sed -i -e \\\"s|\$K|\${{MME_CONF[\$K]}}|g\\\" ; ret=\$?;[[ ret -ne 0 ]] && echo \\\"Tried to replace \$K with \${{MME_CONF[\$K]}}\\\" || true ; done && \\
 sudo ./check_mme_s6a_certificate \$PREFIX/freeDiameter mme.{networkRealm} >logs/check_mme_s6a_certificate.log 2>&1 && \\
+echo \\\"====== Preparing SystemD Unit ... ======\\\" && \\
+( echo \\\"[Unit]\\\" && \\
+echo \\\"Description=Mobility Management Entity (MME)\\\" && \\
+echo \\\"After=ssh.target\\\" && \\
+echo \\\"\\\" && \\
+echo \\\"[Service]\\\" && \\
+echo \\\"ExecStart=/bin/sh -c \\\'exec /usr/local/bin/mme -c /usr/local/etc/oai/mme.conf >>/var/log/mme.log 2>&1\\\'\\\" && \\
+echo \\\"KillMode=process\\\" && \\
+echo \\\"Restart=on-failure\\\" && \\
+echo \\\"RestartPreventExitStatus=255\\\" && \\
+echo \\\"WorkingDirectory=/home/nornetpp/src/openair-cn/scripts\\\" && \\
+echo \\\"\\\" && \\
+echo \\\"[Install]\\\" && \\
+echo \\\"WantedBy=multi-user.target\\\" ) | sudo tee /lib/systemd/system/mme.service && \\
+sudo systemctl daemon-reload && \\
 echo \\\"###### Done! ##########################################################\\\"""".format(
       gitDirectory           = gitDirectory,
       hssS6a_IPv4Address     = hssS6a_IPv4Address,
@@ -326,12 +353,15 @@ echo \\\"###### Done! ##########################################################
       mmeS1C_IPv4Interface   = mmeS1C_IPv4Interface,
       mmeS11_IfName          = mmeS11_IfName,
       mmeS11_IPv4Interface   = mmeS11_IPv4Interface,
+      mmeS10_IfName          = mmeS10_IfName,
+      mmeS10_IPv4Interface   = mmeS10_IPv4Interface,
+
       spwgcS11_IPv4Interface = spwgcS11_IPv4Interface,
       networkRealm           = networkRealm,
       networkMCC             = networkMCC,
       networkMNC             = networkMNC,
-      networkLTE_K           = networkLTE_K,
-      networkOP_K            = networkOP_K,
+      networkOP              = networkOP,
+      networkK               = networkK,
       networkIMSIFirst       = networkIMSIFirst,
       networkMSISDNFirst     = networkMSISDNFirst,
       networkUsers           = networkUsers,
@@ -352,16 +382,7 @@ echo \\\"###### Done! ##########################################################
 
 # ###### restart-mme function ###############################################
 @when('actions.restart-mme')
-@when('mmecharm.installed')
+@when('mmecharm.configured-mme')
 def restart_mme():
-   err = ''
-   try:
-      # filename = function_get('filename')
-      cmd = [ 'touch /tmp/restart-mme' ]
-      result, err = charms.sshproxy._run(cmd)
-   except:
-      function_fail('command failed:' + err)
-   else:
-      function_set({'outout': result})
-
-   clear_flag('actions.restart-mme')
+   commands = 'sudo service mme restart'
+   runShellCommands(commands, 'restart_mme: restarting MME', 'actions.restart-mme')

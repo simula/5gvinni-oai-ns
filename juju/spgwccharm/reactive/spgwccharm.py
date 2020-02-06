@@ -29,9 +29,9 @@
 # Contact: dreibh@simula.no
 
 from charmhelpers.core.hookenv import (
-    function_get,
-    function_fail,
-    function_set,
+    action_get,
+    action_fail,
+    action_set,
     status_set
 )
 from charms.reactive import (
@@ -65,17 +65,17 @@ def runShellCommands(commands, comment, actionFlagToClear, successFlagToSet = No
        exc_type, exc_value, exc_traceback = sys.exc_info()
        err = traceback.format_exception(exc_type, exc_value, exc_traceback)
        message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       function_fail(message.encode('utf-8'))
+       action_fail(message.encode('utf-8'))
        status_set('active', comment + ' COMMANDS FAILED!')
    except:
        exc_type, exc_value, exc_traceback = sys.exc_info()
        err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       function_fail('Command execution failed: ' + str(err))
+       action_fail('Command execution failed: ' + str(err))
        status_set('active', comment + ' FAILED!')
    else:
       if successFlagToSet != None:
          set_flag(successFlagToSet)
-      # function_set( { 'output': stdout.encode('utf-8') } )
+      # action_set( { 'output': stdout.encode('utf-8') } )
       status_set('active', comment + ' COMPLETED')
    finally:
       clear_flag(actionFlagToClear)
@@ -154,8 +154,8 @@ def prepare_spgwc_build():
    # For a documentation of the installation procedure, see:
    # https://github.com/OPENAIRINTERFACE/openair-cn-cups/wiki/OpenAirSoftwareSupport#install-spgw-c
 
-   gitRepository     = function_get('spgwc-git-repository')
-   gitCommit         = function_get('spgwc-git-commit')
+   gitRepository     = action_get('spgwc-git-repository')
+   gitCommit         = action_get('spgwc-git-commit')
    gitDirectory      = 'openair-cn-cups'
 
    # Prepare network configurations:
@@ -183,10 +183,13 @@ echo -e \\\"{configurationSXab}\\\" | sudo tee /etc/network/interfaces.d/62-{spg
 sudo ip link add dummy0 type dummy || true && \\
 echo -e \\\"{configurationS5S8_SGW}\\\" | sudo tee /etc/network/interfaces.d/63-{spgwcS5S8_SGW_IfName} && sudo ifup {spgwcS5S8_SGW_IfName} || true && \\
 echo -e \\\"{configurationS5S8_PGW}\\\" | sudo tee /etc/network/interfaces.d/64-{spgwcS5S8_PGW_IfName} && sudo ifup {spgwcS5S8_PGW_IfName} || true && \\
+sudo apt update && \
+DEBIAN_FRONTEND=noninteractive sudo apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends libfmt-dev && \\
 echo \\\"###### Preparing sources ##############################################\\\" && \\
 cd /home/nornetpp/src && \\
 if [ ! -d \\\"{gitDirectory}\\\" ] ; then git clone --quiet {gitRepository} {gitDirectory} && cd {gitDirectory} ; else cd {gitDirectory} && git pull ; fi && \\
 git checkout {gitCommit} && \\
+git cherry-pick edc530acafc8084e518eef829a2344e08928409d || true && \\
 cd build/scripts && \\
 echo \\\"###### Done! ##########################################################\\\"""".format(
       gitRepository          = gitRepository,
@@ -217,9 +220,9 @@ def configure_spgwc():
 
    gitDirectory         = 'openair-cn-cups'
 
-   networkRealm         = function_get('network-realm')
-   networkDNS1_IPv4     = IPv4Address(function_get('network-ipv4-dns1'))
-   networkDNS2_IPv4     = IPv4Address(function_get('network-ipv4-dns2'))
+   networkRealm         = action_get('network-realm')
+   networkDNS1_IPv4     = IPv4Address(action_get('network-ipv4-dns1'))
+   networkDNS2_IPv4     = IPv4Address(action_get('network-ipv4-dns2'))
 
    # Prepare network configurations:
    spgwcSXab_IfName     = 'ens4'
@@ -260,6 +263,23 @@ SPGWC_CONF[@PGW_INTERFACE_NAME_FOR_SX@]='{spgwcSXab_IfName}' && \\
 SPGWC_CONF[@DEFAULT_DNS_IPV4_ADDRESS@]='{networkDNS1_IPv4}' && \\
 SPGWC_CONF[@DEFAULT_DNS_SEC_IPV4_ADDRESS@]='{networkDNS2_IPv4}' && \\
 for K in \\\"\${{!SPGWC_CONF[@]}}\\\"; do sudo egrep -lRZ \\\"\$K\\\" \$PREFIX | xargs -0 -l sudo sed -i -e \\\"s|\$K|\${{SPGWC_CONF[\$K]}}|g\\\" ; ret=\$?;[[ ret -ne 0 ]] && echo \\\"Tried to replace \$K with \${{SPGWC_CONF[\$K]}}\\\" || true ; done && \\
+sudo sed -e \\\"s/APN_NI = \\\\\\"default\\\\\\"/APN_NI = \\\\\\"default.{networkRealm}\\\\\\"/g\\\" -i /usr/local/etc/oai/spgw_c.conf && \\
+sudo sed -e \\\"s/APN_NI = \\\\\\"apn1\\\\\\"/APN_NI = \\\\\\"internet.{networkRealm}\\\\\\"/g\\\" -i /usr/local/etc/oai/spgw_c.conf && \\
+echo \\\"====== Preparing SystemD Unit ... ======\\\" && \\
+( echo \\\"[Unit]\\\" && \\
+echo \\\"Description=Serving and Packet Data Network Gateway -- Control Plane (SPGW-C)\\\" && \\
+echo \\\"After=ssh.target\\\" && \\
+echo \\\"\\\" && \\
+echo \\\"[Service]\\\" && \\
+echo \\\"ExecStart=/bin/sh -c \\\'exec /usr/local/bin/spgwc -c /usr/local/etc/oai/spgw_c.conf -o >>/var/log/spgwc.log 2>&1\\\'\\\" && \\
+echo \\\"KillMode=process\\\" && \\
+echo \\\"Restart=on-failure\\\" && \\
+echo \\\"RestartPreventExitStatus=255\\\" && \\
+echo \\\"WorkingDirectory=/home/nornetpp/src/openair-cn-cups/build/scripts\\\" && \\
+echo \\\"\\\" && \\
+echo \\\"[Install]\\\" && \\
+echo \\\"WantedBy=multi-user.target\\\" ) | sudo tee /lib/systemd/system/spgwc.service && \\
+sudo systemctl daemon-reload && \\
 echo \\\"###### Done! ##########################################################\\\"""".format(
       gitDirectory         = gitDirectory,
       networkRealm         = networkRealm,
@@ -277,8 +297,7 @@ echo \\\"###### Done! ##########################################################
 
 # ###### restart-spgwc function #############################################
 @when('actions.restart-spgwc')
-@when('spgwccharm.installed')
+@when('spgwccharm.configured-spgwc')
 def restart_spgwc():
-   commands = 'touch /tmp/restart-spgwc'
-   if execute(commands) == True:
-      clear_flag('actions.restart-spgwc')
+   commands = 'sudo service spgwc restart'
+   runShellCommands(commands, 'restart_spgwc: restarting SPGW-C', 'actions.restart-spgwc')

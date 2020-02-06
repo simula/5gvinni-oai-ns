@@ -73,6 +73,13 @@ prepare-spgwu-build:
 
 configure-spgwu:
   description: Configures the SPGW-U
+  params:
+    spgwu-spgwc-list:
+      description: SPGW-U SPGW-C list (comma-separated)
+      type: string
+      default: 172.55.55.101
+  required:
+    - spgwu-spgwc-list
 
 restart-spgwu:
   description: Restarts the SPGW-U

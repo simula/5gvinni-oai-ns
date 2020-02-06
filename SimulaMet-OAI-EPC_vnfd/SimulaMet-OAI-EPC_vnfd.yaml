@@ -107,12 +107,16 @@ vnfd:vnfd-catalog:
                 parameter:
                   - name: cassandra-server-ip
                     value: 172.16.6.129
+                  - name: hss-S6a-address
+                    value: <hss_S6a_address>
+                  - name: mme-S6a-address
+                    value: <mme_S6a_address>
                   - name: network-realm
                     value: <network_realm>
-                  - name: network-lte-k
-                    value: <network_lte_k>
-                  - name: network-op-k
-                    value: <network_op_k>
+                  - name: network-op
+                    value: <network_op>
+                  - name: network-k
+                    value: <network_k>
                   - name: network-imsi-first
                     value: <network_imsi_first>
                   - name: network-msisdn-first
@@ -208,18 +212,18 @@ vnfd:vnfd-catalog:
                     value: <mme_S11_ipv4_interface>
                   - name: spgwc-S11-ipv4-interface
                     value: <spgwc_S11_ipv4_interface>
-                  - name: hss-s6a-address
-                    value: <hss_s6a_address>
+                  - name: hss-S6a-address
+                    value: <hss_S6a_address>
                   - name: network-realm
                     value: <network_realm>
                   - name: network-mcc
                     value: <network_mcc>
                   - name: network-mnc
                     value: <network_mnc>
-                  - name: network-lte-k
-                    value: <network_lte_k>
-                  - name: network-op-k
-                    value: <network_op_k>
+                  - name: network-op
+                    value: <network_op>
+                  - name: network-k
+                    value: <network_k>
                   - name: network-imsi-first
                     value: <network_imsi_first>
                   - name: network-msisdn-first
@@ -390,6 +394,11 @@ vnfd:vnfd-catalog:
                     value: <spgwu_SGi_ipv6_gateway>
               - seq: '3'
                 name: configure-spgwu
+                parameter:
+                  - name: spgwu-spgwc-list
+                    value: <spgwu_spgwc_list>
+              - seq: '4'
+                name: restart-spgwu
 
 
       # ###### Internal VLDs ################################################
