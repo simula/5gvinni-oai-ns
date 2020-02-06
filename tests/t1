@@ -210,14 +210,6 @@ def configureInterface(name,
 
 
 
-# ###### Installation #######################################################
-@when('sshproxy.configured')
-@when_not('hsscharm.installed')
-def install_hsscharm_proxy_charm():
-   set_flag('hsscharm.installed')
-   status_set('active', 'Ready!')
-
-
 # ###### prepare-cassandra-hss-build function ###############################
 @when('actions.prepare-cassandra-hss-build')
 @when('hsscharm.installed')
@@ -328,8 +320,8 @@ def configure_hss():
    gitDirectory       = 'openair-cn'
    cassandraServerIP  = action_get('cassandra-server-ip')
    networkRealm       = action_get('network-realm')
-   networkK           = action_get('network-k')
    networkOP          = action_get('network-op')
+   networkK           = action_get('network-k')
    networkIMSIFirst   = action_get('network-imsi-first')
    networkMSISDNFirst = action_get('network-msisdn-first')
    networkUsers       = int(action_get('network-users'))
@@ -398,14 +390,19 @@ echo \\\"\\\" && \\
 echo \\\"[Install]\\\" && \\
 echo \\\"WantedBy=multi-user.target\\\" ) | sudo tee /lib/systemd/system/hss.service && \\
 sudo systemctl daemon-reload && \\
+echo \\\"###### Installing sysstat #############################################\\\" && \\
+DEBIAN_FRONTEND=noninteractive sudo apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends sysstat && \\
+sudo sed -e \\\"s/^ENABLED=.*$/ENABLED=\\\\\\"true\\\\\\"/g\\\" -i /etc/default/sysstat && \\
+sudo sed -e \\\"s/^SADC_OPTIONS=.*$/SADC_OPTIONS=\\\\\\"-S ALL\\\\\\"/g\\\" -i /etc/sysstat/sysstat && \\
+sudo service sysstat restart && \\
 echo \\\"###### Done! ##########################################################\\\"""".format(
       gitDirectory       = gitDirectory,
       cassandraServerIP  = cassandraServerIP,
       hssS6a_IPv4Address = hssS6a_IPv4Address,
       mmeS6a_IPv4Address = mmeS6a_IPv4Address,
       networkRealm       = networkRealm,
-      networkK           = networkK,
       networkOP          = networkOP,
+      networkK           = networkK,
       networkIMSIFirst   = networkIMSIFirst,
       networkMSISDNFirst = networkMSISDNFirst,
       networkUsers       = networkUsers
@@ -511,8 +508,8 @@ def configure_mme():
    networkRealm           = action_get('network-realm')
    networkMCC             = int(action_get('network-mcc'))
    networkMNC             = int(action_get('network-mnc'))
-   networkK               = action_get('network-k')
    networkOP              = action_get('network-op')
+   networkK               = action_get('network-k')
    networkIMSIFirst       = action_get('network-imsi-first')
    networkMSISDNFirst     = action_get('network-msisdn-first')
    networkUsers           = int(action_get('network-users'))
@@ -619,6 +616,11 @@ echo \\\"\\\" && \\
 echo \\\"[Install]\\\" && \\
 echo \\\"WantedBy=multi-user.target\\\" ) | sudo tee /lib/systemd/system/mme.service && \\
 sudo systemctl daemon-reload && \\
+echo \\\"###### Installing sysstat #############################################\\\" && \\
+DEBIAN_FRONTEND=noninteractive sudo apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends sysstat && \\
+sudo sed -e \\\"s/^ENABLED=.*$/ENABLED=\\\\\\"true\\\\\\"/g\\\" -i /etc/default/sysstat && \\
+sudo sed -e \\\"s/^SADC_OPTIONS=.*$/SADC_OPTIONS=\\\\\\"-S ALL\\\\\\"/g\\\" -i /etc/sysstat/sysstat && \\
+sudo service sysstat restart && \\
 echo \\\"###### Done! ##########################################################\\\"""".format(
       gitDirectory           = gitDirectory,
       hssS6a_IPv4Address     = hssS6a_IPv4Address,
@@ -633,8 +635,8 @@ echo \\\"###### Done! ##########################################################
       networkRealm           = networkRealm,
       networkMCC             = networkMCC,
       networkMNC             = networkMNC,
-      networkK               = networkK,
       networkOP              = networkOP,
+      networkK               = networkK,
       networkIMSIFirst       = networkIMSIFirst,
       networkMSISDNFirst     = networkMSISDNFirst,
       networkUsers           = networkUsers,
@@ -812,23 +814,8 @@ echo \\\"###### Done! ##########################################################
       spgwcList         = spgwcList
    )
 
-   try:
-       stdout, stderr = execute(commands)
-   except subprocess.CalledProcessError as e:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       action_fail(message.encode('utf-8'))
-       status_set('active', 'confiigure-spgwu: configuring SPGW-U FAILED!')
-   except:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       action_fail('Command execution failed: ' + str(err))
-       status_set('active', 'confiigure-spgwu: configuring SPGW-U FAILED!')
-   else:
-      clear_flag('actions.configure-spgwu')
-      action_set( { 'output': stdout.encode('utf-8') } )
-      status_set('active', 'confiigure-spgwu: configuring SPGW-U COMPLETED')
+   runShellCommands(commands, 'configure_spgwu: configuring SPGW-U',
+                    'actions.configure-spgwu', 'spgwucharm.configured-spgwu')
 
 
 
@@ -872,13 +859,10 @@ echo -e \\\"{configurationSXab}\\\" | sudo tee /etc/network/interfaces.d/62-{spg
 sudo ip link add dummy0 type dummy || true && \\
 echo -e \\\"{configurationS5S8_SGW}\\\" | sudo tee /etc/network/interfaces.d/63-{spgwcS5S8_SGW_IfName} && sudo ifup {spgwcS5S8_SGW_IfName} || true && \\
 echo -e \\\"{configurationS5S8_PGW}\\\" | sudo tee /etc/network/interfaces.d/64-{spgwcS5S8_PGW_IfName} && sudo ifup {spgwcS5S8_PGW_IfName} || true && \\
-sudo apt update && \
-DEBIAN_FRONTEND=noninteractive sudo apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends libfmt-dev && \\
 echo \\\"###### Preparing sources ##############################################\\\" && \\
 cd /home/nornetpp/src && \\
 if [ ! -d \\\"{gitDirectory}\\\" ] ; then git clone --quiet {gitRepository} {gitDirectory} && cd {gitDirectory} ; else cd {gitDirectory} && git pull ; fi && \\
 git checkout {gitCommit} && \\
-git cherry-pick edc530acafc8084e518eef829a2344e08928409d || true && \\
 cd build/scripts && \\
 echo \\\"###### Done! ##########################################################\\\"""".format(
       gitRepository          = gitRepository,
@@ -969,6 +953,11 @@ echo \\\"\\\" && \\
 echo \\\"[Install]\\\" && \\
 echo \\\"WantedBy=multi-user.target\\\" ) | sudo tee /lib/systemd/system/spgwc.service && \\
 sudo systemctl daemon-reload && \\
+echo \\\"###### Installing sysstat #############################################\\\" && \\
+DEBIAN_FRONTEND=noninteractive sudo apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends sysstat && \\
+sudo sed -e \\\"s/^ENABLED=.*$/ENABLED=\\\\\\"true\\\\\\"/g\\\" -i /etc/default/sysstat && \\
+sudo sed -e \\\"s/^SADC_OPTIONS=.*$/SADC_OPTIONS=\\\\\\"-S ALL\\\\\\"/g\\\" -i /etc/sysstat/sysstat && \\
+sudo service sysstat restart && \\
 echo \\\"###### Done! ##########################################################\\\"""".format(
       gitDirectory         = gitDirectory,
       networkRealm         = networkRealm,
@@ -987,15 +976,15 @@ echo \\\"###### Done! ##########################################################
 
 
 # ###########################################################################
-#prepare_cassandra_hss_build()
-#configure_cassandra()
-#configure_hss()
+prepare_cassandra_hss_build()
+configure_cassandra()
+configure_hss()
 
-#prepare_mme_build()
-#configure_mme()
+prepare_mme_build()
+configure_mme()
 
 prepare_spgwu_build()
 configure_spgwu()
 
-#prepare_spgwc_build()
-#configure_spgwc()
+prepare_spgwc_build()
+configure_spgwc()
