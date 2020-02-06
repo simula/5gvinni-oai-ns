@@ -183,13 +183,10 @@ echo -e \\\"{configurationSXab}\\\" | sudo tee /etc/network/interfaces.d/62-{spg
 sudo ip link add dummy0 type dummy || true && \\
 echo -e \\\"{configurationS5S8_SGW}\\\" | sudo tee /etc/network/interfaces.d/63-{spgwcS5S8_SGW_IfName} && sudo ifup {spgwcS5S8_SGW_IfName} || true && \\
 echo -e \\\"{configurationS5S8_PGW}\\\" | sudo tee /etc/network/interfaces.d/64-{spgwcS5S8_PGW_IfName} && sudo ifup {spgwcS5S8_PGW_IfName} || true && \\
-sudo apt update && \
-DEBIAN_FRONTEND=noninteractive sudo apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends libfmt-dev && \\
 echo \\\"###### Preparing sources ##############################################\\\" && \\
 cd /home/nornetpp/src && \\
 if [ ! -d \\\"{gitDirectory}\\\" ] ; then git clone --quiet {gitRepository} {gitDirectory} && cd {gitDirectory} ; else cd {gitDirectory} && git pull ; fi && \\
 git checkout {gitCommit} && \\
-git cherry-pick edc530acafc8084e518eef829a2344e08928409d || true && \\
 cd build/scripts && \\
 echo \\\"###### Done! ##########################################################\\\"""".format(
       gitRepository          = gitRepository,
@@ -280,6 +277,11 @@ echo \\\"\\\" && \\
 echo \\\"[Install]\\\" && \\
 echo \\\"WantedBy=multi-user.target\\\" ) | sudo tee /lib/systemd/system/spgwc.service && \\
 sudo systemctl daemon-reload && \\
+echo \\\"###### Installing sysstat #############################################\\\" && \\
+DEBIAN_FRONTEND=noninteractive sudo apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends sysstat && \\
+sudo sed -e \\\"s/^ENABLED=.*$/ENABLED=\\\\\\"true\\\\\\"/g\\\" -i /etc/default/sysstat && \\
+sudo sed -e \\\"s/^SADC_OPTIONS=.*$/SADC_OPTIONS=\\\\\\"-S ALL\\\\\\"/g\\\" -i /etc/sysstat/sysstat && \\
+sudo service sysstat restart && \\
 echo \\\"###### Done! ##########################################################\\\"""".format(
       gitDirectory         = gitDirectory,
       networkRealm         = networkRealm,
