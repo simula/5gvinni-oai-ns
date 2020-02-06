@@ -705,13 +705,10 @@ echo \\\"###### Preparing system ###############################################
 echo -e \\\"{configurationSXab}\\\" | sudo tee /etc/network/interfaces.d/61-{spgwuSXab_IfName} && sudo ifup {spgwuSXab_IfName} || true && \\
 echo -e \\\"{configurationS1U}\\\" | sudo tee /etc/network/interfaces.d/62-{spgwuS1U_IfName} && sudo ifup {spgwuS1U_IfName} || true && \\
 echo -e \\\"{configurationSGi}\\\" | sudo tee /etc/network/interfaces.d/63-{spgwuSGi_IfName} && sudo ifup {spgwuSGi_IfName} || true && \\
-sudo apt update && \
-DEBIAN_FRONTEND=noninteractive sudo apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends libfmt-dev && \\
 echo \\\"###### Preparing sources ##############################################\\\" && \\
 cd /home/nornetpp/src && \\
 if [ ! -d \\\"{gitDirectory}\\\" ] ; then git clone --quiet {gitRepository} {gitDirectory} && cd {gitDirectory} ; else cd {gitDirectory} && git pull ; fi && \\
 git checkout {gitCommit} && \\
-git cherry-pick edc530acafc8084e518eef829a2344e08928409d || true && \\
 cd build/scripts && \\
 echo \\\"###### Done! ##########################################################\\\"""".format(
       gitRepository     = gitRepository,
@@ -800,6 +797,11 @@ echo \\\"\\\" && \\
 echo \\\"[Install]\\\" && \\
 echo \\\"WantedBy=multi-user.target\\\" ) | sudo tee /lib/systemd/system/spgwu.service && \\
 sudo systemctl daemon-reload && \\
+echo \\\"###### Installing sysstat #############################################\\\" && \\
+DEBIAN_FRONTEND=noninteractive sudo apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends sysstat && \\
+sudo sed -e \\\"s/^ENABLED=.*$/ENABLED=\\\\\\"true\\\\\\"/g\\\" -i /etc/default/sysstat && \\
+sudo sed -e \\\"s/^SADC_OPTIONS=.*$/SADC_OPTIONS=\\\\\\"-S ALL\\\\\\"/g\\\" -i /etc/sysstat/sysstat && \\
+sudo service sysstat restart && \\
 echo \\\"###### Done! ##########################################################\\\"""".format(
       gitRepository     = gitRepository,
       gitDirectory      = gitDirectory,
@@ -987,13 +989,13 @@ echo \\\"###### Done! ##########################################################
 # ###########################################################################
 #prepare_cassandra_hss_build()
 #configure_cassandra()
-configure_hss()
+#configure_hss()
 
 #prepare_mme_build()
 #configure_mme()
 
-#prepare_spgwu_build()
-#configure_spgwu()
+prepare_spgwu_build()
+configure_spgwu()
 
 #prepare_spgwc_build()
 #configure_spgwc()

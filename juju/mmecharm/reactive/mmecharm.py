@@ -346,6 +346,11 @@ echo \\\"\\\" && \\
 echo \\\"[Install]\\\" && \\
 echo \\\"WantedBy=multi-user.target\\\" ) | sudo tee /lib/systemd/system/mme.service && \\
 sudo systemctl daemon-reload && \\
+echo \\\"###### Installing sysstat #############################################\\\" && \\
+DEBIAN_FRONTEND=noninteractive sudo apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends sysstat && \\
+sudo sed -e \\\"s/^ENABLED=.*$/ENABLED=\\\\\\"true\\\\\\"/g\\\" -i /etc/default/sysstat && \\
+sudo sed -e \\\"s/^SADC_OPTIONS=.*$/SADC_OPTIONS=\\\\\\"-S ALL\\\\\\"/g\\\" -i /etc/sysstat/sysstat && \\
+sudo service sysstat restart && \\
 echo \\\"###### Done! ##########################################################\\\"""".format(
       gitDirectory           = gitDirectory,
       hssS6a_IPv4Address     = hssS6a_IPv4Address,
