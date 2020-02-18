@@ -54,15 +54,28 @@ SUMMARY_UPDATED="${DIRECTORY}/results.summary.updated"
 ) >${SUMMARY_NEW}
 
 
+# ====== Flow parameters ====================================================
+saturatedFlow="const0:const1400"
+streamingFlow="const60:const20000"   # 9.6 Mbit/s payload
+maxMsgSize=1440                      # Max. 1440 bytes per SCTP message/UDP packet
+tcpdumpSnaplens="64 65536"
+
+
 # ====== Run measurements ===================================================
 for scenario in Upload Download Bidirectional ; do   # Bidirectional
-   for protocol in tcp sctp ; do
+   for protocol in udp sctp ; do
+      flowParameters="INVALID!"
+      if [ "${protocol}" == "udp" ] ; then
+         flowParameters="${streamingFlow}"
+      else
+         flowParameters="${saturatedFlow}"
+      fi
       if [ "${scenario}" == "Bidirectional" ] ; then
-          flowParameters="const0:const1400:const0:const1400:sndbuf=0,rcvbuf=0"
+          flowParameters="${flowParameters}:${flowParameters}:maxmsgsize=${maxMsgSize},sndbuf=0,rcvbuf=0"
        elif [ "${scenario}" == "Upload" ] ; then
-          flowParameters="const0:const1400:const0:const0:sndbuf=0,rcvbuf=0"
+          flowParameters="${flowParameters}:const0:const0:maxmsgsize=${maxMsgSize},sndbuf=0,rcvbuf=0"
        elif [ "${scenario}" == "Download" ] ; then
-          flowParameters="const0:const0:const0:const1400:sndbuf=0,rcvbuf=0"
+          flowParameters="const0:const0:${flowParameters}:maxmsgsize=${maxMsgSize},sndbuf=0,rcvbuf=0"
        else
           echo >&2 "ERROR: Bad scenario ${scenario}!"
           exit 1
@@ -78,7 +91,7 @@ for scenario in Upload Download Bidirectional ; do   # Bidirectional
       scalarFileA="${DIRECTORY}/${id}-active.sca"
       scalarFileP="${DIRECTORY}/${id}-passive.sca"
       vectorFile="${DIRECTORY}/${id}.vec"
-      pcapFile="${DIRECTORY}/${id}.pcap"
+      pcapFilePrefix="${DIRECTORY}/${id}"
 
       (
          echo "--values=${values}"
@@ -89,8 +102,12 @@ for scenario in Upload Download Bidirectional ; do   # Bidirectional
 
 
       echo "Starting tcpdump ..."
-      tcpdump -i ${INTERFACE} -w "${pcapFile}" -s 65536 &
+      for tcpdumpSnaplen in ${tcpdumpSnaplens} ; do
+         tcpdump -i ${INTERFACE} -w "${pcapFilePrefix}-${tcpdumpSnaplen}.pcap" -s ${tcpdumpSnaplen} -n ${protocol} or sctp or icmp or icmp6 &
+      done
+      sleep 3
 
+ 
       echo "Starting NetPerfMeter ..."
       sudo -u#${SUDO_UID} -g#${SUDO_GID} netperfmeter ${DESTINATION} \
          -quiet -runtime=${RUNTIME} \
@@ -98,11 +115,11 @@ for scenario in Upload Download Bidirectional ; do   # Bidirectional
          -${protocol} ${flowParameters}
 
       echo "Stopping tcpdump ..."
-      killall tcpdump
+      killall tcpdump || true
       wait
 
       chown ${SUDO_UID}:${SUDO_GID} ${DIRECTORY}/${id}*
-      xz -T0 "${pcapFile}"
+      find ${DIRECTORY} -name "${id}*.pcap" | xargs -r xz -T0
    done
 done
 
