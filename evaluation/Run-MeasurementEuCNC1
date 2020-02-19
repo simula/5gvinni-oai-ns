@@ -28,7 +28,7 @@
 # Contact: dreibh@simula.no
 
 
-DIRECTORY="Measurement1"
+DIRECTORY="MeasurementEuCNC1"
 DESTINATION="10.1.1.249:9000"
 INTERFACE="any"
 RUNTIME=20
@@ -47,14 +47,15 @@ if [ "${SUDO_UID}:${SUDO_GID}" == ":" ] ; then
 fi
 
 sudo ifconfig wwan0 mtu 1440     # !!! Set MTU here!
-sudo sysctl net.ipv4.tcp_ecn=0   # !!! Enable ECN here!
+sudo sysctl net.ipv4.tcp_ecn=1   # !!! Enable ECN here!
 
-sudo -u#${SUDO_UID} -g#${SUDO_GID} ssh-keygen -q -R ${IP_HSS}
-sudo -u#${SUDO_UID} -g#${SUDO_GID} ssh-keygen -q -R ${IP_MME}
-sudo -u#${SUDO_UID} -g#${SUDO_GID} ssh-keygen -q -R ${IP_SPGWC}
-sudo -u#${SUDO_UID} -g#${SUDO_GID} ssh-keygen -q -R ${IP_SPGWU}
+sudo -u#${SUDO_UID} -g#${SUDO_GID} ssh-keygen -q -R ${IP_HSS}   >/dev/null 2>&1
+sudo -u#${SUDO_UID} -g#${SUDO_GID} ssh-keygen -q -R ${IP_MME}   >/dev/null 2>&1
+sudo -u#${SUDO_UID} -g#${SUDO_GID} ssh-keygen -q -R ${IP_SPGWC} >/dev/null 2>&1
+sudo -u#${SUDO_UID} -g#${SUDO_GID} ssh-keygen -q -R ${IP_SPGWU} >/dev/null 2>&1
 
 sudo -u#${SUDO_UID} -g#${SUDO_GID} mkdir -p ${DIRECTORY}
+
 SUMMARY_OLD="${DIRECTORY}/results.summary"
 SUMMARY_NEW="${DIRECTORY}/results.summary.new"
 SUMMARY_UPDATED="${DIRECTORY}/results.summary.updated"
@@ -71,9 +72,52 @@ maxMsgSize=1400                      # Max. 1440 bytes per SCTP message/UDP pack
 tcpdumpSnaplens="64 65536"
 
 
+# ###### Start monitoring EPC component #####################################
+start-monitoring ()
+{
+   local id="$1"
+   local component="$2"
+   local Component="${component^^}"
+   local ip="$3"
+   local sysstatParameters="$4"
+   ${SSH_EPC}${ip} /bin/bash -c "\"\\
+killall -q -sKILL sar ; \\
+sudo killall -q -sKILL tcpdump ; \\
+sudo rm -f /tmp/*.pcap /tmp/*.data /tmp/*.out /tmp/*.xz ; \\
+echo \\\"${Component}: starting tcpdump ...\\\" ; \\
+{ nohup sudo tcpdump -i any -n -s 65536 -w /tmp/${id}-${component}.pcap >/tmp/${id}-${component}-tcpdump.out 2>&1 & } ; \\
+echo \\\"${Component}: starting sar ...\\\" ; \\
+{ nohup sar -o /tmp/${id}-${component}.data ${sysstatParameters} >/tmp/${id}-${component}-sar.out 2>&1 & } ;\\
+echo \\\"${Component}: monitoring ready!\\\" ; \\
+\""
+}
+
+
+# ###### Stop monitoring EPC component ######################################
+stop-monitoring ()
+{
+   local id="$1"
+   local component="$2"
+   local Component="${component^^}"
+   local ip="$3"
+
+   ${SSH_EPC}${ip} /bin/bash -c "\"\\
+killall -q -sKILL sar ; \\
+sudo killall -q -sINT tcpdump ; \\
+sleep 5 ; \\
+find /tmp -maxdepth 1 -name ${id}-${component}.pcap | xargs -r sudo chown nornetpp:nornetpp ; \\
+find /tmp -maxdepth 1 -name ${id}-${component}.pcap | xargs -r xz -T0 ; \\
+find /tmp -maxdepth 1 -name ${id}-${component}.out  | xargs -r xz -T0 ; \\
+echo \\\"${Component}: monitoring stopped!\\\" ; \\
+\""
+
+sudo -u dreibh rsync -Pavz -e "sshpass -p osm4us ssh -4C -oStrictHostKeyChecking=no -J nornetpp@10.1.1.85" nornetpp@${ip}:/tmp/${id}-${component}.* ${DIRECTORY}/
+}
+
+
 # ====== Run measurements ===================================================
-for scenario in Download Upload Bidirectional ; do
-   for protocol in sctp udp ; do
+for scenario in Download Upload Bidirectional ; do   #  Download Upload Bidirectional
+   for protocol in udp sctp ; do   # udp sctp
       flowParameters="INVALID!"
       if [ "${protocol}" == "udp" ] ; then
          flowParameters="${streamingFlow}"
@@ -113,12 +157,11 @@ for scenario in Download Upload Bidirectional ; do
 
 
       # ====== Start sysstat in EPC =========================================
-      echo "Starting sar ..."
       sysstatParameters="-bqr -n DEV,EDEV,IP,EIP,ICMP,EICMP,IP6,EIP6,ICMP6,EICMP6,TCP,ETCP,UDP,UDP6 1 600"
-      ${SSH_EPC}${IP_HSS}   /bin/bash -c "\"killall -q -sKILL sar ; rm -f /tmp/*.data /tmp/*.log ; nohup sar -o /tmp/${id}-hss.data   ${sysstatParameters} >/tmp/${id}-hss.log   2>&1 &\""
-      ${SSH_EPC}${IP_MME}   /bin/bash -c "\"killall -q -sKILL sar ; rm -f /tmp/*.data /tmp/*.log ; nohup sar -o /tmp/${id}-mme.data   ${sysstatParameters} >/tmp/${id}-mme.log   2>&1 &\""
-      ${SSH_EPC}${IP_SPGWC} /bin/bash -c "\"killall -q -sKILL sar ; rm -f /tmp/*.data /tmp/*.log ; nohup sar -o /tmp/${id}-spgwc.data ${sysstatParameters} >/tmp/${id}-spgwc.log 2>&1 &\""
-      ${SSH_EPC}${IP_SPGWU} /bin/bash -c "\"killall -q -sKILL sar ; rm -f /tmp/*.data /tmp/*.log ; nohup sar -o /tmp/${id}-spgwu.data ${sysstatParameters} >/tmp/${id}-spgwu.log 2>&1 &\""
+      start-monitoring ${id} hss   ${IP_HSS}   "${sysstatParameters}" &
+      start-monitoring ${id} mme   ${IP_MME}   "${sysstatParameters}" &
+      start-monitoring ${id} spgwc ${IP_SPGWC} "${sysstatParameters}" &
+      start-monitoring ${id} spgwu ${IP_SPGWU} "${sysstatParameters}" &
       wait
 
 
@@ -135,7 +178,11 @@ for scenario in Download Upload Bidirectional ; do
       sudo -u#${SUDO_UID} -g#${SUDO_GID} netperfmeter ${DESTINATION} \
          -quiet -runtime=${RUNTIME} \
          -vector="${vectorFile}" -scalar="${scalarFile}" \
-         -${protocol} ${flowParameters}
+         -${protocol} ${flowParameters} || \
+        sudo -u#${SUDO_UID} -g#${SUDO_GID} netperfmeter ${DESTINATION} \
+            -quiet -runtime=${RUNTIME} \
+            -vector="${vectorFile}" -scalar="${scalarFile}" \
+            -${protocol} ${flowParameters}
 
       echo "Stopping tcpdump ..."
       killall tcpdump || true
@@ -144,30 +191,10 @@ for scenario in Download Upload Bidirectional ; do
 
       # ====== Stop sysstat in EPC and collect statistics ===================
       echo "Stopping sar and and collecting statistics ..."
-      (
-        echo "HSS"
-        ${SSH_EPC}${IP_HSS} /bin/bash -c "\"killall -q -sKILL sar\""
-        echo "rsync ..."
-        sudo -u dreibh rsync -Pavz -e "sshpass -p osm4us ssh -4C -oStrictHostKeyChecking=no -J nornetpp@10.1.1.85" nornetpp@${IP_HSS}:/tmp/${id}-hss.* ${DIRECTORY}/
-      )
-      (
-        echo "MME"
-        ${SSH_EPC}${IP_MME} /bin/bash -c "\"killall -q -sKILL sar\""
-        echo "rsync ..."
-        sudo -u dreibh rsync -Pavz -e "sshpass -p osm4us ssh -4C -oStrictHostKeyChecking=no -J nornetpp@10.1.1.85" nornetpp@${IP_MME}:/tmp/${id}-mme.* ${DIRECTORY}/
-      )
-      (
-        echo "SPGW-C"
-        ${SSH_EPC}${IP_SPGWC} /bin/bash -c "\"killall -q -sKILL sar\""
-        echo "rsync ..."
-        sudo -u dreibh rsync -Pavz -e "sshpass -p osm4us ssh -4C -oStrictHostKeyChecking=no -J nornetpp@10.1.1.85" nornetpp@${IP_SPGWC}:/tmp/${id}-spgwc.* ${DIRECTORY}/
-      )
-      (
-        echo "SPGW-U"
-        ${SSH_EPC}${IP_SPGWU} /bin/bash -c "\"killall -q -sKILL sar\""
-        echo "rsync ..."
-        sudo -u dreibh rsync -Pavz -e "sshpass -p osm4us ssh -4C -oStrictHostKeyChecking=no -J nornetpp@10.1.1.85" nornetpp@${IP_SPGWU}:/tmp/${id}-spgwu.* ${DIRECTORY}/
-      )
+      stop-monitoring ${id} hss   ${IP_HSS}   &
+      stop-monitoring ${id} mme   ${IP_MME}   &
+      stop-monitoring ${id} spgwc ${IP_SPGWC} &
+      stop-monitoring ${id} spgwu ${IP_SPGWU} &
       wait
 
 
