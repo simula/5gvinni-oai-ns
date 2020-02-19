@@ -28,7 +28,7 @@
 # Contact: dreibh@simula.no
 
 
-DIRECTORY="Measurement2"
+DIRECTORY="MeasurementEuCNC2"
 INTERFACE="any"
 
 IP_HSS="10.208.0.200"
@@ -80,11 +80,11 @@ start-monitoring ()
    ${SSH_EPC}${ip} /bin/bash -c "\"\\
 killall -q -sKILL sar ; \\
 sudo killall -q -sKILL tcpdump ; \\
-sudo rm -f /tmp/*.pcap /tmp/*.data /tmp/*.log /tmp/*.xz ; \\
+sudo rm -f /tmp/*.pcap /tmp/*.data /tmp/*.out /tmp/*.xz ; \\
 echo \\\"${Component}: starting tcpdump ...\\\" ; \\
-( nohup sudo tcpdump -i any -n -w /tmp/${id}-${component}.pcap & ) ; \\
+{ nohup sudo tcpdump -i any -n -s 65536 -w /tmp/${id}-${component}.pcap >/tmp/${id}-${component}-tcpdump.out 2>&1 & } ; \\
 echo \\\"${Component}: starting sar ...\\\" ; \\
-( nohup sar -o /tmp/${id}-${component}.data ${sysstatParameters} >/tmp/${id}-${component}.log 2>&1 & ) ;\\
+{ nohup sar -o /tmp/${id}-${component}.data ${sysstatParameters} >/tmp/${id}-${component}-sar.out 2>&1 & } ;\\
 echo \\\"${Component}: monitoring ready!\\\" ; \\
 \""
 }
@@ -101,11 +101,13 @@ stop-monitoring ()
    ${SSH_EPC}${ip} /bin/bash -c "\"\\
 killall -q -sKILL sar ; \\
 sudo killall -q -sINT tcpdump ; \\
-sleep 3 ; \\
+sleep 5 ; \\
 find /tmp -maxdepth 1 -name ${id}-${component}.pcap | xargs -r sudo chown nornetpp:nornetpp ; \\
 find /tmp -maxdepth 1 -name ${id}-${component}.pcap | xargs -r xz -T0 ; \\
+find /tmp -maxdepth 1 -name ${id}-${component}.out  | xargs -r xz -T0 ; \\
 echo \\\"${Component}: monitoring stopped!\\\" ; \\
 \""
+
 sudo -u dreibh rsync -Pavz -e "sshpass -p osm4us ssh -4C -oStrictHostKeyChecking=no -J nornetpp@10.1.1.85" nornetpp@${ip}:/tmp/${id}-${component}.* ${DIRECTORY}/
 }
 
@@ -130,7 +132,7 @@ sleep 3
 # ====== Wait =========================================================
 echo "Waiting ..."
 echo "(manually run web browser to stream test video: https://www.youtube.com/watch?v=ftlvreFtA2A)"
-sleep 5
+sleep 120
 
 
 # ====== Stop tcpdump =================================================
