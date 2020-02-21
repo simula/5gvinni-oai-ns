@@ -35,7 +35,7 @@ library(Hmisc)
 source("/usr/share/netperfmeter/plotter.R")
 
 
-name <- "Measurement1"
+name <- "MeasurementEuCNC1"
 
 
 
@@ -58,11 +58,12 @@ makePlot <- function(node)
       allResults <- loadResults(paste(sep="", name, "/active.flow-ReceivedBitRate.data.bz2"))
    }
 
-   pdf(paste(sep="", "Results-", name, "-", node, ".pdf"),
-       width=20, height=10, family="Helvetica", pointsize=22)
-
    numberOfRuns <- length(levels(factor(allResults$Protocol)))
    title <- node
+
+   pdf(paste(sep="", "Results-", name, "-", node, ".pdf"),
+       title=title,
+       width=20, height=10, family="Helvetica", pointsize=22)
 
    pSet   <- allResults$Protocol
    pTitle <- "Protocol"

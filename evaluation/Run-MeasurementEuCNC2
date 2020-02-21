@@ -1,0 +1,155 @@
+#!/bin/bash -e
+# =====================================================================
+#     #######  #####          #     #   ###   #     # #     #   ###
+#     #       #     #         #     #    #    ##    # ##    #    #
+#     #       #               #     #    #    # #   # # #   #    #
+#      #####  #  ####  #####  #     #    #    #  #  # #  #  #    #
+#           # #     #          #   #     #    #   # # #   # #    #
+#     #     # #     #           # #      #    #    ## #    ##    #
+#      #####   #####             #      ###   #     # #     #   ###
+# =====================================================================
+#
+# SimulaMet OpenAirInterface Evolved Packet Core VNF and NS
+# Copyright (C) 2019 by Thomas Dreibholz
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Contact: dreibh@simula.no
+
+
+DIRECTORY="MeasurementEuCNC2"
+INTERFACE="any"
+
+IP_HSS="10.208.0.200"
+IP_MME="10.208.0.201"
+IP_SPGWC="10.208.0.202"
+IP_SPGWU="10.208.0.203"
+SSH_EPC="sudo -u dreibh sshpass -p osm4us ssh -4C -oStrictHostKeyChecking=no -J nornetpp@10.1.1.85 nornetpp@"
+
+
+# ====== Initialise =========================================================
+if [ "${SUDO_UID}:${SUDO_GID}" == ":" ] ; then
+   echo >&2 "ERROR: Run this script with sudo, since it has to enable ECN and start tcpdump!"
+   exit 1
+fi
+
+sudo ifconfig wwan0 mtu 1440     # !!! Set MTU here!
+sudo sysctl net.ipv4.tcp_ecn=1   # !!! Enable ECN here!
+
+sudo -u#${SUDO_UID} -g#${SUDO_GID} ssh-keygen -q -R ${IP_HSS}   >/dev/null 2>&1
+sudo -u#${SUDO_UID} -g#${SUDO_GID} ssh-keygen -q -R ${IP_MME}   >/dev/null 2>&1
+sudo -u#${SUDO_UID} -g#${SUDO_GID} ssh-keygen -q -R ${IP_SPGWC} >/dev/null 2>&1
+sudo -u#${SUDO_UID} -g#${SUDO_GID} ssh-keygen -q -R ${IP_SPGWU} >/dev/null 2>&1
+
+sudo -u#${SUDO_UID} -g#${SUDO_GID} mkdir -p ${DIRECTORY}
+
+
+# ====== Flow parameters ====================================================
+tcpdumpSnaplens="64 65536"
+
+
+# ====== Run measurements ===================================================
+now=`date +%FT%H:%M:%S.%N`
+echo ""
+echo "====== ${now} ======"
+
+values="${now}"
+id=`echo "${now}: ${values}" | sha256 -x`
+prefix="${DIRECTORY}/${id}"
+
+
+# ###### Start monitoring EPC component #####################################
+start-monitoring ()
+{
+   local id="$1"
+   local component="$2"
+   local Component="${component^^}"
+   local ip="$3"
+   local sysstatParameters="$4"
+   ${SSH_EPC}${ip} /bin/bash -c "\"\\
+killall -q -sKILL sar ; \\
+sudo killall -q -sKILL tcpdump ; \\
+sudo rm -f /tmp/*.pcap /tmp/*.data /tmp/*.out /tmp/*.xz ; \\
+echo \\\"${Component}: starting tcpdump ...\\\" ; \\
+{ nohup sudo tcpdump -i any -n -s 65536 -w /tmp/${id}-${component}.pcap >/tmp/${id}-${component}-tcpdump.out 2>&1 & } ; \\
+echo \\\"${Component}: starting sar ...\\\" ; \\
+{ nohup sar -o /tmp/${id}-${component}.data ${sysstatParameters} >/tmp/${id}-${component}-sar.out 2>&1 & } ;\\
+echo \\\"${Component}: monitoring ready!\\\" ; \\
+\""
+}
+
+
+# ###### Stop monitoring EPC component ######################################
+stop-monitoring ()
+{
+   local id="$1"
+   local component="$2"
+   local Component="${component^^}"
+   local ip="$3"
+
+   ${SSH_EPC}${ip} /bin/bash -c "\"\\
+killall -q -sKILL sar ; \\
+sudo killall -q -sINT tcpdump ; \\
+sleep 5 ; \\
+find /tmp -maxdepth 1 -name ${id}-${component}.pcap | xargs -r sudo chown nornetpp:nornetpp ; \\
+find /tmp -maxdepth 1 -name ${id}-${component}.pcap | xargs -r xz -T0 ; \\
+find /tmp -maxdepth 1 -name ${id}-${component}.out  | xargs -r xz -T0 ; \\
+echo \\\"${Component}: monitoring stopped!\\\" ; \\
+\""
+
+sudo -u dreibh rsync -Pavz -e "sshpass -p osm4us ssh -4C -oStrictHostKeyChecking=no -J nornetpp@10.1.1.85" nornetpp@${ip}:/tmp/${id}-${component}.* ${DIRECTORY}/
+}
+
+
+# ====== Start sysstat in EPC =========================================
+sysstatParameters="-bqr -n DEV,EDEV,IP,EIP,ICMP,EICMP,IP6,EIP6,ICMP6,EICMP6,TCP,ETCP,UDP,UDP6 1 600"
+start-monitoring ${id} hss   ${IP_HSS}   "${sysstatParameters}" &
+start-monitoring ${id} mme   ${IP_MME}   "${sysstatParameters}" &
+start-monitoring ${id} spgwc ${IP_SPGWC} "${sysstatParameters}" &
+start-monitoring ${id} spgwu ${IP_SPGWU} "${sysstatParameters}" &
+wait
+
+
+# ====== Start tcpdump ================================================
+echo "Starting tcpdump on client ..."
+for tcpdumpSnaplen in ${tcpdumpSnaplens} ; do
+tcpdump -q -i ${INTERFACE} -w "${prefix}-${tcpdumpSnaplen}.pcap" -s ${tcpdumpSnaplen} -n tcp or sctp or udp or icmp or icmp6 &
+done
+sleep 3
+
+
+# ====== Wait =========================================================
+echo "Waiting ..."
+echo "(manually run web browser to stream test video: https://www.youtube.com/watch?v=ftlvreFtA2A)"
+sleep 120
+
+
+# ====== Stop tcpdump =================================================
+echo "Stopping tcpdump on client ..."
+killall tcpdump || true
+wait
+
+
+# ====== Stop sysstat in EPC and collect statistics ===================
+echo "Stopping sar and and collecting statistics ..."
+stop-monitoring ${id} hss   ${IP_HSS}   &
+stop-monitoring ${id} mme   ${IP_MME}   &
+stop-monitoring ${id} spgwc ${IP_SPGWC} &
+stop-monitoring ${id} spgwu ${IP_SPGWU} &
+wait
+
+
+# ====== Set ownership and compress pcap files ========================
+chown ${SUDO_UID}:${SUDO_GID} ${prefix}*
+find ${DIRECTORY} -name "${id}*.pcap" | xargs -r xz -T0
