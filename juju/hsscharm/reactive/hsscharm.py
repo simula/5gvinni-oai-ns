@@ -333,6 +333,11 @@ echo \\\"\\\" && \\
 echo \\\"[Install]\\\" && \\
 echo \\\"WantedBy=multi-user.target\\\" ) | sudo tee /lib/systemd/system/hss.service && \\
 sudo systemctl daemon-reload && \\
+echo \\\"###### Creating helper scripts ########################################\\\" && \\
+( echo -e \\\"#\\x21/bin/sh\\\" && echo \\\"tail -f /var/log/hss.log\\\" ) | tee /home/nornetpp/log && \\
+chmod +x /home/nornetpp/log && \\
+( echo -e \\\"#\\x21/bin/sh\\\" && echo \\\"sudo service hss restart && ./log\\\" ) | tee /home/nornetpp/restart && \\
+chmod +x /home/nornetpp/restart && \\
 echo \\\"###### Installing sysstat #############################################\\\" && \\
 DEBIAN_FRONTEND=noninteractive sudo apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends sysstat && \\
 sudo sed -e \\\"s/^ENABLED=.*$/ENABLED=\\\\\\"true\\\\\\"/g\\\" -i /etc/default/sysstat && \\
