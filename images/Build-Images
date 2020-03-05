@@ -81,7 +81,7 @@ for preseed in $PRESEEDS ; do
             sed -e "s/^# d-i base-installer\/kernel\/override-image.*$/d-i base-installer\/kernel\/override-image string linux-generic-hwe-16.04/g" \
                 -i ${preseed}-${variant}/preseed.cfg
          elif [ "${variant}" == "bionic" ] ; then
-            # Xenial: Use HWE kernel
+            # Bionic: Use HWE kernel
             sed -e "s/^# d-i base-installer\/kernel\/override-image.*$/d-i base-installer\/kernel\/override-image string linux-generic-hwe-18.04/g" \
                 -i ${preseed}-${variant}/preseed.cfg
          fi
