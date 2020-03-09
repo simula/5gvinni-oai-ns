@@ -1,0 +1,2 @@
+#!/bin/sh
+juju list-models | cut -d' ' -f1 | grep -E "^[a-f0-9-]+$" | xargs -n1 juju destroy-model -y
