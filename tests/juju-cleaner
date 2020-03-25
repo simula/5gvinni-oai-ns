@@ -1,2 +1,6 @@
 #!/bin/sh
+sudo snap remove charms
 juju list-models | cut -d' ' -f1 | grep -E "^[a-f0-9-]+$" | xargs -n1 juju destroy-model -y
+lxc list -c n --format csv | grep "^juju" | xargs -n1 -r sudo lxc delete --force
+sudo updatedb
+echo "Done!"
