@@ -26,7 +26,7 @@ fi
 # ------ Default settings ---------------------------------
 DIRECTORY="."
 PRESEEDS="MELODIC"
-VARIANTS="bionic"
+VARIANTS="xenial bionic focal"
 
 # ------ Default keyboard settings ------------------------
 XKBMODEL="pc105"
