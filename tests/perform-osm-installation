@@ -1,0 +1,23 @@
+#!/bin/bash -e
+
+wget https://osm-download.etsi.org/ftp/osm-7.0-seven/install_osm.sh
+chmod +x install_osm.sh
+./install_osm.sh -y -c k8s   2>&1 | tee osm_install_log.txt
+# --k8s_monitor
+
+export RELEASE=ReleaseSEVEN
+export REPOSITORY=stable
+export DOCKER_TAG=latest
+
+newgrp docker
+
+sudo snap install charm --classic
+
+sudo add-apt-repository -y "deb [arch=amd64] https://osm-download.etsi.org/repository/osm/debian/${RELEASE} ${REPOSITORY} IM"
+sudo apt-get update
+sudo apt-get install -y python3-osm-im
+
+sudo -H pip3 install yamllint
+sudo -H pip3 install pyangbind
+sudo -H pip3 install setuptools
+sudo -H pip3 install markupsafe
