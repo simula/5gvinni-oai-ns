@@ -1,4 +1,7 @@
-#!/bin/bash -e
+#!/bin/bash
+
+cd ~
+rm -f install_osm.sh
 
 wget https://osm-download.etsi.org/ftp/osm-7.0-seven/install_osm.sh
 chmod +x install_osm.sh
@@ -21,3 +24,5 @@ sudo -H pip3 install yamllint
 sudo -H pip3 install pyangbind
 sudo -H pip3 install setuptools
 sudo -H pip3 install markupsafe
+
+~/vim
