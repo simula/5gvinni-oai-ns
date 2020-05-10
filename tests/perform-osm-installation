@@ -12,7 +12,7 @@ export RELEASE=ReleaseSEVEN
 export REPOSITORY=stable
 export DOCKER_TAG=latest
 
-newgrp docker
+# newgrp docker
 
 sudo snap install charm --classic
 
