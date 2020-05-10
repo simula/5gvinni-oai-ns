@@ -18,7 +18,7 @@ cd ~/src
 if [ ! -e devops ] ; then git clone https://osm.etsi.org/gerrit/osm/devops.git && cd devops ; else cd devops && git pull ; fi
 git checkout master
 cd installers
-./full_install_osm.sh -R$RELEASE -r$REPOSITORY -t$DOCKER_TAG -c k8s --k8s_monitor -D ~/src/devops   2>&1 | tee install_osm.log
+./full_install_osm.sh -R$RELEASE -r$REPOSITORY -t$DOCKER_TAG -c k8s --k8s_monitor -D ~/src/devops -y   2>&1 | tee install_osm.log
 
 
 # newgrp docker
@@ -29,9 +29,9 @@ sudo add-apt-repository -y "deb [arch=amd64] https://osm-download.etsi.org/repos
 sudo apt-get update
 sudo apt-get install -y python3-osm-im
 
+sudo -H pip3 install setuptools
 sudo -H pip3 install yamllint
 sudo -H pip3 install pyangbind
-sudo -H pip3 install setuptools
 sudo -H pip3 install markupsafe
 
 ~/vim
