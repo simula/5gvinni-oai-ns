@@ -1,3 +1,6 @@
 [submodule "devops"]
 	path = devops
 	url = https://osm.etsi.org/gerrit/osm/devops.git
+[submodule "baselayers/basic"]
+	path = baselayers/basic
+	url = https://github.com/juju-solutions/layer-basic.git

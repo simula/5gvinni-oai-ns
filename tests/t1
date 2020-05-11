@@ -980,11 +980,11 @@ prepare_cassandra_hss_build()
 configure_cassandra()
 configure_hss()
 
-prepare_mme_build()
-configure_mme()
+#prepare_mme_build()
+#configure_mme()
 
-prepare_spgwu_build()
-configure_spgwu()
+#prepare_spgwu_build()
+#configure_spgwu()
 
-prepare_spgwc_build()
-configure_spgwc()
+#prepare_spgwc_build()
+#configure_spgwc()

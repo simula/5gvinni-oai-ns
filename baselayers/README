@@ -1,0 +1,8 @@
+This directory should be empty in the ideal case. However, if there is a
+problem with the Juju Charms baselayers, place the base layers to be included
+in this directory.
+
+Example to get a previous version of the "basic" layer:
+git submodule add https://github.com/juju-solutions/layer-basic.git baselayers/basic
+cd baselayers/basic
+git checkout 26ece6b3192bfb2b61e12740a05d5822cfedf496

@@ -67,8 +67,9 @@ EXECUTE_PROCESS(COMMAND git ls-files
 MESSAGE("NSDs: ${NSD_LIST}")
 
 # Automatically obtain list of charms:
-SET(CHARMS_SOURCE_DIRECTORY "juju/")
-SET(CHARMS_BUILD_DIRECTORY  ".build/")
+SET(CHARMS_BASELAYERS_DIRECTORY "${CMAKE_SOURCE_DIR}/baselayers/")
+SET(CHARMS_SOURCE_DIRECTORY     "${CMAKE_SOURCE_DIR}/juju/")
+SET(CHARMS_BUILD_DIRECTORY      ".build/")
 EXECUTE_PROCESS(COMMAND git ls-files
                 COMMAND cut -d/ -f1
                 COMMAND sort -u
@@ -172,7 +173,7 @@ FOREACH(charmName IN LISTS CHARM_SOURCE_LIST)
    SET(timestampFile "${charmOutputDirectory}.stamp")
    ADD_CUSTOM_COMMAND(OUTPUT  ${timestampFile}
                       COMMAND rm -rf ${charmOutputDirectory}
-                      COMMAND ${CHARM} build --build-dir ${charmBuildDirectory}
+                      COMMAND env CHARM_LAYERS_DIR=${CHARMS_BASELAYERS_DIRECTORY} ${CHARM} build --build-dir ${charmBuildDirectory}
                       # FIXME!
                       # COMMAND sed -e "s#^import shlex#import shlex\\\\nimport traceback#g" -i ${charmOutputDirectory}/lib/charms/sshproxy.py
                       COMMAND touch ${timestampFile}
