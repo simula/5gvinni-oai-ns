@@ -5,23 +5,22 @@ export REPOSITORY=stable
 export DOCKER_TAG=latest
 
 
-#cd ~
-#rm -f install_osm.sh
-#wget https://osm-download.etsi.org/ftp/osm-7.0-seven/install_osm.sh
-#chmod +x install_osm.sh
-#./install_osm.sh -y -c k8s   2>&1 | tee osm_install_log.txt
+cd ~
+rm -f install_osm.sh
+wget https://osm-download.etsi.org/ftp/osm-7.0-seven/install_osm.sh
+chmod +x install_osm.sh
+./install_osm.sh -y -c k8s   2>&1 | tee osm_install_log.txt
+# --k8s_monitor
+
+
+#mkdir -p ~/src
+#cd ~/src
+#if [ ! -e devops ] ; then git clone https://osm.etsi.org/gerrit/osm/devops.git && cd devops ; else cd devops && git pull ; fi
+#git checkout master
+#cd installers
+#./full_install_osm.sh -R$RELEASE -r$REPOSITORY -t$DOCKER_TAG -c k8s -D ~/src/devops -y   2>&1 | tee install_osm.log
 ## --k8s_monitor
 
-
-mkdir -p ~/src
-cd ~/src
-if [ ! -e devops ] ; then git clone https://osm.etsi.org/gerrit/osm/devops.git && cd devops ; else cd devops && git pull ; fi
-git checkout master
-cd installers
-./full_install_osm.sh -R$RELEASE -r$REPOSITORY -t$DOCKER_TAG -c k8s --k8s_monitor -D ~/src/devops -y   2>&1 | tee install_osm.log
-
-
-# newgrp docker
 
 sudo snap install charm --classic
 
