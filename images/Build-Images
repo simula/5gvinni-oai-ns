@@ -53,16 +53,6 @@ for preseed in $PRESEEDS ; do
 
       (
          # ------ Customise preseed file ------------------------------------
-         # BASE_LOCATION="http://no.archive.ubuntu.com/ubuntu/dists/"
-         BASE_LOCATION="https://ftp.lysator.liu.se/ubuntu/"   # Use HTTPS!
-         # Try to use "updates" variant first. This is not available for development versions.
-         for extension in "-updates" "" ; do
-            LOCATION="${BASE_LOCATION}/ubuntu/dists/${variant}${extension}/main/installer-amd64/"
-            if wget -q --spider "${LOCATION}" ; then
-               break
-            fi
-         done
-
          sed -e "s/xenial/${variant}/g" \
              -e "s/<SET_XKBMODEL_HERE>/$XKBMODEL/g" \
              -e "s/<SET_XKBLAYOUT_HERE>/$XKBLAYOUT/g" \
@@ -88,36 +78,55 @@ for preseed in $PRESEEDS ; do
 
 
          # ------ Create disk image and VM ----------------------------------
-         NAME="Ubuntu-${preseed}-`echo "${variant}" | sed  -e's/^\(.\)/\U\1/'`"
-         IMAGE="${DIRECTORY}/${NAME}.qcow2"
+         name="Ubuntu-${preseed}-`echo "${variant}" | sed  -e's/^\(.\)/\U\1/'`"
+         image="${DIRECTORY}/${name}.qcow2"
 
-         virsh destroy "${NAME}"          >/dev/null 2>&1
-         virsh undefine --nvram "${NAME}" >/dev/null 2>&1
-         rm -f "${IMAGE}"
+         virsh destroy "${name}"          >/dev/null 2>&1
+         virsh undefine --nvram "${name}" >/dev/null 2>&1
+         rm -f "${image}"
+         qemu-img create -f qcow2 -o size=8G ${image}
 
-         bootOptions=""   # "--boot uefi"
+      ) &
+   done
+   wait
+
+   echo "Starting VMs ..."
+   for variant in $VARIANTS ; do
+      (
+         BASE_LOCATION="http://no.archive.ubuntu.com/ubuntu/"
+         # BASE_LOCATION="https://ftp.lysator.liu.se/ubuntu/"   # Use HTTPS!
+         # Try to use "updates" variant first. This is not available for development versions.
+         for extension in "-updates" "" ; do
+            LOCATION="${BASE_LOCATION}/ubuntu/dists/${variant}${extension}/main/installer-amd64/"
+            if wget -q --spider "${LOCATION}" ; then
+               break
+            fi
+         done
+
+         name="Ubuntu-${preseed}-`echo "${variant}" | sed  -e's/^\(.\)/\U\1/'`"
+         image="${DIRECTORY}/${name}.qcow2"
+
+         bootOptions=""   # --boot uefi"
          osOptions="--os-type linux --os-variant ubuntu18.04"
          if [ "${variant}" == "trusty" -o "${variant}" == "xenial" ] ; then
             bootOptions=""
             osOptions="--os-type linux --os-variant ubuntu16.04"
          fi
 
-         qemu-img create -f qcow2 -o size=8G ${IMAGE} && \
          virt-install \
             --quiet \
-            --name "${NAME}" \
-            --ram 4096 \
-            --controller scsi,model=virtio-scsi \
-            --disk "bus=scsi,path=${IMAGE},format=qcow2,cache=unsafe,discard=unmap" \
-            --network bridge=virbr0,model=virtio \
+            --name "${name}" \
             --vcpus 4 \
             --cpu host \
+            --ram 4096 \
             --video virtio --channel spicevmc \
-            ${bootOptions} \
-            ${osOptions} \
+            --controller scsi,model=virtio-scsi \
+            --disk "bus=scsi,path=${image},format=qcow2,cache=unsafe,discard=unmap" \
+            --network bridge=virbr0,model=virtio \
+            ${bootOptions} ${osOptions} \
             --location "$LOCATION" \
-            --initrd-inject=${preseed}-${variant}/preseed.cfg \
-            --extra-args "vga=792 priority=critical preseed/file=/preseed.cfg" \
+            --initrd-inject "${preseed}-${variant}/preseed.cfg" \
+            --extra-args "priority=critical preseed/file=/preseed.cfg" \
             --noreboot
 
          # For serial console instead of graphics output:
@@ -132,7 +141,7 @@ for preseed in $PRESEEDS ; do
          # clear
 
          # ------ Clean up --------------------------------------------------
-         # virt-sysprep -a ${IMAGE}
+         # virt-sysprep -a ${image}
       ) &
    done
 done
