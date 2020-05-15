@@ -1,36 +1,42 @@
-#!/bin/bash
+#!/bin/bash -e
 
 export RELEASE=ReleaseSEVEN
 export REPOSITORY=stable
 export DOCKER_TAG=latest
 
 
-cd ~
-rm -f install_osm.sh
-wget https://osm-download.etsi.org/ftp/osm-7.0-seven/install_osm.sh
-chmod +x install_osm.sh
-./install_osm.sh -y -c k8s   2>&1 | tee osm_install_log.txt
-# --k8s_monitor
-
-
-#mkdir -p ~/src
-#cd ~/src
-#if [ ! -e devops ] ; then git clone https://osm.etsi.org/gerrit/osm/devops.git && cd devops ; else cd devops && git pull ; fi
-#git checkout master
-#cd installers
-#./full_install_osm.sh -R$RELEASE -r$REPOSITORY -t$DOCKER_TAG -c k8s -D ~/src/devops -y   2>&1 | tee install_osm.log
+#cd ~
+#rm -f install_osm.sh
+#wget https://osm-download.etsi.org/ftp/osm-7.0-seven/install_osm.sh
+#chmod +x install_osm.sh
+#./install_osm.sh -y -c k8s   2>&1 | tee osm_install_log.txt
 ## --k8s_monitor
 
 
+cd ..
+git submodule init
+git submodule update --remote --merge
+cd devops
+DEVOPS_PATH=`realpath .`
+cd installers
+echo "###### Running installer: ./full_install_osm.sh -R${RELEASE} -r${REPOSITORY} -t${DOCKER_TAG} -c k8s -D ${DEVOPS_PATH} -y"
+./full_install_osm.sh -R${RELEASE} -r${REPOSITORY} -t${DOCKER_TAG} -c k8s -D ${DEVOPS_PATH} -y   2>&1 | tee install_osm.log
+# --k8s_monitor
+
+
+echo "###### Installing \"charm\" snap"
 sudo snap install charm --classic
 
+echo "###### Installing OSM IM"
 sudo add-apt-repository -y "deb [arch=amd64] https://osm-download.etsi.org/repository/osm/debian/${RELEASE} ${REPOSITORY} IM"
 sudo apt-get update
 sudo apt-get install -y python3-osm-im
 
+echo "###### Adding Python packages"
 sudo -H pip3 install setuptools
 sudo -H pip3 install yamllint
 sudo -H pip3 install pyangbind
 sudo -H pip3 install markupsafe
 
+echo "###### Adding VIM"
 ~/vim
