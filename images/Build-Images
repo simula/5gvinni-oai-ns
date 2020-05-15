@@ -93,8 +93,8 @@ for preseed in $PRESEEDS ; do
    echo "Starting VMs ..."
    for variant in $VARIANTS ; do
       (
-         # BASE_LOCATION="http://no.archive.ubuntu.com/ubuntu/dists/"
-         BASE_LOCATION="https://ftp.lysator.liu.se/ubuntu/"   # Use HTTPS!
+         BASE_LOCATION="http://no.archive.ubuntu.com/ubuntu/"
+         # BASE_LOCATION="https://ftp.lysator.liu.se/ubuntu/"   # Use HTTPS!
          # Try to use "updates" variant first. This is not available for development versions.
          for extension in "-updates" "" ; do
             LOCATION="${BASE_LOCATION}/ubuntu/dists/${variant}${extension}/main/installer-amd64/"
