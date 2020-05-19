@@ -32,5 +32,5 @@ for image in ${IMAGES} ; do
 done
 echo "----------------------"
 
-rsync -e "ssh -J ${SSH_PROXY}" -Pav \
+rsync -e "ssh -J ${SSH_PROXY}" -Pav --partial \
    ${IMAGES} "${DESTINATION}"
