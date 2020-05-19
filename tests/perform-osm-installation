@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
-export RELEASE=ReleaseSEVEN
-export REPOSITORY=stable
+export RELEASE=ReleaseSEVEN-daily
+export REPOSITORY=testing
 export DOCKER_TAG=latest
 
 
@@ -20,7 +20,7 @@ cd devops
 DEVOPS_PATH=`realpath .`
 cd installers
 echo "###### Running installer: ./full_install_osm.sh -R${RELEASE} -r${REPOSITORY} -t${DOCKER_TAG} -c k8s -D ${DEVOPS_PATH} -y"
-./full_install_osm.sh -R${RELEASE} -r${REPOSITORY} -t${DOCKER_TAG} -c k8s -D ${DEVOPS_PATH} -y   2>&1 | tee install_osm.log
+./full_install_osm.sh -R${RELEASE} -r${REPOSITORY} -t${DOCKER_TAG} -c k8s --k8s_monitor -D ${DEVOPS_PATH} -y   2>&1 | tee install_osm.log
 # --k8s_monitor
 
 
