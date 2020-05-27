@@ -33,10 +33,11 @@ sudo apt-get update
 sudo apt-get install -y python3-osm-im
 
 echo "###### Adding Python packages"
-sudo -H pip3 install setuptools
-sudo -H pip3 install yamllint
-sudo -H pip3 install pyangbind
-sudo -H pip3 install markupsafe
+sudo apt install -y cmake yamllint python3-setuptools python3-markupsafe
+# sudo -H pip3 install setuptools
+# sudo -H pip3 install yamllint
+# sudo -H pip3 install pyangbind
+# sudo -H pip3 install markupsafe
 
 echo "###### Adding VIM"
 ~/vim
