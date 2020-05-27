@@ -1,5 +1,5 @@
 # ###### VNF External Addresses #############################################
 vld:
   # ====== Management =======================================================
-  - name: mgmt
-    vim-network-name: osm-ext
+  - name: mgmtnet
+    vim-network-name: mgmt
