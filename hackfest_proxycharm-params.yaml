@@ -2,4 +2,4 @@
 vld:
   # ====== Management =======================================================
   - name: mgmtnet
-    vim-network-name: osm-ext
+    vim-network-name: mgmt
