@@ -3,7 +3,7 @@ vnfd:vnfd-catalog:
     - id: hackfest_proxycharm_vnfd
       name: hackfest_proxycharm_vnfd
       short-name: hackfest_proxycharm_vnfd
-      version: '1.0'
+      version: '1.1'
       description: |
         A VNF consisting of 1 VDU connected to two external VL, and one for
         data and another one for management
@@ -46,6 +46,11 @@ vnfd:vnfd-catalog:
           vdu-configuration:
             juju:
               charm: simple
+            metrics:
+              - name: load
+              - name: load_pct
+              - name: users
+              - name: random
             initial-config-primitive:
               - seq: '1'
                 name: config
@@ -69,28 +74,47 @@ vnfd:vnfd-catalog:
                     data-type: STRING
                     default-value: /home/ubuntu/touched
 
-      # vnf-configuration:
-        # juju:
-          # charm: simple
-        # initial-config-primitive:
-          # - seq: '1'
-            # name: config
-            # parameter:
-              # - name: ssh-hostname
-                # value: <rw_mgmt_ip>
-              # - name: ssh-username
-                # value: ubuntu
-              # - name: ssh-password
-                # value: osm4u
-          # - seq: '2'
-            # name: touch
-            # parameter:
-              # - name: filename
-                # data-type: STRING
-                # value: /home/ubuntu/first-touch
-        # config-primitive:
-          # - name: touch
-            # parameter:
-              # - name: filename
-                # data-type: STRING
-                # default-value: /home/ubuntu/touched
+          monitoring-param:
+            - id: metric_mgmtVM_cpu
+              nfvi-metric: cpu_utilization
+            - id: metric_mgmtVM_memory
+              nfvi-metric: average_memory_utilization
+
+      monitoring-param:
+        - id: metric_vim_vnf1_cpu
+          name: metric_vim_vnf1_cpu
+          aggregation-type: AVERAGE
+          vdu-monitoring-param:
+            vdu-ref: mgmtVM
+            vdu-monitoring-param-ref: metric_mgmtVM_cpu
+        - id: metric_vim_vnf1_memory
+          name: metric_vim_vnf1_memory
+          aggregation-type: AVERAGE
+          vdu-monitoring-param:
+            vdu-ref: mgmtVM
+            vdu-monitoring-param-ref: metric_mgmtVM_memory
+
+        - id: metric_vim_mgmtVM_load
+          name: metric_vim_mgmtVM_load
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: mgmtVM
+            vdu-metric-name-ref: load
+        - id: metric_vim_mgmtVM_loadpct
+          name: metric_vim_mgmtVM_loadpct
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: mgmtVM
+            vdu-metric-name-ref: load_pct
+        - id: metric_vim_mgmtVM_users
+          name: metric_vim_mgmtVM_users
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: mgmtVM
+            vdu-metric-name-ref: users
+        - id: metric_vim_mgmtVM_random
+          name: metric_vim_mgmtVM_random
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: mgmtVM
+            vdu-metric-name-ref: random

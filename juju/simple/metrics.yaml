@@ -1,0 +1,17 @@
+metrics:
+   users:
+      type: gauge
+      description: "# of users"
+      command: who|wc -l
+   load:
+      type: gauge
+      description: "5 minute load average"
+      command: cat /proc/loadavg |awk '{print $1}'
+   load_pct:
+      type: gauge
+      description: "1 minute load average percent"
+      command: cat /proc/loadavg  | awk '{load_pct=$1*100.00} END {print load_pct}'
+   random:
+      type: gauge
+      description: "just a random byte"
+      command: od -A n -t d -N 1 /dev/urandom
