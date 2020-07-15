@@ -82,6 +82,7 @@ class VDUHelper:
    def __init__(self, logFileName):
       # ====== Initialise object ============================================
       self.blockStack = []
+      self.lastError  = None
 
       # ====== Initialise logger ============================================
       loggingConfiguration = {
@@ -107,14 +108,16 @@ class VDUHelper:
       }
       logging.config.dictConfig(loggingConfiguration)
       self.logger = logging.getLogger(__name__)
-      self.logger.info('Starting')
+      self.logger.debug('Starting')
 
 
    # ###### Begin block #####################################################
    def beginBlock(self, label):
       self.blockStack.append(label)
+      self.lastError = None
+
       message = label + ' ...'
-      self.logger.info(message)
+      self.logger.debug(message)
       return message
 
 
@@ -122,12 +125,18 @@ class VDUHelper:
    def endBlock(self, success = True):
       assert len(self.blockStack) > 0
       label = self.blockStack.pop()
+
       if success == True:
          message = label + ' completed!'
-         self.logger.info(message)
+         self.logger.debug(message)
       else:
          message = label + ' FAILED!'
          self.logger.error(message)
+         if self.lastError == None:
+            self.lastError = message
+         else:
+            return message + ' <= ' + self.lastError
+
       return message
 
 
@@ -283,5 +292,6 @@ try:
    vduHelper.testNetworking('8.8.8.9', 2)
    vduHelper.endBlock()
 except:
-   vduHelper.endBlock(False)
+   errorMessage = vduHelper.endBlock(False)
+   print(errorMessage)
    pass

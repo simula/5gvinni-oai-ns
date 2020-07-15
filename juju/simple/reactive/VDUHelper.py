@@ -61,6 +61,7 @@ class VDUHelper:
    def __init__(self, logFileName):
       # ====== Initialise object ============================================
       self.blockStack = []
+      self.lastError  = None
 
       # ====== Initialise logger ============================================
       loggingConfiguration = {
@@ -92,6 +93,8 @@ class VDUHelper:
    # ###### Begin block #####################################################
    def beginBlock(self, label):
       self.blockStack.append(label)
+      self.lastError = None
+
       message = label + ' ...'
       self.logger.debug(message)
       return message
@@ -101,12 +104,18 @@ class VDUHelper:
    def endBlock(self, success = True):
       assert len(self.blockStack) > 0
       label = self.blockStack.pop()
+
       if success == True:
          message = label + ' completed!'
          self.logger.debug(message)
       else:
          message = label + ' FAILED!'
          self.logger.error(message)
+         if self.lastError == None:
+            self.lastError = message
+         else:
+            return message + ' <= ' + self.lastError
+
       return message
 
 
