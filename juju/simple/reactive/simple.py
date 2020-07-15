@@ -12,6 +12,8 @@ from charms.reactive import (
 )
 import charms.sshproxy
 
+import VDUHelper
+
 
 @when('sshproxy.configured')
 @when_not('simple.installed')
