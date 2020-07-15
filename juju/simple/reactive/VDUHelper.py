@@ -11,7 +11,7 @@
 # =====================================================================
 #
 # SimulaMet OpenAirInterface Evolved Packet Core NS
-# Copyright (C) 2019 by Thomas Dreibholz
+# Copyright (C) 2019-2020 by Thomas Dreibholz
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -36,21 +36,6 @@ import subprocess
 import sys
 import traceback
 
-from charmhelpers.core.hookenv import (
-    action_get,
-    action_fail,
-    action_set,
-    status_set
-)
-from charms.reactive import (
-    clear_flag,
-    set_flag,
-    when,
-    when_not
-)
-import charms.sshproxy
-
-
 
 # ###########################################################################
 # #### VDUHelper class                                                   ####
@@ -64,28 +49,28 @@ class VDUHelper:
       self.lastError  = None
 
       # ====== Initialise logger ============================================
-      loggingConfiguration = {
-         'version': 1,
-         'handlers': {
-            'default': {
-               'level':     'DEBUG',
-               'class':     'logging.handlers.TimedRotatingFileHandler',
-               'formatter': 'standard',
-               'filename':  logFileName,
-               'when':      'D'
-            }
-         },
-         'formatters': {
-            'standard': {
-               'format': '%(asctime)s %(levelname)s [PID=%(process)d] %(message)s'
-            }
-         },
-         'root': {
-            'level':    'DEBUG',
-            'handlers': ['default']
-         }
-      }
-      logging.config.dictConfig(loggingConfiguration)
+      #loggingConfiguration = {
+         #'version': 1,
+         #'handlers': {
+            #'default': {
+               #'level':     'DEBUG',
+               #'class':     'logging.handlers.TimedRotatingFileHandler',
+               #'formatter': 'standard',
+               #'filename':  logFileName,
+               #'when':      'D'
+            #}
+         #},
+         #'formatters': {
+            #'standard': {
+               #'format': '%(asctime)s %(levelname)s [PID=%(process)d] %(message)s'
+            #}
+         #},
+         #'root': {
+            #'level':    'DEBUG',
+            #'handlers': ['default']
+         #}
+      #}
+      #logging.config.dictConfig(loggingConfiguration)
       self.logger = logging.getLogger(__name__)
       self.logger.debug('Starting')
 
