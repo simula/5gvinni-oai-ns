@@ -24,6 +24,17 @@ def install_simple_proxy_charm():
 
 @when('actions.touch')
 def touch():
+
+    vduHelper = VDUHelper('/tmp/test.log')
+
+    vduHelper.beginBlock('Touch')
+    try:
+        vduHelper.testNetworking('8.8.8.8', 2)
+        vduHelper.endBlock()
+    except:
+        vduHelper.endBlock(False)
+        pass
+
     err = ''
     try:
         filename = action_get('filename')
