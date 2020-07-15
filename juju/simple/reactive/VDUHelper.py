@@ -36,6 +36,9 @@ import subprocess
 import sys
 import traceback
 
+import charms.sshproxy
+
+
 
 # ###########################################################################
 # #### VDUHelper class                                                   ####
@@ -109,9 +112,16 @@ class VDUHelper:
       #sys.stdout.write('-----------------------------------------------------------------------------\n')
       #sys.stdout.write('time bash -c "' + commands + '"\n')
 
+      #print(commands)
+      #self.logger.debug(commands)
+      #subprocess.check_call(commands, shell=True)
+
+      self.logger.debug("C=" + commands)
       print(commands)
       self.logger.debug(commands)
-      subprocess.check_call(commands, shell=True)
+      self.logger.debug("C2")
+      charms.sshproxy._run(commands)
+      self.logger.debug("C2")
 
 
    # ###### Run shell commands and handle exceptions ########################
