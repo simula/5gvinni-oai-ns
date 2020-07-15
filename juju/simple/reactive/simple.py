@@ -14,6 +14,8 @@ import charms.sshproxy
 
 from . import VDUHelper
 
+vduHelper = VDUHelper.VDUHelper('/tmp/test.log')
+
 
 @when('sshproxy.configured')
 @when_not('simple.installed')
@@ -25,7 +27,7 @@ def install_simple_proxy_charm():
 @when('actions.touch')
 def touch():
 
-    vduHelper = VDUHelper.VDUHelper('/tmp/test.log')
+    # vduHelper = VDUHelper.VDUHelper('/tmp/test.log')
 
     vduHelper.beginBlock('Touch')
     try:
