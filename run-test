@@ -101,7 +101,7 @@ while [ $# -gt 0 ] ; do
    # osm ns-list --filter=name=${NS}
    id=`osm ns-list --filter=name=${NS} | grep "| ${NS}" | awk '{ print $4 }'`
    echo "ID=${id}"
-   sleep 10
+   sleep 15
    echo "juju switch ${id}"
    juju switch ${id}
 

@@ -25,7 +25,7 @@ def install_simple_proxy_charm():
 @when('actions.touch')
 def touch():
 
-    vduHelper = VDUHelper('/tmp/test.log')
+    vduHelper = VDUHelper.VDUHelper('/tmp/test.log')
 
     vduHelper.beginBlock('Touch')
     try:
