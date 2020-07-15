@@ -53,16 +53,6 @@ import charms.sshproxy
 
 
 # ###########################################################################
-# #### Helper functions                                                  ####
-# ###########################################################################
-
-# ###### Execute command ####################################################
-def execute(commands):
-   return charms.sshproxy._run(commands)
-
-
-
-# ###########################################################################
 # #### VDUHelper class                                                   ####
 # ###########################################################################
 
@@ -82,27 +72,28 @@ class VDUHelper:
                'formatter': 'standard',
                'filename':  logFileName,
                'when':      'D'
-            },
+            }
          },
          'formatters': {
             'standard': {
                'format': '%(asctime)s %(levelname)s [PID=%(process)d] %(message)s'
-            },
+            }
          },
          'root': {
-            'level': 'DEBUG',
-            'handlers': ['default'],
+            'level':    'DEBUG',
+            'handlers': ['default']
          }
       }
       logging.config.dictConfig(loggingConfiguration)
-      logging.debug('Starting')
+      self.logger = logging.getLogger(__name__)
+      self.logger.debug('Starting')
 
 
    # ###### Begin block #####################################################
    def beginBlock(self, label):
       self.blockStack.append(label)
       message = label + ' ...'
-      logging.debug(message)
+      self.logger.debug(message)
       return message
 
 
@@ -112,20 +103,30 @@ class VDUHelper:
       label = self.blockStack.pop()
       if success == True:
          message = label + ' completed!'
-         logging.debug(message)
+         self.logger.debug(message)
       else:
          message = label + ' FAILED!'
-         logging.error(message)
+         self.logger.error(message)
       return message
+
+
+   # ###### Execute command #################################################
+   def execute(self, commands):
+      #sys.stdout.write('-----------------------------------------------------------------------------\n')
+      #sys.stdout.write('time bash -c "' + commands + '"\n')
+
+      print(commands)
+      self.logger.debug(commands)
+      subprocess.check_call(commands, shell=True)
 
 
    # ###### Run shell commands and handle exceptions ########################
    def runInShell(self, commands, raiseExceptionOnError = True):
       try:
-         execute(commands)
+         self.execute(commands)
       except:
          message = 'Command execution failed: ' + commands
-         logging.error(message)
+         self.logger.error(message)
          if raiseExceptionOnError:
             raise
          return False
