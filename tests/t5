@@ -72,14 +72,11 @@ def when_not(*flags):
     return decorator_when
 
 
-# ###### Execute command ####################################################
-def execute(commands):
-   #sys.stdout.write('-----------------------------------------------------------------------------\n')
-   #sys.stdout.write('time bash -c "' + commands + '"\n')
-   subprocess.check_call(commands, shell=True)
 
+# ###########################################################################
+# #### VDUHelper class                                                   ####
+# ###########################################################################
 
-# ###### VDUHelper class ####################################################
 class VDUHelper:
    # ###### Constructor #####################################################
    def __init__(self, logFileName):
@@ -96,26 +93,29 @@ class VDUHelper:
                'formatter': 'standard',
                'filename':  logFileName,
                'when':      'D'
-            },
+            }
          },
          'formatters': {
             'standard': {
                'format': '%(asctime)s %(levelname)s [PID=%(process)d] %(message)s'
-            },
+            }
          },
          'root': {
-            'level': 'DEBUG',
-            'handlers': ['default'],
+            'level':    'DEBUG',
+            'handlers': ['default']
          }
       }
       logging.config.dictConfig(loggingConfiguration)
-      logging.debug('Starting')
+      self.logger = logging.getLogger(__name__)
+      self.logger.info('Starting')
 
 
    # ###### Begin block #####################################################
    def beginBlock(self, label):
       self.blockStack.append(label)
-      logging.debug(label + ' ...')
+      message = label + ' ...'
+      self.logger.info(message)
+      return message
 
 
    # ###### End block #######################################################
@@ -123,19 +123,31 @@ class VDUHelper:
       assert len(self.blockStack) > 0
       label = self.blockStack.pop()
       if success == True:
-         logging.debug(label + ' completed!')
+         message = label + ' completed!'
+         self.logger.info(message)
       else:
-         logging.debug(label + ' FAILED!')
-         print(label + ' FAILED!')
+         message = label + ' FAILED!'
+         self.logger.error(message)
+      return message
+
+
+   # ###### Execute command #################################################
+   def execute(self, commands):
+      #sys.stdout.write('-----------------------------------------------------------------------------\n')
+      #sys.stdout.write('time bash -c "' + commands + '"\n')
+
+      print(commands)
+      self.logger.debug(commands)
+      subprocess.check_call(commands, shell=True)
 
 
    # ###### Run shell commands and handle exceptions ########################
    def runInShell(self, commands, raiseExceptionOnError = True):
       try:
-         execute(commands)
+         self.execute(commands)
       except:
          message = 'Command execution failed: ' + commands
-         logging.error(message)
+         self.logger.error(message)
          if raiseExceptionOnError:
             raise
          return False
@@ -256,6 +268,7 @@ echo -e \\\"{interfaceConfiguration}\\\" | sudo tee /etc/network/interfaces.d/61
          raise
 
       self.endBlock()
+
 
 
 vduHelper = VDUHelper('test.log')
