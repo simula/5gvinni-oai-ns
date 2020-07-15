@@ -101,7 +101,9 @@ class VDUHelper:
    # ###### Begin block #####################################################
    def beginBlock(self, label):
       self.blockStack.append(label)
-      logging.debug(label + ' ...')
+      message = label + ' ...'
+      logging.debug(message)
+      return message
 
 
    # ###### End block #######################################################
@@ -109,10 +111,12 @@ class VDUHelper:
       assert len(self.blockStack) > 0
       label = self.blockStack.pop()
       if success == True:
-         logging.debug(label + ' completed!')
+         message = label + ' completed!'
+         logging.debug(message)
       else:
-         logging.debug(label + ' FAILED!')
-         print(label + ' FAILED!')
+         message = label + ' FAILED!'
+         logging.error(message)
+      return message
 
 
    # ###### Run shell commands and handle exceptions ########################
@@ -210,6 +214,20 @@ echo -e \\\"{interfaceConfiguration}\\\" | sudo tee /etc/network/interfaces.d/61
          interfaceConfiguration = interfaceConfiguration
       )
       self.runInShell(commands)
+      self.endBlock()
+
+
+   # ###### Touch file ######################################################
+   def touchFile(self, fileName):
+      self.beginBlock('Touch ' + fileName)
+
+      try:
+         commands = """touch {}""".format(fileName)
+         self.runInShell(commands)
+      except:
+         self.endBlock(False)
+         raise
+
       self.endBlock()
 
 

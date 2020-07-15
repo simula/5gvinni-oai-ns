@@ -29,20 +29,29 @@ def touch():
 
     vduHelper.beginBlock('Touch')
     try:
+        vduHelper.touchFile('/tmp/touch1')
         vduHelper.testNetworking('8.8.8.8', 2)
-        vduHelper.endBlock()
-    except:
-        vduHelper.endBlock(False)
-        pass
+        vduHelper.touchFile('/tmp/touch2')
 
-    err = ''
-    try:
-        filename = action_get('filename')
-        cmd = ['touch {}'.format(filename)]
-        result, err = charms.sshproxy._run(cmd)
+        fileName = action_get('filename')
+        vduHelper.touchFile(fileName)
+
+        message = vduHelper.endBlock()
+        action_set( { 'outout': message } )
     except:
-        action_fail('command failed:' + err)
-    else:
-        action_set({'outout': result})
+        message = vduHelper.endBlock(False)
+        action_fail(message)
     finally:
         clear_flag('actions.touch')
+
+    #err = ''
+    #try:
+        #filename = action_get('filename')
+        #cmd = ['touch {}'.format(filename)]
+        #result, err = charms.sshproxy._run(cmd)
+    #except:
+        #action_fail('command failed:' + err)
+    #else:
+        #action_set({'outout': result})
+    #finally:
+        #clear_flag('actions.touch')

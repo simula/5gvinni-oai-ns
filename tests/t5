@@ -227,6 +227,20 @@ echo -e \\\"{interfaceConfiguration}\\\" | sudo tee /etc/network/interfaces.d/61
       self.endBlock()
 
 
+   # ###### Touch file ######################################################
+   def touchFile(self, fileName):
+      self.beginBlock('Touch ' + fileName)
+
+      try:
+         commands = """touch {}""".format(fileName)
+         self.runInShell(commands)
+      except:
+         self.endBlock(False)
+         raise
+
+      self.endBlock()
+
+
    # ###### Test networking #################################################
    def testNetworking(self, destination = ipaddress.IPv4Address('8.8.8.8'), timeout = 60):
       self.beginBlock('Testing networking')
@@ -252,6 +266,7 @@ try:
    hssS6a_IfName    = 'ens4'
    configurationS6a = vduHelper.makeInterfaceConfiguration('eth0', ipaddress.IPv4Interface('0.0.0.0/0'))
    #vduHelper.configureInterface('eth0', configurationS6a)
+   vduHelper.touchFile('/tmp/touch-test1')
    vduHelper.testNetworking('8.8.8.9', 2)
    vduHelper.endBlock()
 except:
