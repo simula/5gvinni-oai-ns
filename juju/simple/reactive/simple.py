@@ -12,7 +12,7 @@ from charms.reactive import (
 )
 import charms.sshproxy
 
-import VDUHelper
+from . import VDUHelper
 
 
 @when('sshproxy.configured')
