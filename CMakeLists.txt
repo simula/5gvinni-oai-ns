@@ -179,7 +179,7 @@ FOREACH(charmName IN LISTS CHARM_SOURCE_LIST)
                       COMMAND touch ${timestampFile}
                       WORKING_DIRECTORY ${charmInputDirectory}
                       DEPENDS ${charmInputFiles})
-   ADD_CUSTOM_TARGET(${generate_charm} DEPENDS ${timestampFile})
+   ADD_CUSTOM_TARGET(${generate_charm} DEPENDS ${timestampFile} ${charmInputFiles})
 ENDFOREACH()
 
 
@@ -224,7 +224,7 @@ FOREACH(vnfd IN LISTS VNFD_LIST)
                          COMMAND ${YAMLLINT} -d '{extends: relaxed, rules: {document-start: {present: no}}}' ${vnfdCloudInitFile}
                          COMMAND touch ${timestampFile}
                          DEPENDS ${vnfdCloudInitFile})
-      ADD_CUSTOM_TARGET(${validate_cloudinit} DEPENDS ${timestampFile})
+      ADD_CUSTOM_TARGET(${validate_cloudinit} DEPENDS ${timestampFile} ${vnfdCloudInitFile})
 
       LIST(APPEND allVNFDCloudInitFiles ${validate_cloudinit})
    ENDFOREACH()
