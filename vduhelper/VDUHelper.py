@@ -65,7 +65,7 @@ class VDUHelper:
       self.lastError = None
 
       message = label + ' ...'
-      status_set(message)
+      status_set('active', message)
       print(message)
       self.logger.debug(message)
       return message
@@ -78,12 +78,12 @@ class VDUHelper:
 
       if success == True:
          message = label + ' completed!'
-         status_set(message)
+         status_set('active', message)
          print(message)
          self.logger.debug(message)
       else:
          message = label + ' FAILED!'
-         status_set(message)
+         status_set('active', message)
          print(message)
          self.logger.error(message)
          if self.lastError == None:
