@@ -88,6 +88,20 @@ class VDUHelper:
       return message
 
 
+   # ###### Touch file ######################################################
+   def touchFile(self, fileName):
+      self.beginBlock('Touch ' + fileName)
+
+      try:
+         commands = """touch {}""".format(fileName)
+         self.runInShell(commands)
+      except:
+         self.endBlock(False)
+         raise
+
+      self.endBlock()
+
+
    # ###### Execute command #################################################
    def execute(self, commands):
       #sys.stdout.write('-----------------------------------------------------------------------------\n')
@@ -188,24 +202,30 @@ class VDUHelper:
       return interfaceConfiguration
 
 
-   # ###### Configuration and activate network interface ####################
-   def configureInterface(self, interfaceName, interfaceConfiguration):
-      self.beginBlock('Configuring and activating ' + interfaceName)
-      commands = """\
-echo -e \\\"{interfaceConfiguration}\\\" | sudo tee /etc/network/interfaces.d/61-{interfaceName} && sudo ifup {interfaceName} || true""".format(
-         interfaceName          = interfaceName,
-         interfaceConfiguration = interfaceConfiguration
-      )
-      self.runInShell(commands)
+   # ###### Enable dummy interface ##########################################
+   def addDummyInterface(self, dummyInterfaceName = 'dummy0'):
+      self.beginBlock('Adding dummy interface ' + dummyInterfaceName)
+      try:
+         commands = """sudo ip link add {} type dummy""".format(dummyInterfaceName)
+         self.runInShell(commands)
+      except:
+         self.endBlock(False)
+         raise
+
       self.endBlock()
 
 
-   # ###### Touch file ######################################################
-   def touchFile(self, fileName):
-      self.beginBlock('Touch ' + fileName)
+   # ###### Configuration and activate network interface ####################
+   def configureInterface(self, interfaceName, interfaceConfiguration, priority = 61):
+      self.beginBlock('Configuring and activating ' + interfaceName)
 
       try:
-         commands = """touch {}""".format(fileName)
+         commands = """\
+   echo -e \\\"{interfaceConfiguration}\\\" | sudo tee /etc/network/interfaces.d/{priority}-{interfaceName} && sudo ifup {interfaceName} || true""".format(
+            interfaceName          = interfaceName,
+            interfaceConfiguration = interfaceConfiguration,
+            priority               = priority
+         )
          self.runInShell(commands)
       except:
          self.endBlock(False)
@@ -222,6 +242,27 @@ echo -e \\\"{interfaceConfiguration}\\\" | sudo tee /etc/network/interfaces.d/61
          commands = """ping -W{timeout} -c3 {destination}""".format(
             destination = str(destination),
             timeout     = timeout
+         )
+         self.runInShell(commands)
+      except:
+         self.endBlock(False)
+         raise
+
+      self.endBlock()
+
+
+   # ###### Fetch Git repository ############################################
+   def fetchGitRepository(self, gitDirectory, gitRepository, gitCommit):
+      self.beginBlock('Fetching Git repository ' + gitDirectory)
+
+      try:
+         commands = """\
+cd /home/nornetpp/src && \\
+if [ ! -d \\\"{gitDirectory}\\\" ] ; then git clone --quiet {gitRepository} {gitDirectory} && cd {gitDirectory} ; else cd {gitDirectory} && git pull ; fi && \\
+git checkout {gitCommit}""".format(
+            gitRepository    = gitRepository,
+            gitDirectory     = gitDirectory,
+            gitCommit        = gitCommit
          )
          self.runInShell(commands)
       except:
