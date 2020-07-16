@@ -60,36 +60,36 @@ vduHelper = VDUHelper.VDUHelper()
 # ***************************************************************************
 
 
-## !!!!! FIXME
-# ###### Execute command ####################################################
-def execute(commands):
-   return charms.sshproxy._run(commands)
+### !!!!! FIXME
+## ###### Execute command ####################################################
+#def execute(commands):
+   #return charms.sshproxy._run(commands)
 
 
-## !!!!! FIXME
-# ###### Run shell commands, handle exceptions, and upage status flags ######
-def runShellCommands(commands, comment, actionFlagToClear, successFlagToSet = None):
-   status_set('active', comment + ' ...')
-   try:
-       stdout, stderr = execute(commands)
-   except subprocess.CalledProcessError as e:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       action_fail(message.encode('utf-8'))
-       status_set('active', comment + ' COMMANDS FAILED!')
-   except:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       action_fail('Command execution failed: ' + str(err))
-       status_set('active', comment + ' FAILED!')
-   else:
-      if successFlagToSet != None:
-         set_flag(successFlagToSet)
-      # action_set( { 'output': stdout.encode('utf-8') } )
-      status_set('active', comment + ' COMPLETED')
-   finally:
-      clear_flag(actionFlagToClear)
+### !!!!! FIXME
+## ###### Run shell commands, handle exceptions, and upage status flags ######
+#def runShellCommands(commands, comment, actionFlagToClear, successFlagToSet = None):
+   #status_set('active', comment + ' ...')
+   #try:
+       #stdout, stderr = execute(commands)
+   #except subprocess.CalledProcessError as e:
+       #exc_type, exc_value, exc_traceback = sys.exc_info()
+       #err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       #message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
+       #action_fail(message.encode('utf-8'))
+       #status_set('active', comment + ' COMMANDS FAILED!')
+   #except:
+       #exc_type, exc_value, exc_traceback = sys.exc_info()
+       #err = traceback.format_exception(exc_type, exc_value, exc_traceback)
+       #action_fail('Command execution failed: ' + str(err))
+       #status_set('active', comment + ' FAILED!')
+   #else:
+      #if successFlagToSet != None:
+         #set_flag(successFlagToSet)
+      ## action_set( { 'output': stdout.encode('utf-8') } )
+      #status_set('active', comment + ' COMPLETED')
+   #finally:
+      #clear_flag(actionFlagToClear)
 
 
 
@@ -110,7 +110,7 @@ def install_mmecharm_proxy_charm():
 @when('mmecharm.installed')
 @when_not('mmecharm.prepared-mme-build')
 def prepare_mme_build():
-   beginBlock('prepare_mme_build')
+   vduHelper.beginBlock('prepare_mme_build')
    try:
 
       # ====== Get MME parameters ===========================================
@@ -210,7 +210,7 @@ def prepare_mme_build():
 @when('actions.configure-mme')
 @when('mmecharm.prepared-mme-build')
 def configure_mme():
-   beginBlock('configure-mme')
+   vduHelper.beginBlock('configure-mme')
    try:
 
       # ====== Get MME parameters ===========================================
@@ -397,7 +397,7 @@ echo \\\"###### Done! ##########################################################
 @when('actions.restart-mme')
 @when('mmecharm.configured-mme')
 def restart_mme():
-   beginBlock('restart-mme')
+   vduHelper.beginBlock('restart-mme')
    try:
 
       commands = 'sudo service mme restart'
