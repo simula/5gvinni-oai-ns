@@ -1,7 +1,7 @@
 from charmhelpers.core.hookenv import (
-    action_get,
-    action_fail,
-    action_set,
+    function_get,
+    function_fail,
+    function_set,
     status_set,
 )
 from charms.reactive import (
@@ -14,7 +14,7 @@ import charms.sshproxy
 
 from . import VDUHelper
 
-vduHelper = VDUHelper.VDUHelper('/tmp/test.log')
+vduHelper = VDUHelper.VDUHelper()
 
 
 @when('sshproxy.configured')
@@ -27,33 +27,32 @@ def install_simple_proxy_charm():
 @when('actions.touch')
 def touch():
 
-    # vduHelper = VDUHelper.VDUHelper('/tmp/test.log')
-
     vduHelper.beginBlock('Touch')
     try:
         vduHelper.touchFile('/tmp/touch1')
+        vduHelper.testNetworking('8.8.4.4', 2)
         vduHelper.testNetworking('8.8.8.8', 2)
         vduHelper.touchFile('/tmp/touch2')
 
-        fileName = action_get('filename')
+        fileName = function_get('filename')
         vduHelper.touchFile(fileName)
 
         message = vduHelper.endBlock()
-        action_set( { 'outout': message } )
+        function_set( { 'outout': message } )
     except:
         message = vduHelper.endBlock(False)
-        action_fail(message)
+        function_fail(message)
     finally:
         clear_flag('actions.touch')
 
     #err = ''
     #try:
-        #filename = action_get('filename')
+        #filename = function_get('filename')
         #cmd = ['touch {}'.format(filename)]
         #result, err = charms.sshproxy._run(cmd)
     #except:
         #action_fail('command failed:' + err)
     #else:
-        #action_set({'outout': result})
+        #function_set({'outout': result})
     #finally:
         #clear_flag('actions.touch')

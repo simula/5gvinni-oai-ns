@@ -46,36 +46,14 @@ import charms.sshproxy
 
 class VDUHelper:
    # ###### Constructor #####################################################
-   def __init__(self, logFileName):
+   def __init__(self):
       # ====== Initialise object ============================================
       self.blockStack = []
       self.lastError  = None
 
       # ====== Initialise logger ============================================
-      #loggingConfiguration = {
-         #'version': 1,
-         #'handlers': {
-            #'default': {
-               #'level':     'DEBUG',
-               #'class':     'logging.handlers.TimedRotatingFileHandler',
-               #'formatter': 'standard',
-               #'filename':  logFileName,
-               #'when':      'D'
-            #}
-         #},
-         #'formatters': {
-            #'standard': {
-               #'format': '%(asctime)s %(levelname)s [PID=%(process)d] %(message)s'
-            #}
-         #},
-         #'root': {
-            #'level':    'DEBUG',
-            #'handlers': ['default']
-         #}
-      #}
-      #logging.config.dictConfig(loggingConfiguration)
       self.logger = logging.getLogger(__name__)
-      self.logger.debug('Starting')
+      self.logger.error('Starting')
 
 
    # ###### Begin block #####################################################
@@ -84,6 +62,7 @@ class VDUHelper:
       self.lastError = None
 
       message = label + ' ...'
+      print(message)
       self.logger.debug(message)
       return message
 
@@ -95,9 +74,11 @@ class VDUHelper:
 
       if success == True:
          message = label + ' completed!'
+         print(message)
          self.logger.debug(message)
       else:
          message = label + ' FAILED!'
+         print(message)
          self.logger.error(message)
          if self.lastError == None:
             self.lastError = message
@@ -116,12 +97,9 @@ class VDUHelper:
       #self.logger.debug(commands)
       #subprocess.check_call(commands, shell=True)
 
-      self.logger.debug("C=" + commands)
-      print(commands)
-      self.logger.debug(commands)
-      self.logger.debug("C2")
+      print('Shell: ' + commands)
+      self.logger.debug('Shell: ' + commands)
       charms.sshproxy._run(commands)
-      self.logger.debug("C2")
 
 
    # ###### Run shell commands and handle exceptions ########################
