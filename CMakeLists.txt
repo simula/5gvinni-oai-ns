@@ -182,7 +182,7 @@ FOREACH(charmName IN LISTS CHARM_SOURCE_LIST)
    SET(timestampFile "${charmOutputDirectory}.stamp")
    ADD_CUSTOM_COMMAND(OUTPUT  ${timestampFile}
                       COMMAND echo cp ${vduHelperFiles} ${charmInputDirectory}
-                      COMMAND cp ${vduHelperFiles} ${charmInputDirectory}
+                      COMMAND cp ${vduHelperFiles} ${charmInputDirectory}/reactive
                       COMMAND rm -rf ${charmOutputDirectory}                      
                       COMMAND env CHARM_LAYERS_DIR=${CHARMS_BASELAYERS_DIRECTORY} ${CHARM} build --build-dir ${charmBuildDirectory}
                       # FIXME!
