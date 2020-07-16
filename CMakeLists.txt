@@ -179,7 +179,7 @@ FOREACH(charmName IN LISTS CHARM_SOURCE_LIST)
                       COMMAND touch ${timestampFile}
                       WORKING_DIRECTORY ${charmInputDirectory}
                       DEPENDS ${charmInputFiles})
-   ADD_CUSTOM_TARGET(${generate_charm} DEPENDS ${timestampFile} ${charmInputFiles})
+   ADD_CUSTOM_TARGET(${generate_charm} DEPENDS ${timestampFile})
 ENDFOREACH()
 
 
@@ -202,9 +202,9 @@ FOREACH(vnfd IN LISTS VNFD_LIST)
                          COMMAND rm -rf ${charmCopyDirectory}
                          COMMAND mkdir -p ${charmCopyDirectory}
                          COMMAND cp -a ${charmOutputDirectory}/* ${charmCopyDirectory}/
-                         DEPENDS ${charmOutputDirectory}/version)
-      ADD_CUSTOM_TARGET(${generate_vnfd_charm} DEPENDS ${charmCopyDirectory}/version ${allYAMLs} ${generate_charm})
-      LIST(APPEND allCharmsInVNFD ${generate_vnfd_charm})
+                         DEPENDS ${charmOutputDirectory}/version ${allYAMLs} ${generate_charm})
+      ADD_CUSTOM_TARGET(${generate_vnfd_charm} DEPENDS ${charmCopyDirectory}/version)
+      LIST(APPEND allCharmsInVNFD ${charmCopyDirectory}/version)
    ENDFOREACH()
 
    # ====== Validate cloud-init YAML files ==================================
@@ -224,7 +224,7 @@ FOREACH(vnfd IN LISTS VNFD_LIST)
                          COMMAND ${YAMLLINT} -d '{extends: relaxed, rules: {document-start: {present: no}}}' ${vnfdCloudInitFile}
                          COMMAND touch ${timestampFile}
                          DEPENDS ${vnfdCloudInitFile})
-      ADD_CUSTOM_TARGET(${validate_cloudinit} DEPENDS ${timestampFile} ${vnfdCloudInitFile})
+      ADD_CUSTOM_TARGET(${validate_cloudinit} DEPENDS ${timestampFile})
 
       LIST(APPEND allVNFDCloudInitFiles ${validate_cloudinit})
    ENDFOREACH()
@@ -238,7 +238,7 @@ FOREACH(vnfd IN LISTS VNFD_LIST)
                       COMMAND ${VALIDATE_DESCRIPTOR} ${vnfdDefinition}
                       COMMAND ${GENERATE_DESCRIPTOR} -t vnfd -N ${vnfd}/
                       COMMAND du -k ${vnfdPackage}
-                      DEPENDS ${vnfdFiles})
+                      DEPENDS ${vnfdFiles}  ${allYAMLs} ${allVNFDCloudInitFiles} ${allCharmsInVNFD})
    ADD_CUSTOM_TARGET(${generate_vnfdPackage}
                      DEPENDS ${vnfdPackage} ${allYAMLs} ${allVNFDCloudInitFiles} ${allCharmsInVNFD})
 
