@@ -137,7 +137,7 @@ ENDFUNCTION()
 
 
 # ###### Validate YAML ######################################################
-EXECUTE_PROCESS(COMMAND git ls-files ${vnfd}
+EXECUTE_PROCESS(COMMAND git ls-files .
                 COMMAND grep -E ".yaml$"
                 COMMAND tr "\n" ";"
                 COMMAND sed -e "s/;$//g"
@@ -158,11 +158,20 @@ FOREACH(yamlFile IN LISTS yamlFiles)
 ENDFOREACH()
 
 
+# ###### VDUHelper ##########################################################
+EXECUTE_PROCESS(COMMAND git ls-files vduhelper
+                COMMAND grep -v "README$"
+                COMMAND sed -e "s#^#${CMAKE_SOURCE_DIR}/#g"
+                COMMAND tr "\n" ";"
+                COMMAND sed -e "s/;$//g"
+                OUTPUT_VARIABLE vduHelperFiles OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+
 # ###### Generate Juju Charms ###############################################
-FILE(MAKE_DIRECTORY ${CHARMS_BUILD_DIRECTORY})
+GET_FILENAME_COMPONENT(charmBuildDirectory ${CHARMS_BUILD_DIRECTORY} ABSOLUTE)
+FILE(MAKE_DIRECTORY ${charmBuildDirectory})
 FOREACH(charmName IN LISTS CHARM_SOURCE_LIST)
    GET_FILENAME_COMPONENT(charmInputDirectory  ${CHARMS_SOURCE_DIRECTORY}/${charmName} ABSOLUTE)
-   GET_FILENAME_COMPONENT(charmBuildDirectory  ${CHARMS_BUILD_DIRECTORY}               ABSOLUTE)
    GET_FILENAME_COMPONENT(charmOutputDirectory ${charmBuildDirectory}/${charmName}     ABSOLUTE)
    EXECUTE_PROCESS(COMMAND git ls-files ${charmInputDirectory}
                    COMMAND tr "\n" ";"
@@ -172,13 +181,15 @@ FOREACH(charmName IN LISTS CHARM_SOURCE_LIST)
    makeUniqueTarget(generate_charm "generate_${charmName}")
    SET(timestampFile "${charmOutputDirectory}.stamp")
    ADD_CUSTOM_COMMAND(OUTPUT  ${timestampFile}
-                      COMMAND rm -rf ${charmOutputDirectory}
+                      COMMAND echo cp ${vduHelperFiles} ${charmInputDirectory}
+                      COMMAND cp ${vduHelperFiles} ${charmInputDirectory}
+                      COMMAND rm -rf ${charmOutputDirectory}                      
                       COMMAND env CHARM_LAYERS_DIR=${CHARMS_BASELAYERS_DIRECTORY} ${CHARM} build --build-dir ${charmBuildDirectory}
                       # FIXME!
                       # COMMAND sed -e "s#^import shlex#import shlex\\\\nimport traceback#g" -i ${charmOutputDirectory}/lib/charms/sshproxy.py
                       COMMAND touch ${timestampFile}
                       WORKING_DIRECTORY ${charmInputDirectory}
-                      DEPENDS ${charmInputFiles})
+                      DEPENDS ${charmInputFiles} ${vduHelperFiles})
    ADD_CUSTOM_TARGET(${generate_charm} DEPENDS ${timestampFile})
 ENDFOREACH()
 
