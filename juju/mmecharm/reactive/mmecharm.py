@@ -62,7 +62,7 @@ vduHelper = VDUHelper.VDUHelper()
 
 
 # ###########################################################################
-# #### MME Charm Functions                                               ####
+# #### MME Charm functions                                               ####
 # ###########################################################################
 
 # ###### Installation #######################################################
@@ -70,7 +70,7 @@ vduHelper = VDUHelper.VDUHelper()
 @when_not('mmecharm.installed')
 def install_mmecharm_proxy_charm():
    set_flag('mmecharm.installed')
-   status_set('active', 'install_mmecharm_proxy_charm: SSH proxy charm is READY')
+   vduHelper.setStatus('install_mmecharm_proxy_charm: SSH proxy charm is READY')
 
 
 # ###### prepare-mme-build function #########################################

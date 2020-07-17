@@ -421,7 +421,7 @@ echo \\\"###### Done! ##########################################################
 
 
 # ###########################################################################
-# #### MME Charm Functions                                               ####
+# #### MME Charm functions                                               ####
 # ###########################################################################
 
 # ###### Installation #######################################################
@@ -429,7 +429,7 @@ echo \\\"###### Done! ##########################################################
 @when_not('mmecharm.installed')
 def install_mmecharm_proxy_charm():
    set_flag('mmecharm.installed')
-   status_set('active', 'install_mmecharm_proxy_charm: SSH proxy charm is READY')
+   vduHelper.setStatus('install_mmecharm_proxy_charm: SSH proxy charm is READY')
 
 
 # ###### prepare-mme-build function #########################################
@@ -1072,8 +1072,10 @@ echo \\\"###### Done! ##########################################################
 #configure_cassandra()
 #configure_hss()
 
+install_mmecharm_proxy_charm()
 prepare_mme_build()
 configure_mme()
+restart_mme()
 
 #prepare_spgwu_build()
 #configure_spgwu()
