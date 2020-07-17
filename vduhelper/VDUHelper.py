@@ -130,7 +130,7 @@ class VDUHelper:
       if self.testMode == False:
          print('Shell: ' + commands)
          self.logger.debug('Shell: ' + commands)
-         VDUHelper.sshproxy_module._run(commands)
+         self.sshproxy_module._run(commands)
 
       else:
          sys.stdout.write('-----------------------------------------------------------------------------\n')
