@@ -1,0 +1,5 @@
+# ---------------------------------------------------------------------------
+
+cores=`getconf _NPROCESSORS_ONLN 2>/dev/null || true`
+export MAKEFLAGS=-j${cores}
+export XZ_DEFAULTS="-T 0"
