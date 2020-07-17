@@ -36,12 +36,6 @@ import subprocess
 import sys
 import traceback
 
-from charmhelpers.core.hookenv import (
-    status_set
-)
-import charms.sshproxy
-
-
 
 # ###########################################################################
 # #### VDUHelper class                                                   ####
@@ -49,14 +43,32 @@ import charms.sshproxy
 
 class VDUHelper:
    # ###### Constructor #####################################################
-   def __init__(self):
+   def __init__(self, testMode = False):
       # ====== Initialise object ============================================
+      self.testMode   = testMode
       self.blockStack = []
       self.lastError  = None
+
+      if testMode == False:
+         from charmhelpers.core.hookenv import (
+            status_set
+         )
+         import charms.sshproxy
 
       # ====== Initialise logger ============================================
       self.logger = logging.getLogger(__name__)
       self.logger.error('Starting')
+
+
+   # ###### Begin block #####################################################
+   def setStatus(self, message, isError = False):
+      # print('Status: ' + message)
+      if isError:
+         self.logger.error(message)
+      else:
+         self.logger.debug(message)
+      if self.testMode == False:
+         status_set('active', message)
 
 
    # ###### Begin block #####################################################
@@ -65,9 +77,7 @@ class VDUHelper:
       self.lastError = None
 
       message = label + ' ...'
-      status_set('active', message)
-      print(message)
-      self.logger.debug(message)
+      self.setStatus(message)
       return message
 
 
@@ -78,20 +88,24 @@ class VDUHelper:
 
       if success == True:
          message = label + ' completed!'
-         status_set('active', message)
-         print(message)
-         self.logger.debug(message)
+         self.setStatus(message)
       else:
          message = label + ' FAILED!'
-         status_set('active', message)
-         print(message)
-         self.logger.error(message)
+         self.setStatus(message, True)
          if self.lastError == None:
             self.lastError = message
          else:
             return message + ' <= ' + self.lastError
 
       return message
+
+
+   # ###### End block as part of exception handling #########################
+   def endBlockInException(self):
+      exceptionType, exceptionValue, exceptionTraceback = sys.exc_info()
+      exceptionTraceback = traceback.format_exception(exceptionType, exceptionValue, exceptionTraceback)
+      self.endBlock(False)
+      self.logger.error(str(''.join(map(str, exceptionTraceback))))
 
 
    # ###### Touch file ######################################################
@@ -110,16 +124,17 @@ class VDUHelper:
 
    # ###### Execute command #################################################
    def execute(self, commands):
-      #sys.stdout.write('-----------------------------------------------------------------------------\n')
-      #sys.stdout.write('time bash -c "' + commands + '"\n')
+      if self.testMode == False:
+         print('Shell: ' + commands)
+         self.logger.debug('Shell: ' + commands)
+         charms.sshproxy._run(commands)
 
-      #print(commands)
-      #self.logger.debug(commands)
-      #subprocess.check_call(commands, shell=True)
+      else:
+         sys.stdout.write('-----------------------------------------------------------------------------\n')
+         sys.stdout.write('time bash -c "' + commands + '"\n')
 
-      print('Shell: ' + commands)
-      self.logger.debug('Shell: ' + commands)
-      charms.sshproxy._run(commands)
+         # commands = 'echo "' + commands + '"'
+         # subprocess.check_call(commands, shell=True)
 
 
    # ###### Run shell commands and handle exceptions ########################
@@ -175,7 +190,7 @@ class VDUHelper:
             'iface ' + interfaceName + ' inet static\\\\n' + \
             '\\\\taddress ' + str(ipv4Interface.ip)      + '\\\\n' + \
             '\\\\tnetmask ' + str(ipv4Interface.netmask) + '\\\\n'
-         if ((ipv4Gateway != None) and (ipv4Gateway != IPv4Address('0.0.0.0'))):
+         if ((ipv4Gateway != None) and (ipv4Gateway != ipaddress.IPv4Address('0.0.0.0'))):
             interfaceConfiguration = interfaceConfiguration + \
                '\\\\tgateway ' + str(ipv4Gateway) + '\\\\n' + \
                '\\\\tmetric '  + str(metric)      + '\\\\n'
@@ -198,7 +213,7 @@ class VDUHelper:
             '\\\\tautoconf 0\\\\n' + \
             '\\\\taddress ' + str(ipv6Interface.ip)                + '\\\\n' + \
             '\\\\tnetmask ' + str(ipv6Interface.network.prefixlen) + '\\\\n'
-         if ((ipv6Gateway != None) and (ipv6Gateway != IPv6Address('::'))):
+         if ((ipv6Gateway != None) and (ipv6Gateway != ipaddress.IPv6Address('::'))):
             interfaceConfiguration = interfaceConfiguration + \
                '\\\\tgateway ' + str(ipv6Gateway) + '\\\\n' + \
                '\\\\tmetric '  + str(metric)      + '\\\\n'
@@ -227,7 +242,7 @@ class VDUHelper:
 
       try:
          commands = """\
-   echo -e \\\"{interfaceConfiguration}\\\" | sudo tee /etc/network/interfaces.d/{priority}-{interfaceName} && sudo ifup {interfaceName} || true""".format(
+echo -e \\\"{interfaceConfiguration}\\\" | sudo tee /etc/network/interfaces.d/{priority}-{interfaceName} && sudo ifup {interfaceName} || true""".format(
             interfaceName          = interfaceName,
             interfaceConfiguration = interfaceConfiguration,
             priority               = priority

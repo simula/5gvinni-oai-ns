@@ -40,7 +40,7 @@ def touch():
         message = vduHelper.endBlock()
         function_set( { 'outout': message } )
     except:
-        message = vduHelper.endBlock(False)
+        message = vduHelper.endBlockInException()
         function_fail(message)
     finally:
         clear_flag('actions.touch')

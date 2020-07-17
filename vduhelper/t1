@@ -1,0 +1,27 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+import ipaddress
+import sys
+import traceback
+
+import VDUHelper
+
+vduHelper = VDUHelper.VDUHelper(True)   # Test Mode!!!
+
+vduHelper.beginBlock('Preparing sources')
+try:
+
+   hssS6a_IfName    = 'ens4'
+   configurationS6a = vduHelper.makeInterfaceConfiguration('eth0', ipaddress.IPv4Interface('0.0.0.0/0'))
+   vduHelper.configureInterface('eth0', configurationS6a)
+   vduHelper.touchFile('/tmp/touch-test1')
+   vduHelper.testNetworking('8.8.8.9', 2)
+   vduHelper.endBlock()
+except:
+   exceptionType, exceptionValue, exceptionTraceback = sys.exc_info()
+   err = traceback.format_exception(exceptionType, exceptionValue, exceptionTraceback)
+
+   errorMessage = vduHelper.endBlockInException()
+   print(errorMessage)
+   pass

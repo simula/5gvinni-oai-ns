@@ -60,41 +60,9 @@ vduHelper = VDUHelper.VDUHelper()
 # ***************************************************************************
 
 
-### !!!!! FIXME
-## ###### Execute command ####################################################
-#def execute(commands):
-   #return charms.sshproxy._run(commands)
-
-
-### !!!!! FIXME
-## ###### Run shell commands, handle exceptions, and upage status flags ######
-#def runShellCommands(commands, comment, actionFlagToClear, successFlagToSet = None):
-   #status_set('active', comment + ' ...')
-   #try:
-       #stdout, stderr = execute(commands)
-   #except subprocess.CalledProcessError as e:
-       #exc_type, exc_value, exc_traceback = sys.exc_info()
-       #err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       #message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       #action_fail(message.encode('utf-8'))
-       #status_set('active', comment + ' COMMANDS FAILED!')
-   #except:
-       #exc_type, exc_value, exc_traceback = sys.exc_info()
-       #err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       #action_fail('Command execution failed: ' + str(err))
-       #status_set('active', comment + ' FAILED!')
-   #else:
-      #if successFlagToSet != None:
-         #set_flag(successFlagToSet)
-      ## action_set( { 'output': stdout.encode('utf-8') } )
-      #status_set('active', comment + ' COMPLETED')
-   #finally:
-      #clear_flag(actionFlagToClear)
-
-
 
 # ###########################################################################
-# #### Charm functions                                                   ####
+# #### MME Charm Functions                                               ####
 # ###########################################################################
 
 # ###### Installation #######################################################
@@ -163,9 +131,9 @@ def prepare_mme_build():
 
       message = vduHelper.endBlock()
       function_set( { 'outout': message } )
-      flag_set('mmecharm.prepared-mme-build')
+      set_flag('mmecharm.prepared-mme-build')
    except:
-      message = vduHelper.endBlock(False)
+      message = vduHelper.endBlockInException()
       function_fail(message)
    finally:
       clear_flag('actions.prepare-mme-build')
@@ -256,7 +224,7 @@ export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
 cd /home/nornetpp/src/{gitDirectory}/scripts && \\
 mkdir -p logs && \\
 ./build_mme --check-installed-software --force >logs/build_mme-1.log 2>&1""".format(gitDirectory = gitDirectory)
-      self.runInShell(commands)
+      vduHelper.runInShell(commands)
       vduHelper.endBlock()
 
       # ====== Build MME itself =============================================
@@ -265,10 +233,10 @@ mkdir -p logs && \\
 export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
 cd /home/nornetpp/src/{gitDirectory}/scripts && \\
 ./build_mme --clean >logs/build_mme-2.log 2>&1""".format(gitDirectory = gitDirectory)
-      self.runInShell(commands)
+      vduHelper.runInShell(commands)
       vduHelper.endBlock()
 
-      # ====== Configure MME  ===============================================
+      # ====== Configure MME ================================================
       vduHelper.beginBlock('Configuring MME')
       commands = """\
 export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
@@ -325,33 +293,7 @@ MME_CONF[@MNC3_MME_1@]={networkMNC:03d} && \\
 MME_CONF[@TAC-LB_MME_1@]={tac_mme_1_lo} && \\
 MME_CONF[@TAC-HB_MME_1@]={tac_mme_1_hi} && \\
 for K in \\\"\${{!MME_CONF[@]}}\\\"; do sudo egrep -lRZ \\\"\$K\\\" \$PREFIX | xargs -0 -l sudo sed -i -e \\\"s|\$K|\${{MME_CONF[\$K]}}|g\\\" ; ret=\$?;[[ ret -ne 0 ]] && echo \\\"Tried to replace \$K with \${{MME_CONF[\$K]}}\\\" || true ; done && \\
-sudo ./check_mme_s6a_certificate \$PREFIX/freeDiameter mme.{networkRealm} >logs/check_mme_s6a_certificate.log 2>&1 && \\
-echo \\\"====== Preparing SystemD Unit ... ======\\\" && \\
-( echo \\\"[Unit]\\\" && \\
-echo \\\"Description=Mobility Management Entity (MME)\\\" && \\
-echo \\\"After=ssh.target\\\" && \\
-echo \\\"\\\" && \\
-echo \\\"[Service]\\\" && \\
-echo \\\"ExecStart=/bin/sh -c \\\'exec /usr/local/bin/mme -c /usr/local/etc/oai/mme.conf >>/var/log/mme.log 2>&1\\\'\\\" && \\
-echo \\\"KillMode=process\\\" && \\
-echo \\\"Restart=on-failure\\\" && \\
-echo \\\"RestartPreventExitStatus=255\\\" && \\
-echo \\\"WorkingDirectory=/home/nornetpp/src/openair-cn/scripts\\\" && \\
-echo \\\"\\\" && \\
-echo \\\"[Install]\\\" && \\
-echo \\\"WantedBy=multi-user.target\\\" ) | sudo tee /lib/systemd/system/mme.service && \\
-sudo systemctl daemon-reload && \\
-echo \\\"###### Creating helper scripts ########################################\\\" && \\
-( echo -e \\\"#\\x21/bin/sh\\\" && echo \\\"tail -f /var/log/mme.log\\\" ) | tee /home/nornetpp/log && \\
-chmod +x /home/nornetpp/log && \\
-( echo -e \\\"#\\x21/bin/sh\\\" && echo \\\"sudo service mme restart && ./log\\\" ) | tee /home/nornetpp/restart && \\
-chmod +x /home/nornetpp/restart && \\
-echo \\\"###### Installing sysstat #############################################\\\" && \\
-DEBIAN_FRONTEND=noninteractive sudo apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends sysstat && \\
-sudo sed -e \\\"s/^ENABLED=.*$/ENABLED=\\\\\\"true\\\\\\"/g\\\" -i /etc/default/sysstat && \\
-sudo sed -e \\\"s/^SADC_OPTIONS=.*$/SADC_OPTIONS=\\\\\\"-S ALL\\\\\\"/g\\\" -i /etc/sysstat/sysstat && \\
-sudo service sysstat restart && \\
-echo \\\"###### Done! ##########################################################\\\"""".format(
+sudo ./check_mme_s6a_certificate \$PREFIX/freeDiameter mme.{networkRealm} >logs/check_mme_s6a_certificate.log 2>&1""".format(
          gitDirectory           = gitDirectory,
          hssS6a_IPv4Address     = hssS6a_IPv4Address,
          mmeS1C_IfName          = mmeS1C_IfName,
@@ -380,14 +322,49 @@ echo \\\"###### Done! ##########################################################
          tac_mme_1_hi           = tac_mme_1[0:2],
          tac_mme_1_lo           = tac_mme_1[2:4]
       )
-      self.runInShell(commands)
+      vduHelper.runInShell(commands)
       vduHelper.endBlock()
+
+      # ====== Set up MME service ===========================================
+      vduHelper.beginBlock('Setting up MME service')
+      commands = """\
+( echo \\\"[Unit]\\\" && \\
+echo \\\"Description=Mobility Management Entity (MME)\\\" && \\
+echo \\\"After=ssh.target\\\" && \\
+echo \\\"\\\" && \\
+echo \\\"[Service]\\\" && \\
+echo \\\"ExecStart=/bin/sh -c \\\'exec /usr/local/bin/mme -c /usr/local/etc/oai/mme.conf >>/var/log/mme.log 2>&1\\\'\\\" && \\
+echo \\\"KillMode=process\\\" && \\
+echo \\\"Restart=on-failure\\\" && \\
+echo \\\"RestartPreventExitStatus=255\\\" && \\
+echo \\\"WorkingDirectory=/home/nornetpp/src/openair-cn/scripts\\\" && \\
+echo \\\"\\\" && \\
+echo \\\"[Install]\\\" && \\
+echo \\\"WantedBy=multi-user.target\\\" ) | sudo tee /lib/systemd/system/mme.service && \\
+sudo systemctl daemon-reload && \\
+( echo -e \\\"#\\x21/bin/sh\\\" && echo \\\"tail -f /var/log/mme.log\\\" ) | tee /home/nornetpp/log && \\
+chmod +x /home/nornetpp/log && \\
+( echo -e \\\"#\\x21/bin/sh\\\" && echo \\\"sudo service mme restart && ./log\\\" ) | tee /home/nornetpp/restart && \\
+chmod +x /home/nornetpp/restart"""
+      vduHelper.runInShell(commands)
+      vduHelper.endBlock()
+
+      # ====== Set up sysstat service =======================================
+      vduHelper.beginBlock('Setting up sysstat service')
+      commands = """\
+DEBIAN_FRONTEND=noninteractive sudo apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends sysstat && \\
+sudo sed -e \\\"s/^ENABLED=.*$/ENABLED=\\\\\\"true\\\\\\"/g\\\" -i /etc/default/sysstat && \\
+sudo sed -e \\\"s/^SADC_OPTIONS=.*$/SADC_OPTIONS=\\\\\\"-S ALL\\\\\\"/g\\\" -i /etc/sysstat/sysstat && \\
+sudo service sysstat restart"""
+      vduHelper.runInShell(commands)
+      vduHelper.endBlock()
+
 
       message = vduHelper.endBlock()
       function_set( { 'outout': message } )
-      flag_set('mmecharm.configured-mme')
+      set_flag('mmecharm.configured-mme')
    except:
-      message = vduHelper.endBlock(False)
+      message = vduHelper.endBlockInException()
       function_fail(message)
    finally:
       clear_flag('actions.configure-mme')
@@ -401,12 +378,12 @@ def restart_mme():
    try:
 
       commands = 'sudo service mme restart'
-      self.runInShell(commands)
+      vduHelper.runInShell(commands)
 
       message = vduHelper.endBlock()
       function_set( { 'outout': message } )
    except:
-      message = vduHelper.endBlock(False)
+      message = vduHelper.endBlockInException()
       function_fail(message)
    finally:
       clear_flag('actions.restart-mme')
