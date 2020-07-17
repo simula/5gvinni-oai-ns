@@ -28,5 +28,6 @@
 
 includes:
   - layer:basic
+  - layer:metrics
   - layer:vnfproxy
 repo: https://github.com/simula/5gvinni-oai-ns
