@@ -349,14 +349,7 @@ chmod +x /home/nornetpp/restart"""
       vduHelper.endBlock()
 
       # ====== Set up sysstat service =======================================
-      vduHelper.beginBlock('Setting up sysstat service')
-      commands = """\
-DEBIAN_FRONTEND=noninteractive sudo apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends sysstat && \\
-sudo sed -e \\\"s/^ENABLED=.*$/ENABLED=\\\\\\"true\\\\\\"/g\\\" -i /etc/default/sysstat && \\
-sudo sed -e \\\"s/^SADC_OPTIONS=.*$/SADC_OPTIONS=\\\\\\"-S ALL\\\\\\"/g\\\" -i /etc/sysstat/sysstat && \\
-sudo service sysstat restart"""
-      vduHelper.runInShell(commands)
-      vduHelper.endBlock()
+      vduHelper.installSysStat()
 
 
       message = vduHelper.endBlock()

@@ -288,6 +288,18 @@ echo -e \\\"{interfaceConfiguration}\\\" | sudo tee /etc/network/interfaces.d/{p
          self.runInShell(commands)
 
 
+   # ###### Install SysStat #################################################
+   def installSysStat(self):
+      self.beginBlock('Setting up sysstat service')
+      commands = """\
+DEBIAN_FRONTEND=noninteractive sudo apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends sysstat && \\
+sudo sed -e \\\"s/^ENABLED=.*$/ENABLED=\\\\\\"true\\\\\\"/g\\\" -i /etc/default/sysstat && \\
+sudo sed -e \\\"s/^SADC_OPTIONS=.*$/SADC_OPTIONS=\\\\\\"-S ALL\\\\\\"/g\\\" -i /etc/sysstat/sysstat && \\
+sudo service sysstat restart"""
+      self.runInShell(commands)
+      self.endBlock()
+
+
    # ###### Fetch Git repository ############################################
    def fetchGitRepository(self, gitDirectory, gitRepository, gitCommit):
       self.beginBlock('Fetching Git repository ' + gitDirectory)
