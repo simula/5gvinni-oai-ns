@@ -238,3 +238,22 @@ chmod +x /home/nornetpp/restart"""
       function_fail(message)
    finally:
       clear_flag('actions.configure-spgwc')
+
+
+# ###### restart-spgwc function #############################################
+@when('actions.restart-spgwc')
+@when('spgwccharm.configured-spgwc')
+def restart_spgwc():
+   vduHelper.beginBlock('restart_spgwc')
+   try:
+
+      commands = 'sudo service spgwc restart'
+      vduHelper.runInShell(commands)
+
+      message = vduHelper.endBlock()
+      function_set( { 'outout': message } )
+   except:
+      message = vduHelper.endBlockInException()
+      function_fail(message)
+   finally:
+      clear_flag('actions.restart-spgwc')
