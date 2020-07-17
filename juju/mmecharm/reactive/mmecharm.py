@@ -11,7 +11,7 @@
 # =====================================================================
 #
 # SimulaMet OpenAirInterface Evolved Packet Core NS
-# Copyright (C) 2019 by Thomas Dreibholz
+# Copyright (C) 2019-2020 by Thomas Dreibholz
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -40,7 +40,6 @@ from charms.reactive import (
     when,
     when_not
 )
-import charms.sshproxy
 import subprocess
 import sys
 import traceback
@@ -126,7 +125,7 @@ def prepare_mme_build():
 
       # ====== Prepare sources ==============================================
       vduHelper.beginBlock('Preparing sources')
-      vduHelper.fetchGitRepository(self, gitDirectory, gitRepository, gitCommit)
+      vduHelper.fetchGitRepository(gitDirectory, gitRepository, gitCommit)
       vduHelper.endBlock()
 
       message = vduHelper.endBlock()

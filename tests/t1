@@ -485,7 +485,7 @@ def prepare_mme_build():
 
       # ====== Prepare sources ==============================================
       vduHelper.beginBlock('Preparing sources')
-      vduHelper.fetchGitRepository(self, gitDirectory, gitRepository, gitCommit)
+      vduHelper.fetchGitRepository(gitDirectory, gitRepository, gitCommit)
       vduHelper.endBlock()
 
       message = vduHelper.endBlock()

@@ -49,7 +49,7 @@ class VDUHelper:
       self.blockStack = []
       self.lastError  = None
 
-      if testMode == False:
+      if self.testMode == False:
          from charmhelpers.core.hookenv import (
             status_set
          )
@@ -57,7 +57,10 @@ class VDUHelper:
 
       # ====== Initialise logger ============================================
       self.logger = logging.getLogger(__name__)
-      self.logger.error('Starting')
+      if self.testMode == False:
+         self.logger.error('Starting')
+      else:
+         self.logger.error('Starting in Test Mode!')
 
 
    # ###### Begin block #####################################################
