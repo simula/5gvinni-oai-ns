@@ -259,13 +259,14 @@ echo -e \\\"{interfaceConfiguration}\\\" | sudo tee /etc/network/interfaces.d/{p
 
 
    # ###### Test networking #################################################
-   def testNetworking(self, destination = ipaddress.IPv4Address('8.8.8.8'), timeout = 60):
+   def testNetworking(self, destination = ipaddress.IPv4Address('8.8.8.8'), timeout = 60, interval = 0.333):
       self.beginBlock('Testing networking')
 
       try:
-         commands = """ping -W{timeout} -c3 {destination}""".format(
+         commands = """ping -W{timeout}  -i{interval} -c3 {destination}""".format(
             destination = str(destination),
-            timeout     = timeout
+            timeout     = timeout,
+            interval    = interval
          )
          self.runInShell(commands)
       except:

@@ -115,18 +115,19 @@ def prepare_mme_build():
 
       # ====== Prepare system ===============================================
       vduHelper.beginBlock('Preparing system')
-      vduHelper.configureInterface(mmeS6a_IfName, configurationS6a, 61)
-      vduHelper.configureInterface(mmeS11_IfName, configurationS11, 62)
-      vduHelper.configureInterface(mmeS1C_IfName, configurationS1C, 63)
+      vduHelper.vduHelper.makeInterfaceConfiguration(mmeS6a_IfName, configurationS6a, 61)
+      vduHelper.vduHelper.makeInterfaceConfiguration(mmeS11_IfName, configurationS11, 62)
+      vduHelper.vduHelper.makeInterfaceConfiguration(mmeS1C_IfName, configurationS1C, 63)
       vduHelper.addDummyInterface('dummy0')
-      vduHelper.configureInterface(mmeS10_IfName, configurationS10, 64)
-      vduHelper.testNetworking('8.8.8.8', 2)
+      vduHelper.vduHelper.makeInterfaceConfiguration(mmeS10_IfName, configurationS10, 64)
+      vduHelper.testNetworking('8.8.8.8')
       vduHelper.endBlock()
 
       # ====== Prepare sources ==============================================
       vduHelper.beginBlock('Preparing sources')
       vduHelper.fetchGitRepository(gitDirectory, gitRepository, gitCommit)
       vduHelper.endBlock()
+
 
       message = vduHelper.endBlock()
       function_set( { 'outout': message } )
@@ -136,41 +137,6 @@ def prepare_mme_build():
       function_fail(message)
    finally:
       clear_flag('actions.prepare-mme-build')
-
-      ## NOTE:
-      ## Double escaping is required for \ and " in "command" string!
-      ## 1. Python
-      ## 2. bash -c "<command>"
-      ## That is: $ => \$ ; \ => \\ ; " => \\\"
-
-      #commands = """\
-   #echo \\\"###### Preparing system ###############################################\\\" && \\
-   #echo -e \\\"{configurationS6a}\\\" | sudo tee /etc/network/interfaces.d/61-{mmeS6a_IfName} && sudo ifup {mmeS6a_IfName} || true && \\
-   #echo -e \\\"{configurationS11}\\\" | sudo tee /etc/network/interfaces.d/62-{mmeS11_IfName} && sudo ifup {mmeS11_IfName} || true && \\
-   #echo -e \\\"{configurationS1C}\\\" | sudo tee /etc/network/interfaces.d/63-{mmeS1C_IfName} && sudo ifup {mmeS1C_IfName} || true && \\
-   #sudo ip link add dummy0 type dummy || true && \\
-   #echo -e \\\"{configurationS10}\\\" | sudo tee /etc/network/interfaces.d/64-{mmeS10_IfName} && sudo ifup {mmeS10_IfName} || true && \\
-   #echo \\\"###### Preparing sources ##############################################\\\" && \\
-   #cd /home/nornetpp/src && \\
-   #if [ ! -d \\\"{gitDirectory}\\\" ] ; then git clone --quiet {gitRepository} {gitDirectory} && cd {gitDirectory} ; else cd {gitDirectory} && git pull ; fi && \\
-   #git checkout {gitCommit} && \\
-   #cd scripts && \\
-   #echo \\\"###### Done! ##########################################################\\\"""".format(
-         #gitRepository    = gitRepository,
-         #gitDirectory     = gitDirectory,
-         #gitCommit        = gitCommit,
-         #mmeS6a_IfName    = mmeS6a_IfName,
-         #mmeS11_IfName    = mmeS11_IfName,
-         #mmeS1C_IfName    = mmeS1C_IfName,
-         #mmeS10_IfName    = mmeS10_IfName,
-         #configurationS6a = configurationS6a,
-         #configurationS11 = configurationS11,
-         #configurationS1C = configurationS1C,
-         #configurationS10 = configurationS10
-      #)
-
-      #runShellCommands(commands, 'prepare_mme_build: preparing MME build',
-                     #'actions.prepare-mme-build', 'mmecharm.prepared-mme-build')
 
 
 # ###### configure-mme function #############################################
@@ -366,7 +332,7 @@ chmod +x /home/nornetpp/restart"""
 @when('actions.restart-mme')
 @when('mmecharm.configured-mme')
 def restart_mme():
-   vduHelper.beginBlock('restart-mme')
+   vduHelper.beginBlock('restart_mme')
    try:
 
       commands = 'sudo service mme restart'

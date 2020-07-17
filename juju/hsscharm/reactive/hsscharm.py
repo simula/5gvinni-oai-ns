@@ -78,7 +78,7 @@ def install_hsscharm_proxy_charm():
 @when('hsscharm.installed')
 @when_not('hsscharm.prepared-cassandra-hss-build')
 def prepare_cassandra_hss_build():
-   vduHelper.beginBlock('prepare_mme_build')
+   vduHelper.beginBlock('prepare_cassandra_hss_build')
    try:
 
       # ====== Get HSS parameters ===========================================
@@ -96,7 +96,7 @@ def prepare_cassandra_hss_build():
       # ====== Prepare system ===============================================
       vduHelper.beginBlock('Preparing system')
       vduHelper.configureInterface(hssS6a_IfName, configurationS6a, 61)
-      vduHelper.testNetworking('8.8.8.8', 2)
+      vduHelper.testNetworking('8.8.8.8')
       commands = "if [ \\\"`find /etc/apt/sources.list.d -name 'rmescandon-ubuntu-yq-*.list'`\\\" == \\\"\\\" ] ; then sudo add-apt-repository -y ppa:rmescandon/yq ; fi"
       vduHelper.runInShell(commands)
       vduHelper.aptInstallPackages([ 'yq' ])
@@ -192,7 +192,7 @@ sudo service cassandra status | cat""".format(
 @when('actions.configure-hss')
 @when('hsscharm.configured-cassandra')
 def configure_hss():
-   vduHelper.beginBlock('configure_cassandra')
+   vduHelper.beginBlock('configure_hss')
    try:
 
       # ====== Get HSS parameters ===========================================
@@ -310,7 +310,11 @@ echo \\\"WorkingDirectory=/home/nornetpp/src/openair-cn/scripts\\\" && \\
 echo \\\"\\\" && \\
 echo \\\"[Install]\\\" && \\
 echo \\\"WantedBy=multi-user.target\\\" ) | sudo tee /lib/systemd/system/hss.service && \\
-sudo systemctl daemon-reload"""
+sudo systemctl daemon-reload && \\
+( echo -e \\\"#\\x21/bin/sh\\\" && echo \\\"tail -f /var/log/hss.log\\\" ) | tee /home/nornetpp/log && \\
+chmod +x /home/nornetpp/log && \\
+( echo -e \\\"#\\x21/bin/sh\\\" && echo \\\"sudo service hss restart && ./log\\\" ) | tee /home/nornetpp/restart && \\
+chmod +x /home/nornetpp/restart"""
       vduHelper.runInShell(commands)
       vduHelper.endBlock()
 
@@ -332,7 +336,7 @@ sudo systemctl daemon-reload"""
 @when('actions.restart-hss')
 @when('hsscharm.configured-hss')
 def restart_hss():
-   vduHelper.beginBlock('restart-hss')
+   vduHelper.beginBlock('restart_hss')
    try:
 
       commands = 'sudo service hss restart'
