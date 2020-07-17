@@ -275,6 +275,19 @@ echo -e \\\"{interfaceConfiguration}\\\" | sudo tee /etc/network/interfaces.d/{p
       self.endBlock()
 
 
+   # ###### Test networking #################################################
+   def aptInstallPackages(self, packages, update = True):
+      if len(packages) > 0:
+         if update == True:
+            commands = 'sudo apt update && \\\n'
+         else:
+            commands = ''
+         commands = commands + 'DEBIAN_FRONTEND=noninteractive sudo apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends '
+         for package in packages:
+            commands = commands + package
+         self.runInShell(commands)
+
+
    # ###### Fetch Git repository ############################################
    def fetchGitRepository(self, gitDirectory, gitRepository, gitCommit):
       self.beginBlock('Fetching Git repository ' + gitDirectory)
