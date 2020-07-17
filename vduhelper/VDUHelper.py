@@ -50,9 +50,7 @@ class VDUHelper:
       self.lastError  = None
 
       if self.testMode == False:
-         from charmhelpers.core.hookenv import (
-            status_set
-         )
+         import charmhelpers.core.hookenv
          import charms.sshproxy
 
       # ====== Initialise logger ============================================
@@ -71,7 +69,7 @@ class VDUHelper:
       else:
          self.logger.debug(message)
       if self.testMode == False:
-         status_set('active', message)
+         VDUHelper.charmhelpers.core.hookenv.status_set('active', message)
 
 
    # ###### Begin block #####################################################
@@ -130,7 +128,7 @@ class VDUHelper:
       if self.testMode == False:
          print('Shell: ' + commands)
          self.logger.debug('Shell: ' + commands)
-         charms.sshproxy._run(commands)
+         VDUHelper.charms.sshproxy._run(commands)
 
       else:
          sys.stdout.write('-----------------------------------------------------------------------------\n')
