@@ -179,7 +179,7 @@ d-i preseed/late_command                            string \
  in-target /bin/sed -i "s/XKBOPTIONS=\"[a-z]*\"/XKBOPTIONS=\"<SET_XKBOPTIONS_HERE>\"/g" /etc/default/keyboard ; \
  in-target /usr/sbin/dpkg-reconfigure -fnoninteractive keyboard-configuration ; \
  in-target /usr/sbin/update-locale LC_TIME=en_GB.UTF-8 LC_MESSAGES=POSIX ; \
- in-target /usr/bin/apt-get install --reinstall nornet-management ; \
+ in-target /usr/bin/apt-get install -y --reinstall nornet-management ; \
  in-target /usr/bin/apt-file update ; \
  in-target /usr/bin/apt-get dist-upgrade -y ; \
  in-target /usr/bin/apt-get clean ; \
