@@ -47,9 +47,14 @@ vnfd:vnfd-catalog:
             juju:
               charm: simple
             metrics:
-              - name: load
-              - name: load_pct
+              - name: uptime
               - name: users
+              - name: cpu_processes
+              - name: cpu_load_1min
+              - name: cpu_load_5min
+              - name: cpu_load_15min
+              - name: memory_ram_usage
+              - name: memory_swap_usage
               - name: random
             initial-config-primitive:
               - seq: '1'
@@ -94,26 +99,56 @@ vnfd:vnfd-catalog:
             vdu-ref: mgmtVM
             vdu-monitoring-param-ref: metric_mgmtVM_memory
 
-        - id: metric_vim_mgmtVM_load
-          name: metric_vim_mgmtVM_load
+        - id: metric_mgmtVM_uptime
+          name: metric_mgmtVM_uptime
           aggregation-type: AVERAGE
           vdu-metric:
             vdu-ref: mgmtVM
-            vdu-metric-name-ref: load
-        - id: metric_vim_mgmtVM_loadpct
-          name: metric_vim_mgmtVM_loadpct
-          aggregation-type: AVERAGE
-          vdu-metric:
-            vdu-ref: mgmtVM
-            vdu-metric-name-ref: load_pct
-        - id: metric_vim_mgmtVM_users
-          name: metric_vim_mgmtVM_users
+            vdu-metric-name-ref: uptime
+        - id: metric_mgmtVM_users
+          name: metric_mgmtVM_users
           aggregation-type: AVERAGE
           vdu-metric:
             vdu-ref: mgmtVM
             vdu-metric-name-ref: users
-        - id: metric_vim_mgmtVM_random
-          name: metric_vim_mgmtVM_random
+        - id: metric_mgmtVM_cpu_load_1min
+          name: metric_mgmtVM_cpu_load_1min
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: mgmtVM
+            vdu-metric-name-ref: cpu_load_1min
+        - id: metric_mgmtVM_cpu_load_5min
+          name: metric_mgmtVM_cpu_load_5min
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: mgmtVM
+            vdu-metric-name-ref: cpu_load_5min
+        - id: metric_mgmtVM_cpu_load_15min
+          name: metric_mgmtVM_cpu_load_15min
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: mgmtVM
+            vdu-metric-name-ref: cpu_load_15min
+        - id: metric_mgmtVM_cpu_load_15min
+          name: metric_mgmtVM_cpu_load_15min
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: mgmtVM
+            vdu-metric-name-ref: cpu_load_15min
+        - id: metric_mgmtVM_memory_ram_usage
+          name: metric_mgmtVM_memory_ram_usage
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: mgmtVM
+            vdu-metric-name-ref: memory_ram_usage
+        - id: metric_mgmtVM_memory_swap_usage
+          name: metric_mgmtVM_memory_swap_usage
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: mgmtVM
+            vdu-metric-name-ref: memory_swap_usage
+        - id: metric_mgmtVM_random
+          name: metric_mgmtVM_random
           aggregation-type: AVERAGE
           vdu-metric:
             vdu-ref: mgmtVM
