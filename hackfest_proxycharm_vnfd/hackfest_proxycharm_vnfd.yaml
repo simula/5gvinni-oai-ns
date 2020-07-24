@@ -129,12 +129,6 @@ vnfd:vnfd-catalog:
           vdu-metric:
             vdu-ref: mgmtVM
             vdu-metric-name-ref: cpu_load_15min
-        - id: metric_mgmtVM_cpu_load_15min
-          name: metric_mgmtVM_cpu_load_15min
-          aggregation-type: AVERAGE
-          vdu-metric:
-            vdu-ref: mgmtVM
-            vdu-metric-name-ref: cpu_load_15min
         - id: metric_mgmtVM_memory_ram_usage
           name: metric_mgmtVM_memory_ram_usage
           aggregation-type: AVERAGE
