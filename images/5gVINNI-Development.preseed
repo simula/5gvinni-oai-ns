@@ -163,7 +163,7 @@ d-i preseed/late_command                            string \
  echo "====== NorNet/MELODIC Post-Install ======" ; \
  in-target /usr/bin/apt-add-repository -s -y ppa:dreibh/ppa ; \
  in-target /usr/bin/apt-get update ; \
- in-target /usr/bin/apt-get install -y nornet-management nornet-development nornet-autoupdate ; \
+ in-target /usr/bin/apt-get install -y gawk nornet-management nornet-development nornet-autoupdate ; \
  in-target /bin/bash -c -- '/bin/echo "# Network configuration written by preseed late_command" >/etc/network/interfaces' ; \
  in-target /bin/bash -c -- '/bin/echo "source /etc/network/interfaces.d/*" >>/etc/network/interfaces' ; \
  in-target /bin/bash -c -- '/bin/echo "" >>/etc/network/interfaces' ; \
