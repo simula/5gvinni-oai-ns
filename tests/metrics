@@ -26,3 +26,9 @@ cat /proc/meminfo | gawk '/^SwapTotal:/ { total=$2 } /^SwapFree:/ { available=$2
 
 # Disk usage for /:
 df / | tail -n1 | gawk '{ total=$2 ; used=$3 ; available=$4 ; print 100.0*(total-available)/total }'
+
+# Network for ens3:
+cat /proc/net/dev | gawk '/ens3:/ { inB=$2 ; inP=$3 ; outB=$10 ; outP=$11 ; print inB }'
+cat /proc/net/dev | gawk '/ens3:/ { inB=$2 ; inP=$3 ; outB=$10 ; outP=$11 ; print inP }'
+cat /proc/net/dev | gawk '/ens3:/ { inB=$2 ; inP=$3 ; outB=$10 ; outP=$11 ; print outB }'
+cat /proc/net/dev | gawk '/ens3:/ { inB=$2 ; inP=$3 ; outB=$10 ; outP=$11 ; print outP }'
