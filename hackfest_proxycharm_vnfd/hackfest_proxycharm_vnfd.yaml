@@ -57,10 +57,10 @@ vnfd:vnfd-catalog:
               - name: memory_ram_usage
               - name: memory_swap_usage
               - name: disk_usage
-              - name: network_ens3_bytes_in
-              - name: network_ens3_packets_in
-              - name: network_ens3_bytes_out
-              - name: network_ens3_packets_out
+              - name: network_mgmt_bytes_in
+              - name: network_mgmt_packets_in
+              - name: network_mgmt_bytes_out
+              - name: network_mgmt_packets_out
             initial-config-primitive:
               - seq: '1'
                 name: config
@@ -167,27 +167,27 @@ vnfd:vnfd-catalog:
             vdu-metric-name-ref: disk_usage
 
         # ====== Network metrics ============================================
-        - id: metric_mgmtVM_network_ens3_bytes_in
-          name: metric_mgmtVM_network_ens3_bytes_in
+        - id: metric_mgmtVM_network_mgmt_bytes_in
+          name: metric_mgmtVM_network_mgmt_bytes_in
           aggregation-type: AVERAGE
           vdu-metric:
             vdu-ref: mgmtVM
-            vdu-metric-name-ref: network_ens3_bytes_in
-        - id: metric_mgmtVM_network_ens3_packets_in
-          name: metric_mgmtVM_network_ens3_packets_in
+            vdu-metric-name-ref: network_mgmt_bytes_in
+        - id: metric_mgmtVM_network_mgmt_packets_in
+          name: metric_mgmtVM_network_mgmt_packets_in
           aggregation-type: AVERAGE
           vdu-metric:
             vdu-ref: mgmtVM
-            vdu-metric-name-ref: network_ens3_packets_in
-        - id: metric_mgmtVM_network_ens3_bytes_out
-          name: metric_mgmtVM_network_ens3_bytes_out
+            vdu-metric-name-ref: network_mgmt_packets_in
+        - id: metric_mgmtVM_network_mgmt_bytes_out
+          name: metric_mgmtVM_network_mgmt_bytes_out
           aggregation-type: AVERAGE
           vdu-metric:
             vdu-ref: mgmtVM
-            vdu-metric-name-ref: network_ens3_bytes_out
-        - id: metric_mgmtVM_network_ens3_packets_out
-          name: metric_mgmtVM_network_ens3_packets_out
+            vdu-metric-name-ref: network_mgmt_bytes_out
+        - id: metric_mgmtVM_network_mgmt_packets_out
+          name: metric_mgmtVM_network_mgmt_packets_out
           aggregation-type: AVERAGE
           vdu-metric:
             vdu-ref: mgmtVM
-            vdu-metric-name-ref: network_ens3_packets_out
+            vdu-metric-name-ref: network_mgmt_packets_out

@@ -48,19 +48,70 @@ metrics:
       command: df / | tail -n1 | gawk '{ total=$2 ; used=$3 ; available=$4 ; print 100.0*(total-available)/total }'
 
    # ====== Network metrics =================================================
-   network_ens3_bytes_in:
+   network_mgmt_bytes_in:
       type: gauge
-      description: "Bytes received on interface ens3"
+      description: "Bytes received on mgmt interface ens3"
       command: cat /proc/net/dev | gawk '/ens3:/ { inB=$2 ; inP=$3 ; outB=$10 ; outP=$11 ; print inB }'
-   network_ens3_packets_in:
+   network_mgmt_packets_in:
       type: gauge
-      description: "Packets received on interface ens3"
+      description: "Packets received on mgmt interface ens3"
       command: cat /proc/net/dev | gawk '/ens3:/ { inB=$2 ; inP=$3 ; outB=$10 ; outP=$11 ; print inP }'
-   network_ens3_bytes_out:
+   network_mgmt_bytes_out:
       type: gauge
-      description: "Bytes sent on interface ens3"
+      description: "Bytes sent on mgmt interface ens3"
       command: cat /proc/net/dev | gawk '/ens3:/ { inB=$2 ; inP=$3 ; outB=$10 ; outP=$11 ; print outB }'
-   network_ens3_packets_out:
+   network_mgmt_packets_out:
       type: gauge
-      description: "Packets sent on interface ens3"
+      description: "Packets sent on mgmt interface ens3"
       command: cat /proc/net/dev | gawk '/ens3:/ { inB=$2 ; inP=$3 ; outB=$10 ; outP=$11 ; print outP }'
+
+   network_S6a_bytes_in:
+      type: gauge
+      description: "Bytes received on S6a interface ens4"
+      command: cat /proc/net/dev | gawk '/ens4:/ { inB=$2 ; inP=$3 ; outB=$10 ; outP=$11 ; print inB }'
+   network_S6a_packets_in:
+      type: gauge
+      description: "Packets received on S6a interface ens4"
+      command: cat /proc/net/dev | gawk '/ens4:/ { inB=$2 ; inP=$3 ; outB=$10 ; outP=$11 ; print inP }'
+   network_S6a_bytes_out:
+      type: gauge
+      description: "Bytes sent on S6a interface ens4"
+      command: cat /proc/net/dev | gawk '/ens4:/ { inB=$2 ; inP=$3 ; outB=$10 ; outP=$11 ; print outB }'
+   network_S6a_packets_out:
+      type: gauge
+      description: "Packets sent on S6a interface ens4"
+      command: cat /proc/net/dev | gawk '/ens4:/ { inB=$2 ; inP=$3 ; outB=$10 ; outP=$11 ; print outP }'
+
+   network_S11_bytes_in:
+      type: gauge
+      description: "Bytes received on S11 interface ens5"
+      command: cat /proc/net/dev | gawk '/ens5:/ { inB=$2 ; inP=$3 ; outB=$10 ; outP=$11 ; print inB }'
+   network_S11_packets_in:
+      type: gauge
+      description: "Packets received on S11 interface ens5"
+      command: cat /proc/net/dev | gawk '/ens5:/ { inB=$2 ; inP=$3 ; outB=$10 ; outP=$11 ; print inP }'
+   network_S11_bytes_out:
+      type: gauge
+      description: "Bytes sent on S11 interface ens5"
+      command: cat /proc/net/dev | gawk '/ens5:/ { inB=$2 ; inP=$3 ; outB=$10 ; outP=$11 ; print outB }'
+   network_S11_packets_out:
+      type: gauge
+      description: "Packets sent on S11 interface ens5"
+      command: cat /proc/net/dev | gawk '/ens5:/ { inB=$2 ; inP=$3 ; outB=$10 ; outP=$11 ; print outP }'
+
+   network_S1C_bytes_in:
+      type: gauge
+      description: "Bytes received on S1C interface ens6"
+      command: cat /proc/net/dev | gawk '/ens6:/ { inB=$2 ; inP=$3 ; outB=$10 ; outP=$11 ; print inB }'
+   network_S1C_packets_in:
+      type: gauge
+      description: "Packets received on S1C interface ens6"
+      command: cat /proc/net/dev | gawk '/ens6:/ { inB=$2 ; inP=$3 ; outB=$10 ; outP=$11 ; print inP }'
+   network_S1C_bytes_out:
+      type: gauge
+      description: "Bytes sent on S1C interface ens6"
+      command: cat /proc/net/dev | gawk '/ens6:/ { inB=$2 ; inP=$3 ; outB=$10 ; outP=$11 ; print outB }'
+   network_S1C_packets_out:
+      type: gauge
+      description: "Packets sent on S1C interface ens6"
+      command: cat /proc/net/dev | gawk '/ens6:/ { inB=$2 ; inP=$3 ; outB=$10 ; outP=$11 ; print outP }'
