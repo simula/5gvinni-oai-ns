@@ -342,6 +342,14 @@ vnfd:vnfd-catalog:
               - name: network_mgmt_packets_in
               - name: network_mgmt_bytes_out
               - name: network_mgmt_packets_out
+              - name: network_SXab_bytes_in
+              - name: network_SXab_packets_in
+              - name: network_SXab_bytes_out
+              - name: network_SXab_packets_out
+              - name: network_S11_bytes_in
+              - name: network_S11_packets_in
+              - name: network_S11_bytes_out
+              - name: network_S11_packets_out
             initial-config-primitive:
               - seq: '1'
                 name: config
@@ -439,6 +447,18 @@ vnfd:vnfd-catalog:
               - name: network_mgmt_packets_in
               - name: network_mgmt_bytes_out
               - name: network_mgmt_packets_out
+              - name: network_SXab_bytes_in
+              - name: network_SXab_packets_in
+              - name: network_SXab_bytes_out
+              - name: network_SXab_packets_out
+              - name: network_S1U_bytes_in
+              - name: network_S1U_packets_in
+              - name: network_S1U_bytes_out
+              - name: network_S1U_packets_out
+              - name: network_SGi_bytes_in
+              - name: network_SGi_packets_in
+              - name: network_SGi_bytes_out
+              - name: network_SGi_packets_out
             initial-config-primitive:
               - seq: '1'
                 name: config
