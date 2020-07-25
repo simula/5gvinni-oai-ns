@@ -1,12 +1,19 @@
 metrics:
-   uptime:
+   # ====== System metrics ==================================================
+   system_random:
+      type: gauge
+      description: "just a random byte"
+      command: od -A n -t d -N 1 /dev/urandom
+   system_uptime:
       type: gauge
       description: "Uptime in h"
       command: cat /proc/uptime | gawk '{ uptime_h=$1/3600.0 } END { print uptime_h }'
-   users:
+   system_users:
       type: gauge
       description: "Number of users"
       command: who|wc -l
+
+   # ====== CPU metrics =====================================================
    cpu_processes:
       type: gauge
       description: "Number of processes"
@@ -23,6 +30,8 @@ metrics:
       type: gauge
       description: "15 minute load average in percent"
       command: cat /proc/loadavg | gawk '{ load15min_pct=100.0*$3 } END { print load15min_pct }'
+
+   # ====== Memory metrics ==================================================
    memory_ram_usage:
       type: gauge
       description: "RAM memory usage in percent"
@@ -31,7 +40,9 @@ metrics:
       type: gauge
       description: "Swap memory usage in percent"
       command: cat /proc/meminfo | gawk '/^SwapTotal:/ { total=$2 } /^SwapFree:/ { available=$2 } END { print 100.0*(total-available)/total }'
-   random:
+
+   # ====== Disk metrics ====================================================
+   disk_usage:
       type: gauge
-      description: "just a random byte"
-      command: od -A n -t d -N 1 /dev/urandom
+      description: "Disk usage for / in percent"
+      command: df / | tail -n1 | gawk '{ total=$2 ; used=$3 ; available=$4 ; print 100.0*(total-available)/total }'

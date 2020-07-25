@@ -47,15 +47,16 @@ vnfd:vnfd-catalog:
             juju:
               charm: simple
             metrics:
-              - name: uptime
-              - name: users
+              - name: system_random
+              - name: system_uptime
+              - name: system_users
               - name: cpu_processes
               - name: cpu_load_1min
               - name: cpu_load_5min
               - name: cpu_load_15min
               - name: memory_ram_usage
               - name: memory_swap_usage
-              - name: random
+              - name: disk_usage
             initial-config-primitive:
               - seq: '1'
                 name: config
@@ -99,18 +100,27 @@ vnfd:vnfd-catalog:
             vdu-ref: mgmtVM
             vdu-monitoring-param-ref: metric_mgmtVM_memory
 
-        - id: metric_mgmtVM_uptime
-          name: metric_mgmtVM_uptime
+        # ====== System metrics =============================================
+        - id: metric_mgmtVM_system_random
+          name: metric_mgmtVM_system_random
           aggregation-type: AVERAGE
           vdu-metric:
             vdu-ref: mgmtVM
-            vdu-metric-name-ref: uptime
-        - id: metric_mgmtVM_users
-          name: metric_mgmtVM_users
+            vdu-metric-name-ref: system_random
+        - id: metric_mgmtVM_system_uptime
+          name: metric_mgmtVM_system_uptime
           aggregation-type: AVERAGE
           vdu-metric:
             vdu-ref: mgmtVM
-            vdu-metric-name-ref: users
+            vdu-metric-name-ref: system_uptime
+        - id: metric_mgmtVM_system_users
+          name: metric_mgmtVM_system_users
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: mgmtVM
+            vdu-metric-name-ref: system_users
+
+        # ====== CPU metrics ================================================
         - id: metric_mgmtVM_cpu_load_1min
           name: metric_mgmtVM_cpu_load_1min
           aggregation-type: AVERAGE
@@ -129,6 +139,8 @@ vnfd:vnfd-catalog:
           vdu-metric:
             vdu-ref: mgmtVM
             vdu-metric-name-ref: cpu_load_15min
+
+        # ====== Memory metrics =============================================
         - id: metric_mgmtVM_memory_ram_usage
           name: metric_mgmtVM_memory_ram_usage
           aggregation-type: AVERAGE
@@ -141,9 +153,11 @@ vnfd:vnfd-catalog:
           vdu-metric:
             vdu-ref: mgmtVM
             vdu-metric-name-ref: memory_swap_usage
-        - id: metric_mgmtVM_random
-          name: metric_mgmtVM_random
+
+        # ====== Disk metrics ===============================================
+        - id: metric_mgmtVM_disk_usage
+          name: metric_mgmtVM_disk_usage
           aggregation-type: AVERAGE
           vdu-metric:
             vdu-ref: mgmtVM
-            vdu-metric-name-ref: random
+            vdu-metric-name-ref: disk_usage

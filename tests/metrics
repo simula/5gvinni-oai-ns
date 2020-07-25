@@ -23,3 +23,6 @@ cat /proc/loadavg | gawk '{ load15min_pct=100.0*$3 } END { print load15min_pct }
 cat /proc/meminfo | gawk '/^MemTotal:/ { total=$2 } /^MemAvailable:/ { available=$2 } END { print 100.0*(total-available)/total }'
 # Swap usage in percent:
 cat /proc/meminfo | gawk '/^SwapTotal:/ { total=$2 } /^SwapFree:/ { available=$2 } END { print 100.0*(total-available)/total }'
+
+# Disk usage for /:
+df / | tail -n1 | gawk '{ total=$2 ; used=$3 ; available=$4 ; print 100.0*(total-available)/total }'
