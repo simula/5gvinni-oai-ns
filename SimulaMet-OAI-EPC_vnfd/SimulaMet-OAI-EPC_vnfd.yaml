@@ -80,6 +80,21 @@ vnfd:vnfd-catalog:
           vdu-configuration:
             juju:
               charm: hsscharm
+            metrics:
+              - name: system_random
+              - name: system_uptime
+              - name: system_users
+              - name: cpu_processes
+              - name: cpu_load_1min
+              - name: cpu_load_5min
+              - name: cpu_load_15min
+              - name: memory_ram_usage
+              - name: memory_swap_usage
+              - name: disk_usage
+              - name: network_ens3_bytes_in
+              - name: network_ens3_packets_in
+              - name: network_ens3_bytes_out
+              - name: network_ens3_packets_out
             initial-config-primitive:
               - seq: '1'
                 name: config
@@ -178,6 +193,21 @@ vnfd:vnfd-catalog:
           vdu-configuration:
             juju:
               charm: mmecharm
+            metrics:
+              - name: system_random
+              - name: system_uptime
+              - name: system_users
+              - name: cpu_processes
+              - name: cpu_load_1min
+              - name: cpu_load_5min
+              - name: cpu_load_15min
+              - name: memory_ram_usage
+              - name: memory_swap_usage
+              - name: disk_usage
+              - name: network_ens3_bytes_in
+              - name: network_ens3_packets_in
+              - name: network_ens3_bytes_out
+              - name: network_ens3_packets_out
             initial-config-primitive:
               - seq: '1'
                 name: config
@@ -281,6 +311,21 @@ vnfd:vnfd-catalog:
           vdu-configuration:
             juju:
               charm: spgwccharm
+            metrics:
+              - name: system_random
+              - name: system_uptime
+              - name: system_users
+              - name: cpu_processes
+              - name: cpu_load_1min
+              - name: cpu_load_5min
+              - name: cpu_load_15min
+              - name: memory_ram_usage
+              - name: memory_swap_usage
+              - name: disk_usage
+              - name: network_ens3_bytes_in
+              - name: network_ens3_packets_in
+              - name: network_ens3_bytes_out
+              - name: network_ens3_packets_out
             initial-config-primitive:
               - seq: '1'
                 name: config
@@ -363,6 +408,21 @@ vnfd:vnfd-catalog:
           vdu-configuration:
             juju:
               charm: spgwucharm
+            metrics:
+              - name: system_random
+              - name: system_uptime
+              - name: system_users
+              - name: cpu_processes
+              - name: cpu_load_1min
+              - name: cpu_load_5min
+              - name: cpu_load_15min
+              - name: memory_ram_usage
+              - name: memory_swap_usage
+              - name: disk_usage
+              - name: network_ens3_bytes_in
+              - name: network_ens3_packets_in
+              - name: network_ens3_bytes_out
+              - name: network_ens3_packets_out
             initial-config-primitive:
               - seq: '1'
                 name: config
@@ -458,6 +518,98 @@ vnfd:vnfd-catalog:
         - name: spgwu-mgmt-cp
         - name: spgwu-s1u-cp
         - name: spgwu-sgi-cp
+
+
+      # ###### Monitoring ###################################################
+      monitoring-param:
+        # ###### VDU: HSS ###################################################
+        # ====== System metrics =============================================
+        - id: metric_HSS_system_random
+          name: metric_HSS_system_random
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: HSS
+            vdu-metric-name-ref: system_random
+        - id: metric_HSS_system_uptime
+          name: metric_HSS_system_uptime
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: HSS
+            vdu-metric-name-ref: system_uptime
+        - id: metric_HSS_system_users
+          name: metric_HSS_system_users
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: HSS
+            vdu-metric-name-ref: system_users
+
+        # ====== CPU metrics ================================================
+        - id: metric_HSS_cpu_load_1min
+          name: metric_HSS_cpu_load_1min
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: HSS
+            vdu-metric-name-ref: cpu_load_1min
+        - id: metric_HSS_cpu_load_5min
+          name: metric_HSS_cpu_load_5min
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: HSS
+            vdu-metric-name-ref: cpu_load_5min
+        - id: metric_HSS_cpu_load_15min
+          name: metric_HSS_cpu_load_15min
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: HSS
+            vdu-metric-name-ref: cpu_load_15min
+
+        # ====== Memory metrics =============================================
+        - id: metric_HSS_memory_ram_usage
+          name: metric_HSS_memory_ram_usage
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: HSS
+            vdu-metric-name-ref: memory_ram_usage
+        - id: metric_HSS_memory_swap_usage
+          name: metric_HSS_memory_swap_usage
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: HSS
+            vdu-metric-name-ref: memory_swap_usage
+
+        # ====== Disk metrics ===============================================
+        - id: metric_HSS_disk_usage
+          name: metric_HSS_disk_usage
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: HSS
+            vdu-metric-name-ref: disk_usage
+
+        # ====== Network metrics ============================================
+        - id: metric_HSS_network_ens3_bytes_in
+          name: metric_HSS_network_ens3_bytes_in
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: HSS
+            vdu-metric-name-ref: network_ens3_bytes_in
+        - id: metric_HSS_network_ens3_packets_in
+          name: metric_HSS_network_ens3_packets_in
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: HSS
+            vdu-metric-name-ref: network_ens3_packets_in
+        - id: metric_HSS_network_ens3_bytes_out
+          name: metric_HSS_network_ens3_bytes_out
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: HSS
+            vdu-metric-name-ref: network_ens3_bytes_out
+        - id: metric_HSS_network_ens3_packets_out
+          name: metric_HSS_network_ens3_packets_out
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: HSS
+            vdu-metric-name-ref: network_ens3_packets_out
 
 
       # ###### Juju Charm ###################################################
