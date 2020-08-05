@@ -41,6 +41,14 @@ fi
 . ./$1.config
 
 
+# ====== Get virt-install ===================================================
+if [ ! -e virt-manager/ ] ; then
+   git clone https://github.com/virt-manager/virt-manager.git
+else
+   cd virt-manager/ && git pull && cd ..
+fi
+
+
 # ====== Make template VMs ==================================================
 for preseed in $PRESEEDS ; do
    if [ ! -e "${preseed}.preseed" ] ; then
@@ -107,13 +115,15 @@ for preseed in $PRESEEDS ; do
          image="${DIRECTORY}/${name}.qcow2"
 
          bootOptions=""   # --boot uefi"
-         osOptions="--os-type linux --os-variant ubuntu18.04"
-         if [ "${variant}" == "trusty" -o "${variant}" == "xenial" ] ; then
+         osOptions="--os-type linux --os-variant ubuntu20.04"
+         if [ "${variant}" == "bionic" ] ; then
+            osOptions="--os-type linux --os-variant ubuntu18.04"
+         elif [ "${variant}" == "trusty" -o "${variant}" == "xenial" ] ; then
             bootOptions=""
             osOptions="--os-type linux --os-variant ubuntu16.04"
          fi
 
-         virt-install \
+         virt-manager/virt-install \
             --quiet \
             --name "${name}" \
             --vcpus 4 \
