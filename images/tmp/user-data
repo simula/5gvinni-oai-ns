@@ -50,35 +50,35 @@ autoinstall:
     swap:
       size: 0
 
-    #config:
-      #- {ptable: gpt, path: /dev/sda, preserve: false, name: '', grub_device: false, type: disk, id: disk-sda}
-      #- {device: disk-sda, size: 536870912, wipe: superblock, flag: boot, number: 1, preserve: false, grub_device: true, type: partition, id: partition-sda1}
-      #- {fstype: fat32, volume: partition-sda1, preserve: false, type: format, id: format-2}
-      #- {device: disk-sda, size: 1073741824, wipe: superblock, flag: linux, number: 2, preserve: false, grub_device: false, type: partition, id: partition-sda2}
-      #- {fstype: ext4, volume: partition-sda2, preserve: false, type: format, id: format-0}
-      #- {device: disk-sda, size: -1, flag: linux, number: 3, preserve: false, grub_device: false, type: partition, id: partition-sda3}
-      #- name: vg-0
-        #devices: [partition-sda3]
-        #preserve: false
-        #type: lvm_volgroup
-        #id: lvm-volgroup-vg-0
-      #- {name: lv-root, volgroup: lvm-volgroup-vg-0, size: 100%, preserve: false, type: lvm_partition, id: lvm-partition-lv-root}
-      #- {fstype: ext4, volume: lvm-partition-lv-root, preserve: false, type: format, id: format-1}
-      #- {device: format-1, path: /, type: mount, id: mount-2}
-      #- {device: format-0, path: /boot, type: mount, id: mount-1}
-      #- {device: format-2, path: /boot/efi, type: mount, id: mount-3}
+    # config:
+    #   - {ptable: gpt, path: /dev/sda, preserve: false, name: '', grub_device: false, type: disk, id: disk-sda}
+    #   - {device: disk-sda, size: 536870912, wipe: superblock, flag: boot, number: 1, preserve: false, grub_device: true, type: partition, id: partition-sda1}
+    #   - {fstype: fat32, volume: partition-sda1, preserve: false, type: format, id: format-2}
+    #   - {device: disk-sda, size: 1073741824, wipe: superblock, flag: linux, number: 2, preserve: false, grub_device: false, type: partition, id: partition-sda2}
+    #   - {fstype: ext4, volume: partition-sda2, preserve: false, type: format, id: format-0}
+    #   - {device: disk-sda, size: -1, flag: linux, number: 3, preserve: false, grub_device: false, type: partition, id: partition-sda3}
+    #   - name: vg-0
+    #     devices: [partition-sda3]
+    #     preserve: false
+    #     type: lvm_volgroup
+    #     id: lvm-volgroup-vg-0
+    #   - {name: lv-root, volgroup: lvm-volgroup-vg-0, size: 100%, preserve: false, type: lvm_partition, id: lvm-partition-lv-root}
+    #   - {fstype: ext4, volume: lvm-partition-lv-root, preserve: false, type: format, id: format-1}
+    #   - {device: format-1, path: /, type: mount, id: mount-2}
+    #   - {device: format-0, path: /boot, type: mount, id: mount-1}
+    #   - {device: format-2, path: /boot/efi, type: mount, id: mount-3}
 
-    #config:
-      #- {ptable: gpt, path: /dev/sda, preserve: false, name: '', grub_device: false, type: disk, id: disk-sda}
-      #- {device: disk-sda, size: 536870912, wipe: superblock, flag: boot, number: 1, preserve: false, grub_device: true, type: partition, id: partition-sda1}
-      #- {fstype: fat32, volume: partition-sda1, preserve: false, type: format, id: format-2}
-      #- {device: disk-sda, size: 1073741824, wipe: superblock, flag: linux, number: 2, preserve: false, grub_device: false, type: partition, id: partition-sda2}
-      #- {fstype: ext4, volume: partition-sda2, preserve: false, type: format, id: format-0}
-      #- {device: disk-sda, size: -1, flag: linux, number: 3, preserve: false, grub_device: false, type: partition, id: partition-sda3}
-      #- {fstype: ext4, volume: partition-sda3, preserve: false, type: format, id: format-1}
-      #- {device: format-1, path: /, type: mount, id: mount-2}
-      #- {device: format-0, path: /boot, type: mount, id: mount-1}
-      #- {device: format-2, path: /boot/efi, type: mount, id: mount-3}
+    # config:
+    #   - {ptable: gpt, path: /dev/sda, preserve: false, name: '', grub_device: false, type: disk, id: disk-sda}
+    #   - {device: disk-sda, size: 536870912, wipe: superblock, flag: boot, number: 1, preserve: false, grub_device: true, type: partition, id: partition-sda1}
+    #   - {fstype: fat32, volume: partition-sda1, preserve: false, type: format, id: format-2}
+    #   - {device: disk-sda, size: 1073741824, wipe: superblock, flag: linux, number: 2, preserve: false, grub_device: false, type: partition, id: partition-sda2}
+    #   - {fstype: ext4, volume: partition-sda2, preserve: false, type: format, id: format-0}
+    #   - {device: disk-sda, size: -1, flag: linux, number: 3, preserve: false, grub_device: false, type: partition, id: partition-sda3}
+    #   - {fstype: ext4, volume: partition-sda3, preserve: false, type: format, id: format-1}
+    #   - {device: format-1, path: /, type: mount, id: mount-2}
+    #   - {device: format-0, path: /boot, type: mount, id: mount-1}
+    #   - {device: format-2, path: /boot/efi, type: mount, id: mount-3}
 
     config:
       # ====== Disks ========================================================
@@ -96,7 +96,6 @@ autoinstall:
       - id: disk0-partition-grub
         type: partition
         device: disk0
-        number: 128
         size: 1048576
         flag: bios_grub
         #grub_device: true
@@ -106,14 +105,13 @@ autoinstall:
       - id: disk0-partition-efi
         type: partition
         device: disk0
-        number: 1
         size: 65011712
         flag: boot
         grub_device: true
         preserve: false
       - id: disk0-partition-efi-format
         type: format
-        fstype: fat32
+        fstype: fat16
         label: EFI
         volume: disk0-partition-efi
         preserve: false
@@ -122,7 +120,6 @@ autoinstall:
       - id: disk0-partition-system
         type: partition
         device: disk0
-        number: 2
         size: -1
         flag: linux
         grub_device: false
@@ -176,9 +173,9 @@ autoinstall:
   # ###### Post-Install Configuration #######################################
   late-commands:
     # Add BIOS Grub partition, if not yet created, just to be sure:
-    - sgdisk --set-alignment=1 --new=128:34:2047 --change-name=128:GRUB --sort || true
-    # Add partition names and sort the partition table:
-    - sgdisk --change-name=1:GRUB --change-name=2:EFI-SP --change-name=3:System --sort /dev/sda
+    - if ! sgdisk --print /dev/sda | grep EF02 ; then sgdisk --set-alignment=1 --new=128:34:2047 --typecode=128:EF02 --sort /dev/sda ; fi
+    # Add partition names:
+    - sgdisk --change-name=1:GRUB --change-name=2:EFI-SP --change-name=3:System /dev/sda
     # Generate additional locales:
     - chroot /target locale-gen en_US.UTF-8 en_GB.UTF-8 en_AU.UTF-8 nb_NO.UTF-8 de_DE.UTF-8 zh_CN.UTF-8
     # Set time locale to en_GB.UTF-8 for 24-hour clock:
