@@ -11,7 +11,14 @@ LOCATION=~/Nedlastinger/ubuntu-20.04-live-server-amd64.iso
 name=Test
 image=image.qcow
 
+
+virsh destroy "${name}"          >/dev/null 2>&1
+virsh undefine --nvram "${name}" >/dev/null 2>&1
+
+
+rm -f ${image}
 qemu-img create -f qcow2 -o size=32G ${image}
+
 
 # kvm --no-reboot -m 2048 -smp cores=4 \
 #     -drive file=${image},format=qcow2,cache=unsafe,discard=unmap,if=virtio \
@@ -24,9 +31,6 @@ qemu-img create -f qcow2 -o size=32G ${image}
 
 bootOptions="--boot uefi"
 osOptions="--os-type linux --os-variant ubuntu20.04"
-
-virsh destroy "${name}"          >/dev/null 2>&1
-virsh undefine --nvram "${name}" >/dev/null 2>&1
 
 virt-manager/virt-install \
    --quiet \
