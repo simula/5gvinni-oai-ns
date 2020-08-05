@@ -6,7 +6,8 @@ python3 -m http.server 3003 &
 
 yamllint -d '{extends: default, rules: {document-start: {present: no}, line-length: {max: 4096}, comments-indentation: disable}}' user-data
 
-LOCATION=~/Nedlastinger/ubuntu-20.04-live-server-amd64.iso
+# LOCATION=~/Nedlastinger/ubuntu-20.04-live-server-amd64.iso
+LOCATION=~/Nedlastinger/groovy-live-server-amd64.iso
 
 name=Test
 image=image.qcow
@@ -29,7 +30,7 @@ qemu-img create -f qcow2 -o size=32G ${image}
 #     -append 'autoinstall ds=nocloud-net;s=http://_gateway:3003/'
 
 
-bootOptions="--boot uefi"
+bootOptions=""   # --boot uefi"
 osOptions="--os-type linux --os-variant ubuntu20.04"
 
 virt-manager/virt-install \

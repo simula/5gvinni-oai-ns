@@ -25,9 +25,9 @@
 
 autoinstall:
   version: 1
-  #refresh-installer:
-    #update: true
-    #channel: edge
+  refresh-installer:
+    update: true
+    channel: stable
   # Using Irish locale (€, metric units, etc.), but late-commands sets British
   # time format (24-hour clock). Also install locales for NO, DE, CN:
   locale: en_IE.UTF-8
@@ -35,44 +35,44 @@ autoinstall:
     layout: de
     variant: nodeadkeys
   storage:
-    layout:
-      name: direct
-    #config:
-      #- type: disk
-        #id: disk0
-        #path: /dev/sda
-        #wipe: superblock
-        #ptable: gpt
-        #grub_device: true
-      #- id: disk0-partition-grub
-        #type: partition
-        #number: 1
-        #device: disk0
-        #size: 64K
-        #flag: bios_grub
+    #layout:
+      #name: direct
+    config:
+      - type: disk
+        id: disk0
+        path: /dev/sda
+        wipe: superblock
+        ptable: msdos
+        grub_device: true
+      - id: disk0-partition-grub
+        type: partition
+        number: 1
+        device: disk0
+        size: 64K
+        flag: bios_grub
       #- id: disk0-partition-efi
         #type: partition
         #number: 2
         #device: disk0
         #size: 64M
         #flag: boot
-      #- id: disk0-partition-system
-        #type: partition
-        #number: 3
-        #device: disk0
-        #size: -1
+      - id: disk0-partition-system
+        type: partition
+        number: 3
+        device: disk0
+        size: -1
       #- id: disk0-partition-efi-format
         #type: format
         #fstype: fat16
         #volume: disk0-partition-efi
-      #- id: disk0-partition-system-format
-        #type: format
-        #fstype: btrfs
-        #volume: disk0-partition-system
-      #- id: disk0-partition-system-mount
-        #type: mount
-        #path: /
-        #device: disk0-partition-system-format
+      - id: disk0-partition-system-format
+        type: format
+        fstype: btrfs
+        volume: disk0-partition-system
+      - id: disk0-partition-system-mount
+        type: mount
+        path: /
+        device: disk0-partition-system-format
       #- id: disk0-partition-efi-mount
         #type: mount
         #path: /boot/efi
