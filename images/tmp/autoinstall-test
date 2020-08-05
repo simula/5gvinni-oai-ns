@@ -2,7 +2,7 @@
 
 ps ax | grep http.server | grep python | grep 3003 | awk '{ print $1 }' | xargs -r kill
 sleep 2
-python3 -m http.server 3003 &
+python3 -m http.server --bind 127.0.0.1 3003 &
 
 yamllint -d '{extends: default, rules: {document-start: {present: no}, line-length: {max: 4096}, comments-indentation: disable}}' user-data
 
@@ -10,6 +10,7 @@ yamllint -d '{extends: default, rules: {document-start: {present: no}, line-leng
 LOCATION=~/Nedlastinger/groovy-live-server-amd64.iso
 
 name=Test
+size=`echo "32*(1024^3) + 34304 + 17408" | bc`
 image=image.qcow
 
 
@@ -18,7 +19,7 @@ virsh undefine --nvram "${name}" >/dev/null 2>&1
 
 
 rm -f ${image}
-qemu-img create -f qcow2 -o size=32G ${image}
+qemu-img create -f qcow2 -o size=${size},nocow=on ${image}
 
 
 # kvm --no-reboot -m 2048 -smp cores=4 \
