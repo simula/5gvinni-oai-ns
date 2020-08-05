@@ -30,7 +30,7 @@ qemu-img create -f qcow2 -o size=32G ${image}
 #     -append 'autoinstall ds=nocloud-net;s=http://_gateway:3003/'
 
 
-bootOptions=""   # --boot uefi"
+bootOptions="--boot uefi"
 osOptions="--os-type linux --os-variant ubuntu20.04"
 
 virt-manager/virt-install \
