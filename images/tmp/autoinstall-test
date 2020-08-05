@@ -1,0 +1,46 @@
+#!/bin/bash
+
+ps ax | grep http.server | grep python | grep 3003 | awk '{ print $1 }' | xargs -r kill
+sleep 2
+python3 -m http.server 3003 &
+
+yamllint -d '{extends: default, rules: {document-start: {present: no}, line-length: {max: 4096}, comments-indentation: disable}}' user-data
+
+LOCATION=~/Nedlastinger/ubuntu-20.04-live-server-amd64.iso
+
+name=Test
+image=image.qcow
+
+qemu-img create -f qcow2 -o size=32G ${image}
+
+# kvm --no-reboot -m 2048 -smp cores=4 \
+#     -drive file=${image},format=qcow2,cache=unsafe,discard=unmap,if=virtio \
+#     -cdrom ${LOCATION} \
+#     -bios /usr/share/qemu/OVMF.fd \
+#     -kernel /mnt/casper/vmlinuz \
+#     -initrd /mnt/casper/initrd \
+#     -append 'autoinstall ds=nocloud-net;s=http://_gateway:3003/'
+
+
+bootOptions="--boot uefi"
+osOptions="--os-type linux --os-variant ubuntu20.04"
+
+virsh destroy "${name}"          >/dev/null 2>&1
+virsh undefine --nvram "${name}" >/dev/null 2>&1
+
+virt-manager/virt-install \
+   --quiet \
+   --name "${name}" \
+   --vcpus 4 \
+   --cpu host \
+   --ram 4096 \
+   --video virtio --channel spicevmc \
+   --controller scsi,model=virtio-scsi,driver.iommu=on \
+   --disk "bus=scsi,path=${image},format=qcow2,cache=unsafe,discard=unmap" \
+   ${bootOptions} ${osOptions} \
+   --location "${LOCATION},kernel=casper/vmlinuz,initrd=casper/initrd" \
+   --extra-args "autoinstall ds=nocloud-net;s=http://_gateway:3003/" \
+   --noreboot
+
+
+# kvm -m 2048 -smp cores=4 -drive file=image.qcow,format=qcow2,cache=none,discard=unmap,if=virtio

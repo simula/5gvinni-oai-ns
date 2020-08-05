@@ -1,0 +1,55 @@
+#cloud-config
+#
+# Ubuntu Preseed Configuration
+# Copyright (C) 2017-2020 by Thomas Dreibholz
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Contact: dreibh@simula.no
+
+# Preseed documentation:
+# - https://ubuntu.com/server/docs/install/autoinstall
+# - https://ubuntu.com/server/docs/install/autoinstall-reference
+# - https://github.com/CanonicalLtd/subiquity
+
+autoinstall:
+  version: 1
+  refresh-installer:
+    update: yes
+    channel: edge
+  locale: nb_NO.UTF-8
+  keyboard:
+    layout: de
+    variant: nodeadkeys
+  identity:
+    hostname: akerbrygge.simula.nornet
+    username: nornetpp
+    password: "$6$2NWrlKtE5C$u1zqajwW/sfrUMxeKBp7MH.ptmrXW0kvSv20Cf.kSSuAS5lFJUq.WI.iildLgru2Otf1WG1dndo4B8IxnM9Kn1"
+    realname: NorNet Praesum Presum
+  apt:
+    preserve_sources_list: false
+    geoip: true
+    primary:
+      - arches: [default]
+        uri: "http://archive.ubuntu.com/ubuntu"
+    sources:
+      dreibh-ppa:
+        source: ppa:dreibh/ppa
+  packages:
+    - joe
+    - nornet-management
+  ssh:
+    install-server: true
+  late-commands:
+    - fstrim -av
