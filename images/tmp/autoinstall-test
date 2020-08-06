@@ -10,7 +10,7 @@ yamllint -d '{extends: default, rules: {document-start: {present: no}, line-leng
 LOCATION=~/Nedlastinger/groovy-live-server-amd64.iso
 
 name=Test
-size=`echo "32*(1024^3) + 34304 + 17408" | bc`
+size=`echo "32*(1024^3) + 16896" | bc`
 image=image.qcow
 
 

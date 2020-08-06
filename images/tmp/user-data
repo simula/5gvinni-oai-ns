@@ -89,7 +89,7 @@ autoinstall:
         wipe: superblock
         ptable: gpt
         preserve: false
-        grub_device: false
+        grub_device: true
 
       # ====== BIOS Grub ====================================================
       # NOTE: Will be created later manually!
