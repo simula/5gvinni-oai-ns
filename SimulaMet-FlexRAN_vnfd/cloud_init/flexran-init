@@ -27,7 +27,7 @@
 #
 # Contact: dreibh@simula.no
 
-hostname: hss
+hostname: flexran
 manage_etc_hosts: localhost
 password: {{password}}
 chpasswd: {expire: False}
