@@ -115,6 +115,13 @@ def prepare_flexran_build():
       # ====== Prepare sources ==============================================
       vduHelper.beginBlock('Preparing sources')
       vduHelper.fetchGitRepository(gitDirectory, gitRepository, gitCommit)
+      commands = """\
+cd /home/nornetpp/src/{gitDirectory} && \\
+git submodule init && \\
+git submodule update""".format(
+         gitDirectory       = gitDirectory
+      )
+      vduHelper.runInShell(commands)
       vduHelper.endBlock()
 
 
