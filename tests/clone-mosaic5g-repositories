@@ -69,7 +69,7 @@ for repository in ${REPOSITORIES} ; do
    fi
 
    echo "==== Push ===="
-   git push --all || true
+   git push --mirror || true
    cd ${WORKDIR}
 
 done
