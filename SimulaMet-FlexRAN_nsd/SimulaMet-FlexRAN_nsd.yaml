@@ -53,7 +53,7 @@ nsd:nsd-catalog:
           vnfd-connection-point-ref:
             - member-vnf-index-ref: 1
               vnfd-id-ref: SimulaMet-FlexRAN_vnfd
-              vnfd-connection-point-ref: mme-mgmt-cp
+              vnfd-connection-point-ref: flexran-mgmt-cp
 
         # ====== Service ====================================================
         - id: SimulaMet-FlexRAN_nsd-Service
@@ -64,5 +64,5 @@ nsd:nsd-catalog:
           vnfd-connection-point-ref:
             - member-vnf-index-ref: 1
               vnfd-id-ref: SimulaMet-FlexRAN_vnfd
-              vnfd-connection-point-ref: mme-service-cp
+              vnfd-connection-point-ref: flexran-service-cp
               #ip-address: 192.168.246.100

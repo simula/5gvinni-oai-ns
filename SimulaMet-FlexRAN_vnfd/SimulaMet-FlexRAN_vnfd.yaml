@@ -38,7 +38,7 @@ vnfd:vnfd-catalog:
 
       # ###### Management Interface #########################################
       mgmt-interface:
-        cp: mme-mgmt-cp
+        cp: flexran-mgmt-cp
 
       vdu:
 
