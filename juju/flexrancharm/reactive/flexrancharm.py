@@ -77,8 +77,8 @@ def install_flexrancharm_proxy_charm():
 @when('actions.prepare-flexran-build')
 @when('flexrancharm.installed')
 @when_not('flexrancharm.prepared-flexran-build')
-def prepare_cassandra_flexran_build():
-   vduHelper.beginBlock('prepare_cassandra_flexran_build')
+def prepare_flexran_build():
+   vduHelper.beginBlock('prepare_flexran_build')
    try:
 
       # ====== Get FlexRAN parameters ===========================================
@@ -117,7 +117,7 @@ def prepare_cassandra_flexran_build():
 
 # ###### configure-flexran function #########################################
 @when('actions.configure-flexran')
-@when('flexrancharm.configured-cassandra')
+@when('flexrancharm.prepared-flexran-build')
 def configure_flexran():
    vduHelper.beginBlock('configure_flexran')
    try:
@@ -135,7 +135,7 @@ def configure_flexran():
 export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
 cd /home/nornetpp/src/{gitDirectory} && \\
 mkdir -p logs && \\
-./build_m5g -f >logs/build_flexran.log 2>&1""".format(gitDirectory = gitDirectory)
+./build_m5g -f >logs/build_flexran.log 2>&1""".format(
          gitDirectory       = gitDirectory
       )
       vduHelper.runInShell(commands)
