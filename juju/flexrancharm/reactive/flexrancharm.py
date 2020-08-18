@@ -164,7 +164,7 @@ mkdir -p logs && \\
       # ====== Configure FlexRAN ================================================
       vduHelper.beginBlock('Configuring FlexRAN')
       commands = """\
-cd /home/nornetpp/src/{gitDirectory}/scripts""".format(
+cd /home/nornetpp/src/{gitDirectory}/flexran""".format(
          gitDirectory = gitDirectory
       )
       vduHelper.runInShell(commands)
