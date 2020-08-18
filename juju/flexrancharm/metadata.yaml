@@ -31,7 +31,7 @@ display-name: flexrancharm
 summary: SimulaMet FlexRAN Charm
 maintainer: Thomas Dreibholz <dreibh@simula.no>
 description: |
-  This charm manages the HSS.
+  This charm manages FlexRAN.
 tags:
   - network
 subordinate: false

@@ -179,7 +179,7 @@ FOREACH(charmName IN LISTS CHARM_SOURCE_LIST)
                    OUTPUT_VARIABLE charmInputFiles OUTPUT_STRIP_TRAILING_WHITESPACE)
 
    makeUniqueTarget(generate_charm "generate_${charmName}")
-   SET(timestampFile "${charmBuildDirectory}/${charmOutputDirectory}.stamp")
+   SET(timestampFile "${charmOutputDirectory}.stamp")
    ADD_CUSTOM_COMMAND(OUTPUT  ${timestampFile}
                       COMMAND echo cp ${vduHelperFiles} ${charmInputDirectory}
                       COMMAND cp ${vduHelperFiles} ${charmInputDirectory}/reactive
