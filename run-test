@@ -59,19 +59,19 @@ while [ $# -gt 0 ] ; do
       exit 1
    fi
    NS=`echo "${PARAMS}" | sed -e "s/-params.yaml$//g"`
-   if [ ! -d "${NS}_nsd" ] ; then
-      NS=`echo "${NS}" | sed -e "s/-[a-zA-Z0-9]*$//g"`
-      if [ ! -d "${NS}_nsd" ] ; then
-        echo >&2 "ERROR: NSD ${NS}_nsd not found!"
+   NSD="${NS}_nsd"
+   if [ ! -d "${NSD}" ] ; then
+      NSD=`echo "${NS}" | sed -e "s/-[a-zA-Z0-9]*$/_nsd/g"`
+      if [ ! -d "${NSD}" ] ; then
+        echo >&2 "ERROR: NSD ${NSD} not found!"
         usage
         exit 1
      fi
    fi
    VNFD="${NS}_vnfd"
-   NSD="${NS}_nsd"
 
    echo "NS=$NS NSD=$NSD VNFD=$VNFD PARAMS=$PARAMS"
-
+exit 1
 
    # ====== Build ===========================================================
    if [ $n -eq 0 ] ; then
