@@ -90,8 +90,8 @@ while [ $# -gt 0 ] ; do
 
    # ====== Create ==========================================================
    echo -e "\x1b[34m`date +%FT%H:%M:%S`: Creating ${NS} ...\x1b[0m"
-   osm vnfd-create ${VNFD}.tar.gz
-   osm nsd-create ${NSD}.tar.gz
+   osm vnfd-create ${VNFD}.tar.gz || true
+   osm nsd-create ${NSD}.tar.gz || true
 
 
    # ====== Instantiate =====================================================
