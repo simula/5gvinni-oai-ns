@@ -68,7 +68,7 @@ while [ $# -gt 0 ] ; do
         exit 1
      fi
    fi
-   VNFD="${NS}_vnfd"
+   VNFD=`echo "${NSD}" | sed -e "s/_nsd$/_vnfd/g"`
 
    echo "NS=$NS NSD=$NSD VNFD=$VNFD PARAMS=$PARAMS"
 
