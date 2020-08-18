@@ -118,7 +118,7 @@ def prepare_flexran_build():
       commands = """\
 cd /home/nornetpp/src/{gitDirectory} && \\
 git submodule init && \\
-git submodule update""".format(
+git submodule update flexran""".format(
          gitDirectory       = gitDirectory
       )
       vduHelper.runInShell(commands)
