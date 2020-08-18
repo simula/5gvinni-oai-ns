@@ -71,7 +71,7 @@ while [ $# -gt 0 ] ; do
    VNFD="${NS}_vnfd"
 
    echo "NS=$NS NSD=$NSD VNFD=$VNFD PARAMS=$PARAMS"
-exit 1
+
 
    # ====== Build ===========================================================
    if [ $n -eq 0 ] ; then
