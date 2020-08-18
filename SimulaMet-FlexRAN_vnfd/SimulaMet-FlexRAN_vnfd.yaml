@@ -65,10 +65,10 @@ vnfd:vnfd-catalog:
                 type: PARAVIRT
               external-connection-point-ref: flexran-mgmt-cp
             - name: eth1
-              type: INTERNAL
+              type: EXTERNAL
               virtual-interface:
                 type: PARAVIRT
-              internal-connection-point-ref: flexran-service-cp
+              external-connection-point-ref: flexran-service-cp
 
           # ====== Juju Charm ===============================================
           vdu-configuration:
