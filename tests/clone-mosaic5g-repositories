@@ -1,0 +1,75 @@
+#!/bin/bash -e
+# =================================================================
+#          #     #                 #     #
+#          ##    #   ####   #####  ##    #  ######   #####
+#          # #   #  #    #  #    # # #   #  #          #
+#          #  #  #  #    #  #    # #  #  #  #####      #
+#          #   # #  #    #  #####  #   # #  #          #
+#          #    ##  #    #  #   #  #    ##  #          #
+#          #     #   ####   #    # #     #  ######     #
+#
+#       ---   The NorNet Testbed for Multi-Homed Systems  ---
+#                       https://www.nntb.no
+# =================================================================
+#
+# Copy Mosaic5G repositories
+# Copyright (C) 2020 by Thomas Dreibholz
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Contact: dreibh@simula.no
+
+OLD_SERVER="https://gitlab.eurecom.fr/"
+NEW_SERVER_GIT="git@github.com:simula/mosaic5g-"
+NEW_SERVER_HTTPS="https://github.com/simula/mosaic5g-"
+REPOSITORIES="mosaic5g/mosaic5g flexran/flexran-rtc  mosaic5g/jox  mosaic5g/kube5g  mosaic5g/ll-mec  oai/openair-cn  oai/openairinterface5g  mosaic5g/store"
+
+WORKDIR=`pwd`/tmp
+mkdir -p ${WORKDIR}
+
+cd ${WORKDIR}
+mkdir -p flexran mosaic5g oai
+
+for repository in ${REPOSITORIES} ; do
+   echo ""
+   echo "###### ${repository} ######"
+
+   if [ ! -e ${repository} ] ; then
+      git clone ${OLD_SERVER}${repository}.git ${repository}
+   else
+      cd ${repository}
+      git fetch --all
+      cd ${WORKDIR}
+   fi
+
+   cd ${repository}
+
+   echo "==== Updating repository URL ===="
+   git remote rm origin
+   newRepository=`echo "${repository}" | sed -e "s#.*/##g"`
+   git remote add origin ${NEW_SERVER_GIT}${newRepository}.git || true
+   git fetch --all
+
+   if [ -e .gitmodules ] ; then
+      echo "==== Updating submodule URLs ===="
+      sed -e "s#url = ${OLD_SERVER}\(mosaic5g/\|oai/\|flexran/\)#url = ${NEW_SERVER_HTTPS}#g" -i .gitmodules && \
+         git commit -m "Updated submodule URLs" .gitmodules && \
+         git push --force --set-upstream origin master || true
+   fi
+
+   echo "==== Push ===="
+   git push --all || true
+   cd ${WORKDIR}
+
+done
