@@ -33,7 +33,7 @@
 OLD_SERVER="https://gitlab.eurecom.fr/"
 NEW_SERVER_GIT="git@github.com:simula/mosaic5g-"
 NEW_SERVER_HTTPS="https://github.com/simula/mosaic5g-"
-REPOSITORIES="mosaic5g/mosaic5g flexran/flexran-rtc  mosaic5g/jox  mosaic5g/kube5g  mosaic5g/ll-mec  oai/openair-cn  oai/openairinterface5g  mosaic5g/store"
+REPOSITORIES="mosaic5g/mosaic5g flexran/flexran-rtc  mosaic5g/jox  mosaic5g/kube5g  mosaic5g/ll-mec  oai/openair-cn  oai/openairinterface5g  mosaic5g/store  mosaic5g/ll-mec-ovs"
 
 WORKDIR=`pwd`/tmp
 mkdir -p ${WORKDIR}
