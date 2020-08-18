@@ -89,9 +89,22 @@ def prepare_flexran_build():
       gitCommit     = function_get('flexran-git-commit')
       gitDirectory  = 'mosaic5g'
 
+      flexranService_IPv4Interface = IPv4Interface(function_get('flexran-service-ipv4-interface'))
+      flexranService_IPv4Gateway   = IPv4Address(function_get('flexran-service-ipv4-gateway'))
+      if function_get('flexran-service-ipv6-interface') != '':
+         flexranService_IPv6Interface = IPv6Interface(function_get('flexran-service-ipv6-interface'))
+      else:
+         flexranService_IPv6Interface = None
+      if function_get('flexran-service-ipv6-gateway') != '':
+         flexranService_IPv6Gateway   = IPv6Address(function_get('flexran-service-ipv6-gateway'))
+      else:
+         flexranService_IPv6Gateway = None
+
       # Prepare network configuration:
       flexranService_IfName = 'ens4'
-      configurationS6a = vduHelper.makeInterfaceConfiguration(flexranService_IfName, IPv4Interface('0.0.0.0/0'))
+      configurationService = vduHelper.makeInterfaceConfiguration(flexranService_IfName,
+                                                                  flexranService_IPv4Interface, flexranService_IPv4Gateway,
+                                                                  flexranService_IPv6Interface, flexranService_IPv6Gateway)
 
       # ====== Prepare system ===============================================
       vduHelper.beginBlock('Preparing system')

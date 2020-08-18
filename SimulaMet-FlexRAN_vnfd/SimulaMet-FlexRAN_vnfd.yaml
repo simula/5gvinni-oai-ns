@@ -110,6 +110,14 @@ vnfd:vnfd-catalog:
                     value: <flexran_git_repository>
                   - name: flexran-git-commit
                     value: <flexran_git_commit>
+                  - name: flexran-service-ipv4-interface
+                    value: <flexran_service_ipv4_interface>
+                  - name: flexran-service-ipv4-gateway
+                    value: <flexran_service_ipv4_gateway>
+                  - name: flexran-service-ipv6-interface
+                    value: <flexran_service_ipv6_interface>
+                  - name: flexran-service-ipv6-gateway
+                    value: <flexran_service_ipv6_gateway>
               - seq: '3'
                 name: configure-flexran
                 #parameter:

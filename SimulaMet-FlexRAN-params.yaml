@@ -33,6 +33,10 @@ additionalParamsForVnf:
       # ====== FlexRAN ======================================================
       flexran_git_repository: 'https://gitlab.eurecom.fr/mosaic5g/mosaic5g'
       flexran_git_commit: 'master'
+      flexran_service_ipv4_interface: '192.168.246.100/24'
+      flexran_service_ipv4_gateway: '0.0.0.0'
+      flexran_service_ipv6_interface: ''
+      flexran_service_ipv6_gateway: ''
       #network_users: '1024'
 
       # ====== Other ========================================================
