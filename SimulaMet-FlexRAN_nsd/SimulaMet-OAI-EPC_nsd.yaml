@@ -1,0 +1,68 @@
+# =====================================================================
+#     #######  #####          #     #   ###   #     # #     #   ###
+#     #       #     #         #     #    #    ##    # ##    #    #
+#     #       #               #     #    #    # #   # # #   #    #
+#      #####  #  ####  #####  #     #    #    #  #  # #  #  #    #
+#           # #     #          #   #     #    #   # # #   # #    #
+#     #     # #     #           # #      #    #    ## #    ##    #
+#      #####   #####             #      ###   #     # #     #   ###
+# =====================================================================
+#
+# SimulaMet FlexRAN NS
+# Copyright (C) 2019-2020 by Thomas Dreibholz
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Contact: dreibh@simula.no
+
+nsd:nsd-catalog:
+  nsd:
+    - id: SimulaMet-FlexRAN_nsd
+      name: SimulaMet-FlexRAN_nsd
+      short-name: SimulaMet-FlexRAN_nsd
+      description: SimulaMet OpenAirInterface Evolved Packet Core NS
+      vendor: Thomas Dreibholz
+      version: '1.0'
+      logo: NorNet.png
+
+      # ###### VNFDs that are part of this NSD ##############################
+      constituent-vnfd:
+        - member-vnf-index: 1
+          vnfd-id-ref: SimulaMet-FlexRAN_vnfd
+
+      # ###### VLDs #########################################################
+      vld:
+        # ====== Management =================================================
+        - id: SimulaMet-FlexRAN_nsd-Management
+          name: SimulaMet-FlexRAN_nsd-Management
+          short-name: SimulaMet-FlexRAN_nsd-Management
+          mgmt-network: 'true'
+          type: ELAN
+          vim-network-name: mgmt
+          vnfd-connection-point-ref:
+            - member-vnf-index-ref: 1
+              vnfd-id-ref: SimulaMet-FlexRAN_vnfd
+              vnfd-connection-point-ref: mme-mgmt-cp
+
+        # ====== Service ====================================================
+        - id: SimulaMet-FlexRAN_nsd-Service
+          name: SimulaMet-FlexRAN_nsd-Service
+          short-name: SimulaMet-FlexRAN_nsd-Service
+          type: ELAN
+          vim-network-name: nornet-simula
+          vnfd-connection-point-ref:
+            - member-vnf-index-ref: 1
+              vnfd-id-ref: SimulaMet-FlexRAN_vnfd
+              vnfd-connection-point-ref: mme-service-cp
+              #ip-address: 192.168.246.100
