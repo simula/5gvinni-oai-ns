@@ -93,13 +93,13 @@ autoinstall:
 
       # ====== BIOS Grub ====================================================
       # NOTE: Will be created later manually!
-      - id: disk0-partition-grub
-        type: partition
-        device: disk0
-        size: 1048576
-        flag: bios_grub
-        #grub_device: true
-        preserve: false
+      # - id: disk0-partition-grub
+      #   type: partition
+      #   device: disk0
+      #   size: 1048576
+      #   flag: bios_grub
+      #   #grub_device: true
+      #   preserve: false
 
       # ====== EFI ==========================================================
       - id: disk0-partition-efi
@@ -164,8 +164,8 @@ autoinstall:
         source: ppa:dreibh/ppa
   packages:
     - joe
-    #- nornet-autoupdate
-    #- nornet-management
+    - nornet-autoupdate
+    - nornet-management
   ssh:
     install-server: true
 
@@ -185,11 +185,11 @@ autoinstall:
     # Update Grub configuration (console=ttyS0...):
     # - chroot /target update-grub
     # Update packages:
-    #- chroot /target apt update
-    #- chroot /target apt-file update
-    #- chroot /target apt dist-upgrade -y
-    #- chroot /target apt autoremove -y --purge
+    - chroot /target apt update
+    - chroot /target apt-file update
+    - chroot /target apt dist-upgrade -y
+    - chroot /target apt autoremove -y --purge
     # Clean up:
-    #- chroot /target updatedb
-    #- chroot /target apt clean
-    #- fstrim -av
+    - chroot /target updatedb
+    - chroot /target apt clean
+    - fstrim -av

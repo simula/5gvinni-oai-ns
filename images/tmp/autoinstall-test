@@ -6,8 +6,9 @@ python3 -m http.server --bind 127.0.0.1 3003 &
 
 yamllint -d '{extends: default, rules: {document-start: {present: no}, line-length: {max: 4096}, comments-indentation: disable}}' user-data
 
-# LOCATION=~/Nedlastinger/ubuntu-20.04-live-server-amd64.iso
-LOCATION=~/Nedlastinger/groovy-live-server-amd64.iso
+# LOCATION=~/Nedlastinger/ubuntu-18.04.4-live-server-amd64.iso
+LOCATION=~/Nedlastinger/ubuntu-20.04.1-live-server-amd64.iso
+# LOCATION=~/Nedlastinger/groovy-live-server-amd64.iso
 
 name=Test
 size=`echo "32*(1024^3) + 16896" | bc`
@@ -32,7 +33,7 @@ qemu-img create -f qcow2 -o size=${size},nocow=on ${image}
 
 
 bootOptions="--boot uefi"
-osOptions="--os-type linux --os-variant ubuntu20.04"
+osOptions="--os-type linux --os-variant ubuntu18.04"
 
 virt-manager/virt-install \
    --quiet \
