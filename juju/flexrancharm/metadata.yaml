@@ -26,8 +26,8 @@
 #
 # Contact: dreibh@simula.no
 
-name: hsscharm
-display-name: hsscharm
+name: flexrancharm
+display-name: flexrancharm
 summary: SimulaMet FlexRAN Charm
 maintainer: Thomas Dreibholz <dreibh@simula.no>
 description: |
