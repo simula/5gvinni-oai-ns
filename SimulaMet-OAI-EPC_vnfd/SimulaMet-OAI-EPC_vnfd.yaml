@@ -51,7 +51,7 @@ vnfd:vnfd-catalog:
           # ====== VDU VM Configuration =====================================
           vm-flavor:
             vcpu-count: 4
-            memory-mb: 2048
+            memory-mb: 3072
             storage-gb: 16
           image: Template-Ubuntu-5gVINNI-Development-Bionic
           cloud-init-file: hss-init
