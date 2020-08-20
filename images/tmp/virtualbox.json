@@ -5,6 +5,7 @@
   "builders": [
     {
        "type": "virtualbox-iso",
+       "guest_additions_mode": "disable",
        "guest_os_type": "Ubuntu_64",
        "vm_name": "akerselva.simula.nornet",
 
@@ -23,24 +24,24 @@
        "memory": 4096,
        "sound": "pulse",
        "disk_size": 32768,
-       "hard_drive_interface": "scsi",
+       "hard_drive_interface": "sata",
        "hard_drive_discard": true,
        "hard_drive_nonrotational": true,
        "keep_registered": true,
        "vboxmanage": [
-         [ "modifyvm", "{{.Name}}", "--nested-hw-virt",     "on" ],
-         [ "modifyvm", "{{.Name}}", "--firmware",           "EFI" ],
-         [ "modifyvm", "{{.Name}}", "--rtcuseutc",          "on"  ],
-         [ "modifyvm", "{{.Name}}", "--vram",               "16"  ],
+         [ "modifyvm", "{{.Name}}", "--nested-hw-virt",   "on" ],
+         [ "modifyvm", "{{.Name}}", "--firmware",         "EFI" ],
+         [ "modifyvm", "{{.Name}}", "--rtcuseutc",        "on"  ],
+         [ "modifyvm", "{{.Name}}", "--vram",             "16"  ],
          [ "modifyvm", "{{.Name}}", "--graphicscontroller", "vmsvga", "--accelerate3d", "on"  ],
          [ "setextradata", "{{.Name}}", "VBoxInternal2/EfiGraphicsResolution", "1024x768"  ],
          [ "modifyvm", "{{.Name}}", "--nictype1", "virtio", "--nictype2", "virtio", "--nictype3", "virtio", "--nictype4", "virtio" ],
-         [ "storagectl", "{{.Name}}", "--name", "SCSI Controller", "--hostiocache", "on" ],
+         [ "storagectl", "{{.Name}}", "--name", "SATA Controller", "--hostiocache", "on" ],
          [ "createhd", "--format", "VDI", "--filename", "{{.Name}}-Home.vdi", "--variant", "Standard", "--size", "131072" ],
          [ "createhd", "--format", "VDI", "--filename", "{{.Name}}-Swap.vdi", "--variant", "Standard", "--size", "4096"   ],
-         [ "storageattach", "{{.Name}}", "--storagectl", "SCSI Controller", "--port", "1", "--type", "hdd",
+         [ "storageattach", "{{.Name}}", "--storagectl", "SATA Controller", "--port", "1", "--type", "hdd",
            "--medium", "{{.Name}}-Home.vdi", "--nonrotational", "on", "--discard", "on" ],
-         [ "storageattach", "{{.Name}}", "--storagectl", "SCSI Controller", "--port", "2", "--type", "hdd",
+         [ "storageattach", "{{.Name}}", "--storagectl", "SATA Controller", "--port", "2", "--type", "hdd",
            "--medium", "{{.Name}}-Swap.vdi", "--nonrotational", "on", "--discard", "on" ]
       ],
 
