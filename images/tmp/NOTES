@@ -7,6 +7,17 @@
 
  "guest_additions_mode": "disable",
 
+         [ "modifyvm", "{{.Name}}", "--nested-hw-virt",   "on" ],
+         [ "modifyvm", "{{.Name}}", "--firmware",         "EFI" ],
+         [ "modifyvm", "{{.Name}}", "--rtcuseutc",        "on"  ],
+         [ "modifyvm", "{{.Name}}", "--vram",             "16"  ],
+         [ "modifyvm", "{{.Name}}", "--graphicscontroller", "vmsvga", "--accelerate3d", "on"  ],
+         [ "setextradata", "{{.Name}}", "VBoxInternal2/EfiGraphicsResolution", "1024x768"  ],
+
+       "disk_additional_size": [
+          "131072M",
+          "4096M"
+       ],
 
 SSH:
        "ssh_username": "nornetpp",

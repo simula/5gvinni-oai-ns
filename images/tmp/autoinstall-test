@@ -6,9 +6,9 @@ python3 -m http.server 3003 &
 
 yamllint -d '{extends: default, rules: {document-start: {present: no}, line-length: {max: 4096}, comments-indentation: disable}}' user-data
 
-# LOCATION=~/Downloads/ubuntu-18.04.5-live-server-amd64.iso
-LOCATION=~/Downloads/ubuntu-20.04.1-live-server-amd64.iso
-# LOCATION=~/Downloads/groovy-live-server-amd64.iso
+# LOCATION=~/Nedlastinger/ubuntu-18.04.5-live-server-amd64.iso
+LOCATION=~/Nedlastinger/ubuntu-20.04.1-live-server-amd64.iso
+# LOCATION=~/Nedlastinger/groovy-live-server-amd64.iso
 
 name=Test
 size=`echo "32*(1024^3) + 16896" | bc`
