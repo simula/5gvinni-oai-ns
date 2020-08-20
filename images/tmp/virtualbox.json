@@ -4,66 +4,39 @@
   },
   "builders": [
     {
-      "type": "virtualbox-iso",
-      "boot_command": [
-        "<esc><wait>",
-        "<esc><wait>",
-        "<enter><wait>",
-        "/install/vmlinuz",
-        " auto=true",
-        " url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg",
-        " locale=en_US<wait>",
-        " console-setup/ask_detect=false<wait>",
-        " console-setup/layoutcode=us<wait>",
-        " console-setup/modelcode=pc105<wait>",
-        " debconf/frontend=noninteractive<wait>",
-        " debian-installer=en_US<wait>",
-        " fb=false<wait>",
-        " initrd=/install/initrd.gz<wait>",
-        " kbd-chooser/method=us<wait>",
-        " keyboard-configuration/layout=USA<wait>",
-        " keyboard-configuration/variant=USA<wait>",
-        " netcfg/get_domain=vm<wait>",
-        " netcfg/get_hostname=vagrant<wait>",
-        " grub-installer/bootdev=/dev/sda<wait>",
-        " noapic<wait>",
-        " -- <wait>",
-        "<enter><wait>"
+       "type": "virtualbox-iso",
+       "guest_os_type": "Ubuntu_64",
+       "iso_url": "/home/dreibh/Downloads/ubuntu-20.04.1-live-server-amd64.iso",
+       "iso_checksum": "443511f6bf12402c12503733059269a2e10dec602916c0a75263e5d990f6bb93",
+       "iso_checksum_type": "sha256",
+       "ssh_username": "ubuntu",
+       "ssh_password": "osm4u",
+       "shutdown_command": "echo 'osm4u' | sudo -S shutdown -P now",
+       "vm_name": "akerselva.simula.nornet",
+       "cpus": 4,
+       "memory": 4096,
+       "sound": "pulse",
+       "disk_size": 32768,
+       "hard_drive_interface": "scsi",
+       "hard_drive_discard": true,
+       "hard_drive_nonrotational": true,
+       "keep_registered": true,
+       "vboxmanage": [
+         [ "modifyvm", "{{.Name}}", "--firmware",  "EFI" ],
+         [ "modifyvm", "{{.Name}}", "--rtcuseutc", "on"  ],
+         [ "modifyvm", "{{.Name}}", "--vram",      "16"  ],
+         [ "createhd", "--format", "VDI", "--filename", "second_disk.vdi", "--variant", "Standard", "--size", "100" ],
+         [ "storageattach", "{{.Name}}", "--storagectl", "SCSI Controller", "--port", "1", "--type", "hdd", "--medium", "second_disk.vdi", "--nonrotational", "on", "--discard", "on" ]
       ],
-      "boot_wait": "10s",
-      "disk_size": 81920,
-      "guest_os_type": "Ubuntu_64",
-      "headless": true,
       "http_directory": "http",
-      "iso_urls": [
-        "ubuntu-20.04.1-legacy-server-amd64.iso",
-        "http://cdimage.ubuntu.com/ubuntu-legacy-server/releases/20.04/release/ubuntu-20.04.1-legacy-server-amd64.iso"
-      ],
-      "iso_checksum": "f11bda2f2caed8f420802b59f382c25160b114ccc665dbac9c5046e7fceaced2",
-      "iso_checksum_type": "sha256",
-      "ssh_username": "vagrant",
-      "ssh_password": "vagrant",
-      "ssh_port": 22,
-      "ssh_wait_timeout": "1800s",
-      "shutdown_command": "echo 'vagrant'|sudo -S shutdown -P now",
-      "guest_additions_path": "VBoxGuestAdditions_{{.Version}}.iso",
-      "virtualbox_version_file": ".vbox_version",
-      "vm_name": "packer-ubuntu-20.04-amd64",
-      "vboxmanage": [
-        [
-          "modifyvm",
-          "{{.Name}}",
-          "--memory",
-          "1024"
-        ],
-        [
-          "modifyvm",
-          "{{.Name}}",
-          "--cpus",
-          "1"
+      "boot_wait": "3s",
+      "boot_command": [
+           "<esc><wait>",
+           "<esc><wait>",
+           "linux (cd0)/casper/vmlinuz autoinstall ds=nocloud-net;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}<enter><wait>",
+           "initrd (cd0)/casper/initrd<enter><wait>",
+           "boot<enter><wait>"
         ]
-      ]
-    }
+     }
   ]
 }
-
