@@ -4,13 +4,26 @@
        "iso_url": "/home/dreibh/Downloads/ubuntu-18.04.5-live-server-amd64.iso",
        "iso_checksum": "3756b3201007a88da35ee0957fbe6666c495fb3d8ef2e851ed2bd1115dc36446",
 
-      "boot_command": [
-          "<esc><wait>",
-          "<esc><wait>",
-          "linux (cd0)/casper/vmlinuz autoinstall ds=nocloud-net;seedfrom=http://{{ .HTTPIP }}:{{ .HTTPPort }}/<enter><wait>",
-          "initrd (cd0)/casper/initrd<enter><wait>",
-          "boot<enter><wait>"
-       ]
+
+ "guest_additions_mode": "disable",
+
+
+SSH:
+       "ssh_username": "nornetpp",
+       "ssh_password": "!NorNetInst!",
+       "ssh_pty": true,
+       "ssh_timeout": "20m",
+       "ssh_handshake_attempts": "1024",
+       "shutdown_command": "echo '!NorNetInst!' | sudo -S shutdown -P now",
+
+
+Additional HDDs:
+         [ "createhd", "--format", "VDI", "--filename", "Home.vdi", "--variant", "Standard", "--size", "128" ],
+         [ "createhd", "--format", "VDI", "--filename", "Swap.vdi", "--variant", "Standard", "--size", "4"   ],
+         [ "storageattach", "{{.Name}}", "--storagectl", "SCSI Controller", "--port", "1", "--type", "hdd",
+           "--medium", "Home.vdi", "--nonrotational", "on", "--discard", "on" ],
+         [ "storageattach", "{{.Name}}", "--storagectl", "SCSI Controller", "--port", "2", "--type", "hdd",
+           "--medium", "Swap.vdi", "--nonrotational", "on", "--discard", "on" ]
 
 
 EFI Boot:

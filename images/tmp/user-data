@@ -90,6 +90,22 @@ autoinstall:
         ptable: gpt
         preserve: false
         grub_device: true
+      - type: disk
+        id: disk1
+        name: "home-disk"
+        path: /dev/sdb
+        wipe: superblock
+        ptable: gpt
+        preserve: false
+        grub_device: false
+      - type: disk
+        id: disk2
+        name: "swap-disk"
+        path: /dev/sdc
+        wipe: superblock
+        ptable: gpt
+        preserve: false
+        grub_device: false
 
       # ====== BIOS Grub ====================================================
       # NOTE: Will be created later manually!
@@ -131,6 +147,36 @@ autoinstall:
         volume: disk0-partition-system
         preserve: false
 
+      # ====== Home =========================================================
+      - id: disk1-partition-home
+        type: partition
+        device: disk1
+        size: -1
+        flag: linux
+        grub_device: false
+        preserve: false
+      - id: disk1-partition-home-format
+        type: format
+        fstype: btrfs
+        label: Home
+        volume: disk1-partition-home
+        preserve: false
+
+      ## ====== Swap =========================================================
+      - id: disk2-partition-swap
+        type: partition
+        device: disk2
+        size: -1
+        flag: linux
+        grub_device: false
+        preserve: false
+      - id: disk2-partition-swap-format
+        type: format
+        fstype: swap
+        label: Swap
+        volume: disk2-partition-swap
+        preserve: false
+
       # ====== Mount points =================================================
       - id: disk0-partition-system-mount
         type: mount
@@ -141,6 +187,16 @@ autoinstall:
         type: mount
         path: /boot/efi
         device: disk0-partition-efi-format
+        preserve: false
+      - id: disk1-partition-home-mount
+        type: mount
+        path: /home
+        device: disk1-partition-home-format
+        preserve: false
+      - id: disk2-partition-swap-mount
+        type: mount
+        path: none
+        device: disk2-partition-swap-format
         preserve: false
 
 
