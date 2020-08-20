@@ -63,7 +63,7 @@ additionalParamsForVnf:
       # ====== SPGW_U =======================================================
       spgwu_git_repository: 'https://github.com/OPENAIRINTERFACE/openair-cn-cups.git'
       spgwu_git_commit: 'dreibh/tx-checksum-ip-generic-off'
-      spgwu_S1U_ipv4_interface: '192.168.250.160/24'
+      spgwu_S1U_ipv4_interface: '192.168.250.159/24'
       spgwu_S1U_ipv4_gateway: '0.0.0.0'
       spgwu_SGi_ipv4_interface: '10.254.1.204/24'
       spgwu_SGi_ipv4_gateway: '10.254.1.1'
@@ -98,14 +98,14 @@ vld:
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '1'
         vnfd-connection-point-ref: mme-s1c-cp
-        ip-address: 192.168.247.103
+        ip-address: 192.168.249.102
 
   # ====== S1-U =============================================================
   - name: SimulaMet-OAI-EPC_nsd-S1U
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '1'
         vnfd-connection-point-ref: spgwu-s1u-cp
-        ip-address: 192.168.248.160
+        ip-address: 192.168.250.159
 
   # ====== SGi ==============================================================
   - name: SimulaMet-OAI-EPC_nsd-SGi
