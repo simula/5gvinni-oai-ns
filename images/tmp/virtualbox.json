@@ -5,13 +5,17 @@
   "builders": [
     {
        "type": "virtualbox-iso",
+       "guest_additions_mode": "disable",
        "guest_os_type": "Ubuntu_64",
        "iso_url": "/home/dreibh/Downloads/ubuntu-20.04.1-live-server-amd64.iso",
        "iso_checksum": "443511f6bf12402c12503733059269a2e10dec602916c0a75263e5d990f6bb93",
        "iso_checksum_type": "sha256",
-       "ssh_username": "ubuntu",
-       "ssh_password": "osm4u",
-       "shutdown_command": "echo 'osm4u' | sudo -S shutdown -P now",
+       "ssh_username": "nornetpp",
+       "ssh_password": "!NorNetInst!",
+       "ssh_pty": true,
+       "ssh_timeout": "20m",
+       "ssh_handshake_attempts": "1024",
+       "shutdown_command": "echo '!NorNetInst!' | sudo -S shutdown -P now",
        "vm_name": "akerselva.simula.nornet",
        "cpus": 4,
        "memory": 4096,
@@ -25,18 +29,26 @@
          [ "modifyvm", "{{.Name}}", "--firmware",  "EFI" ],
          [ "modifyvm", "{{.Name}}", "--rtcuseutc", "on"  ],
          [ "modifyvm", "{{.Name}}", "--vram",      "16"  ],
-         [ "createhd", "--format", "VDI", "--filename", "second_disk.vdi", "--variant", "Standard", "--size", "100" ],
-         [ "storageattach", "{{.Name}}", "--storagectl", "SCSI Controller", "--port", "1", "--type", "hdd", "--medium", "second_disk.vdi", "--nonrotational", "on", "--discard", "on" ]
+         [ "modifyvm", "{{.Name}}", "--graphicscontroller", "vmsvga", "--accelerate3d", "on"  ],
+         [ "setextradata", "{{.Name}}", "VBoxInternal2/EfiGraphicsResolution", "1024x768"  ],
+         [ "modifyvm", "{{.Name}}", "--nictype1", "virtio", "--nictype2", "virtio", "--nictype3", "virtio", "--nictype4", "virtio" ],
+         [ "storagectl", "{{.Name}}", "--name", "SCSI Controller", "--hostiocache", "on" ],
+         [ "createhd", "--format", "VDI", "--filename", "Home.vdi", "--variant", "Standard", "--size", "128" ],
+         [ "createhd", "--format", "VDI", "--filename", "Swap.vdi", "--variant", "Standard", "--size", "4"   ],
+         [ "storageattach", "{{.Name}}", "--storagectl", "SCSI Controller", "--port", "1", "--type", "hdd",
+           "--medium", "Home.vdi", "--nonrotational", "on", "--discard", "on" ],
+         [ "storageattach", "{{.Name}}", "--storagectl", "SCSI Controller", "--port", "2", "--type", "hdd",
+           "--medium", "Swap.vdi", "--nonrotational", "on", "--discard", "on" ]
       ],
       "http_directory": "http",
       "boot_wait": "3s",
       "boot_command": [
-           "<esc><wait>",
-           "<esc><wait>",
-           "linux (cd0)/casper/vmlinuz autoinstall ds=nocloud-net;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}<enter><wait>",
-           "initrd (cd0)/casper/initrd<enter><wait>",
-           "boot<enter><wait>"
-        ]
+          "<esc><wait>",
+          "<esc><wait>",
+          "linux /casper/vmlinuz --- autoinstall ds=\"nocloud-net;seedfrom=http://{{ .HTTPIP }}:{{ .HTTPPort }}/\"<enter><wait>",
+          "initrd /casper/initrd<enter><wait>",
+          "boot<enter>"
+       ]
      }
   ]
 }
