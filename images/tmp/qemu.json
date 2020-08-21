@@ -4,48 +4,42 @@
   },
   "builders": [
     {
-       "vm_name": "akerselva.simula.nornet",
+      "vm_name": "akerselva.simula.nornet",
+      "type": "qemu",
+      "accelerator": "kvm",
+      "headless": true,
+      "format": "qcow2",
+      "disk_interface": "virtio-scsi",
+      "disk_cache": "unsafe",
+      "disk_discard": "unmap",
+      "net_device": "virtio-net",
 
-       "type": "qemu",
-       "accelerator": "kvm",
-       "headless": true,
-       "format": "qcow2",
-       "disk_interface": "virtio-scsi",
-       "disk_cache": "unsafe",
-       "disk_discard": "unmap",
-       "net_device": "virtio-net",
+      "cpus": 4,
+      "memory": 4096,
+      "disk_size": 32768,
+      "qemuargs": [
+        [ "-bios", "OVMF.fd" ]
+      ],
 
-       "cpus": 4,
-       "memory": 4096,
-       "disk_size": 32768,
-       "qemuargs": [
-          [ "-bios", "OVMF.fd" ]
-       ],
-
-       "iso_url": "/home/dreibh/Nedlastinger/ubuntu-20.04.1-live-server-amd64.iso",
-       "iso_checksum": "443511f6bf12402c12503733059269a2e10dec602916c0a75263e5d990f6bb93",
-       "iso_checksum_type": "sha256",
-
-       "ssh_username": "nornetpp",
-       "ssh_password": "!NorNetInst!",
-       "ssh_pty": true,
-       "ssh_timeout": "60m",
-       "ssh_handshake_attempts": "1024",
-       "shutdown_command": "echo '!NorNetInst!' | sudo -S shutdown -P now",
-
-       "cpus": 4,
-       "memory": 4096,
-       "disk_size": 32768,
-
+      "iso_url": "/home/dreibh/Downloads/ubuntu-20.04.1-live-server-amd64.iso",
+      "iso_checksum": "443511f6bf12402c12503733059269a2e10dec602916c0a75263e5d990f6bb93",
+      "iso_checksum_type": "sha256",
+      "ssh_username": "nornetpp",
+      "ssh_password": "!NorNetInst!",
+      "ssh_pty": true,
+      "ssh_timeout": "60m",
+      "ssh_handshake_attempts": "1024",
+      "shutdown_command": "echo '!NorNetInst!' | sudo -S shutdown -P now",
       "http_directory": ".",
+
       "boot_wait": "3s",
       "boot_command": [
-          "<esc><wait>",
-          "<esc><wait>",
-          "linux /casper/vmlinuz --- autoinstall ds=\"nocloud-net;seedfrom=http://{{ .HTTPIP }}:{{ .HTTPPort }}/\"<enter><wait>",
-          "initrd /casper/initrd<enter><wait>",
-          "boot<enter>"
-       ]
-     }
+        "<esc><wait>",
+        "<esc><wait>",
+        "linux /casper/vmlinuz --- autoinstall ds=\"nocloud-net;seedfrom=http://{{ .HTTPIP }}:{{ .HTTPPort }}/\"<enter><wait>",
+        "initrd /casper/initrd<enter><wait>",
+        "boot<enter>"
+      ]
+    }
   ]
 }
