@@ -7,6 +7,9 @@ vm_disk_root=32768
 vm_disk_home=131072
 vm_disk_swap=4096
 
+sudo service virtualbox start
+sudo service vboxdrv start
+
 packer build \
    -var "vm_name=${vm_name}"             \
    -var "vm_version=${vm_version}"       \
