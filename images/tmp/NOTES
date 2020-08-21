@@ -4,6 +4,8 @@
        "iso_url": "/home/dreibh/Downloads/ubuntu-18.04.5-live-server-amd64.iso",
        "iso_checksum": "3756b3201007a88da35ee0957fbe6666c495fb3d8ef2e851ed2bd1115dc36446",
 
+       "iso_url": "/home/dreibh/Downloads/groovy-live-server-amd64.iso",
+       "iso_checksum": "272ace8b13899c33d035b1016a06eb366e991ff848c49883292f66912d1797d2",
 
  "guest_additions_mode": "disable",
 
