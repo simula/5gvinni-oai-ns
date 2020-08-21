@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 vm_name="VirtualBox-Template-Ubuntu-Server-20.04-LTS"
 vm_description='NorNet VM Template'
@@ -7,8 +7,12 @@ vm_disk_root=32768
 vm_disk_home=131072
 vm_disk_swap=4096
 
-sudo service virtualbox start
-sudo service vboxdrv start
+sudo service virtualbox start || true
+sudo service vboxdrv start || true
+
+# Packer JSON does not allow comments -> awful!
+# Allow C++-style comments for commenting out a full line:
+sed -e "/^[ \t]*\/\/.*$/d" <virtualbox.json >${vm_name}.json
 
 packer build \
    -var "vm_name=${vm_name}"             \
@@ -17,4 +21,4 @@ packer build \
    -var "vm_disk_root=${vm_disk_root}"   \
    -var "vm_disk_home=${vm_disk_home}"   \
    -var "vm_disk_swap=${vm_disk_swap}"   \
-   virtualbox.json
+   ${vm_name}.json

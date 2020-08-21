@@ -1,8 +1,28 @@
+// Ubuntu Preseed Configuration
+// Copyright (C) 2020 by Thomas Dreibholz
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
+// Contact: dreibh@simula.no
+
 {
+  // ###### Variables #######################################################
   "variables": {
     "version": ""
   },
 
+  // ###### Builders ########################################################
   "builders": [
     {
       "vm_name": "{{user `vm_name`}}",
@@ -34,11 +54,15 @@
         [ "modifyvm", "{{.Name}}", "--nested-hw-virt", "off" ],
         [ "modifyvm", "{{.Name}}", "--firmware", "EFI" ],
         [ "modifyvm", "{{.Name}}", "--rtcuseutc", "on" ],
-        [ "modifyvm", "{{.Name}}", "--vram", "16" ],
+        [ "modifyvm", "{{.Name}}", "--vram", "48" ],
         [ "modifyvm", "{{.Name}}", "--vrde", "off" ],
         [ "modifyvm", "{{.Name}}", "--graphicscontroller", "vmsvga", "--accelerate3d", "off" ],
         [ "setextradata", "{{.Name}}", "VBoxInternal2/EfiGraphicsResolution", "1024x768" ],
+        // VirtualBox seems to hang when there is no serial port but a serial port console configured:
+        [ "modifyvm", "{{.Name}}", "--uart1", "0x03f8", "4", "--uartmode1", "file", "/dev/null" ],
+        // NIC uses virtio:
         [ "modifyvm", "{{.Name}}", "--nictype1", "virtio", "--nictype2", "virtio", "--nictype3", "virtio", "--nictype4", "virtio" ],
+        // Add additional disks:
         [ "storagectl", "{{.Name}}", "--name", "SATA Controller", "--hostiocache", "on" ],
         [ "createhd", "--format", "VDI", "--filename", "{{.Name}}-Home.vdi", "--variant", "Standard", "--size", "{{user `vm_disk_home`}}" ],
         [ "createhd", "--format", "VDI", "--filename", "{{.Name}}-Swap.vdi", "--variant", "Standard", "--size", "{{user `vm_disk_swap`}}" ],
@@ -48,6 +72,7 @@
           "--medium", "{{.Name}}-Swap.vdi", "--nonrotational", "on", "--discard", "on" ]
       ],
 
+      // ====== ISO settings ================================================
       "iso_url": "/home/dreibh/Downloads/ubuntu-20.04.1-live-server-amd64.iso",
       "iso_checksum": "sha256:443511f6bf12402c12503733059269a2e10dec602916c0a75263e5d990f6bb93",
       "ssh_username": "nornetpp",
@@ -58,6 +83,7 @@
       "shutdown_command": "echo '!NorNetInst!' | sudo -S shutdown -P now",
       "http_directory": ".",
 
+      // ====== Boot into installer =========================================
       "boot_wait": "3s",
       "boot_command": [
         "<esc><wait>",
@@ -69,6 +95,7 @@
     }
   ],
 
+  // ###### Provisioners ####################################################
   "provisioners": [
     {
       "type": "shell",

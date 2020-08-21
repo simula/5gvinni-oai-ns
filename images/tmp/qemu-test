@@ -1,2 +1,3 @@
 #!/bin/sh
-qemu-system-x86_64-spice -name Test1 -smp cores=4 -bios OVMF.fd -m 4096 -drive file=x.vdi,if=virtio
+# qemu-system-x86_64-spice
+kvm-spice -name Test1 -cpu host -smp cores=4 -bios OVMF.fd -m 4096 -drive file=x.vdi,if=virtio
