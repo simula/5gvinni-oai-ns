@@ -2,6 +2,7 @@
   "variables": {
     "version": ""
   },
+
   "builders": [
     {
       "vm_name": "{{user `vm_name`}}",
@@ -65,6 +66,19 @@
         "initrd /casper/initrd<enter><wait>",
         "boot<enter>"
       ]
+    }
+  ],
+
+  "provisioners": [
+    {
+      "type": "shell",
+      "execute_command": "echo '!NorNetInst!' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
+      "script": "scripts/virtualbox-guest-utils"
+    },
+    {
+      "type": "shell",
+      "execute_command": "echo '!NorNetInst!' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
+      "script": "scripts/user-settings"
     }
   ]
 }
