@@ -12,20 +12,24 @@
        "headless": false,
        "format": "ova",
        "hard_drive_interface": "sata",
-       "hard_drive_discard": false,
-       "hard_drive_nonrotational": false,
+       "hard_drive_discard": true,
+       "hard_drive_nonrotational": true,
        "keep_registered": true,
 
        "cpus": 4,
        "memory": 4096,
        "disk_size": 32768,
+       "sound": "pulse",
        "vboxmanage": [
-         [ "modifyvm", "{{.Name}}", "--nested-hw-virt",   "off" ],
-         [ "modifyvm", "{{.Name}}", "--firmware",         "EFI" ],
-         [ "modifyvm", "{{.Name}}", "--rtcuseutc",        "on"  ],
-         [ "modifyvm", "{{.Name}}", "--vram",             "128"  ],
-         [ "modifyvm", "{{.Name}}", "--graphicscontroller", "vmsvga", "--accelerate3d", "off"  ],
-         [ "setextradata", "{{.Name}}", "VBoxInternal2/EfiGraphicsResolution", "1024x768"  ]
+         [ "modifyvm", "{{.Name}}", "--nested-hw-virt", "off" ],
+         [ "modifyvm", "{{.Name}}", "--firmware",       "EFI" ],
+         [ "modifyvm", "{{.Name}}", "--rtcuseutc",      "on"  ],
+         [ "modifyvm", "{{.Name}}", "--vram",           "128" ],
+         [ "modifyvm", "{{.Name}}", "--vrde",           "off" ],
+         [ "modifyvm", "{{.Name}}", "--graphicscontroller", "vmsvga", "--accelerate3d", "off" ],
+         [ "setextradata", "{{.Name}}", "VBoxInternal2/EfiGraphicsResolution", "1024x768" ],
+         [ "modifyvm", "{{.Name}}", "--nictype1", "virtio", "--nictype2", "virtio", "--nictype3", "virtio", "--nictype4", "virtio" ],
+         [ "storagectl", "{{.Name}}", "--name", "SATA Controller", "--hostiocache", "on" ]
       ],
 
        "iso_url": "/home/dreibh/Downloads/ubuntu-20.04.1-live-server-amd64.iso",
