@@ -4,7 +4,8 @@
   },
   "builders": [
     {
-      "vm_name": "akerselva.simula.nornet",
+      "vm_name": "{{user `vm_name`}}",
+      "output_directory": "{{user `vm_name`}}",
       "type": "virtualbox-iso",
       "guest_additions_mode": "disable",
       "guest_os_type": "Ubuntu_64",
@@ -14,19 +15,19 @@
         "--ovf20",
         "--manifest",
         "--vsys", "0",
-        "--description", "VirtualBox NorNet VM Template",
-        "--version",     "1.0.0",
+        "--description", "{{user `vm_description`}}",
+        "--version",     "{{user `vm_version`}}",
         "--vendor",      "NorNet",
         "--vendorurl",   "https://www.nntb.no"
       ],
       "hard_drive_interface": "sata",
       "hard_drive_discard": true,
       "hard_drive_nonrotational": true,
-      "keep_registered": false,
+      "keep_registered": true,
 
       "cpus": 4,
       "memory": 4096,
-      "disk_size": 32768,
+      "disk_size": "{{user `vm_disk_root`}}",
       "sound": "pulse",
       "vboxmanage": [
         [ "modifyvm", "{{.Name}}", "--nested-hw-virt", "off" ],
@@ -37,12 +38,17 @@
         [ "modifyvm", "{{.Name}}", "--graphicscontroller", "vmsvga", "--accelerate3d", "off" ],
         [ "setextradata", "{{.Name}}", "VBoxInternal2/EfiGraphicsResolution", "1024x768" ],
         [ "modifyvm", "{{.Name}}", "--nictype1", "virtio", "--nictype2", "virtio", "--nictype3", "virtio", "--nictype4", "virtio" ],
-        [ "storagectl", "{{.Name}}", "--name", "SATA Controller", "--hostiocache", "on" ]
+        [ "storagectl", "{{.Name}}", "--name", "SATA Controller", "--hostiocache", "on" ],
+        [ "createhd", "--format", "VDI", "--filename", "{{.Name}}-Home.vdi", "--variant", "Standard", "--size", "{{user `vm_disk_home`}}" ],
+        [ "createhd", "--format", "VDI", "--filename", "{{.Name}}-Swap.vdi", "--variant", "Standard", "--size", "{{user `vm_disk_swap`}}" ],
+        [ "storageattach", "{{.Name}}", "--storagectl", "SATA Controller", "--port", "1", "--type", "hdd",
+          "--medium", "{{.Name}}-Home.vdi", "--nonrotational", "on", "--discard", "on" ],
+        [ "storageattach", "{{.Name}}", "--storagectl", "SATA Controller", "--port", "2", "--type", "hdd",
+          "--medium", "{{.Name}}-Swap.vdi", "--nonrotational", "on", "--discard", "on" ]
       ],
 
       "iso_url": "/home/dreibh/Downloads/ubuntu-20.04.1-live-server-amd64.iso",
-      "iso_checksum": "443511f6bf12402c12503733059269a2e10dec602916c0a75263e5d990f6bb93",
-      "iso_checksum_type": "sha256",
+      "iso_checksum": "sha256:443511f6bf12402c12503733059269a2e10dec602916c0a75263e5d990f6bb93",
       "ssh_username": "nornetpp",
       "ssh_password": "!NorNetInst!",
       "ssh_pty": true,

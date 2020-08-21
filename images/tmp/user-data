@@ -90,22 +90,22 @@ autoinstall:
         ptable: gpt
         preserve: false
         grub_device: true
-      #- type: disk
-        #id: disk1
-        #name: "home-disk"
-        #path: /dev/sdb
-        #wipe: superblock
-        #ptable: gpt
-        #preserve: false
-        #grub_device: false
-      #- type: disk
-        #id: disk2
-        #name: "swap-disk"
-        #path: /dev/sdc
-        #wipe: superblock
-        #ptable: gpt
-        #preserve: false
-        #grub_device: false
+      - type: disk
+        id: disk1
+        name: "home-disk"
+        path: /dev/sdb
+        wipe: superblock
+        ptable: gpt
+        preserve: false
+        grub_device: false
+      - type: disk
+        id: disk2
+        name: "swap-disk"
+        path: /dev/sdc
+        wipe: superblock
+        ptable: gpt
+        preserve: false
+        grub_device: false
 
       # ====== BIOS Grub ====================================================
       # NOTE: Will be created later manually!
@@ -147,35 +147,35 @@ autoinstall:
         volume: disk0-partition-system
         preserve: false
 
-      ## ====== Home =========================================================
-      #- id: disk1-partition-home
-        #type: partition
-        #device: disk1
-        #size: -1
-        #flag: linux
-        #grub_device: false
-        #preserve: false
-      #- id: disk1-partition-home-format
-        #type: format
-        #fstype: btrfs
-        #label: Home
-        #volume: disk1-partition-home
-        #preserve: false
+      # ====== Home =========================================================
+      - id: disk1-partition-home
+        type: partition
+        device: disk1
+        size: -1
+        flag: linux
+        grub_device: false
+        preserve: false
+      - id: disk1-partition-home-format
+        type: format
+        fstype: btrfs
+        label: Home
+        volume: disk1-partition-home
+        preserve: false
 
-      ### ====== Swap =========================================================
-      #- id: disk2-partition-swap
-        #type: partition
-        #device: disk2
-        #size: -1
-        #flag: linux
-        #grub_device: false
-        #preserve: false
-      #- id: disk2-partition-swap-format
-        #type: format
-        #fstype: swap
-        #label: Swap
-        #volume: disk2-partition-swap
-        #preserve: false
+      # ====== Swap =========================================================
+      - id: disk2-partition-swap
+        type: partition
+        device: disk2
+        size: -1
+        flag: linux
+        grub_device: false
+        preserve: false
+      - id: disk2-partition-swap-format
+        type: format
+        fstype: swap
+        label: Swap
+        volume: disk2-partition-swap
+        preserve: false
 
       # ====== Mount points =================================================
       - id: disk0-partition-system-mount
@@ -188,16 +188,16 @@ autoinstall:
         path: /boot/efi
         device: disk0-partition-efi-format
         preserve: false
-      #- id: disk1-partition-home-mount
-        #type: mount
-        #path: /home
-        #device: disk1-partition-home-format
-        #preserve: false
-      #- id: disk2-partition-swap-mount
-        #type: mount
-        #path: none
-        #device: disk2-partition-swap-format
-        #preserve: false
+      - id: disk1-partition-home-mount
+        type: mount
+        path: /home
+        device: disk1-partition-home-format
+        preserve: false
+      - id: disk2-partition-swap-mount
+        type: mount
+        path: none
+        device: disk2-partition-swap-format
+        preserve: false
 
 
   # ###### Host and User Configuration ######################################
@@ -229,7 +229,9 @@ autoinstall:
   # ###### Post-Install Configuration #######################################
   late-commands:
     # Add partition names:
-    - sgdisk --change-name=1:EFI-SP --change-name=2:System /dev/sda
+    - sgdisk --change-name=1:EFI --change-name=2:Root /dev/sda
+    - sgdisk --change-name=1:Home /dev/sdb
+    - sgdisk --change-name=1:Swap --typecode=1:8200 /dev/sdc
     # Add BIOS Grub partition, if not yet created, just to be sure:
     ###- if ! sgdisk --print /dev/sda | grep EF02 ; then sgdisk --set-alignment=1 --new=128:34:2047 --typecode=128:EF02 --sort /dev/sda ; fi
     ###- sgdisk --change-name=1:GRUB /dev/sda
