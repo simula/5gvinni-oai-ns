@@ -4,54 +4,61 @@
   },
   "builders": [
     {
-       "vm_name": "akerselva.simula.nornet",
+      "vm_name": "akerselva.simula.nornet",
+      "type": "virtualbox-iso",
+      "guest_additions_mode": "disable",
+      "guest_os_type": "Ubuntu_64",
+      "headless": false,
+      "format": "ova",
+      "export_opts": [
+        "--ovf20",
+        "--manifest",
+        "--vsys", "0",
+        "--description", "VirtualBox NorNet VM Template",
+        "--version",     "1.0.0",
+        "--vendor",      "NorNet",
+        "--vendorurl",   "https://www.nntb.no"
+      ],
+      "hard_drive_interface": "sata",
+      "hard_drive_discard": true,
+      "hard_drive_nonrotational": true,
+      "keep_registered": false,
 
-       "type": "virtualbox-iso",
-       "guest_additions_mode": "disable",
-       "guest_os_type": "Ubuntu_64",
-       "headless": false,
-       "format": "ova",
-       "hard_drive_interface": "sata",
-       "hard_drive_discard": true,
-       "hard_drive_nonrotational": true,
-       "keep_registered": true,
-
-       "cpus": 4,
-       "memory": 4096,
-       "disk_size": 32768,
-       "sound": "pulse",
-       "vboxmanage": [
-         [ "modifyvm", "{{.Name}}", "--nested-hw-virt", "off" ],
-         [ "modifyvm", "{{.Name}}", "--firmware",       "EFI" ],
-         [ "modifyvm", "{{.Name}}", "--rtcuseutc",      "on"  ],
-         [ "modifyvm", "{{.Name}}", "--vram",           "128" ],
-         [ "modifyvm", "{{.Name}}", "--vrde",           "off" ],
-         [ "modifyvm", "{{.Name}}", "--graphicscontroller", "vmsvga", "--accelerate3d", "off" ],
-         [ "setextradata", "{{.Name}}", "VBoxInternal2/EfiGraphicsResolution", "1024x768" ],
-         [ "modifyvm", "{{.Name}}", "--nictype1", "virtio", "--nictype2", "virtio", "--nictype3", "virtio", "--nictype4", "virtio" ],
-         [ "storagectl", "{{.Name}}", "--name", "SATA Controller", "--hostiocache", "on" ]
+      "cpus": 4,
+      "memory": 4096,
+      "disk_size": 32768,
+      "sound": "pulse",
+      "vboxmanage": [
+        [ "modifyvm", "{{.Name}}", "--nested-hw-virt", "off" ],
+        [ "modifyvm", "{{.Name}}", "--firmware", "EFI" ],
+        [ "modifyvm", "{{.Name}}", "--rtcuseutc", "on" ],
+        [ "modifyvm", "{{.Name}}", "--vram", "16" ],
+        [ "modifyvm", "{{.Name}}", "--vrde", "off" ],
+        [ "modifyvm", "{{.Name}}", "--graphicscontroller", "vmsvga", "--accelerate3d", "off" ],
+        [ "setextradata", "{{.Name}}", "VBoxInternal2/EfiGraphicsResolution", "1024x768" ],
+        [ "modifyvm", "{{.Name}}", "--nictype1", "virtio", "--nictype2", "virtio", "--nictype3", "virtio", "--nictype4", "virtio" ],
+        [ "storagectl", "{{.Name}}", "--name", "SATA Controller", "--hostiocache", "on" ]
       ],
 
-       "iso_url": "/home/dreibh/Downloads/ubuntu-20.04.1-live-server-amd64.iso",
-       "iso_checksum": "443511f6bf12402c12503733059269a2e10dec602916c0a75263e5d990f6bb93",
-       "iso_checksum_type": "sha256",
-
-       "ssh_username": "nornetpp",
-       "ssh_password": "!NorNetInst!",
-       "ssh_pty": true,
-       "ssh_timeout": "60m",
-       "ssh_handshake_attempts": "1024",
-       "shutdown_command": "echo '!NorNetInst!' | sudo -S shutdown -P now",
-
+      "iso_url": "/home/dreibh/Downloads/ubuntu-20.04.1-live-server-amd64.iso",
+      "iso_checksum": "443511f6bf12402c12503733059269a2e10dec602916c0a75263e5d990f6bb93",
+      "iso_checksum_type": "sha256",
+      "ssh_username": "nornetpp",
+      "ssh_password": "!NorNetInst!",
+      "ssh_pty": true,
+      "ssh_timeout": "60m",
+      "ssh_handshake_attempts": "1024",
+      "shutdown_command": "echo '!NorNetInst!' | sudo -S shutdown -P now",
       "http_directory": ".",
+
       "boot_wait": "3s",
       "boot_command": [
-          "<esc><wait>",
-          "<esc><wait>",
-          "linux /casper/vmlinuz --- autoinstall ds=\"nocloud-net;seedfrom=http://{{ .HTTPIP }}:{{ .HTTPPort }}/\"<enter><wait>",
-          "initrd /casper/initrd<enter><wait>",
-          "boot<enter>"
-       ]
-     }
+        "<esc><wait>",
+        "<esc><wait>",
+        "linux /casper/vmlinuz --- autoinstall ds=\"nocloud-net;seedfrom=http://{{ .HTTPIP }}:{{ .HTTPPort }}/\"<enter><wait>",
+        "initrd /casper/initrd<enter><wait>",
+        "boot<enter>"
+      ]
+    }
   ]
 }
