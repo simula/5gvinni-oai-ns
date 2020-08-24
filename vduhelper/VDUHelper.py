@@ -162,7 +162,8 @@ class VDUHelper:
                                   ipv6Interface = None,
                                   ipv6Gateway   = None,
                                   metric        = 1,
-                                  pdnInterface  = None):
+                                  pdnInterface  = None,
+                                  createDummy   = False):
 
       # NOTE:
       # Double escaping is required for \ and " in "interfaceConfiguration" string!
@@ -223,20 +224,15 @@ class VDUHelper:
          if pdnInterface != None:
             interfaceConfiguration = interfaceConfiguration + makePDNRules(pdnInterface, ipv6Interface, ipv6Gateway)
 
+      # ====== Dummy interface ==============================================
+      if createDummy == True:
+         dummyInterfaceName = interfaceName.split(':')
+         if len(dummyInterfaceName) > 0:
+            dummyInterfaceName = dummyInterfaceName[0]
+            interfaceConfiguration = interfaceConfiguration + \
+               '\\\\tpre-up ip link add ' + dummyInterfaceName + ' type dummy || true\\\\n'
+
       return interfaceConfiguration
-
-
-   # ###### Enable dummy interface ##########################################
-   def addDummyInterface(self, dummyInterfaceName = 'dummy0'):
-      self.beginBlock('Adding dummy interface ' + dummyInterfaceName)
-      try:
-         commands = """sudo ip link add {} type dummy""".format(dummyInterfaceName)
-         self.runInShell(commands)
-      except:
-         self.endBlock(False)
-         raise
-
-      self.endBlock()
 
 
    # ###### Configuration and activate network interface ####################

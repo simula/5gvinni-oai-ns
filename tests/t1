@@ -79,12 +79,12 @@ MyParameters = {
    'spgwu-spgwc-list': '172.55.55.101',
 
    # ====== FlexRAN =========================================================
-   'flexran_git_repository': 'https://gitlab.eurecom.fr/mosaic5g/mosaic5g',
-   'flexran_git_commit': 'master',
-   'flexran_service_ipv4_interface': '192.168.246.100/24',
-   'flexran_service_ipv4_gateway': '0.0.0.0',
-   'flexran_service_ipv6_interface': '',
-   'flexran_service_ipv6_gateway': ''
+   'flexran-git-repository': 'https://gitlab.eurecom.fr/mosaic5g/mosaic5g',
+   'flexran-git-commit': 'master',
+   'flexran-service-ipv4-interface': '192.168.246.100/24',
+   'flexran-service-ipv4-gateway': '0.0.0.0',
+   'flexran-service-ipv6-interface': '',
+   'flexran-service-ipv6-gateway': ''
 }
 
 def function_get(flag):
@@ -470,11 +470,10 @@ def prepare_mme_build():
 
       # ====== Prepare system ===============================================
       vduHelper.beginBlock('Preparing system')
-      vduHelper.makeInterfaceConfiguration(mmeS6a_IfName, configurationS6a, 61)
-      vduHelper.makeInterfaceConfiguration(mmeS11_IfName, configurationS11, 62)
-      vduHelper.makeInterfaceConfiguration(mmeS1C_IfName, configurationS1C, 63)
-      vduHelper.addDummyInterface('dummy0')
-      vduHelper.makeInterfaceConfiguration(mmeS10_IfName, configurationS10, 64)
+      vduHelper.configureInterface(mmeS6a_IfName, configurationS6a, 61)
+      vduHelper.configureInterface(mmeS11_IfName, configurationS11, 62)
+      vduHelper.configureInterface(mmeS1C_IfName, configurationS1C, 63)
+      vduHelper.configureInterface(mmeS10_IfName, configurationS10, 64, createDummy = True)
       vduHelper.testNetworking('8.8.8.8')
       vduHelper.endBlock()
 
@@ -747,8 +746,8 @@ def prepare_spgwc_build():
       vduHelper.beginBlock('Preparing system')
       vduHelper.configureInterface(spgwcS11_IfName,       configurationS11,       61)
       vduHelper.configureInterface(spgwcSXab_IfName,      configurationSXab,      62)
-      vduHelper.configureInterface(spgwcS5S8_SGW_IfName,  configurationS5S8_SGW,  63)
-      vduHelper.configureInterface(spgwcS5S8_PGW_IfName,  configurationS5S8_PGW,  64)
+      vduHelper.configureInterface(spgwcS5S8_SGW_IfName,  configurationS5S8_SGW,  63, createDummy = True)
+      vduHelper.configureInterface(spgwcS5S8_PGW_IfName,  configurationS5S8_PGW,  64, createDummy = True)
       vduHelper.testNetworking('8.8.8.8')
       vduHelper.endBlock()
 
