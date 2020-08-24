@@ -104,8 +104,8 @@ def prepare_spgwc_build():
       vduHelper.beginBlock('Preparing system')
       vduHelper.configureInterface(spgwcS11_IfName,       configurationS11,       61)
       vduHelper.configureInterface(spgwcSXab_IfName,      configurationSXab,      62)
-      vduHelper.configureInterface(spgwcS5S8_SGW_IfName,  configurationS5S8_SGW,  63)
-      vduHelper.configureInterface(spgwcS5S8_PGW_IfName,  configurationS5S8_PGW,  64)
+      vduHelper.configureInterface(spgwcS5S8_SGW_IfName,  configurationS5S8_SGW,  63, createDummy = True)
+      vduHelper.configureInterface(spgwcS5S8_PGW_IfName,  configurationS5S8_PGW,  64, createDummy = True)
       vduHelper.testNetworking('8.8.8.8')
       vduHelper.endBlock()
 

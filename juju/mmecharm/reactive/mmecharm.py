@@ -118,8 +118,7 @@ def prepare_mme_build():
       vduHelper.configureInterface(mmeS6a_IfName, configurationS6a, 61)
       vduHelper.configureInterface(mmeS11_IfName, configurationS11, 62)
       vduHelper.configureInterface(mmeS1C_IfName, configurationS1C, 63)
-      vduHelper.addDummyInterface('dummy0')
-      vduHelper.configureInterface(mmeS10_IfName, configurationS10, 64)
+      vduHelper.configureInterface(mmeS10_IfName, configurationS10, 64, createDummy = True)
       vduHelper.testNetworking('8.8.8.8')
       vduHelper.endBlock()
 
