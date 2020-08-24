@@ -35,6 +35,14 @@ cat >>/home/nornetpp/.bashrc <<EOF
 
 # ---------------------------------------------------------------------------
 
+alias runws="sudo echo Starting Wireshark && ( sudo wireshark & )"
+
+ulimit -c unlimited
+
+export EDITOR=joe
+export CVSEDITOR=\${EDITOR}
+export SVN_EDITOR=\${EDITOR}
+
 cores=\`getconf _NPROCESSORS_ONLN 2>/dev/null || true\`
 if [ \$cores -gt 1 ] ; then
    export MAKEFLAGS=-j\${cores}
