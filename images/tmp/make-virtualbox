@@ -12,9 +12,9 @@ sudo service vboxdrv start || true
 
 # Packer JSON does not allow comments -> awful!
 # Allow C++-style comments for commenting out a full line:
-sed -e "/^[ \t]*\/\/.*$/d" <virtualbox.json >${vm_name}.json
+sed -e "/^[ \t]*\/\/.*$/d" <vbox-fedora.json >${vm_name}.json
 
-packer build \
+env CHECKPOINT_DISABLE=1 packer build    \
    -var "vm_name=${vm_name}"             \
    -var "vm_version=${vm_version}"       \
    -var "vm_version=${vm_version}"       \
