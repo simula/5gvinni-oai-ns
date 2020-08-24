@@ -174,11 +174,11 @@ cd /home/nornetpp/src/{gitDirectory}/flexran""".format(
       vduHelper.beginBlock('Setting up FlexRAN service')
       commands = """\
 ( echo \\\"[Unit]\\\" && \\
-echo \\\"Description=Home Subscriber Server (FlexRAN)\\\" && \\
+echo \\\"Description=FlexRAN Controller\\\" && \\
 echo \\\"After=ssh.target\\\" && \\
 echo \\\"\\\" && \\
 echo \\\"[Service]\\\" && \\
-echo \\\"ExecStart=/bin/sh -c \\\'exec /home/nornetpp/src/mosaic5g/flexran/run_flexran_rtc.sh >>/var/log/flexran.log 2>&1\\\'\\\" && \\
+echo \\\"ExecStart=/bin/sh -c 'exec /usr/bin/env FLEXRAN_RTC_HOME=/home/nornetpp/src/mosaic5g/flexran FLEXRAN_RTC_EXEC=/home/nornetpp/src/mosaic5g/flexran/build ./build/rt_controller -c log_config/basic_log >>/var/log/flexran.log 2>&1\\\'\\\" && \\
 echo \\\"KillMode=process\\\" && \\
 echo \\\"Restart=on-failure\\\" && \\
 echo \\\"RestartPreventExitStatus=255\\\" && \\
