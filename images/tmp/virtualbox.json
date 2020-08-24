@@ -64,12 +64,12 @@
         [ "modifyvm", "{{.Name}}", "--nictype1", "virtio", "--nictype2", "virtio", "--nictype3", "virtio", "--nictype4", "virtio" ],
         // Add additional disks:
         [ "storagectl", "{{.Name}}", "--name", "SATA Controller", "--hostiocache", "on" ],
-        [ "createhd", "--format", "VDI", "--filename", "{{.Name}}-Home.vdi", "--variant", "Standard", "--size", "{{user `vm_disk_home`}}" ],
-        [ "createhd", "--format", "VDI", "--filename", "{{.Name}}-Swap.vdi", "--variant", "Standard", "--size", "{{user `vm_disk_swap`}}" ],
+        [ "createhd", "--format", "VDI", "--filename", "{{.Name}}/{{.Name}}-Home.vdi", "--variant", "Standard", "--size", "{{user `vm_disk_home`}}" ],
+        [ "createhd", "--format", "VDI", "--filename", "{{.Name}}/{{.Name}}-Swap.vdi", "--variant", "Standard", "--size", "{{user `vm_disk_swap`}}" ],
         [ "storageattach", "{{.Name}}", "--storagectl", "SATA Controller", "--port", "1", "--type", "hdd",
-          "--medium", "{{.Name}}-Home.vdi", "--nonrotational", "on", "--discard", "on" ],
+          "--medium", "{{.Name}}/{{.Name}}-Home.vdi", "--nonrotational", "on", "--discard", "on" ],
         [ "storageattach", "{{.Name}}", "--storagectl", "SATA Controller", "--port", "2", "--type", "hdd",
-          "--medium", "{{.Name}}-Swap.vdi", "--nonrotational", "on", "--discard", "on" ]
+          "--medium", "{{.Name}}/{{.Name}}-Swap.vdi", "--nonrotational", "on", "--discard", "on" ]
       ],
 
       // ====== ISO settings ================================================
