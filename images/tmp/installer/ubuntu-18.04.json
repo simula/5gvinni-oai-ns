@@ -33,7 +33,7 @@
   "boot_command": [
     "<esc><wait>",
     "<esc><wait>",
-    "linux /casper/hwe-vmlinuz boot=casper auto url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/legacy ---<enter><wait>",
+    "linux /casper/hwe-vmlinuz boot=casper auto url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/legacy.preseed ---<enter><wait>",
     "initrd /casper/hwe-initrd<enter><wait>",
     "boot<enter>"
   ]

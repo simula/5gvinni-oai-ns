@@ -8,8 +8,9 @@ python3 -m http.server 3003 &
 cd ..
 
 
-LOCATION=~/Nedlastinger/ubuntu-18.04.5-live-server-amd64.iso
-# LOCATION=~/Nedlastinger/ubuntu-20.04.1-live-server-amd64.iso
+# LOCATION=~/Nedlastinger/ubuntu-16.04.7-server-amd64.iso
+# LOCATION=~/Nedlastinger/ubuntu-18.04.5-live-server-amd64.iso
+LOCATION=~/Nedlastinger/ubuntu-20.04.1-live-server-amd64.iso
 # LOCATION=~/Nedlastinger/groovy-live-server-amd64.iso
 
 name=Test
@@ -23,6 +24,7 @@ virsh undefine --nvram "${name}" >/dev/null 2>&1
 
 rm -f ${image}
 qemu-img create -f qcow2 -o size=${size},nocow=on ${image}
+
 
 
 bootOptions="--boot uefi"
@@ -43,7 +45,21 @@ virt-install \
    --noreboot
 
 
-#    ,kernel=casper/hwe-vmlinuz,initrd=casper/hwe-initrd" \
 
-#    --extra-args "priority=critical preseed/file=/legacy.cfg" \
-#    --extra-args "priority=critical preseed/url=http://_gateway:3003/legacy.cfg" \
+# bootOptions=""   # "--boot uefi"
+# osOptions="--os-type linux --os-variant ubuntu18.04"
+#
+# virt-install \
+#    --quiet \
+#    --name "${name}" \
+#    --vcpus 4 \
+#    --cpu host \
+#    --ram 4096 \
+#    --video virtio --channel spicevmc \
+#    --controller scsi,model=virtio-scsi,driver.iommu=on \
+#    --disk "bus=scsi,path=${image},format=qcow2,cache=unsafe,discard=unmap" \
+#    ${bootOptions} ${osOptions} \
+#    --location "${LOCATION}" \
+#    --initrd-inject "http/legacy.preseed" \
+#    --extra-args "boot=casper auto console-setup/ask_detect=false console-setup/layoutcode=us console-setup/modelcode=pc105 debconf/frontend=noninteractive debian-installer=en_US initrd=/install/initrd.gz kbd-chooser/method=us keyboard-configuration/layout=USA keyboard-configuration/variant=USA priority=critical preseed/file=/legacy.preseed" \
+#    --noreboot

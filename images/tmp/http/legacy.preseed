@@ -86,12 +86,6 @@ d-i partman-auto/method                 string regular
 d-i partman-auto/choose_recipe          string root
 d-i partman-auto/expert_recipe          string \
       root ::                                                     \
-              62 62 62 fat16                                      \
-                      $gptonly{ }                                 \
-                      $primary{ }                                 \
-                      method{ efi } format{ }                     \
-                      label{ EFI }                                \
-              .                                                   \
               6144 16384 -1 btrfs                                 \
                       $primary{ } $bootable{ }                    \
                       method{ format } format{ }                  \
@@ -107,6 +101,12 @@ d-i partman-auto/expert_recipe          string \
 #                       $bios_boot{ }                               \
 #                       method{ biosgrub }                          \
 #                       label{ BIOS }                               \
+#               .                                                   \
+#               64 64 64 fat16                                      \
+#                       $gptonly{ }                                 \
+#                       $primary{ }                                 \
+#                       method{ efi } format{ }                     \
+#                       label{ EFI }                                \
 #               .                                                   \
 
 # ====== Mirror =============================================================
