@@ -1,0 +1,143 @@
+#!/bin/bash -e
+
+PROJECT="Template"
+HYPERVISOR="VirtualBox"
+DISTRIBUTION="Fedora"
+RELEASE="32"
+# DISTRIBUTION="Ubuntu"
+# RELEASE="20.04"
+USE_SEPARATE_DISKS=1
+
+VM_DISK_ROOT=32768
+VM_DISK_HOME=131072
+VM_DISK_SWAP=4096
+
+
+# ###### Get configuration ##################################################
+NAME=""
+if [ "${HYPERVISOR}" == "VirtualBox" ] ; then
+   BUILDER_VMSETUP="virtualbox"
+   NAME="VirtualBox"
+elif [ "${HYPERVISOR}" == "QEMU" ] ; then
+   BUILDER_VMSETUP="virtualbox"
+   NAME="QEMU"
+else
+   echo >&2 "ERROR: Invalid hypervisor ${HYPERVISOR}!"
+   exit 1
+fi
+NAME="${NAME}-${PROJECT}"
+if [ ${USE_SEPARATE_DISKS} -ne 0 ] ; then
+   BUILDER_VMSETUP="${BUILDER_VMSETUP}-3disks"
+fi
+
+if [ "${DISTRIBUTION}" == "Ubuntu" ] ; then
+   BUILDER_INSTALL="ubuntu-${RELEASE}"
+   NAME="${NAME}-Ubuntu-${RELEASE}"
+   if [[ "${RELEASE}" =~ ^([0-9]*).([0-9]*)$ ]] ; then
+      y=${BASH_REMATCH[1]}
+      m=${BASH_REMATCH[2]}
+      let isNonLTSYear=($y%2) || true
+      if [ ${isNonLTSYear} -eq 0 -a $m -eq 4 ] ; then
+         NAME="${NAME}-LTS"
+         RELEASE="${RELEASE} LTS"
+      fi
+   else
+      echo >&2 "ERROR: Invalid Ubuntu release ${RELEASE}!"
+      exit 1
+   fi
+elif [ "${DISTRIBUTION}" == "Fedora" ] ; then
+   BUILDER_INSTALL="fedora-${RELEASE}"
+   NAME="${NAME}-Fedora-${RELEASE}"
+else
+   echo >&2 "ERROR: Invalid distribution ${DISTRIBUTION}!"
+   exit 1
+fi
+
+
+# ###### Write Packer configuration #########################################
+JSON="${NAME}.json"
+JSONTMP="${JSON}.tmp"
+
+
+# ====== Read and insert JSON block =========================================
+insert-json()
+{
+   sed -e "/^[ \t]*\/\/.*$/d" <"$1" | jq | \
+      sed -e '1d; $d'
+}
+
+# ====== Variables ==========================================================
+rm -f ${JSONTMP}
+cat >>${JSONTMP} <<EOF
+{
+  "variables": {
+    "version": ""
+  },
+EOF
+
+# ====== Builders ===========================================================
+cat >>${JSONTMP} <<EOF
+  "builders": [
+    {
+EOF
+(
+   insert-json vmsetup/${BUILDER_VMSETUP}.json
+   echo ","
+   insert-json installer/${BUILDER_INSTALL}.json
+) >>${JSONTMP}
+cat >>${JSONTMP} <<EOF
+    }
+  ],
+EOF
+
+# ====== Provisioners =======================================================
+cat >>${JSONTMP} <<EOF
+  "provisioners": [
+EOF
+
+for provisioner in ${PROVISIONERS} ; do
+   if [ ! -e scripts/${provisioner} ] ; then
+      echo >&2 "ERROR: Provisioner scripts/${provisioner} does not exist!"
+      exit 1
+   fi
+   cat >>${JSONTMP} <<EOF
+       {
+         "type": "shell",
+         "execute_command": "echo '!NorNetInst!' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
+         "script": "scripts/${provisioner}"
+       }
+EOF
+done
+
+cat >>${JSONTMP} <<EOF
+  ]
+}
+EOF
+
+
+# ###### Clean up and check #################################################
+jq . <${JSONTMP} >${JSON}
+
+
+# ###### Run Packer #########################################################
+vm_name="${NAME/${HYPERVISOR}-/}"
+vm_description="${PROJECT} VM with ${DISTRIBUTION} ${RELEASE}"
+vm_version=`date +"%Y.%m.%d-%H%M%S"`
+
+if [ ${HYPERVISOR} == "VirtualBox" ] ; then
+   sudo service virtualbox start || true
+   sudo service vboxdrv start || true
+elif [ ${HYPERVISOR} == "QEMU" ] ; then
+   sudo service virtualbox stop || true
+   sudo service vboxdrv stop || true
+fi
+
+rm -rf ${NAME}
+env CHECKPOINT_DISABLE=1 packer build    \
+   -var "vm_name=${vm_name}"             \
+   -var "vm_version=${vm_version}"       \
+   -var "vm_version=${vm_version}"       \
+   -var "vm_disk_root=${VM_DISK_ROOT}"   \
+   -var "vm_disk_home=${VM_DISK_HOME}"   \
+   -var "vm_disk_swap=${VM_DISK_SWAP}"   \
+   ${JSON}

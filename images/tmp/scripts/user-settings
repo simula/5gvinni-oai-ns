@@ -48,3 +48,14 @@ if [ \$cores -gt 1 ] ; then
    export MAKEFLAGS=-j\${cores}
 fi
 EOF
+
+
+# ###### Make some directories ##############################################
+sudo -u nornetpp mkdir -p /home/nornetpp/src
+sudo -u nornetpp chattr +c /home/nornetpp/src
+sudo -u nornetpp mkdir -p /home/nornetpp/tmp
+
+sudo -u nornetpp mkdir -p /home/nornetpp/.ssh
+sudo -u nornetpp chmod 700 /home/nornetpp/.ssh
+sudo -u nornetpp touch /home/nornetpp/.ssh/authorized_keys
+sudo -u nornetpp chmod 600 /home/nornetpp/.ssh/authorized_keys
