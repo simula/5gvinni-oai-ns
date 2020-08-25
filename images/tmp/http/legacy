@@ -1,0 +1,193 @@
+# Ubuntu Preseed Configuration
+# Copyright (C) 2017-2020 by Thomas Dreibholz
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Contact: dreibh@simula.no
+
+# Preseed documentation:
+# https://help.ubuntu.com/lts/installation-guide/example-preseed.txt
+
+# ====== Auto-Install =======================================================
+d-i auto-install/enable                 boolean true
+debconf debconf/priority                select critical
+
+# ====== Localization and Keyboard ==========================================
+# Using Irish locale (€, metric units, etc.), but late_command sets British
+# time format (24-hour clock). Also install locales for NO, DE, CN.
+d-i debian-installer/country            string NO
+d-i debian-installer/language           string en_IE:en
+d-i debian-installer/locale             string en_IE.UTF-8
+d-i localechooser/supported-locales     multiselect en_US.UTF-8, en_GB.UTF-8, en_AU.UTF-8, no_NB.UTF-8, de_DE.UTF-8, zh_CN.UTF-8
+
+# !!! These lines have no effect -> bug #1553147 !!!
+# Need to set keyboard layout by late_command ...
+d-i console-setup/ask_detect            boolean false
+d-i keyboard-configuration/modelcode    string pc105
+d-i keyboard-configuration/layoutcode   string de
+d-i keyboard-configuration/variantcode  string nodeadkeys
+d-i keyboard-configuration/optionscode  string ""
+
+
+# ====== Network ============================================================
+d-i netcfg/choose_interface             select auto
+d-i netcfg/disable_autoconfig           boolean false
+d-i netcfg/disable_dhcp                 boolean false
+
+# d-i netcfg/get_nameservers              string 8.8.8.8 8.8.4.4
+# d-i netcfg/get_ipaddress                string 169.254.100.222
+# d-i netcfg/get_netmask                  string 255.255.255.0
+# d-i netcfg/get_gateway                  string 169.254.100.1
+d-i netcfg/confirm_static               boolean true
+
+d-i netcfg/get_hostname                 string akerbrygge
+d-i netcfg/get_domain                   string simula.nornet
+
+# ====== Time ===============================================================
+d-i clock-setup/utc                     boolean true
+d-i clock-setup/ntp                     boolean true
+d-i clock-setup/ntp-server              string ntp.ubuntu.com
+d-i time/zone                           string Europe/Oslo
+
+# ====== User ===============================================================
+d-i passwd/root-login                   boolean false
+d-i passwd/make-user                    boolean true
+d-i passwd/user-fullname                string  NorNet Praesum Presum
+d-i passwd/username                     string  nornetpp
+d-i passwd/user-password-crypted        password $6$2NWrlKtE5C$u1zqajwW/sfrUMxeKBp7MH.ptmrXW0kvSv20Cf.kSSuAS5lFJUq.WI.iildLgru2Otf1WG1dndo4B8IxnM9Kn1
+# NOTE: Example to add crypted password: echo "my password" | mkpasswd -s -m sha-512
+d-i passwd/user-uid                     string  1000
+d-i passwd/user-default-groups          string  adm cdrom sudo dip plugdev lpadmin sambashare
+d-i user-setup/encrypt-home             boolean false
+
+# ====== Disk  ==============================================================
+d-i partman-basicfilesystems/no_swap    boolean false   # Disable "no swap" warning!
+
+d-i partman/confirm                     boolean true
+d-i partman/confirm_write_new_label     boolean true
+d-i partman/confirm_nooverwrite         boolean true
+d-i partman/choose_partition            select finish
+
+# See https://www.bishnet.net/tim/blog/2015/01/29/understanding-partman-autoexpert_recipe/
+# for details on configuring partman-auto/expert_recipe!
+d-i partman-auto/disk                   string /dev/sda
+d-i partman-auto/method                 string regular
+d-i partman-auto/choose_recipe          string root
+d-i partman-auto/expert_recipe          string \
+      root ::                                                     \
+              62 62 62 fat16                                      \
+                      $gptonly{ }                                 \
+                      $primary{ }                                 \
+                      method{ efi } format{ }                     \
+                      label{ EFI }                                \
+              .                                                   \
+              6144 16384 -1 btrfs                                 \
+                      $primary{ } $bootable{ }                    \
+                      method{ format } format{ }                  \
+                      label{ Root }                               \
+                      use_filesystem{ } filesystem{ btrfs }       \
+                      mountpoint{ / }                             \
+              .                                                   \
+
+# Additional partitions for GPT/EFI:
+#               1 1 1 free                                          \
+#                       $gptonly{ }                                 \
+#                       $primary{ }                                 \
+#                       $bios_boot{ }                               \
+#                       method{ biosgrub }                          \
+#                       label{ BIOS }                               \
+#               .                                                   \
+
+# ====== Mirror =============================================================
+d-i mirror/protocol                                 string http
+d-i mirror/http/proxy                               string
+d-i mirror/http/hostname                            string no.archive.ubuntu.com
+d-i mirror/http/directory                           string /ubuntu
+
+# ====== Grub ===============================================================
+grub-pc grub-pc/install_devices                     string /dev/sda
+d-i grub-pc/install_devices_empty                   boolean yes
+d-i grub-installer/bootdev                          string /dev/sda
+d-i grub-installer/only_debian                      boolean true
+d-i grub-installer/with_other_os                    boolean true
+
+# ====== Packages ===========================================================
+# Repositories:
+popularity-contest popularity-contest/participate   boolean true   # !!! May be disabled! !!!
+d-i apt-setup/universe                              boolean true
+d-i apt-setup/universe/source                       boolean true
+d-i apt-setup/multiverse                            boolean true
+d-i apt-setup/multiverse/source                     boolean true
+
+# Thomas Dreibholz's PPA:
+# !!! These lines have no effect -> https://ubuntuforums.org/showthread.php?t=2387570 !!!
+# Need to add PPA by late_command ...
+# d-i apt-setup/restricted                            boolean false
+# d-i apt-setup/local0/repository                     string http://ppa.launchpad.net/dreibh/ppa/ubuntu xenial main
+# d-i apt-setup/local0/comment                        string Thomas Dreibholz's PPA
+# d-i apt-setup/local0/source                         boolean true
+# d-i apt-setup/local0/key                            string https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x8A8EAF3E2F2E3BB5C75F48C1CCEB82DF916C56E0
+
+# Package settings:
+tasksel tasksel/first                               multiselect ubuntu-server
+d-i pkgsel/language-packs                           multiselect en, nb, de
+d-i pkgsel/install-language-support                 boolean true
+d-i pkgsel/update-policy                            select unattended-upgrades
+d-i pkgsel/upgrade                                  select full-upgrade
+d-i pkgsel/updatedb                                 boolean true
+d-i pkgsel/include                                  string bash-completion openssh-server cloud-init
+# d-i base-installer/kernel/override-image          string <SET_NEW_KERNEL_HERE>
+
+# ====== Post-Install =======================================================
+# The following tasks are performed:
+# * Rewrite /etc/network/interfaces to use DHCP + DHCPv6
+# * Enable MELODIC/NorNet Core Cloud-Init configuration
+# * Set the keyboard layout (buggy installer does not set it!)
+# * Set time locale to en_GB.UTF-8 for 24-hour clock
+# * Reinstall nornet-management to update Grub configuration (console=ttyS0...)
+# * Update SSH configuration
+# * Add NorNet/MELODIC Git repositories (just configuration, no fetching)
+# * Clean up
+d-i preseed/late_command                            string \
+ echo "====== NorNet/MELODIC Post-Install ======" ; \
+ in-target /usr/bin/apt-add-repository -s -y ppa:dreibh/ppa ; \
+ in-target /usr/bin/apt-get update ; \
+ in-target /usr/bin/apt-get install -y gawk nornet-management nornet-development nornet-autoupdate ; \
+ in-target /bin/bash -c -- '/bin/echo "# Network configuration written by preseed late_command" >/etc/network/interfaces' ; \
+ in-target /bin/bash -c -- '/bin/echo "source /etc/network/interfaces.d/*" >>/etc/network/interfaces' ; \
+ in-target /bin/bash -c -- '/bin/echo "" >>/etc/network/interfaces' ; \
+ in-target /bin/bash -c -- '/bin/echo "# The loopback network interface" >>/etc/network/interfaces' ; \
+ in-target /bin/bash -c -- '/bin/echo "auto lo" >>/etc/network/interfaces' ; \
+ in-target /bin/bash -c -- '/bin/echo "iface lo inet loopback" >>/etc/network/interfaces' ; \
+ in-target /bin/bash -c -- '/bin/echo "" >>/etc/network/interfaces' ; \
+ in-target /bin/bash -c -- '/bin/echo "iface lo inet6 loopback" >>/etc/network/interfaces' ; \
+ in-target /bin/bash -c -- '/bin/echo "" >>/etc/network/interfaces' ; \
+ in-target /bin/sed -i "s/XKBMODEL=\"[a-z]*\"/XKBMODEL=\"pc105\"/g" /etc/default/keyboard ; \
+ in-target /bin/sed -i "s/XKBLAYOUT=\"[a-z]*\"/XKBLAYOUT=\"de\"/g" /etc/default/keyboard ; \
+ in-target /bin/sed -i "s/XKBVARIANT=\"[a-z]*\"/XKBVARIANT=\"nodeadkeys\"/g" /etc/default/keyboard ; \
+ in-target /bin/sed -i "s/XKBOPTIONS=\"[a-z]*\"/XKBOPTIONS=\"\"/g" /etc/default/keyboard ; \
+ in-target /usr/sbin/dpkg-reconfigure -fnoninteractive keyboard-configuration ; \
+ in-target /usr/sbin/update-locale LC_TIME=en_GB.UTF-8 LC_MESSAGES=POSIX ; \
+ in-target /usr/bin/apt-get install -y --reinstall nornet-management ; \
+ in-target /usr/bin/apt-file update ; \
+ in-target /usr/bin/apt-get dist-upgrade -y ; \
+ in-target /usr/bin/apt-get clean ; \
+ in-target /usr/bin/sudo -u nornetpp /bin/bash -c -- "/bin/mkdir -p /home/nornetpp/src/nornet-control && cd /home/nornetpp/src/nornet-control && pwd && git init && git remote add origin https://github.com/simula/nornet-control.git" ; \
+ in-target /usr/bin/sudo -u nornetpp /bin/bash -c -- "/bin/mkdir -p /home/nornetpp/src/melodic-nornet && cd /home/nornetpp/src/melodic-nornet && pwd && git init && git remote add origin https://github.com/simula/melodic-nornet.git" ; \
+ in-target /sbin/fstrim / || true ; \
+ in-target true # <SET_POSTINSTALL_COMMANDS_HERE>
+
+# ====== Power Off after installation =======================================
+d-i finish-install/reboot_in_progress               note
+d-i debian-installer/exit/poweroff                  boolean true
