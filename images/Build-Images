@@ -123,7 +123,7 @@ for preseed in $PRESEEDS ; do
             osOptions="--os-type linux --os-variant ubuntu16.04"
          fi
 
-         virt-install \
+         virt-manager/virt-install \
             --quiet \
             --name "${name}" \
             --vcpus 4 \
