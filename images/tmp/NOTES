@@ -51,8 +51,9 @@ EFI Boot:
 Ubuntu 18.04:
     "<esc><wait>",
     "<esc><wait>",
-    "linux /casper/vmlinuz --- priority=critical preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/legacy<enter><wait>",
-    "initrd /casper/initrd<enter><wait>"
+    "linux /casper/hwe-vmlinuz boot=casper auto url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/legacy.preseed ---<enter><wait>",
+    "initrd /casper/hwe-initrd<enter><wait>",
+    "boot<enter>"
 
 BIOS Boot:
       "boot_wait": "5s",
