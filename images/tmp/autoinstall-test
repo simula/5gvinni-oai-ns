@@ -2,12 +2,14 @@
 
 ps ax | grep http.server | grep python | grep 3003 | awk '{ print $1 }' | xargs -r kill
 sleep 2
-python3 -m http.server 3003 &
-
+cd http
 yamllint -d '{extends: default, rules: {document-start: {present: no}, line-length: {max: 4096}, comments-indentation: disable}}' user-data
+python3 -m http.server 3003 &
+cd ..
 
-# LOCATION=~/Nedlastinger/ubuntu-18.04.5-live-server-amd64.iso
-LOCATION=~/Nedlastinger/ubuntu-20.04.1-live-server-amd64.iso
+
+LOCATION=~/Nedlastinger/ubuntu-18.04.5-live-server-amd64.iso
+# LOCATION=~/Nedlastinger/ubuntu-20.04.1-live-server-amd64.iso
 # LOCATION=~/Nedlastinger/groovy-live-server-amd64.iso
 
 name=Test
@@ -21,15 +23,6 @@ virsh undefine --nvram "${name}" >/dev/null 2>&1
 
 rm -f ${image}
 qemu-img create -f qcow2 -o size=${size},nocow=on ${image}
-
-
-# kvm --no-reboot -m 2048 -smp cores=4 \
-#     -drive file=${image},format=qcow2,cache=unsafe,discard=unmap,if=virtio \
-#     -cdrom ${LOCATION} \
-#     -bios /usr/share/qemu/OVMF.fd \
-#     -kernel /mnt/casper/vmlinuz \
-#     -initrd /mnt/casper/initrd \
-#     -append 'autoinstall ds=nocloud-net;s=http://_gateway:3003/'
 
 
 bootOptions="--boot uefi"
@@ -50,4 +43,7 @@ virt-install \
    --noreboot
 
 
-# kvm -m 2048 -smp cores=4 -drive file=image.qcow,format=qcow2,cache=none,discard=unmap,if=virtio
+#    ,kernel=casper/hwe-vmlinuz,initrd=casper/hwe-initrd" \
+
+#    --extra-args "priority=critical preseed/file=/legacy.cfg" \
+#    --extra-args "priority=critical preseed/url=http://_gateway:3003/legacy.cfg" \
