@@ -30,8 +30,10 @@
     "--vsys", "0",
     "--description", "{{user `vm_description`}}",
     "--version",     "{{user `vm_version`}}",
-    "--vendor",      "NorNet",
-    "--vendorurl",   "https://www.nntb.no"
+    "--vendor",      "{{user `vm_vendor`}}",
+    "--vendorurl",   "{{user `vm_vendorurl`}}",
+    "--product",     "{{user `vm_product`}}",
+    "--producturl",  "{{user `vm_producturl`}}"
   ],
   "hard_drive_interface": "sata",
   "hard_drive_discard": true,

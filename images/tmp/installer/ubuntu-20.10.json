@@ -1,0 +1,40 @@
+// Ubuntu Server 20.10 with EFI Boot
+// Copyright (C) 2020 by Thomas Dreibholz
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
+// Contact: dreibh@simula.no
+
+{
+  // ====== ISO settings ====================================================
+  "iso_url": "http://cdimage.ubuntu.com/ubuntu-server/daily-live/20200825/groovy-live-server-amd64.iso",
+  "iso_checksum": "sha256:e64f45037a8824ae1adbf126b0c2e37f89d8977d9e20c96d7e95e34be643a883",
+  "ssh_username": "nornetpp",
+  "ssh_password": "!NorNetInst!",
+  "ssh_pty": true,
+  "ssh_timeout": "60m",
+  "ssh_handshake_attempts": "1024",
+  "shutdown_command": "echo '!NorNetInst!' | sudo -S shutdown -P now",
+  "http_directory": ".",
+
+  // ====== Boot into installer =============================================
+  "boot_wait": "3s",
+  "boot_command": [
+    "<esc><wait>",
+    "<esc>c<wait>",
+    "linux /casper/vmlinuz --- autoinstall ds=\"nocloud-net;seedfrom=http://{{ .HTTPIP }}:{{ .HTTPPort }}/\"<enter><wait>",
+    "initrd /casper/initrd<enter><wait>",
+    "boot<enter>"
+  ]
+}

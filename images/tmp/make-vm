@@ -7,6 +7,7 @@ RELEASE="32"
 # DISTRIBUTION="Ubuntu"
 # RELEASE="20.04"
 USE_SEPARATE_DISKS=1
+PROVISIONERS="user-settings"
 
 VM_DISK_ROOT=32768
 VM_DISK_HOME=131072
@@ -18,6 +19,7 @@ NAME=""
 if [ "${HYPERVISOR}" == "VirtualBox" ] ; then
    BUILDER_VMSETUP="virtualbox"
    NAME="VirtualBox"
+   PROVISIONERS="virtualbox-guest-utils ${PROVISIONERS}"
 elif [ "${HYPERVISOR}" == "QEMU" ] ; then
    BUILDER_VMSETUP="virtualbox"
    NAME="QEMU"
@@ -25,7 +27,9 @@ else
    echo >&2 "ERROR: Invalid hypervisor ${HYPERVISOR}!"
    exit 1
 fi
+
 NAME="${NAME}-${PROJECT}"
+
 if [ ${USE_SEPARATE_DISKS} -ne 0 ] ; then
    BUILDER_VMSETUP="${BUILDER_VMSETUP}-3disks"
 fi
@@ -95,10 +99,15 @@ cat >>${JSONTMP} <<EOF
   "provisioners": [
 EOF
 
+p=0
 for provisioner in ${PROVISIONERS} ; do
    if [ ! -e scripts/${provisioner} ] ; then
       echo >&2 "ERROR: Provisioner scripts/${provisioner} does not exist!"
       exit 1
+   fi
+   let p=$p+1
+   if [ $p -gt 1 ] ; then
+      echo "," >>${JSONTMP}
    fi
    cat >>${JSONTMP} <<EOF
        {
@@ -121,23 +130,42 @@ jq . <${JSONTMP} >${JSON}
 
 # ###### Run Packer #########################################################
 vm_name="${NAME/${HYPERVISOR}-/}"
-vm_description="${PROJECT} VM with ${DISTRIBUTION} ${RELEASE}"
 vm_version=`date +"%Y.%m.%d-%H%M%S"`
+vm_product="${HYPERVISOR} ${PROJECT} VM with ${DISTRIBUTION} ${RELEASE}"
+vm_producturl="https://www.nntb.no"
+vm_vendor="Simula Research Laboratory"
+vm_vendorurl="https://www.simula.no/people/dreibh"
+vm_description="This is a ${PROJECT} VM with ${DISTRIBUTION} ${RELEASE} for ${HYPERVISOR}."
+
+
+echo "Running Packer:"
+echo " - NAME=${NAME}"
+echo " - VM_NAME=${vm_name}"
+echo " - DISTRIBUTION=${DISTRIBUTION}"
+echo " - RELEASE=${RELEASE}"
+echo " - PROVISIONERS=${PROVISIONERS}"
+
 
 if [ ${HYPERVISOR} == "VirtualBox" ] ; then
    sudo service virtualbox start || true
    sudo service vboxdrv start || true
+   vboxmanage unregistervm ${vm_name} --delete || true
 elif [ ${HYPERVISOR} == "QEMU" ] ; then
    sudo service virtualbox stop || true
    sudo service vboxdrv stop || true
 fi
 
-rm -rf ${NAME}
-env CHECKPOINT_DISABLE=1 packer build    \
-   -var "vm_name=${vm_name}"             \
-   -var "vm_version=${vm_version}"       \
-   -var "vm_version=${vm_version}"       \
-   -var "vm_disk_root=${VM_DISK_ROOT}"   \
-   -var "vm_disk_home=${VM_DISK_HOME}"   \
-   -var "vm_disk_swap=${VM_DISK_SWAP}"   \
+rm -rf ${vm_name}
+
+env CHECKPOINT_DISABLE=1 packer build      \
+   -var "vm_name=${vm_name}"               \
+   -var "vm_version=${vm_version}"         \
+   -var "vm_version=${vm_version}"         \
+   -var "vm_disk_root=${VM_DISK_ROOT}"     \
+   -var "vm_disk_home=${VM_DISK_HOME}"     \
+   -var "vm_disk_swap=${VM_DISK_SWAP}"     \
+   -var "vm_vendor=${vm_vendor}"           \
+   -var "vm_vendorurl=${vm_vendorurl}"     \
+   -var "vm_product=${vm_product}"         \
+   -var "vm_producturl=${vm_producturl}"   \
    ${JSON}
