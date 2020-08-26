@@ -1,4 +1,4 @@
-// Ubuntu Server 20.04 LTS "Focal Fossa" with EFI Boot
+// Ubuntu Server 16.04 LTS "Xenial Xerus" with EFI Boot
 // Copyright (C) 2020 by Thomas Dreibholz
 //
 // This program is free software: you can redistribute it and/or modify
@@ -18,23 +18,35 @@
 
 {
   // ====== ISO settings ====================================================
-  "iso_url": "https://releases.ubuntu.com/20.04/ubuntu-20.04.1-live-server-amd64.iso",
-  "iso_checksum": "sha256:443511f6bf12402c12503733059269a2e10dec602916c0a75263e5d990f6bb93",
+  "iso_url": "https://releases.ubuntu.com/16.04/ubuntu-16.04.7-server-amd64.iso",
+  "iso_checksum": "sha256:b23488689e16cad7a269eb2d3a3bf725d3457ee6b0868e00c8762d3816e25848",
   "ssh_username": "nornetpp",
   "ssh_password": "!NorNetInst!",
   "ssh_pty": true,
   "ssh_timeout": "60m",
   "ssh_handshake_attempts": "1024",
   "shutdown_command": "echo '!NorNetInst!' | sudo -S shutdown -P now",
-  "http_directory": ".",
+  "http_directory": "http",
 
   // ====== Boot into installer =============================================
   "boot_wait": "3s",
   "boot_command": [
     "<esc><wait>",
     "<esc><wait>",
-    "linux /casper/vmlinuz --- autoinstall ds=\"nocloud-net;seedfrom=http://{{ .HTTPIP }}:{{ .HTTPPort }}/\"<enter><wait>",
-    "initrd /casper/initrd<enter><wait>",
+    "linux /install/hwe-vmlinuz ---",
+    " auto",
+    " debconf/frontend=noninteractive",
+    " console-setup/ask_detect=false",
+    " debian-installer=en_US",
+    " kbd-chooser/method=us",
+    " keyboard-configuration/layout=USA",
+    " keyboard-configuration/variant=USA",
+    " locale=en_US",
+    " netcfg/get_domain=simula.nornet",
+    " netcfg/get_hostname=akerbrygge",
+    " preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/legacy.preseed",
+    "<enter><wait>",
+    "initrd /install/hwe-initrd.gz<enter><wait>",
     "boot<enter>"
-  ]
+   ]
 }
