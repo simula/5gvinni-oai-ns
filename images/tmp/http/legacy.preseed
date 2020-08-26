@@ -158,8 +158,24 @@ d-i pkgsel/include                                  string bash-completion opens
 # * Clean up
 d-i preseed/late_command                            string \
  in-target sgdisk --change-name=1:EFI --change-name=2:Root /dev/sda ; \
- in-target /bin/bash -c -- 'if [ -e /dev/sdb ] ; then sgdisk --zap-all --new 1:0:0 --typecode 1:8300 --change-name=1:Home /dev/sdb ; partprobe ; mkfs.btrfs -L home /dev/sdb1 ; fi' ; \
- in-target /bin/bash -c -- 'if [ -e /dev/sdc ] ; then sgdisk --zap-all --new 1:0:0 --typecode 1:8200 --change-name=1:Swap /dev/sdc ; partprobe ; mkswap /dev/sdc1 ; fi' ; \
+ in-target /bin/bash -c -- 'if [ -e /dev/sdb ] ; then sgdisk --zap-all --new 1:0:0 --typecode 1:8300 --change-name=1:Home /dev/sdb ; partprobe ; mkfs.btrfs -L Home /dev/sdb1 ; fi' ; \
+ in-target /bin/bash -c -- 'if [ -e /dev/sdc ] ; then sgdisk --zap-all --new 1:0:0 --typecode 1:8200 --change-name=1:Swap /dev/sdc ; partprobe ; mkswap -L Swap /dev/sdc1 ; fi' ; \
+ mkdir -p /tmp/old ; \
+ mkdir -p /tmp/new ; \
+ mount /dev/sda2 /tmp/old ; \
+ btrfs subvolume snapshot -r /tmp/old/@home /tmp/old/@home_ro ; \
+ mount /dev/sdb1 /tmp/new ; \
+ /bin/sh -c -- 'btrfs send /tmp/old/@home_ro | btrfs receive /tmp/new' ; \
+ btrfs subvolume snapshot /tmp/new/@home_ro /tmp/new/@home ; \
+ btrfs subvolume delete /tmp/new/@home_ro ; \
+ btrfs subvolume delete /tmp/old/@home_ro /tmp/old/@home ; \
+ umount /tmp/old ; \
+ umount /tmp/new ; \
+ umount /target/home ; \
+ mount -o subvol=@home /dev/sdb1 /target/home ; \
+ sleep 3600 ; \
+ in-target /bin/bash -c -- '( cat /etc/fstab | grep -v "/home" | grep -v "/swapfile" ; echo "UUID=`blkid /dev/sdb1 | xargs -n1 | grep "^UUID=" | sed -e "s/UUID=//"` /home           btrfs   defaults,subvol=@home 0       2" ; echo "UUID=`blkid /dev/sdc1 | xargs -n1 | grep "^UUID=" | sed -e "s/UUID=//"` none            swap    sw              0       0") >/etc/fstab.new' ; \
+ in-target mv /etc/fstab.new /etc/fstab ; \
  in-target /usr/bin/apt-add-repository -s -y ppa:dreibh/ppa ; \
  in-target /usr/bin/apt-get update ; \
  in-target /usr/bin/apt-get install -y nornet-management nornet-autoupdate ; \
