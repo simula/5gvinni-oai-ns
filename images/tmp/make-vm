@@ -41,7 +41,7 @@ VM_DISK_SWAP=4096
 # ###### Handle command-line parameters #####################################
 while [ $# -gt 0 ] ; do
    if [ "$1" == "--hypervisor" -o "$1" == "-H" ] ; then
-      DISTRIBUTION="$2"
+      HYPERVISOR="$2"
       shift
    elif [ "$1" == "--project" -o "$1" == "-P" ] ; then
       PROJECT="$2"
@@ -101,7 +101,7 @@ if [ "${HYPERVISOR}" == "VirtualBox" ] ; then
    NAME="VirtualBox"
    PROVISIONERS="virtualbox-guest-utils ${PROVISIONERS}"
 elif [ "${HYPERVISOR}" == "QEMU" ] ; then
-   BUILDER_VMSETUP="virtualbox"
+   BUILDER_VMSETUP="qemu"
    NAME="QEMU"
 else
    echo >&2 "ERROR: Invalid hypervisor ${HYPERVISOR}!"
