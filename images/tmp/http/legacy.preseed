@@ -157,9 +157,9 @@ d-i pkgsel/include                                  string bash-completion opens
 # * Reinstall nornet-management to update Grub configuration (console=ttyS0...)
 # * Clean up
 d-i preseed/late_command                            string \
- in-target  sgdisk --change-name=1:EFI --change-name=2:Root /dev/sda ; \
- in-target  if [ -e /dev/sdb ] ; then sgdisk --zap-all --new 1:0:0 --typecode 1:8300 --change-name=1:Home /dev/sdb ; partprobe ; mkfs.btrfs -L home /dev/sdb1 ; fi ; \
- in-target  if [ -e /dev/sdc ] ; then sgdisk --zap-all --new 1:0:0 --typecode 1:8200 --change-name=1:Swap /dev/sdc ; partprobe ; mkswap /dev/sdc1 ; fi ; \
+ in-target sgdisk --change-name=1:EFI --change-name=2:Root /dev/sda ; \
+ in-target /bin/bash -c -- 'if [ -e /dev/sdb ] ; then sgdisk --zap-all --new 1:0:0 --typecode 1:8300 --change-name=1:Home /dev/sdb ; partprobe ; mkfs.btrfs -L home /dev/sdb1 ; fi' ; \
+ in-target /bin/bash -c -- 'if [ -e /dev/sdc ] ; then sgdisk --zap-all --new 1:0:0 --typecode 1:8200 --change-name=1:Swap /dev/sdc ; partprobe ; mkswap /dev/sdc1 ; fi' ; \
  in-target /usr/bin/apt-add-repository -s -y ppa:dreibh/ppa ; \
  in-target /usr/bin/apt-get update ; \
  in-target /usr/bin/apt-get install -y nornet-management nornet-autoupdate ; \
@@ -186,4 +186,4 @@ d-i preseed/late_command                            string \
 
 # ====== Power Off after installation =======================================
 d-i finish-install/reboot_in_progress               note
-d-i debian-installer/exit/poweroff                  boolean true
+# d-i debian-installer/exit/poweroff                  boolean true

@@ -36,8 +36,6 @@
     "linux /install/hwe-vmlinuz<wait>",
     " auto<wait>",
     " console-setup/ask_detect=false<wait>",
-    " console-setup/layoutcode=us<wait>",
-    " console-setup/modelcode=pc105<wait>",
     " debconf/frontend=noninteractive<wait>",
     " debian-installer=en_US<wait>",
     " kbd-chooser/method=us<wait>",
