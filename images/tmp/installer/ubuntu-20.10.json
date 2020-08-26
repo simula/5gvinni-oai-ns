@@ -18,8 +18,8 @@
 
 {
   // ====== ISO settings ====================================================
-  "iso_url": "http://cdimage.ubuntu.com/ubuntu-server/daily-live/20200825/groovy-live-server-amd64.iso",
-  "iso_checksum": "sha256:e64f45037a8824ae1adbf126b0c2e37f89d8977d9e20c96d7e95e34be643a883",
+  "iso_url": "https://cdimage.ubuntu.com/ubuntu-server/daily-live/current/groovy-live-server-amd64.iso",
+  "iso_checksum": "sha256:272ace8b13899c33d035b1016a06eb366e991ff848c49883292f66912d1797d2",
   "ssh_username": "nornetpp",
   "ssh_password": "!NorNetInst!",
   "ssh_pty": true,
@@ -32,7 +32,7 @@
   "boot_wait": "3s",
   "boot_command": [
     "<esc><wait>",
-    "<esc>c<wait>",
+    "<esc><wait>",
     "linux /casper/vmlinuz --- autoinstall ds=\"nocloud-net;seedfrom=http://{{ .HTTPIP }}:{{ .HTTPPort }}/\"<enter><wait>",
     "initrd /casper/initrd<enter><wait>",
     "boot<enter>"

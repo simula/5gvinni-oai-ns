@@ -1,4 +1,4 @@
-// Ubuntu Server 18.04 LTS "Bionic Beaver" with EFI Boot
+// Fedora 31 Server with EFI Boot
 // Copyright (C) 2020 by Thomas Dreibholz
 //
 // This program is free software: you can redistribute it and/or modify
@@ -18,8 +18,8 @@
 
 {
   // ====== ISO settings ====================================================
-  "iso_url": "https://cdimage.ubuntu.com/ubuntu/releases/bionic/release/ubuntu-18.04.5-server-amd64.iso",
-  "iso_checksum": "sha256:8c5fc24894394035402f66f3824beb7234b757dd2b5531379cb310cedfdf0996",
+  "iso_url": "https://download.fedoraproject.org/pub/fedora/linux/releases/31/Server/x86_64/iso/Fedora-Server-netinst-x86_64-31-1.9.iso",
+  "iso_checksum": "sha256:5be8debd3e8fb4e86b9fbf67c7eb66ea598d2b7ad0c7ba8d505ce88067b43444",
   "ssh_username": "nornetpp",
   "ssh_password": "!NorNetInst!",
   "ssh_pty": true,
@@ -32,21 +32,9 @@
   "boot_wait": "3s",
   "boot_command": [
     "<esc><wait>",
-    "<esc><wait>",
-    "linux /install/hwe-vmlinuz ---",
-    " auto",
-    " debconf/frontend=noninteractive",
-    " console-setup/ask_detect=false",
-    " debian-installer=en_US",
-    " kbd-chooser/method=us",
-    " keyboard-configuration/layout=USA",
-    " keyboard-configuration/variant=USA",
-    " locale=en_US",
-    " netcfg/get_domain=simula.nornet",
-    " netcfg/get_hostname=akerbrygge",
-    " preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/legacy.preseed",
-    "<enter><wait>",
-    "initrd /install/hwe-initrd.gz<enter><wait>",
+    "<esc>c<wait>",
+    "linuxefi /images/pxeboot/vmlinuz --- text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ks.cfg<enter><wait>",
+    "initrd /images/pxeboot/initrd.img<enter><wait>",
     "boot<enter>"
-   ]
+  ]
 }
