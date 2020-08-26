@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+#
+# Template VM Image Builder
+# Copyright (C) 2017-2020 by Thomas Dreibholz
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Contact: dreibh@simula.no
+
+set -e
+
+
+HYPERVISOR="VirtualBox"
+
+
+UBUNTU="18.04 20.04"
+FEDORA="31 32"
+
+
+# ====== Test only ==========================================================
+for ubuntu in ${UBUNTU} ; do
+   ./make-vm -n -H ${HYPERVISOR} -P NorNet   -D Ubuntu -R ${ubuntu}
+   ./make-vm -n -H ${HYPERVISOR} -P RSerPool -D Ubuntu -R ${ubuntu} -1
+done
+
+for fedora in ${FEDORA} ; do
+   ./make-vm -n -H ${HYPERVISOR} -P NorNet   -D Fedora -R ${fedora}
+   ./make-vm -n -H ${HYPERVISOR} -P RSerPool -D Fedora -R ${fedora} -1
+done
+
+
+# ====== Run ================================================================
+for ubuntu in ${UBUNTU} ; do
+   ./make-vm -H ${HYPERVISOR} -P NorNet   -D Ubuntu -R ${ubuntu}      >NorNet-Ubuntu-${ubuntu}.txt   2>&1 &
+   ./make-vm -H ${HYPERVISOR} -P RSerPool -D Ubuntu -R ${ubuntu} -1   >RSerPool-Ubuntu-${ubuntu}.txt 2>&1 &
+done
+
+for fedora in ${FEDORA} ; do
+   ./make-vm -H ${HYPERVISOR} -P NorNet   -D Fedora -R ${fedora}      >NorNet-Fedora-${fedora}.txt   2>&1 &
+   ./make-vm -H ${HYPERVISOR} -P RSerPool -D Fedora -R ${fedora} -1   >RSerPool-Fedora-${fedora}.txt 2>&1 &
+done
+wait

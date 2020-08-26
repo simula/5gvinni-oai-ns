@@ -1,4 +1,4 @@
-// Ubuntu Server 18.04 LTS "Bionic Beaver" with EFI Boot
+// FreeBSD 12.1 with EFI Boot
 // Copyright (C) 2020 by Thomas Dreibholz
 //
 // This program is free software: you can redistribute it and/or modify
@@ -18,8 +18,8 @@
 
 {
   // ====== ISO settings ====================================================
-  "iso_url": "https://cdimage.ubuntu.com/ubuntu/releases/bionic/release/ubuntu-18.04.5-server-amd64.iso",
-  "iso_checksum": "sha256:8c5fc24894394035402f66f3824beb7234b757dd2b5531379cb310cedfdf0996",
+  "iso_url": "https://download.freebsd.org/ftp/releases/ISO-IMAGES/12.1/FreeBSD-12.1-RELEASE-amd64-disc1.iso",
+  "iso_checksum": "sha256:aa9d34b458826486999ed3e872436b6712ae38cede5ea41de4ab923e3419d461",
   "ssh_username": "nornetpp",
   "ssh_password": "!NorNetInst!",
   "ssh_pty": true,
@@ -28,24 +28,11 @@
   "shutdown_command": "echo '!NorNetInst!' | sudo -S shutdown -P now",
 
   // ====== Boot into installer =============================================
-  "boot_wait": "3s",
+  "boot_wait": "30s",
   "boot_command": [
-    "<esc><wait>",
-    "<esc><wait>",
-    "linux /install/hwe-vmlinuz ---",
-    " auto",
-    " debconf/frontend=noninteractive",
-    " console-setup/ask_detect=false",
-    " debian-installer=en_US",
-    " kbd-chooser/method=us",
-    " keyboard-configuration/layout=USA",
-    " keyboard-configuration/variant=USA",
-    " locale=en_US",
-    " netcfg/get_domain=simula.nornet",
-    " netcfg/get_hostname=akerbrygge",
-    " preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/legacy.preseed",
-    "<enter><wait>",
-    "initrd /install/hwe-initrd.gz<enter><wait>",
-    "boot<enter>"
+    "s<enter><wait>",
+    "cd /tmp && dhclient em0 && ",
+    "fetch http://{{ .HTTPIP }}:{{ .HTTPPort }}/installerconfig && ",
+    "bsdinstall script /tmp/installerconfig; reboot<enter>"
    ]
 }
