@@ -1,17 +1,76 @@
 #!/bin/bash -e
 
+# ###### Defaults ###########################################################
 PROJECT="Template"
 HYPERVISOR="VirtualBox"
 # DISTRIBUTION="Fedora"
 # RELEASE="32"
 DISTRIBUTION="Ubuntu"
 RELEASE="18.04"
-USE_SEPARATE_DISKS=1
 PROVISIONERS="user-settings"
+
+DRY_RUN=0
+USE_SEPARATE_DISKS=1
 
 VM_DISK_ROOT=32768
 VM_DISK_HOME=131072
 VM_DISK_SWAP=4096
+
+
+# ###### Handle command-line parameters #####################################
+while [ $# -gt 0 ] ; do
+   if [ "$1" == "--hypervisor" -o "$1" == "-H" ] ; then
+      DISTRIBUTION="$2"
+      shift
+   elif [ "$1" == "--project" -o "$1" == "-P" ] ; then
+      PROJECT="$2"
+      shift
+   elif [ "$1" == "--distribution" -o "$1" == "-D" ] ; then
+      DISTRIBUTION="$2"
+      shift
+   elif [ "$1" == "--release" -o "$1" == "-R" ] ; then
+      RELEASE="$2"
+      shift
+   elif [ "$1" == "--root" -o "$1" == "-r" ] ; then
+      VM_DISK_ROOT="$2"
+      if [[ ! "${VM_DISK_ROOT}" =~ ^[0-9]*$ ]] ; then
+         echo >&2 "ERROR: Bad size for root: ${VM_DISK_ROOT} MiB"
+         exit 1
+      fi
+      shift
+   elif [ "$1" == "--home" -o "$1" == "-r" ] ; then
+      VM_DISK_ROOT="$2"
+      if [[ ! "${VM_DISK_HOME}" =~ ^[0-9]*$ ]] ; then
+         echo >&2 "ERROR: Bad size for home: ${VM_DISK_HOME} MiB"
+         exit 1
+      fi
+      shift
+   elif [ "$1" == "--swap" -o "$1" == "-r" ] ; then
+      VM_DISK_ROOT="$2"
+      if [[ ! "${VM_DISK_SWAP}" =~ ^[0-9]*$ ]] ; then
+         echo >&2 "ERROR: Bad size for swap: ${VM_DISK_SWAP} MiB"
+         exit 1
+      fi
+      shift
+   elif [ "$1" == "--one-disk-only" -o "$1" == "-1" ] ; then
+      USE_SEPARATE_DISKS=0
+   elif [ "$1" == "--dry-run" -o "$1" == "-n" ] ; then
+      DRY_RUN=1
+   else
+      echo >&2 "ERROR: Usage: $0"
+      echo >&2 "   [--hypervisor|-H VirtualBox|QEMU]"
+      echo >&2 "   [--project|-P Template|NEAT|MELODIC|...]"
+      echo >&2 "   [--destination|-D Ubuntu|Fedora]"
+      echo >&2 "   [--release|-R RELEASE]"
+      echo >&2 "   [--root|-r MiB]"
+      echo >&2 "   [--home|-h MiB]"
+      echo >&2 "   [--swap|-s MiB]"
+      echo >&2 "   [--one-disk-only|-1]"
+      echo >&2 "   [--dry-run|-n]"
+      exit 1
+   fi
+   shift
+done
 
 
 # ###### Get configuration ##################################################
@@ -66,7 +125,7 @@ JSONTMP="${JSON}.tmp"
 # ====== Read and insert JSON block =========================================
 insert-json()
 {
-   sed -e "/^[ \t]*\/\/.*$/d" <"$1" | jq | \
+   sed -e "/^[ \t]*\/\/.*$/d" <"$1" | jq . | \
       sed -e '1d; $d'
 }
 
@@ -138,25 +197,43 @@ vm_vendorurl="https://www.simula.no/people/dreibh"
 vm_description="This is a ${PROJECT} VM with ${DISTRIBUTION} ${RELEASE} for ${HYPERVISOR}."
 
 
-echo "Running Packer:"
+echo "Configuration:"
 echo " - NAME=${NAME}"
 echo " - VM_NAME=${vm_name}"
+echo " - PROJECT=${PROJECT}"
 echo " - DISTRIBUTION=${DISTRIBUTION}"
 echo " - RELEASE=${RELEASE}"
 echo " - PROVISIONERS=${PROVISIONERS}"
+echo " - VM_DISK_ROOT=${VM_DISK_ROOT} (MiB)"
+if [ ${USE_SEPARATE_DISKS} -ne 0 ] ; then
+   echo " - VM_DISK_HOME=${VM_DISK_HOME} (MiB)"
+   echo " - VM_DISK_SWAP=${VM_DISK_SWAP} (MiB)"
+fi
+
+if [ ${DRY_RUN} -ne 0 ] ; then
+   echo "Dry run -> exiting."
+   exit
+fi
 
 
 if [ ${HYPERVISOR} == "VirtualBox" ] ; then
-   sudo service virtualbox start || true
-   sudo service vboxdrv start || true
+   if [ "`lsmod|grep "^vboxdrv"`" == "" ] ; then
+      echo "Need to load vboxdrv ..."
+      sudo service virtualbox start || true
+      sudo service vboxdrv start || true
+   fi
    vboxmanage unregistervm ${vm_name} --delete || true
 elif [ ${HYPERVISOR} == "QEMU" ] ; then
-   sudo service virtualbox stop || true
-   sudo service vboxdrv stop || true
+   if [ "`lsmod|grep "^vboxdrv"`" != "" ] ; then
+      echo "Need to unload vboxdrv ..."
+      sudo service virtualbox stop || true
+      sudo service vboxdrv stop || true
+   fi
 fi
 
 rm -rf ${vm_name}
 
+echo "Running Packer:"
 env CHECKPOINT_DISABLE=1 packer build      \
    -var "vm_name=${vm_name}"               \
    -var "vm_version=${vm_version}"         \
