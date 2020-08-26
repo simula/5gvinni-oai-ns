@@ -86,6 +86,12 @@ d-i partman-auto/method                 string regular
 d-i partman-auto/choose_recipe          string root
 d-i partman-auto/expert_recipe          string \
       root ::                                                     \
+              62 62 62 fat16                                      \
+                      $gptonly{ }                                 \
+                      $primary{ }                                 \
+                      method{ efi } format{ }                     \
+                      label{ EFI }                                \
+              .                                                   \
               6144 16384 -1 btrfs                                 \
                       $primary{ } $bootable{ }                    \
                       method{ format } format{ }                  \
@@ -101,12 +107,6 @@ d-i partman-auto/expert_recipe          string \
 #                       $bios_boot{ }                               \
 #                       method{ biosgrub }                          \
 #                       label{ BIOS }                               \
-#               .                                                   \
-#               64 64 64 fat16                                      \
-#                       $gptonly{ }                                 \
-#                       $primary{ }                                 \
-#                       method{ efi } format{ }                     \
-#                       label{ EFI }                                \
 #               .                                                   \
 
 # ====== Mirror =============================================================
@@ -151,21 +151,19 @@ d-i pkgsel/include                                  string bash-completion opens
 
 # ====== Post-Install =======================================================
 # The following tasks are performed:
-# * Rewrite /etc/network/interfaces to use DHCP + DHCPv6
-# * Enable MELODIC/NorNet Core Cloud-Init configuration
+# * Rewrite /etc/network/interfaces
 # * Set the keyboard layout (buggy installer does not set it!)
 # * Set time locale to en_GB.UTF-8 for 24-hour clock
 # * Reinstall nornet-management to update Grub configuration (console=ttyS0...)
-# * Update SSH configuration
-# * Add NorNet/MELODIC Git repositories (just configuration, no fetching)
 # * Clean up
 d-i preseed/late_command                            string \
- echo "====== NorNet/MELODIC Post-Install ======" ; \
+ in-target  sgdisk --change-name=1:EFI --change-name=2:Root /dev/sda ; \
+ in-target  if [ -e /dev/sdb ] ; then sgdisk --zap-all --new 1:0:0 --typecode 1:8300 --change-name=1:Home /dev/sdb ; partprobe ; mkfs.btrfs -L home /dev/sdb1 ; fi ; \
+ in-target  if [ -e /dev/sdc ] ; then sgdisk --zap-all --new 1:0:0 --typecode 1:8200 --change-name=1:Swap /dev/sdc ; partprobe ; mkswap /dev/sdc1 ; fi ; \
  in-target /usr/bin/apt-add-repository -s -y ppa:dreibh/ppa ; \
  in-target /usr/bin/apt-get update ; \
- in-target /usr/bin/apt-get install -y gawk nornet-management nornet-development nornet-autoupdate ; \
- in-target /bin/bash -c -- '/bin/echo "# Network configuration written by preseed late_command" >/etc/network/interfaces' ; \
- in-target /bin/bash -c -- '/bin/echo "source /etc/network/interfaces.d/*" >>/etc/network/interfaces' ; \
+ in-target /usr/bin/apt-get install -y nornet-management nornet-autoupdate ; \
+ in-target /bin/bash -c -- '/bin/echo "source /etc/network/interfaces.d/*" >/etc/network/interfaces' ; \
  in-target /bin/bash -c -- '/bin/echo "" >>/etc/network/interfaces' ; \
  in-target /bin/bash -c -- '/bin/echo "# The loopback network interface" >>/etc/network/interfaces' ; \
  in-target /bin/bash -c -- '/bin/echo "auto lo" >>/etc/network/interfaces' ; \
@@ -183,8 +181,6 @@ d-i preseed/late_command                            string \
  in-target /usr/bin/apt-file update ; \
  in-target /usr/bin/apt-get dist-upgrade -y ; \
  in-target /usr/bin/apt-get clean ; \
- in-target /usr/bin/sudo -u nornetpp /bin/bash -c -- "/bin/mkdir -p /home/nornetpp/src/nornet-control && cd /home/nornetpp/src/nornet-control && pwd && git init && git remote add origin https://github.com/simula/nornet-control.git" ; \
- in-target /usr/bin/sudo -u nornetpp /bin/bash -c -- "/bin/mkdir -p /home/nornetpp/src/melodic-nornet && cd /home/nornetpp/src/melodic-nornet && pwd && git init && git remote add origin https://github.com/simula/melodic-nornet.git" ; \
  in-target /sbin/fstrim / || true ; \
  in-target true # <SET_POSTINSTALL_COMMANDS_HERE>
 

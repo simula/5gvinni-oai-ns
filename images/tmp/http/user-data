@@ -201,7 +201,7 @@ autoinstall:
     # Add partition names:
     - sgdisk --change-name=1:EFI --change-name=2:Root /dev/sda
     - if [ -e /dev/sdb ] ; then sgdisk --change-name=1:Home /dev/sdb ; fi
-    - if [ -e /dev/sdb ] ; then sgdisk --change-name=1:Swap --typecode=1:8200 /dev/sdc ; fi
+    - if [ -e /dev/sdc ] ; then sgdisk --change-name=1:Swap --typecode=1:8200 /dev/sdc ; fi
     # Add BIOS Grub partition, if not yet created, just to be sure:
     ###- if ! sgdisk --print /dev/sda | grep EF02 ; then sgdisk --set-alignment=1 --new=128:34:2047 --typecode=128:EF02 --sort /dev/sda ; fi
     ###- sgdisk --change-name=1:GRUB /dev/sda

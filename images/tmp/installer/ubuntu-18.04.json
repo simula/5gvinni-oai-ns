@@ -29,30 +29,27 @@
   "http_directory": "http",
 
   // ====== Boot into installer =============================================
-  "boot_wait": "10s",
+  "boot_wait": "3s",
   "boot_command": [
     "<esc><wait>",
     "<esc><wait>",
-    "<enter><wait>",
-    "/install/vmlinuz<wait>",
+    "linux /install/hwe-vmlinuz<wait>",
     " auto<wait>",
     " console-setup/ask_detect=false<wait>",
     " console-setup/layoutcode=us<wait>",
     " console-setup/modelcode=pc105<wait>",
     " debconf/frontend=noninteractive<wait>",
     " debian-installer=en_US<wait>",
-    " fb=false<wait>",
-    " initrd=/install/initrd.gz<wait>",
     " kbd-chooser/method=us<wait>",
     " keyboard-configuration/layout=USA<wait>",
     " keyboard-configuration/variant=USA<wait>",
     " locale=en_US<wait>",
-    " netcfg/get_domain=vm<wait>",
-    " netcfg/get_hostname=vagrant<wait>",
-    " grub-installer/bootdev=/dev/sda<wait>",
-    " noapic<wait>",
+    " netcfg/get_domain=simula.nornet<wait>",
+    " netcfg/get_hostname=akerbrygge<wait>",
     " preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/legacy.preseed<wait>",
     " -- <wait>",
-    "<enter><wait>"
+    "<enter><wait>",
+    "initrd /install/hwe-initrd.gz<enter><wait>",
+    "boot<enter>"
    ]
 }
