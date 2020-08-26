@@ -217,12 +217,18 @@ fi
 
 
 if [ ${HYPERVISOR} == "VirtualBox" ] ; then
-   sudo service virtualbox start || true
-   sudo service vboxdrv start || true
+   if [ "`lsmod|grep "^vboxdrv"`" == "" ] ; then
+      echo "Need to load vboxdrv ..."
+      sudo service virtualbox start || true
+      sudo service vboxdrv start || true
+   fi
    vboxmanage unregistervm ${vm_name} --delete || true
 elif [ ${HYPERVISOR} == "QEMU" ] ; then
-   sudo service virtualbox stop || true
-   sudo service vboxdrv stop || true
+   if [ "`lsmod|grep "^vboxdrv"`" != "" ] ; then
+      echo "Need to unload vboxdrv ..."
+      sudo service virtualbox stop || true
+      sudo service vboxdrv stop || true
+   fi
 fi
 
 rm -rf ${vm_name}
