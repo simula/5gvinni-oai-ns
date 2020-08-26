@@ -31,8 +31,8 @@
   "cpus": 4,
   "memory": 4096,
   "disk_size": "{{user `vm_disk_root`}}",
-  "disk_additional_size": [
-  ],
+  // "disk_additional_size": [
+  // ],
   "qemuargs": [
     [ "-bios", "OVMF.fd" ]
   ]

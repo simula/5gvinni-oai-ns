@@ -1,0 +1,222 @@
+#cloud-config
+#
+# Ubuntu Preseed Configuration
+# Copyright (C) 2020 by Thomas Dreibholz
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Contact: dreibh@simula.no
+
+
+# Preseed documentation:
+# - https://ubuntu.com/server/docs/install/autoinstall
+# - https://ubuntu.com/server/docs/install/autoinstall-reference
+# - https://github.com/CanonicalLtd/subiquity
+# - https://askubuntu.com/questions/1235723/automated-20-04-server-installation-using-pxe-and-live-server-image
+
+
+autoinstall:
+  # ###### Installer Configuration ##########################################
+  version: 1
+  refresh-installer:
+    update: true
+    channel: stable
+
+
+  # ###### Locale and Keyboard Configuration ################################
+  # Using Irish locale (€, metric units, etc.), but late-commands sets British
+  # time format (24-hour clock). Also install locales for NO, DE, CN:
+  locale: en_IE.UTF-8
+  keyboard:
+    layout: de
+    variant: nodeadkeys
+
+
+  # ###### Storage Configuration ############################################
+  storage:
+    grub:
+      reorder_uefi: false
+    swap:
+      size: 0
+
+    config:
+      # ====== Disks ========================================================
+      - type: disk
+        id: disk0
+        name: "system-disk"
+        path: /dev/sda
+        wipe: superblock
+        ptable: gpt
+        preserve: false
+        grub_device: true
+      # - type: disk
+      #   id: disk1
+      #   name: "home-disk"
+      #   path: /dev/sdb
+      #   wipe: superblock
+      #   ptable: gpt
+      #   preserve: false
+      #   grub_device: false
+      # - type: disk
+      #   id: disk2
+      #   name: "swap-disk"
+      #   path: /dev/sdc
+      #   wipe: superblock
+      #   ptable: gpt
+      #   preserve: false
+      #   grub_device: false
+
+      # ====== BIOS Grub ====================================================
+      # NOTE: Will be created later manually!
+      # - id: disk0-partition-grub
+      #   type: partition
+      #   device: disk0
+      #   size: 1048576
+      #   flag: bios_grub
+      #   #grub_device: true
+      #   preserve: false
+
+      # ====== EFI ==========================================================
+      - id: disk0-partition-efi
+        type: partition
+        device: disk0
+        size: 65011712
+        flag: boot
+        grub_device: true
+        preserve: false
+      - id: disk0-partition-efi-format
+        type: format
+        fstype: fat16
+        label: EFI
+        volume: disk0-partition-efi
+        preserve: false
+
+      # ====== System =======================================================
+      - id: disk0-partition-system
+        type: partition
+        device: disk0
+        size: -1
+        flag: linux
+        grub_device: false
+        preserve: false
+      - id: disk0-partition-system-format
+        type: format
+        fstype: btrfs
+        label: System
+        volume: disk0-partition-system
+        preserve: false
+
+      # ====== Home =========================================================
+      # - id: disk1-partition-home
+      #   type: partition
+      #   device: disk1
+      #   size: -1
+      #   flag: linux
+      #   grub_device: false
+      #   preserve: false
+      # - id: disk1-partition-home-format
+      #   type: format
+      #   fstype: btrfs
+      #   label: Home
+      #   volume: disk1-partition-home
+      #   preserve: false
+
+      # ====== Swap =========================================================
+      # - id: disk2-partition-swap
+      #   type: partition
+      #   device: disk2
+      #   size: -1
+      #   flag: linux
+      #   grub_device: false
+      #   preserve: false
+      # - id: disk2-partition-swap-format
+      #   type: format
+      #   fstype: swap
+      #   label: Swap
+      #   volume: disk2-partition-swap
+      #   preserve: false
+
+      # ====== Mount points =================================================
+      - id: disk0-partition-system-mount
+        type: mount
+        path: /
+        device: disk0-partition-system-format
+        preserve: false
+      - id: disk0-partition-efi-mount
+        type: mount
+        path: /boot/efi
+        device: disk0-partition-efi-format
+        preserve: false
+      # - id: disk1-partition-home-mount
+      #   type: mount
+      #   path: /home
+      #   device: disk1-partition-home-format
+      #   preserve: false
+      # - id: disk2-partition-swap-mount
+      #   type: mount
+      #   path: none
+      #   device: disk2-partition-swap-format
+      #   preserve: false
+
+
+  # ###### Host and User Configuration ######################################
+  identity:
+    hostname: akerbrygge.simula.nornet
+    username: nornetpp
+    password: "$6$2NWrlKtE5C$u1zqajwW/sfrUMxeKBp7MH.ptmrXW0kvSv20Cf.kSSuAS5lFJUq.WI.iildLgru2Otf1WG1dndo4B8IxnM9Kn1"
+    realname: NorNet Praesum Presum
+
+
+  # ###### Package Management ###############################################
+  apt:
+    preserve_sources_list: false
+    geoip: true
+    primary:
+      - arches: [default]
+        uri: "http://archive.ubuntu.com/ubuntu"
+    sources:
+      dreibh-ppa:
+        source: ppa:dreibh/ppa
+  packages:
+    - joe
+    - nornet-autoupdate
+    - nornet-management
+  ssh:
+    install-server: true
+
+
+  # ###### Post-Install Configuration #######################################
+  late-commands:
+    # Add partition names:
+    - sgdisk --change-name=1:EFI --change-name=2:Root /dev/sda
+    - if [ -e /dev/sdb ] ; then sgdisk --change-name=1:Home /dev/sdb ; fi
+    - if [ -e /dev/sdc ] ; then sgdisk --change-name=1:Swap --typecode=1:8200 /dev/sdc ; fi
+    # Add BIOS Grub partition, if not yet created, just to be sure:
+    ###- if ! sgdisk --print /dev/sda | grep EF02 ; then sgdisk --set-alignment=1 --new=128:34:2047 --typecode=128:EF02 --sort /dev/sda ; fi
+    ###- sgdisk --change-name=1:GRUB /dev/sda
+    # Generate additional locales:
+    - chroot /target locale-gen en_US.UTF-8 en_GB.UTF-8 en_AU.UTF-8 nb_NO.UTF-8 de_DE.UTF-8 zh_CN.UTF-8
+    # Set time locale to en_GB.UTF-8 for 24-hour clock:
+    # - chroot /target update-locale LC_TIME=en_GB.UTF-8 LC_MESSAGES=POSIX
+    # Update Grub configuration (console=ttyS0...):
+    # - chroot /target update-grub
+    # Update packages:
+    - chroot /target apt update
+    - chroot /target apt-file update
+    - chroot /target apt dist-upgrade -y
+    - chroot /target apt autoremove -y --purge
+    # Clean up:
+    - chroot /target updatedb
+    - chroot /target apt clean
+    - fstrim -av
