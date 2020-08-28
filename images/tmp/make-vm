@@ -24,11 +24,9 @@ set -e
 # ###### Defaults ###########################################################
 PROJECT="Template"
 HYPERVISOR="VirtualBox"
-# DISTRIBUTION="Fedora"
-# RELEASE="32"
 DISTRIBUTION="Ubuntu"
-RELEASE="18.04"
-PROVISIONERS="user-settings"
+RELEASE="20.04"
+PROVISIONERS="user-settings development-system"   # "clean-up" will be added later!
 
 DRY_RUN=0
 USE_SEPARATE_DISKS=1
@@ -107,7 +105,7 @@ else
    echo >&2 "ERROR: Invalid hypervisor ${HYPERVISOR}!"
    exit 1
 fi
-
+PROVISIONERS="${PROVISIONERS} clean-up"
 NAME="${NAME}-${PROJECT}"
 
 if [ ${USE_SEPARATE_DISKS} -ne 0 ] ; then
@@ -188,6 +186,10 @@ cat >>${JSONTMP} <<EOF
   "builders": [
     {
 EOF
+if [ ! -d ${HTTP_DIRECTORY} ] ; then
+   echo >&2 "ERROR: HTTP_DIRECTORY ${HTTP_DIRECTORY} does not exist!"
+   exit 1
+fi
 (
    insert-json vmsetup/${BUILDER_VMSETUP}.json
    echo ","

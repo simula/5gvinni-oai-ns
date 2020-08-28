@@ -207,16 +207,3 @@ autoinstall:
     ###- sgdisk --change-name=1:GRUB /dev/sda
     # Generate additional locales:
     - chroot /target locale-gen en_US.UTF-8 en_GB.UTF-8 en_AU.UTF-8 nb_NO.UTF-8 de_DE.UTF-8 zh_CN.UTF-8
-    # Set time locale to en_GB.UTF-8 for 24-hour clock:
-    # - chroot /target update-locale LC_TIME=en_GB.UTF-8 LC_MESSAGES=POSIX
-    # Update Grub configuration (console=ttyS0...):
-    # - chroot /target update-grub
-    # Update packages:
-    - chroot /target apt update
-    - chroot /target apt-file update
-    - chroot /target apt dist-upgrade -y
-    - chroot /target apt autoremove -y --purge
-    # Clean up:
-    - chroot /target updatedb
-    - chroot /target apt clean
-    - fstrim -av

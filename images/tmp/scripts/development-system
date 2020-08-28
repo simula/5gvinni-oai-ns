@@ -19,43 +19,9 @@
 # Contact: dreibh@simula.no
 
 
-# ###### Set timezone #######################################################
-timedatectl set-timezone Europe/Oslo
-
-
-# ###### Make some additions to .bashrc #####################################
-cat >>/home/nornetpp/.bashrc <<EOF
-
-
-# ---------------------------------------------------------------------------
-
-alias runws="sudo echo Starting Wireshark && ( sudo wireshark & )"
-
-ulimit -c unlimited
-
-export EDITOR=joe
-export CVSEDITOR=\${EDITOR}
-export SVN_EDITOR=\${EDITOR}
-
-cores=\`getconf _NPROCESSORS_ONLN 2>/dev/null || true\`
-if [ \$cores -gt 1 ] ; then
-   export MAKEFLAGS=-j\${cores}
-fi
-EOF
-
-
-# ###### Make some directories ##############################################
-sudo -u nornetpp mkdir -p /home/nornetpp/src
-sudo -u nornetpp chattr +c /home/nornetpp/src
-sudo -u nornetpp mkdir -p /home/nornetpp/tmp
-
-sudo -u nornetpp mkdir -p /home/nornetpp/.ssh
-sudo -u nornetpp chmod 700 /home/nornetpp/.ssh
-sudo -u nornetpp touch /home/nornetpp/.ssh/authorized_keys
-sudo -u nornetpp chmod 600 /home/nornetpp/.ssh/authorized_keys
-
-
 # ###### Development configuration ##########################################
+
+# ------ Ubuntu -------------------------------------------------------------
 if [ -e /etc/apt/sources.list ] ; then
    for list in /etc/apt/sources.list `find /etc/apt/sources.list.d -name "*.list"`; do
       cat ${list} | grep "^deb \(.*\)$" | sed -e "s/deb[ \t]*//g" | xargs -n1 -i§ echo "s@^#[ \t]*deb-src \(§\)[ \t]*\$@deb-src \\1@g" >${list}.sed
@@ -80,16 +46,10 @@ if [ -e /etc/apt/sources.list ] ; then
    (
       echo ""
       echo "# Thomas Dreibholz's MPTCP kernel repository:"
-      echo "# deb https://packages.nntb.no/nornet-kernel/ubuntu/ ${codename} ${codename}-kernel"
-      echo "# deb-src https://packages.nntb.no/nornet-kernel/ubuntu/ ${codename} ${codename}-kernel"
+      echo "# deb [arch=amd64] https://packages.nntb.no/nornet-kernel/ubuntu/ ${codename} ${codename}-kernel"
+      echo "# deb-src [arch=amd64] https://packages.nntb.no/nornet-kernel/ubuntu/ ${codename} ${codename}-kernel"
    ) >>/etc/apt/sources.list
 
    # Clean up old installer files:
    rm -f /etc/apt/sources.list.curtin.old /etc/apt/sources.list.save
-fi
-
-
-# ###### Renew SSH keys and enforce strong cipher configurations ############
-if [ -e /usr/bin/Create-New-SSH-Node-Keys ] ; then
-   /usr/bin/Create-New-SSH-Node-Keys -yes-to-all-i-am-really-sure
 fi

@@ -31,7 +31,7 @@
   "boot_wait": "30s",
   "boot_command": [
     "s<enter><wait>",
-    "cd /tmp && dhclient em0 && ",
+    "cd /tmp && dhclient vtnet0 && ",
     "fetch http://{{ .HTTPIP }}:{{ .HTTPPort }}/installerconfig && ",
     "bsdinstall script /tmp/installerconfig; reboot<enter>"
    ]

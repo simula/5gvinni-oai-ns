@@ -50,10 +50,11 @@
     [ "modifyvm", "{{.Name}}", "--rtcuseutc", "on" ],
     [ "modifyvm", "{{.Name}}", "--vram", "48" ],
     [ "modifyvm", "{{.Name}}", "--vrde", "off" ],
+    [ "modifyvm", "{{.Name}}", "--audio", "pulse", "--audiocontroller", "hda" ],
     [ "modifyvm", "{{.Name}}", "--graphicscontroller", "vmsvga", "--accelerate3d", "off" ],
     [ "setextradata", "{{.Name}}", "VBoxInternal2/EfiGraphicsResolution", "1024x768" ],
     // VirtualBox seems to hang when there is no serial port but a serial port console configured:
-    [ "modifyvm", "{{.Name}}", "--uart1", "0x03f8", "4", "--uartmode1", "file", "/dev/null" ],
+    // [ "modifyvm", "{{.Name}}", "--uart1", "0x03f8", "4", "--uartmode1", "file", "/dev/null" ],
     // NIC uses virtio:
     [ "modifyvm", "{{.Name}}", "--nictype1", "virtio", "--nictype2", "virtio", "--nictype3", "virtio", "--nictype4", "virtio" ],
     [ "storagectl", "{{.Name}}", "--name", "SATA Controller", "--hostiocache", "on" ]

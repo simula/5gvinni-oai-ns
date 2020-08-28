@@ -19,17 +19,20 @@
 # Contact: dreibh@simula.no
 
 
-# ###### Install VirtualBox guest utilities #################################
+# ###### Clean up after installation ########################################
 
 # ------ Ubuntu -------------------------------------------------------------
 if [ -e /usr/bin/apt ] ; then
-   /usr/bin/apt install -y virtualbox-guest-utils virtualbox-guest-dkms
-   if [ -e /usr/lib/systemd/system/sddm.service ] ; then
-      # System has X11 -> also install X11 utilities as well:
-      /usr/bin/apt install -y virtualbox-guest-x11
-   fi
+   apt update
+   apt-file update
+   apt dist-upgrade -y
+   apt autoremove -y --purge
+   apt clean
 
 # ------ Fedora -------------------------------------------------------------
 elif [ -e /usr/bin/dnf ] ; then
-   dnf install -y virtualbox-guest-additions
+   dnf clean all
 fi
+
+updatedb
+fstrim -av
