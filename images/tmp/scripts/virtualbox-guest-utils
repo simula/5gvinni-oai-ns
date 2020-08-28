@@ -29,6 +29,9 @@ if [ -e /usr/bin/apt ] ; then
       /usr/bin/apt install -y virtualbox-guest-x11
    fi
 
+   # cloud-init is not useful for VirtualBox VMs:
+   /usr/bin/apt autoremove -y cloud-init
+
 # ------ Fedora -------------------------------------------------------------
 elif [ -e /usr/bin/dnf ] ; then
    dnf install -y virtualbox-guest-additions
