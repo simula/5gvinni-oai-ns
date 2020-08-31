@@ -37,7 +37,7 @@ NEW_OAI_SERVER_GIT="git@bitbucket.org:dreibh/mosaic5g-"
 NEW_OAI_SERVER_HTTPS="https://bitbucket.org/dreibh/mosaic5g-"
 REPOSITORIES="mosaic5g/mosaic5g flexran/flexran-rtc  mosaic5g/jox  mosaic5g/kube5g  mosaic5g/ll-mec  oai/openair-cn  oai/openairinterface5g  mosaic5g/store  mosaic5g/ll-mec-ovs"
 
-WORKDIR=`pwd`/tmp
+WORKDIR=`pwd`/repositories
 mkdir -p ${WORKDIR}
 
 cd ${WORKDIR}
@@ -101,3 +101,8 @@ for repository in mosaic5g/mosaic5g ; do
 
    cd ${WORKDIR}
 done
+
+
+echo ""
+echo "***** Cloning finished successfully! *****"
+echo ""
