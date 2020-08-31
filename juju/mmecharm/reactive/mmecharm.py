@@ -111,14 +111,14 @@ def prepare_mme_build():
 
       # S10 dummy interface:
       mmeS10_IfName    = 'dummy0:m10'
-      configurationS10 = vduHelper.makeInterfaceConfiguration(mmeS10_IfName, IPv4Interface('192.168.10.110/24'))
+      configurationS10 = vduHelper.makeInterfaceConfiguration(mmeS10_IfName, IPv4Interface('192.168.10.110/24'), createDummy = True)
 
       # ====== Prepare system ===============================================
       vduHelper.beginBlock('Preparing system')
       vduHelper.configureInterface(mmeS6a_IfName, configurationS6a, 61)
       vduHelper.configureInterface(mmeS11_IfName, configurationS11, 62)
       vduHelper.configureInterface(mmeS1C_IfName, configurationS1C, 63)
-      vduHelper.configureInterface(mmeS10_IfName, configurationS10, 64, createDummy = True)
+      vduHelper.configureInterface(mmeS10_IfName, configurationS10, 64)
       vduHelper.testNetworking('8.8.8.8')
       vduHelper.endBlock()
 
