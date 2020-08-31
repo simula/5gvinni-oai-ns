@@ -35,6 +35,7 @@ if [ -e /etc/apt/sources.list ] ; then
    (
       echo ""
       echo "# Ubuntu debugging symbols repositories:"
+      echo "# To install the key: apt-key adv --keyserver keyserver.ubuntu.com --recv-keys F2EDC64DC5AEE1F6B9C621F0C8CAB6595FDFF622"
       echo "# deb http://ddebs.ubuntu.com ${codename} main restricted universe multiverse"
       echo "# deb http://ddebs.ubuntu.com ${codename}-updates main restricted universe multiverse"
       echo "# deb http://ddebs.ubuntu.com ${codename}-proposed main restricted universe multiverse"
@@ -46,6 +47,7 @@ if [ -e /etc/apt/sources.list ] ; then
    (
       echo ""
       echo "# Thomas Dreibholz's MPTCP kernel repository:"
+      echo "# To install the key: sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 7266D8CDA688C4D51F362A62DF605BB0760F2D65"
       echo "# deb [arch=amd64] https://packages.nntb.no/nornet-kernel/ubuntu/ ${codename} ${codename}-kernel"
       echo "# deb-src [arch=amd64] https://packages.nntb.no/nornet-kernel/ubuntu/ ${codename} ${codename}-kernel"
    ) >>/etc/apt/sources.list
