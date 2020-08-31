@@ -33,6 +33,8 @@
 OLD_SERVER="https://gitlab.eurecom.fr/"
 NEW_SERVER_GIT="git@github.com:simula/mosaic5g-"
 NEW_SERVER_HTTPS="https://github.com/simula/mosaic5g-"
+NEW_OAI_SERVER_GIT="git@bitbucket.org:dreibh/mosaic5g-"
+NEW_OAI_SERVER_HTTPS="https://bitbucket.org/dreibh/mosaic5g-"
 REPOSITORIES="mosaic5g/mosaic5g flexran/flexran-rtc  mosaic5g/jox  mosaic5g/kube5g  mosaic5g/ll-mec  oai/openair-cn  oai/openairinterface5g  mosaic5g/store  mosaic5g/ll-mec-ovs"
 
 WORKDIR=`pwd`/tmp
@@ -59,12 +61,16 @@ for repository in ${REPOSITORIES} ; do
 
    echo "==== Updating repository URL ===="
    newRepository=`echo "${repository}" | sed -e "s#.*/##g"`
-   git remote set-url origin ${NEW_SERVER_GIT}${newRepository}.git
+   if [[ "${repository}" =~ ^oai/openairinterface5g$ ]] ; then
+      git remote set-url origin ${NEW_OAI_SERVER_GIT}${newRepository}.git
+   else
+      git remote set-url origin ${NEW_SERVER_GIT}${newRepository}.git
+   fi
 
    echo "==== Push ===="
    git push --mirror || true
-   cd ${WORKDIR}
 
+   cd ${WORKDIR}
 done
 
 
@@ -86,7 +92,9 @@ for repository in mosaic5g/mosaic5g ; do
 
    if [ -e .gitmodules ] ; then
       echo "==== Updating submodule URLs ===="
-      sed -e "s#url = ${OLD_SERVER}\(mosaic5g/\|oai/\|flexran/\)#url = ${NEW_SERVER_HTTPS}#g" -i .gitmodules && \
+      sed -e "s#url = ${OLD_SERVER}\(oai/openairinterface5g\)#url = ${NEW_OAI_SERVER_HTTPS}openairinterface5g#g" \
+          -e "s#url = ${OLD_SERVER}\(mosaic5g/\|oai/\|flexran/\)#url = ${NEW_SERVER_HTTPS}#g" \
+          -i .gitmodules && \
          git commit -m "Updated submodule URLs" .gitmodules && \
          git push
    fi
