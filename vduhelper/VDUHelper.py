@@ -171,6 +171,17 @@ class VDUHelper:
       # 2. bash -c "<command>"
       # That is: $ => \$ ; \ => \\ ; " => \\\"
 
+
+      # ====== Dummy interface configuration ================================
+      dummyInterfaceConfiguration = ''
+      if createDummy == True:
+         dummyInterfaceName = interfaceName.split(':')
+         if len(dummyInterfaceName) > 0:
+            dummyInterfaceName = dummyInterfaceName[0]
+            dummyInterfaceConfiguration = \
+               '\\\\tpre-up ip link add ' + dummyInterfaceName + ' type dummy || true\\\\n'
+
+
       interfaceConfiguration = 'auto ' + interfaceName + '\\\\n'
 
       # ====== Helper function =================================================
@@ -200,7 +211,7 @@ class VDUHelper:
                '\\\\tmetric '  + str(metric)      + '\\\\n'
          if pdnInterface != None:
             interfaceConfiguration = interfaceConfiguration + makePDNRules(pdnInterface, ipv4Interface, ipv4Gateway)
-         interfaceConfiguration = interfaceConfiguration + '\\\\n'
+      interfaceConfiguration = interfaceConfiguration + dummyInterfaceConfiguration + '\\\\n'
 
       # ====== IPv6 ============================================================
       if ipv6Interface == None:
@@ -223,14 +234,7 @@ class VDUHelper:
                '\\\\tmetric '  + str(metric)      + '\\\\n'
          if pdnInterface != None:
             interfaceConfiguration = interfaceConfiguration + makePDNRules(pdnInterface, ipv6Interface, ipv6Gateway)
-
-      # ====== Dummy interface ==============================================
-      if createDummy == True:
-         dummyInterfaceName = interfaceName.split(':')
-         if len(dummyInterfaceName) > 0:
-            dummyInterfaceName = dummyInterfaceName[0]
-            interfaceConfiguration = interfaceConfiguration + \
-               '\\\\tpre-up ip link add ' + dummyInterfaceName + ' type dummy || true\\\\n'
+      interfaceConfiguration = interfaceConfiguration + dummyInterfaceConfiguration
 
       return interfaceConfiguration
 

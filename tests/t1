@@ -1310,7 +1310,14 @@ def restart_flexran():
 #restart_spgwu()
 
 
-install_flexrancharm_proxy_charm()
-prepare_flexran_build()
-configure_flexran()
-restart_flexran()
+#install_flexrancharm_proxy_charm()
+#prepare_flexran_build()
+#configure_flexran()
+#restart_flexran()
+
+
+print(vduHelper.makeInterfaceConfiguration('ens4',
+         IPv4Interface('0.0.0.0/0')))
+print(vduHelper.makeInterfaceConfiguration('dummy0:s5c',
+         IPv4Interface('172.58.58.101/24'),
+         createDummy = True))
