@@ -212,13 +212,6 @@ INSTANCE=1 && \\
 PREFIX='/usr/local/etc/oai' && \\
 sudo mkdir -m 0777 -p \$PREFIX && \\
 sudo mkdir -m 0777 -p \$PREFIX/freeDiameter && \\
-echo \\\"############ A=TEST B={{ C=\\( D=@REALM@\\\" >/tmp/t1.txt && \\
-if [ ! -e ../etc/mme_fd.sprint.conf ] ; then \\
-   echo \\\"**** Generating ../etc/mme.conf for Mosaic5G MME ****\\\" && \\
-   sed -e \\\"s#\\(REALM.*\\)=.*\\\\\\".*\\\\\\"#=\\\\\\"@REALM@ 22\\\\\\"#g\\\" -e \\\"s#\\(REALM[ \\t]*\\)=[ \\t]*\\\\\\".*\\\\\\"#=\\\\\\"@REALM@ 11\\\\\\"#g\\\" -e \\\"s#\\(REALM[ \\t]*\\)=[ \\t]*\\\\\\".*\\\\\\"#\\1=\\\\\\"@REALM@\\\\\\"#g\\\" <../etc/mme.conf >../etc/mme-NEU.conf && \\
-   echo \\\"**** Generating ./etc/mme_fd.sprint.conf for Mosaic5G MME ****\\\" && \\
-   sed -e \\\"s#Identity[ \\t]*=[ \\t]*\\\\\\".*\\\\\\";#Identity = \\\\\\"@MME_FQDN@\\\\\\";#g\\\" -e \\\"s#Realm[ \\t]*=[ \\t]*\\\\\\".*\\\\\\";#Realm = \\\\\\"@REALM@\\\\\\";#g\\\" -e \\\"s#LoadExtension[ \\t]*=[ \\t]*\\\\\\"#LoadExtension = \\\\\\"/usr/local/lib/freeDiameter/#g\\\" -e \\\"s#ConnectPeer[ \\t]*=[ \\t]*\\\\\\"hss.openair4G.eur\\\\\\"[ \\t]*.*ConnectTo.*127.0.0.1.*realm[ \\t]*=[ \\t]*\\\\\\"openair4G.eur\\\\\\".*}};#ConnectPeer= \\\\\\"@HSS_FQDN@\\\\\\" {{ ConnectTo = \\\\\\"@HSS_IP_ADDR@\\\\\\"; No_SCTP ; No_IPv6; Prefer_TCP; No_TLS; port = 3868; realm = \\\\\\"@REALM@\\\\\\"; }};#g\\\" -e \\\"s#/usr/local/etc/oai/freeDiameter#@PREFIX@/freeDiameter#g\\\" <../etc/mme_fd.conf >../etc/mme_fd.sprint.conf ; \\
-fi ; \\
 sudo cp ../etc/mme_fd.sprint.conf  \$PREFIX/freeDiameter/mme_fd.conf && \\
 sudo cp ../etc/mme.conf  \$PREFIX && \\
 declare -A MME_CONF && \\

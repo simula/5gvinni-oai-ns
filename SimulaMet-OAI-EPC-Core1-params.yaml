@@ -46,7 +46,7 @@ additionalParamsForVnf:
       # mme_git_repository: 'https://github.com/OPENAIRINTERFACE/openair-cn.git'
       # mme_git_commit: '2020.w13'
       mme_git_repository: 'https://github.com/simula/mosaic5g-openair-cn.git'
-      mme_git_commit: 'ceef14e54c5d4e5ddc3c717eed9f29ae7521385a'
+      mme_git_commit: 'dreibh/mosaic5g'
       # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       mme_S1C_ipv4_interface: '192.168.247.102/24'
       mme_S1C_ipv4_gateway: '0.0.0.0'
