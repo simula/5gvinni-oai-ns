@@ -567,6 +567,15 @@ INSTANCE=1 && \\
 PREFIX='/usr/local/etc/oai' && \\
 sudo mkdir -m 0777 -p \$PREFIX && \\
 sudo mkdir -m 0777 -p \$PREFIX/freeDiameter && \\
+if [ ! -e ../etc/mme_fd.sprint.conf ] ; then \\
+   echo \\\"**** Generating ./etc/mme_fd.sprint.conf for Mosaic5G MME ****\\\" && \\
+   sed -e \\\"s#Identity[ \\t]*=[ \\t]*\\\\\\".*\\\\\\";#Identity = \\\\\\"@MME_FQDN@\\\\\\";#g\\\" \\
+       -e \\\"s#Realm[ \\t]*=[ \\t]*\\\\\\".*\\\\\\";#Realm = \\\\\\"@REALM@\\\\\\";#g\\\" \\
+       -e \\\"s#LoadExtension[ \\t]*=[ \\t]*\\\\\\"#LoadExtension = \\\\\\"/usr/local/lib/freeDiameter/#g\\\" \\
+       -e \\\"s#ConnectPeer[ \\t]*=[ \\t]*\\\\\\"hss.openair4G.eur\\\\\\"[ \\t]*{{[ \\t]*ConnectTo[ \\t]*=[ \\t]*\\\\\\"127.0.0.1\\\\\\";\\(.*\\)realm[ \\t]*=[ \\t]*\\\\\\"openair4G.eur\\\\\\"[ \\t]*;#ConnectPeer = \\\\\\"@HSS_FQDN@\\\\\\" {{ ConnectTo = \\\\\\"@HSS_IP_ADDR@\\\\\\";\\1realm = \\\\\\"@REALM@\\\\\\";#g\\\" \\
+       -e \\\"s#/usr/local/etc/oai/freeDiameter#@PREFIX@/freeDiameter#g\\\" \\
+      <../etc/mme_fd.conf >../etc/mme_fd.sprint.conf ; \\
+fi ; \\
 sudo cp ../etc/mme_fd.sprint.conf  \$PREFIX/freeDiameter/mme_fd.conf && \\
 sudo cp ../etc/mme.conf  \$PREFIX && \\
 declare -A MME_CONF && \\
@@ -1294,10 +1303,10 @@ def restart_flexran():
 #configure_hss()
 #restart_hss()
 
-#install_mmecharm_proxy_charm()
-#prepare_mme_build()
-#configure_mme()
-#restart_mme()
+install_mmecharm_proxy_charm()
+prepare_mme_build()
+configure_mme()
+restart_mme()
 
 #install_spgwccharm_proxy_charm()
 #prepare_spgwc_build()
@@ -1316,8 +1325,8 @@ def restart_flexran():
 #restart_flexran()
 
 
-print(vduHelper.makeInterfaceConfiguration('ens4',
-         IPv4Interface('0.0.0.0/0')))
-print(vduHelper.makeInterfaceConfiguration('dummy0:s5c',
-         IPv4Interface('172.58.58.101/24'),
-         createDummy = True))
+#print(vduHelper.makeInterfaceConfiguration('ens4',
+         #IPv4Interface('0.0.0.0/0')))
+#print(vduHelper.makeInterfaceConfiguration('dummy0:s5c',
+         #IPv4Interface('172.58.58.101/24'),
+         #createDummy = True))
