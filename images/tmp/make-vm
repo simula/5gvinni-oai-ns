@@ -105,6 +105,11 @@ else
    echo >&2 "ERROR: Invalid hypervisor ${HYPERVISOR}!"
    exit 1
 fi
+
+if [ "${PROJECT}" == "NorNet" ] ; then
+   PROVISIONERS="${PROVISIONERS} nornet"
+fi
+
 PROVISIONERS="${PROVISIONERS} clean-up"
 NAME="${NAME}-${PROJECT}"
 
