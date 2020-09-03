@@ -40,6 +40,10 @@ XKBMODEL="pc105"
 XKBLAYOUT="de"
 XKBVARIANT="nodeadkeys"
 XKBOPTIONS=""
+HOSTNAME="akerbrygge.simula.nornet"
+USER_NAME="nornetpp"
+USER_REALNAME="NorNet Praesum Presum"
+USER_PASSWORD="!NorNetInst!"
 
 
 # ###### Handle command-line parameters #####################################
@@ -56,6 +60,29 @@ while [ $# -gt 0 ] ; do
    elif [ "$1" == "--release" -o "$1" == "-R" ] ; then
       RELEASE="$2"
       shift
+   elif [ "$1" == "--root" -o "$1" == "-r" ] ; then
+      VM_DISK_ROOT="$2"
+      if [[ ! "${VM_DISK_ROOT}" =~ ^[0-9]*$ ]] ; then
+         echo >&2 "ERROR: Bad size for root: ${VM_DISK_ROOT} MiB"
+         exit 1
+      fi
+      shift
+   elif [ "$1" == "--home" -o "$1" == "-r" ] ; then
+      VM_DISK_ROOT="$2"
+      if [[ ! "${VM_DISK_HOME}" =~ ^[0-9]*$ ]] ; then
+         echo >&2 "ERROR: Bad size for home: ${VM_DISK_HOME} MiB"
+         exit 1
+      fi
+      shift
+   elif [ "$1" == "--swap" -o "$1" == "-r" ] ; then
+      VM_DISK_ROOT="$2"
+      if [[ ! "${VM_DISK_SWAP}" =~ ^[0-9]*$ ]] ; then
+         echo >&2 "ERROR: Bad size for swap: ${VM_DISK_SWAP} MiB"
+         exit 1
+      fi
+      shift
+   elif [ "$1" == "--one-disk-only" -o "$1" == "-1" ] ; then
+      USE_SEPARATE_DISKS=0
    elif [ "$1" == "--video" -o "$1" == "-V" ] ; then
       VIDEO="$2"
       if [ "${VIDEO}" == "XGA" ] ; then
@@ -88,29 +115,18 @@ while [ $# -gt 0 ] ; do
    elif [ "$1" == "--keyboard-options" -o "$1" == "-o" ] ; then
       XKBOPTIONS="$2"
       shift
-   elif [ "$1" == "--root" -o "$1" == "-r" ] ; then
-      VM_DISK_ROOT="$2"
-      if [[ ! "${VM_DISK_ROOT}" =~ ^[0-9]*$ ]] ; then
-         echo >&2 "ERROR: Bad size for root: ${VM_DISK_ROOT} MiB"
-         exit 1
-      fi
+   elif [ "$1" == "--hostname" -o "$1" == "-h" ] ; then
+      HOSTNAME="$2"
       shift
-   elif [ "$1" == "--home" -o "$1" == "-r" ] ; then
-      VM_DISK_ROOT="$2"
-      if [[ ! "${VM_DISK_HOME}" =~ ^[0-9]*$ ]] ; then
-         echo >&2 "ERROR: Bad size for home: ${VM_DISK_HOME} MiB"
-         exit 1
-      fi
+   elif [ "$1" == "--user" -o "$1" == "-u" ] ; then
+      USER_NAME="$2"
       shift
-   elif [ "$1" == "--swap" -o "$1" == "-r" ] ; then
-      VM_DISK_ROOT="$2"
-      if [[ ! "${VM_DISK_SWAP}" =~ ^[0-9]*$ ]] ; then
-         echo >&2 "ERROR: Bad size for swap: ${VM_DISK_SWAP} MiB"
-         exit 1
-      fi
+   elif [ "$1" == "--realname" -o "$1" == "-r" ] ; then
+      USER_REALNAME="$2"
       shift
-   elif [ "$1" == "--one-disk-only" -o "$1" == "-1" ] ; then
-      USE_SEPARATE_DISKS=0
+   elif [ "$1" == "--password" -o "$1" == "-P" ] ; then
+      USER_PASSWORD="$2"
+      shift
    elif [ "$1" == "--dry-run" -o "$1" == "-n" ] ; then
       DRY_RUN=1
    else
@@ -129,6 +145,11 @@ while [ $# -gt 0 ] ; do
       echo >&2 "   [--keyboard-layout|-l layout]"
       echo >&2 "   [--keyboard-variant|-v variant]"
       echo >&2 "   [--keyboard-options|-o options]"
+      echo >&2 "   [--user|-u username]"
+      echo >&2 "   [--realname|-r real_user_name]"
+      echo >&2 "   [--password|-p password]"
+      echo >&2 "   [--|hostname|-h hostname]"
+      # echo >&2 "   [--| ]"
       echo >&2 "   [--dry-run|-n]"
       exit 1
    fi
@@ -208,9 +229,12 @@ if [ "${HTTP_DIRECTORY}" != "http/ubuntu-legacy" ] ; then
    fi
 fi
 
+USER_HASHED_PASSWORD=`echo "${USER_PASSWORD}" | mkpasswd -s -m sha-512`
+
 
 # ###### Write Packer configuration #########################################
-JSON="${NAME}.json"
+mkdir -p ${NAME}
+JSON="`realpath ${NAME}`/${NAME}.json"
 JSONTMP="${JSON}.tmp"
 
 
@@ -239,10 +263,29 @@ if [ ! -d ${HTTP_DIRECTORY} ] ; then
    echo >&2 "ERROR: HTTP_DIRECTORY ${HTTP_DIRECTORY} does not exist!"
    exit 1
 fi
+
+# Copy all files from HTTP directory and replace placeholders:
+mkdir -p ${NAME}/http
+httpFiles=`find ${HTTP_DIRECTORY}/ -maxdepth 1 -type f -name "*"`
+for httpFile in ${httpFiles} ; do
+   echo "Processing: ${httpFile} -> ${NAME}/http/`basename ${httpFile}`"
+   sed -e "s/<SET_XKBMODEL_HERE>/${XKBMODEL}/g" \
+       -e "s/<SET_XKBLAYOUT_HERE>/${XKBLAYOUT}/g" \
+       -e "s/<SET_XKBVARIANT_HERE>/${XKBVARIANT}/g" \
+       -e "s/<SET_XKBOPTIONS_HERE>/${XKBOPTIONS}/g" \
+       -e "s/<SET_HOSTNAME_HERE>/${HOSTNAME}/g" \
+       -e "s/<SET_USERNAME_HERE>/${USER_NAME}/g" \
+       -e "s/<SET_REALNAME_HERE>/${USER_REALNAME}/g" \
+       -e "s/<SET_PASSWORD_HERE>/${USER_PASSWORD}/g" \
+       -e "s#<SET_HASHED_PASSWORD_HERE>#${USER_HASHED_PASSWORD}#g" \
+       <${httpFile} >"${NAME}/http/`basename ${httpFile}`"
+done
+
+# Configure HTTP directory:
 (
    insert-json vmsetup/${BUILDER_VMSETUP}.json
    echo ","
-   echo "\"http_directory\": \"${HTTP_DIRECTORY}\","
+   echo "\"http_directory\": \"http\","
    insert-json installer/${BUILDER_INSTALL}.json
 ) >>${JSONTMP}
 cat >>${JSONTMP} <<EOF
@@ -269,7 +312,7 @@ for provisioner in ${PROVISIONERS} ; do
        {
          "type": "shell",
          "execute_command": "echo '!NorNetInst!' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
-         "script": "scripts/${provisioner}"
+         "script": "`realpath scripts/${provisioner}`"
        }
 EOF
 done
@@ -335,10 +378,15 @@ elif [ ${HYPERVISOR} == "QEMU" ] ; then
    fi
 fi
 
+
+mkdir -p cache
+CACHE_DIRECTORY="`realpath cache`"
+
+cd ${NAME}
 rm -rf ${vm_name}
 
 echo "Running Packer:"
-env CHECKPOINT_DISABLE=1 packer build      \
+env CHECKPOINT_DISABLE=1 PACKER_CACHE_DIR="${CACHE_DIRECTORY}" packer build \
    -var "vm_name=${vm_name}"               \
    -var "vm_version=${vm_version}"         \
    -var "vm_version=${vm_version}"         \

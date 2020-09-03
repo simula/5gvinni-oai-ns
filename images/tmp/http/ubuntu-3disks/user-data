@@ -39,8 +39,8 @@ autoinstall:
   # time format (24-hour clock). Also install locales for NO, DE, CN:
   locale: en_IE.UTF-8
   keyboard:
-    layout: de
-    variant: nodeadkeys
+    layout: <SET_XKBLAYOUT_HERE>
+    variant: <SET_XKBVARIANT_HERE>
 
 
   # ###### Storage Configuration ############################################
@@ -172,10 +172,10 @@ autoinstall:
 
   # ###### Host and User Configuration ######################################
   identity:
-    hostname: akerbrygge.simula.nornet
-    username: nornetpp
-    password: "$6$2NWrlKtE5C$u1zqajwW/sfrUMxeKBp7MH.ptmrXW0kvSv20Cf.kSSuAS5lFJUq.WI.iildLgru2Otf1WG1dndo4B8IxnM9Kn1"
-    realname: NorNet Praesum Presum
+    hostname: <SET_HOSTNAME_HERE>
+    username: <SET_USERNAME_HERE>
+    realname: "<SET_REALNAME_HERE>"
+    password: "<SET_HASHED_PASSWORD_HERE>"
 
 
   # ###### Package Management ###############################################
