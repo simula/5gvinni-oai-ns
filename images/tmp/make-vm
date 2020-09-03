@@ -29,11 +29,17 @@ RELEASE="20.04"
 PROVISIONERS="user-settings development-system"   # "clean-up" will be added later!
 
 DRY_RUN=0
-USE_SEPARATE_DISKS=1
 
+USE_SEPARATE_DISKS=1
 VM_DISK_ROOT=32768
 VM_DISK_HOME=131072
 VM_DISK_SWAP=4096
+
+VIDEO="1024x768"
+XKBMODEL="pc105"
+XKBLAYOUT="de"
+XKBVARIANT="nodeadkeys"
+XKBOPTIONS=""
 
 
 # ###### Handle command-line parameters #####################################
@@ -49,6 +55,38 @@ while [ $# -gt 0 ] ; do
       shift
    elif [ "$1" == "--release" -o "$1" == "-R" ] ; then
       RELEASE="$2"
+      shift
+   elif [ "$1" == "--video" -o "$1" == "-V" ] ; then
+      VIDEO="$2"
+      if [ "${VIDEO}" == "XGA" ] ; then
+         VIDEO="1024x768"   # Standard, 4:3
+      elif [ "${VIDEO}" == "SXGA" ] ; then
+         VIDEO="1280x960"   # SXGA-, 4:3
+      elif [ "${VIDEO}" == "HD" ] ; then
+         VIDEO="1280x720"   # HD, 16:9
+      elif [ "${VIDEO}" == "HD+" ] ; then
+         VIDEO="1600x900"   # HD+, 16:9
+      elif [ "${VIDEO}" == "FHD" ] ; then
+         VIDEO="1920x1080"  # Full HD, 16:9
+      elif [ "${VIDEO}" == "UHD" ] ; then
+         VIDEO="3840x2160"  # 4K, 16:9
+      fi
+      if [[ ! "${VIDEO}" =~ ^[0-9]*x[0-9]*$ ]] ; then
+         echo >&2 "ERROR: Bad video setting: ${VIDEO}"
+         exit 1
+      fi
+      shift
+   elif [ "$1" == "--keyboard-model" -o "$1" == "-m" ] ; then
+      XKBMODEL="$2"
+      shift
+   elif [ "$1" == "--keyboard-layout" -o "$1" == "-l" ] ; then
+      XKBLAYOUT="$2"
+      shift
+   elif [ "$1" == "--keyboard-variant" -o "$1" == "-v" ] ; then
+      XKBVARIANT="$2"
+      shift
+   elif [ "$1" == "--keyboard-options" -o "$1" == "-o" ] ; then
+      XKBOPTIONS="$2"
       shift
    elif [ "$1" == "--root" -o "$1" == "-r" ] ; then
       VM_DISK_ROOT="$2"
@@ -76,7 +114,8 @@ while [ $# -gt 0 ] ; do
    elif [ "$1" == "--dry-run" -o "$1" == "-n" ] ; then
       DRY_RUN=1
    else
-      echo >&2 "ERROR: Usage: $0"
+      echo >&2 "ERROR: Unknown option $1!"
+      echo >&2 "Usage: $0"
       echo >&2 "   [--hypervisor|-H VirtualBox|QEMU]"
       echo >&2 "   [--project|-P Template|NEAT|MELODIC|...]"
       echo >&2 "   [--destination|-D Ubuntu|Fedora|FreeBSD]"
@@ -85,6 +124,11 @@ while [ $# -gt 0 ] ; do
       echo >&2 "   [--home|-h MiB]"
       echo >&2 "   [--swap|-s MiB]"
       echo >&2 "   [--one-disk-only|-1]"
+      echo >&2 "   [--video|-V WIDTHxHEIGHT|XGA|SXGA|HD|HD+|FHD|UHD]"
+      echo >&2 "   [--keyboard-model|-m model]"
+      echo >&2 "   [--keyboard-layout|-l layout]"
+      echo >&2 "   [--keyboard-variant|-v variant]"
+      echo >&2 "   [--keyboard-options|-o options]"
       echo >&2 "   [--dry-run|-n]"
       exit 1
    fi
@@ -263,6 +307,11 @@ if [ ${USE_SEPARATE_DISKS} -ne 0 ] ; then
    echo " - VM_DISK_HOME=${VM_DISK_HOME} (MiB)"
    echo " - VM_DISK_SWAP=${VM_DISK_SWAP} (MiB)"
 fi
+echo " - VIDEO=${VIDEO}"
+echo " - XKBMODEL=${XKBMODEL}"
+echo " - XKBLAYOUT=${XKBLAYOUT}"
+echo " - XKBVARIANT=${XKBVARIANT}"
+echo " - XKBOPTIONS=${XKBOPTIONS}"
 
 if [ ${DRY_RUN} -ne 0 ] ; then
    echo "Dry run -> exiting."
@@ -295,6 +344,7 @@ env CHECKPOINT_DISABLE=1 packer build      \
    -var "vm_disk_root=${VM_DISK_ROOT}"     \
    -var "vm_disk_home=${VM_DISK_HOME}"     \
    -var "vm_disk_swap=${VM_DISK_SWAP}"     \
+   -var "vm_video=${VIDEO}"                \
    -var "vm_vendor=${vm_vendor}"           \
    -var "vm_vendorurl=${vm_vendorurl}"     \
    -var "vm_product=${vm_product}"         \
