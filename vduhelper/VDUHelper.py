@@ -320,3 +320,12 @@ git checkout {gitCommit}""".format(
          raise
 
       self.endBlock()
+
+
+   # ###### Clean up ########################################################
+   def cleanUp(self):
+      self.beginBlock('Cleaning up')
+      commands = """\
+sudo updatedb"""
+      self.runInShell(commands)
+      self.endBlock()
