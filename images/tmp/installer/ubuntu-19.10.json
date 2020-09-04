@@ -1,4 +1,4 @@
-// Ubuntu Server 20.10 "Groovy Gorilla" with EFI Boot
+// Ubuntu Server 19.10 "Eoan Ermine" with EFI Boot
 // Copyright (C) 2020 by Thomas Dreibholz
 //
 // This program is free software: you can redistribute it and/or modify
@@ -18,8 +18,8 @@
 
 {
   // ====== ISO settings ====================================================
-  "iso_url": "https://cdimage.ubuntu.com/ubuntu-server/daily-live/current/groovy-live-server-amd64.iso",
-  "iso_checksum": "sha256:272ace8b13899c33d035b1016a06eb366e991ff848c49883292f66912d1797d2",
+  "iso_url": "http://old-releases.ubuntu.com/releases/19.10/ubuntu-19.10-server-amd64.iso",
+  "iso_checksum": "sha256:921fd8b271c04aa86a321cc35b40e677f9b85f7903bf2204efb2389b0f0a64c1",
   "ssh_username": "nornetpp",
   "ssh_password": "!NorNetInst!",
   "ssh_pty": true,
@@ -32,8 +32,20 @@
   "boot_command": [
     "<esc><wait>",
     "<esc><wait>",
-    "linux /casper/vmlinuz --- autoinstall ds=\"nocloud-net;seedfrom=http://{{ .HTTPIP }}:{{ .HTTPPort }}/\"<enter><wait>",
-    "initrd /casper/initrd<enter><wait>",
+    "linux /install/vmlinuz ---",
+    " auto",
+    " debconf/frontend=noninteractive",
+    " console-setup/ask_detect=false",
+    " debian-installer=en_US",
+    " kbd-chooser/method=us",
+    " keyboard-configuration/layout=USA",
+    " keyboard-configuration/variant=USA",
+    " locale=en_US",
+    " netcfg/get_domain=simula.nornet",
+    " netcfg/get_hostname=akerbrygge",
+    " preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/legacy.preseed",
+    "<enter><wait>",
+    "initrd /install/initrd.gz<enter><wait>",
     "boot<enter>"
-  ]
+   ]
 }
