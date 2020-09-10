@@ -47,7 +47,7 @@ if [ -e /etc/apt/sources.list ] ; then
    (
       echo ""
       echo "# Thomas Dreibholz's MPTCP kernel repository:"
-      echo "# To install the key: sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 7266D8CDA688C4D51F362A62DF605BB0760F2D65"
+      echo "# To install the key: sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 21412672518D8B2D1862EFEF5CD5D12AA0877B49"
       echo "# deb [arch=amd64] https://packages.nntb.no/nornet-kernel/ubuntu/ ${codename} ${codename}-kernel"
       echo "# deb-src [arch=amd64] https://packages.nntb.no/nornet-kernel/ubuntu/ ${codename} ${codename}-kernel"
    ) >>/etc/apt/sources.list
