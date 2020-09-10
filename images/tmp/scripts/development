@@ -19,22 +19,13 @@
 # Contact: dreibh@simula.no
 
 
-# ###### Clean up after installation ########################################
+# ###### NorNet development configuration ###################################
 
 # ------ Ubuntu -------------------------------------------------------------
 if [ -e /usr/bin/apt ] ; then
-   /usr/bin/apt update
-   if [ -e /usr/bin/apt-file ] ; then
-      /usr/bin/apt-file update
-   fi
-   /usr/bin/apt dist-upgrade -y
-   /usr/bin/apt autoremove -y --purge
-   /usr/bin/apt clean
+   /usr/bin/apt install -y nornet-development
 
 # ------ Fedora -------------------------------------------------------------
 elif [ -e /usr/bin/dnf ] ; then
-   /usr/bin/dnf clean all
+   /usr/bin/dnf install -y nornet-development
 fi
-
-updatedb
-fstrim -av

@@ -1,6 +1,6 @@
-#!/bin/bash -ex
+#!/usr/bin/env bash
 #
-# Autoinstall Scripts
+# Template VM Image Builder
 # Copyright (C) 2017-2020 by Thomas Dreibholz
 #
 # This program is free software: you can redistribute it and/or modify
@@ -18,23 +18,15 @@
 #
 # Contact: dreibh@simula.no
 
+set -e
 
-# ###### Clean up after installation ########################################
 
-# ------ Ubuntu -------------------------------------------------------------
-if [ -e /usr/bin/apt ] ; then
-   /usr/bin/apt update
-   if [ -e /usr/bin/apt-file ] ; then
-      /usr/bin/apt-file update
-   fi
-   /usr/bin/apt dist-upgrade -y
-   /usr/bin/apt autoremove -y --purge
-   /usr/bin/apt clean
+HYPERVISOR="VirtualBox"
+UBUNTU="16.04 18.04 20.04"
 
-# ------ Fedora -------------------------------------------------------------
-elif [ -e /usr/bin/dnf ] ; then
-   /usr/bin/dnf clean all
-fi
 
-updatedb
-fstrim -av
+# ====== Build VMs ==========================================================
+for ubuntu in ${UBUNTU} ; do
+   ./make-vm -H ${HYPERVISOR} -P 5gVINNI-OpenStack -D Ubuntu -R ${ubuntu} -1
+done
+wait
