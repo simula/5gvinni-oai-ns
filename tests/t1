@@ -76,7 +76,15 @@ MyParameters = {
    'spgwu-SGi-ipv4-gateway': '10.254.1.1',
    'spgwu-SGi-ipv6-interface': '',
    'spgwu-SGi-ipv6-gateway': '',
-   'spgwu-spgwc-list': '172.55.55.101'
+   'spgwu-spgwc-list': '172.55.55.101',
+
+   # ====== FlexRAN =========================================================
+   'flexran-git-repository': 'https://gitlab.eurecom.fr/mosaic5g/mosaic5g',
+   'flexran-git-commit': 'master',
+   'flexran-service-ipv4-interface': '192.168.246.100/24',
+   'flexran-service-ipv4-gateway': '0.0.0.0',
+   'flexran-service-ipv6-interface': '',
+   'flexran-service-ipv6-gateway': ''
 }
 
 def function_get(flag):
@@ -376,6 +384,8 @@ chmod +x /home/nornetpp/restart"""
       # ====== Set up sysstat service =======================================
       vduHelper.installSysStat()
 
+      # ====== Clean up =====================================================
+      vduHelper.cleanUp()
 
       message = vduHelper.endBlock()
       function_set( { 'outout': message } )
@@ -458,15 +468,14 @@ def prepare_mme_build():
 
       # S10 dummy interface:
       mmeS10_IfName    = 'dummy0:m10'
-      configurationS10 = vduHelper.makeInterfaceConfiguration(mmeS10_IfName, IPv4Interface('192.168.10.110/24'))
+      configurationS10 = vduHelper.makeInterfaceConfiguration(mmeS10_IfName, IPv4Interface('192.168.10.110/24'), createDummy = True)
 
       # ====== Prepare system ===============================================
       vduHelper.beginBlock('Preparing system')
-      vduHelper.makeInterfaceConfiguration(mmeS6a_IfName, configurationS6a, 61)
-      vduHelper.makeInterfaceConfiguration(mmeS11_IfName, configurationS11, 62)
-      vduHelper.makeInterfaceConfiguration(mmeS1C_IfName, configurationS1C, 63)
-      vduHelper.addDummyInterface('dummy0')
-      vduHelper.makeInterfaceConfiguration(mmeS10_IfName, configurationS10, 64)
+      vduHelper.configureInterface(mmeS6a_IfName, configurationS6a, 61)
+      vduHelper.configureInterface(mmeS11_IfName, configurationS11, 62)
+      vduHelper.configureInterface(mmeS1C_IfName, configurationS1C, 63)
+      vduHelper.configureInterface(mmeS10_IfName, configurationS10, 64)
       vduHelper.testNetworking('8.8.8.8')
       vduHelper.endBlock()
 
@@ -664,6 +673,8 @@ chmod +x /home/nornetpp/restart"""
       # ====== Set up sysstat service =======================================
       vduHelper.installSysStat()
 
+      # ====== Clean up =====================================================
+      vduHelper.cleanUp()
 
       message = vduHelper.endBlock()
       function_set( { 'outout': message } )
@@ -731,9 +742,9 @@ def prepare_spgwc_build():
 
       # S5S8 dummy interfaces:
       spgwcS5S8_SGW_IfName  = 'dummy0:s5c'
-      configurationS5S8_SGW = vduHelper.makeInterfaceConfiguration(spgwcS5S8_SGW_IfName, IPv4Interface('172.58.58.102/24'))
+      configurationS5S8_SGW = vduHelper.makeInterfaceConfiguration(spgwcS5S8_SGW_IfName, IPv4Interface('172.58.58.102/24'), createDummy = True)
       spgwcS5S8_PGW_IfName  = 'dummy0:p5c'
-      configurationS5S8_PGW = vduHelper.makeInterfaceConfiguration(spgwcS5S8_PGW_IfName, IPv4Interface('172.58.58.101/24'))
+      configurationS5S8_PGW = vduHelper.makeInterfaceConfiguration(spgwcS5S8_PGW_IfName, IPv4Interface('172.58.58.101/24'), createDummy = True)
 
       # ====== Prepare system ===============================================
       vduHelper.beginBlock('Preparing system')
@@ -864,6 +875,8 @@ chmod +x /home/nornetpp/restart"""
       # ====== Set up sysstat service =======================================
       vduHelper.installSysStat()
 
+      # ====== Clean up =====================================================
+      vduHelper.cleanUp()
 
       message = vduHelper.endBlock()
       function_set( { 'outout': message } )
@@ -1081,6 +1094,8 @@ chmod +x /home/nornetpp/restart"""
       # ====== Set up sysstat service =======================================
       vduHelper.installSysStat()
 
+      # ====== Clean up =====================================================
+      vduHelper.cleanUp()
 
       message = vduHelper.endBlock()
       function_set( { 'outout': message } )
@@ -1113,6 +1128,175 @@ def restart_spgwu():
 
 
 # ###########################################################################
+# #### FlexRAN Charm functions                                           ####
+# ###########################################################################
+
+# ###### Installation #######################################################
+@when('sshproxy.configured')
+@when_not('flexrancharm.installed')
+def install_flexrancharm_proxy_charm():
+   set_flag('flexrancharm.installed')
+   vduHelper.setStatus('install_flexrancharm_proxy_charm: SSH proxy charm is READY')
+
+
+# ###### prepare-flexran-build function #####################################
+@when('actions.prepare-flexran-build')
+@when('flexrancharm.installed')
+@when_not('flexrancharm.prepared-flexran-build')
+def prepare_flexran_build():
+   vduHelper.beginBlock('prepare_flexran_build')
+   try:
+
+      # ====== Get FlexRAN parameters ===========================================
+      # For a documentation of the installation procedure, see:
+      # https://gitlab.eurecom.fr/mosaic5g/mosaic5g/-/wikis/tutorials/slicing
+
+      gitRepository = function_get('flexran-git-repository')
+      gitCommit     = function_get('flexran-git-commit')
+      gitDirectory  = 'mosaic5g'
+
+      flexranService_IPv4Interface = IPv4Interface(function_get('flexran-service-ipv4-interface'))
+      flexranService_IPv4Gateway   = IPv4Address(function_get('flexran-service-ipv4-gateway'))
+      if function_get('flexran-service-ipv6-interface') != '':
+         flexranService_IPv6Interface = IPv6Interface(function_get('flexran-service-ipv6-interface'))
+      else:
+         flexranService_IPv6Interface = None
+      if function_get('flexran-service-ipv6-gateway') != '':
+         flexranService_IPv6Gateway   = IPv6Address(function_get('flexran-service-ipv6-gateway'))
+      else:
+         flexranService_IPv6Gateway = None
+
+      # Prepare network configuration:
+      flexranService_IfName = 'ens4'
+      configurationService = vduHelper.makeInterfaceConfiguration(flexranService_IfName,
+                                                                  flexranService_IPv4Interface, flexranService_IPv4Gateway,
+                                                                  flexranService_IPv6Interface, flexranService_IPv6Gateway)
+
+      # ====== Prepare system ===============================================
+      vduHelper.beginBlock('Preparing system')
+      vduHelper.configureInterface(flexranService_IfName, configurationService, 61)
+      vduHelper.testNetworking('8.8.8.8')
+      vduHelper.endBlock()
+
+      # ====== Prepare sources ==============================================
+      vduHelper.beginBlock('Preparing sources')
+      vduHelper.fetchGitRepository(gitDirectory, gitRepository, gitCommit)
+      commands = """\
+cd /home/nornetpp/src/{gitDirectory} && \\
+git submodule init && \\
+git submodule update flexran""".format(
+         gitDirectory       = gitDirectory
+      )
+      vduHelper.runInShell(commands)
+      vduHelper.endBlock()
+
+
+      message = vduHelper.endBlock()
+      function_set( { 'outout': message } )
+      set_flag('flexrancharm.prepared-flexran-build')
+   except:
+      message = vduHelper.endBlockInException()
+      function_fail(message)
+   finally:
+      clear_flag('actions.prepare-flexran-build')
+
+
+# ###### configure-flexran function #########################################
+@when('actions.configure-flexran')
+@when('flexrancharm.prepared-flexran-build')
+def configure_flexran():
+   vduHelper.beginBlock('configure_flexran')
+   try:
+
+      # ====== Get FlexRAN parameters =======================================
+      # For a documentation of the installation procedure, see:
+      # https://gitlab.eurecom.fr/mosaic5g/mosaic5g/-/wikis/tutorials/slicing
+
+      gitDirectory = 'mosaic5g'
+      #networkUsers       = int(function_get('network-users'))
+
+      # ====== Build FlexRAN ================================================
+      vduHelper.beginBlock('Building FlexRAN itself')
+      commands = """\
+export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
+cd /home/nornetpp/src/{gitDirectory} && \\
+mkdir -p logs && \\
+./build_m5g -f >logs/build_flexran.log 2>&1""".format(
+         gitDirectory       = gitDirectory
+      )
+      vduHelper.runInShell(commands)
+      vduHelper.endBlock()
+
+      # ====== Configure FlexRAN ================================================
+      vduHelper.beginBlock('Configuring FlexRAN')
+      commands = """\
+cd /home/nornetpp/src/{gitDirectory}/flexran""".format(
+         gitDirectory = gitDirectory
+      )
+      vduHelper.runInShell(commands)
+      vduHelper.endBlock()
+
+      # ====== Set up FlexRAN service ===========================================
+      vduHelper.beginBlock('Setting up FlexRAN service')
+      commands = """\
+( echo \\\"[Unit]\\\" && \\
+echo \\\"Description=FlexRAN Controller\\\" && \\
+echo \\\"After=ssh.target\\\" && \\
+echo \\\"\\\" && \\
+echo \\\"[Service]\\\" && \\
+echo \\\"ExecStart=/bin/sh -c \\\'exec /usr/bin/env FLEXRAN_RTC_HOME=/home/nornetpp/src/mosaic5g/flexran FLEXRAN_RTC_EXEC=/home/nornetpp/src/mosaic5g/flexran/build ./build/rt_controller -c log_config/basic_log >>/var/log/flexran.log 2>&1\\\'\\\" && \\
+echo \\\"KillMode=process\\\" && \\
+echo \\\"Restart=on-failure\\\" && \\
+echo \\\"RestartPreventExitStatus=255\\\" && \\
+echo \\\"WorkingDirectory=/home/nornetpp/src/mosaic5g/flexran\\\" && \\
+echo \\\"\\\" && \\
+echo \\\"[Install]\\\" && \\
+echo \\\"WantedBy=multi-user.target\\\" ) | sudo tee /lib/systemd/system/flexran.service && \\
+sudo systemctl daemon-reload && \\
+( echo -e \\\"#\\x21/bin/sh\\\" && echo \\\"tail -f /var/log/flexran.log\\\" ) | tee /home/nornetpp/log && \\
+chmod +x /home/nornetpp/log && \\
+( echo -e \\\"#\\x21/bin/sh\\\" && echo \\\"sudo service flexran restart && ./log\\\" ) | tee /home/nornetpp/restart && \\
+chmod +x /home/nornetpp/restart"""
+      vduHelper.runInShell(commands)
+      vduHelper.endBlock()
+
+      # ====== Set up sysstat service =======================================
+      vduHelper.installSysStat()
+
+      # ====== Clean up =====================================================
+      vduHelper.cleanUp()
+
+      message = vduHelper.endBlock()
+      function_set( { 'outout': message } )
+      set_flag('flexrancharm.configured-flexran')
+   except:
+      message = vduHelper.endBlockInException()
+      function_fail(message)
+   finally:
+      clear_flag('actions.configure-flexran')
+
+
+# ###### restart-flexran function ###############################################
+@when('actions.restart-flexran')
+@when('flexrancharm.configured-flexran')
+def restart_flexran():
+   vduHelper.beginBlock('restart_flexran')
+   try:
+
+      commands = 'sudo service flexran restart'
+      vduHelper.runInShell(commands)
+
+      message = vduHelper.endBlock()
+      function_set( { 'outout': message } )
+   except:
+      message = vduHelper.endBlockInException()
+      function_fail(message)
+   finally:
+      clear_flag('actions.restart-flexran')
+
+
+
+# ###########################################################################
 
 install_hsscharm_proxy_charm()
 prepare_cassandra_hss_build()
@@ -1134,3 +1318,16 @@ install_spgwucharm_proxy_charm()
 prepare_spgwu_build()
 configure_spgwu()
 restart_spgwu()
+
+
+install_flexrancharm_proxy_charm()
+prepare_flexran_build()
+configure_flexran()
+restart_flexran()
+
+
+#print(vduHelper.makeInterfaceConfiguration('ens4',
+         #IPv4Interface('0.0.0.0/0')))
+#print(vduHelper.makeInterfaceConfiguration('dummy0:s5c',
+         #IPv4Interface('172.58.58.101/24'),
+         #createDummy = True))

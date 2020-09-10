@@ -9,7 +9,7 @@
 # =====================================================================
 #
 # SimulaMet OpenAirInterface Evolved Packet Core VNF and NS
-# Copyright (C) 2019 by Thomas Dreibholz
+# Copyright (C) 2019-2020 by Thomas Dreibholz
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -183,13 +183,15 @@ FOREACH(charmName IN LISTS CHARM_SOURCE_LIST)
    ADD_CUSTOM_COMMAND(OUTPUT  ${timestampFile}
                       COMMAND echo cp ${vduHelperFiles} ${charmInputDirectory}
                       COMMAND cp ${vduHelperFiles} ${charmInputDirectory}/reactive
-                      COMMAND rm -rf ${charmOutputDirectory}                      
+                      COMMAND rm -rf ${charmOutputDirectory}
+                      COMMAND pwd
+                      COMMAND echo env CHARM_LAYERS_DIR=${CHARMS_BASELAYERS_DIRECTORY} ${CHARM} build --build-dir ${charmBuildDirectory}
                       COMMAND env CHARM_LAYERS_DIR=${CHARMS_BASELAYERS_DIRECTORY} ${CHARM} build --build-dir ${charmBuildDirectory}
                       # FIXME!
                       # COMMAND sed -e "s#^import shlex#import shlex\\\\nimport traceback#g" -i ${charmOutputDirectory}/lib/charms/sshproxy.py
                       COMMAND touch ${timestampFile}
                       WORKING_DIRECTORY ${charmInputDirectory}
-                      DEPENDS ${charmInputFiles} ${vduHelperFiles})
+                      DEPENDS ${charmInputFiles} ${vduHelperFiles} ${allYAMLs})
    ADD_CUSTOM_TARGET(${generate_charm} DEPENDS ${timestampFile})
 ENDFOREACH()
 
@@ -213,9 +215,9 @@ FOREACH(vnfd IN LISTS VNFD_LIST)
                          COMMAND rm -rf ${charmCopyDirectory}
                          COMMAND mkdir -p ${charmCopyDirectory}
                          COMMAND cp -a ${charmOutputDirectory}/* ${charmCopyDirectory}/
-                         DEPENDS ${charmOutputDirectory}/version ${allYAMLs} ${generate_charm})
+                         DEPENDS ${generate_charm})
       ADD_CUSTOM_TARGET(${generate_vnfd_charm} DEPENDS ${charmCopyDirectory}/version)
-      LIST(APPEND allCharmsInVNFD ${charmCopyDirectory}/version)
+      LIST(APPEND allCharmsInVNFD ${generate_vnfd_charm})
    ENDFOREACH()
 
    # ====== Validate cloud-init YAML files ==================================
@@ -249,9 +251,8 @@ FOREACH(vnfd IN LISTS VNFD_LIST)
                       COMMAND ${VALIDATE_DESCRIPTOR} ${vnfdDefinition}
                       COMMAND ${GENERATE_DESCRIPTOR} -t vnfd -N ${vnfd}/
                       COMMAND du -k ${vnfdPackage}
-                      DEPENDS ${vnfdFiles}  ${allYAMLs} ${allVNFDCloudInitFiles} ${allCharmsInVNFD})
-   ADD_CUSTOM_TARGET(${generate_vnfdPackage}
-                     DEPENDS ${vnfdPackage} ${allYAMLs} ${allVNFDCloudInitFiles} ${allCharmsInVNFD})
+                      DEPENDS ${vnfdFiles} ${allYAMLs} ${allVNFDCloudInitFiles} ${allCharmsInVNFD})
+   ADD_CUSTOM_TARGET(${generate_vnfdPackage} DEPENDS ${vnfdPackage})
 
    LIST(APPEND allVNFDs ${generate_vnfdPackage})
 ENDFOREACH()
@@ -273,7 +274,6 @@ FOREACH(nsd IN LISTS NSD_LIST)
                       COMMAND ${VALIDATE_DESCRIPTOR} ${nsdDefinition}
                       COMMAND ${GENERATE_DESCRIPTOR} -t nsd -N ${nsd}/
                       COMMAND du -k ${nsdPackage}
-                      DEPENDS ${nsdFiles})
-   ADD_CUSTOM_TARGET(${generate_nsdPackage}
-                     ALL DEPENDS ${nsdPackage} ${allYAMLs} ${allVNFDs})
+                      DEPENDS ${nsdFiles} ${allYAMLs} ${allVNFDs})
+   ADD_CUSTOM_TARGET(${generate_nsdPackage} ALL DEPENDS ${nsdPackage})
 ENDFOREACH()

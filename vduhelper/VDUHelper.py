@@ -162,13 +162,25 @@ class VDUHelper:
                                   ipv6Interface = None,
                                   ipv6Gateway   = None,
                                   metric        = 1,
-                                  pdnInterface  = None):
+                                  pdnInterface  = None,
+                                  createDummy   = False):
 
       # NOTE:
       # Double escaping is required for \ and " in "interfaceConfiguration" string!
       # 1. Python
       # 2. bash -c "<command>"
       # That is: $ => \$ ; \ => \\ ; " => \\\"
+
+
+      # ====== Dummy interface configuration ================================
+      dummyInterfaceConfiguration = ''
+      if createDummy == True:
+         dummyInterfaceName = interfaceName.split(':')
+         if len(dummyInterfaceName) > 0:
+            dummyInterfaceName = dummyInterfaceName[0]
+            dummyInterfaceConfiguration = \
+               '\\\\tpre-up ip link add ' + dummyInterfaceName + ' type dummy || true\\\\n'
+
 
       interfaceConfiguration = 'auto ' + interfaceName + '\\\\n'
 
@@ -199,7 +211,7 @@ class VDUHelper:
                '\\\\tmetric '  + str(metric)      + '\\\\n'
          if pdnInterface != None:
             interfaceConfiguration = interfaceConfiguration + makePDNRules(pdnInterface, ipv4Interface, ipv4Gateway)
-         interfaceConfiguration = interfaceConfiguration + '\\\\n'
+      interfaceConfiguration = interfaceConfiguration + dummyInterfaceConfiguration + '\\\\n'
 
       # ====== IPv6 ============================================================
       if ipv6Interface == None:
@@ -222,21 +234,9 @@ class VDUHelper:
                '\\\\tmetric '  + str(metric)      + '\\\\n'
          if pdnInterface != None:
             interfaceConfiguration = interfaceConfiguration + makePDNRules(pdnInterface, ipv6Interface, ipv6Gateway)
+      interfaceConfiguration = interfaceConfiguration + dummyInterfaceConfiguration
 
       return interfaceConfiguration
-
-
-   # ###### Enable dummy interface ##########################################
-   def addDummyInterface(self, dummyInterfaceName = 'dummy0'):
-      self.beginBlock('Adding dummy interface ' + dummyInterfaceName)
-      try:
-         commands = """sudo ip link add {} type dummy""".format(dummyInterfaceName)
-         self.runInShell(commands)
-      except:
-         self.endBlock(False)
-         raise
-
-      self.endBlock()
 
 
    # ###### Configuration and activate network interface ####################
@@ -319,4 +319,13 @@ git checkout {gitCommit}""".format(
          self.endBlock(False)
          raise
 
+      self.endBlock()
+
+
+   # ###### Clean up ########################################################
+   def cleanUp(self):
+      self.beginBlock('Cleaning up')
+      commands = """\
+sudo updatedb"""
+      self.runInShell(commands)
       self.endBlock()

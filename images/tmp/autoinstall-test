@@ -2,11 +2,14 @@
 
 ps ax | grep http.server | grep python | grep 3003 | awk '{ print $1 }' | xargs -r kill
 sleep 2
-python3 -m http.server --bind 127.0.0.1 3003 &
-
+cd http
 yamllint -d '{extends: default, rules: {document-start: {present: no}, line-length: {max: 4096}, comments-indentation: disable}}' user-data
+python3 -m http.server 3003 &
+cd ..
 
-# LOCATION=~/Nedlastinger/ubuntu-18.04.4-live-server-amd64.iso
+
+# LOCATION=~/Nedlastinger/ubuntu-16.04.7-server-amd64.iso
+# LOCATION=~/Nedlastinger/ubuntu-18.04.5-live-server-amd64.iso
 LOCATION=~/Nedlastinger/ubuntu-20.04.1-live-server-amd64.iso
 # LOCATION=~/Nedlastinger/groovy-live-server-amd64.iso
 
@@ -23,19 +26,11 @@ rm -f ${image}
 qemu-img create -f qcow2 -o size=${size},nocow=on ${image}
 
 
-# kvm --no-reboot -m 2048 -smp cores=4 \
-#     -drive file=${image},format=qcow2,cache=unsafe,discard=unmap,if=virtio \
-#     -cdrom ${LOCATION} \
-#     -bios /usr/share/qemu/OVMF.fd \
-#     -kernel /mnt/casper/vmlinuz \
-#     -initrd /mnt/casper/initrd \
-#     -append 'autoinstall ds=nocloud-net;s=http://_gateway:3003/'
-
 
 bootOptions="--boot uefi"
-osOptions="--os-type linux --os-variant ubuntu18.04"
+osOptions="--os-type linux --os-variant ubuntu20.04"
 
-virt-manager/virt-install \
+virt-install \
    --quiet \
    --name "${name}" \
    --vcpus 4 \
@@ -46,8 +41,25 @@ virt-manager/virt-install \
    --disk "bus=scsi,path=${image},format=qcow2,cache=unsafe,discard=unmap" \
    ${bootOptions} ${osOptions} \
    --location "${LOCATION},kernel=casper/vmlinuz,initrd=casper/initrd" \
-   --extra-args "autoinstall ds=nocloud-net;s=http://_gateway:3003/" \
+   --extra-args "autoinstall ds=nocloud-net;seedfrom=http://_gateway:3003/" \
    --noreboot
 
 
-# kvm -m 2048 -smp cores=4 -drive file=image.qcow,format=qcow2,cache=none,discard=unmap,if=virtio
+
+# bootOptions=""   # "--boot uefi"
+# osOptions="--os-type linux --os-variant ubuntu18.04"
+#
+# virt-install \
+#    --quiet \
+#    --name "${name}" \
+#    --vcpus 4 \
+#    --cpu host \
+#    --ram 4096 \
+#    --video virtio --channel spicevmc \
+#    --controller scsi,model=virtio-scsi,driver.iommu=on \
+#    --disk "bus=scsi,path=${image},format=qcow2,cache=unsafe,discard=unmap" \
+#    ${bootOptions} ${osOptions} \
+#    --location "${LOCATION}" \
+#    --initrd-inject "http/legacy.preseed" \
+#    --extra-args "boot=casper auto console-setup/ask_detect=false console-setup/layoutcode=us console-setup/modelcode=pc105 debconf/frontend=noninteractive debian-installer=en_US initrd=/install/initrd.gz kbd-chooser/method=us keyboard-configuration/layout=USA keyboard-configuration/variant=USA priority=critical preseed/file=/legacy.preseed" \
+#    --noreboot

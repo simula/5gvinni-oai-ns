@@ -9,7 +9,7 @@
 # =====================================================================
 #
 # SimulaMet OpenAirInterface Evolved Packet Core VNF
-# Copyright (C) 2019 by Thomas Dreibholz
+# Copyright (C) 2019-2020 by Thomas Dreibholz
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -51,8 +51,8 @@ vnfd:vnfd-catalog:
           # ====== VDU VM Configuration =====================================
           vm-flavor:
             vcpu-count: 4
-            memory-mb: 4096
-            storage-gb: 24
+            memory-mb: 3072
+            storage-gb: 16
           image: Template-Ubuntu-5gVINNI-Development-Bionic
           cloud-init-file: hss-init
 
@@ -155,8 +155,8 @@ vnfd:vnfd-catalog:
           # ====== VDU VM Configuration =====================================
           vm-flavor:
             vcpu-count: 4
-            memory-mb: 4096
-            storage-gb: 24
+            memory-mb: 2048
+            storage-gb: 16
           image: Template-Ubuntu-5gVINNI-Development-Bionic
           cloud-init-file: mme-init
 
@@ -290,8 +290,8 @@ vnfd:vnfd-catalog:
           # ====== VDU VM Configuration =====================================
           vm-flavor:
             vcpu-count: 4
-            memory-mb: 4096
-            storage-gb: 24
+            memory-mb: 3072
+            storage-gb: 16
           image: Template-Ubuntu-5gVINNI-Development-Bionic
           cloud-init-file: spgwc-init
 
@@ -390,8 +390,8 @@ vnfd:vnfd-catalog:
           # ====== VDU VM Configuration =====================================
           vm-flavor:
             vcpu-count: 4
-            memory-mb: 4096
-            storage-gb: 24
+            memory-mb: 3072
+            storage-gb: 16
           image: Template-Ubuntu-5gVINNI-Development-Bionic
           cloud-init-file: spgwu-init
           # guest-epa:

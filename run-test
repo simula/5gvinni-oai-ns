@@ -10,7 +10,7 @@
 # =====================================================================
 #
 # SimulaMet OpenAirInterface Evolved Packet Core VNF and NS
-# Copyright (C) 2019 by Thomas Dreibholz
+# Copyright (C) 2019-2020 by Thomas Dreibholz
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -31,10 +31,17 @@
 PROGRAM="$0"
 function usage()
 {
-   echo >&2 "Usage: ${PROGRAM} NS [NS ...]"
+   echo >&2 "Usage: ${PROGRAM} NS[-parameter] [NS[-parameter] ...]"
    echo >&2 ""
-   echo >&2 "Available NSs in this directory:"
-   git ls-files | cut -d/ -f1 | sort -u | grep "_nsd$" | sed -e "s/_nsd$//g" -e "s/^/* /g" >&2
+   echo >&2 "Available NSs/parameter files in this directory:"
+   allNSs=`git ls-files | cut -d/ -f1 | sort -u | grep "_nsd$" | sed -e "s/_nsd$//g"`
+   for ns in ${allNSs} ; do
+      echo >&2 "* NS ${ns}:"
+      parameterFiles=`ls ${ns}*-params.yaml | xargs -n1 | sed -e "s/-params.yaml$//g"`
+      for parameterFile in ${parameterFiles} ; do
+         echo >&2 "  - ${parameterFile}"
+      done
+   done
 }
 
 
@@ -45,16 +52,25 @@ if [ $# -lt 1 ] ; then
 fi
 n=0
 while [ $# -gt 0 ] ; do
-   NS="$1"
-   VNFD="${NS}_vnfd"
-   NSD="${NS}_nsd"
-   PARAMS="${NS}-params.yaml"
-   if [ ! -d "${NSD}" ] ; then
-      echo >&2 "ERROR: NSD ${NSD} not found!"
-      echo >&2 ""
+   PARAMS="$1-params.yaml"
+   if [ ! -e "${PARAMS}" ] ; then
+      echo >&2 "ERROR: Parameter file ${PARAMS} not found!"
       usage
       exit 1
    fi
+   NS=`echo "${PARAMS}" | sed -e "s/-params.yaml$//g"`
+   NSD="${NS}_nsd"
+   if [ ! -d "${NSD}" ] ; then
+      NSD=`echo "${NS}" | sed -e "s/-[a-zA-Z0-9]*$/_nsd/g"`
+      if [ ! -d "${NSD}" ] ; then
+        echo >&2 "ERROR: NSD ${NSD} not found!"
+        usage
+        exit 1
+     fi
+   fi
+   VNFD=`echo "${NSD}" | sed -e "s/_nsd$/_vnfd/g"`
+
+   echo "NS=$NS NSD=$NSD VNFD=$VNFD PARAMS=$PARAMS"
 
 
    # ====== Build ===========================================================
@@ -74,8 +90,8 @@ while [ $# -gt 0 ] ; do
 
    # ====== Create ==========================================================
    echo -e "\x1b[34m`date +%FT%H:%M:%S`: Creating ${NS} ...\x1b[0m"
-   osm vnfd-create ${VNFD}.tar.gz
-   osm nsd-create ${NSD}.tar.gz
+   osm vnfd-create ${VNFD}.tar.gz || true
+   osm nsd-create ${NSD}.tar.gz || true
 
 
    # ====== Instantiate =====================================================

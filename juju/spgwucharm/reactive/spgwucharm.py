@@ -246,6 +246,8 @@ chmod +x /home/nornetpp/restart"""
       # ====== Set up sysstat service =======================================
       vduHelper.installSysStat()
 
+      # ====== Clean up =====================================================
+      vduHelper.cleanUp()
 
       message = vduHelper.endBlock()
       function_set( { 'outout': message } )
