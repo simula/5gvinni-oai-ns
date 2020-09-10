@@ -102,6 +102,7 @@ def prepare_spgwc_build():
 
       # ====== Prepare system ===============================================
       vduHelper.beginBlock('Preparing system')
+      vduHelper.addDummyInterface('dummy0')
       vduHelper.configureInterface(spgwcS11_IfName,       configurationS11,       61)
       vduHelper.configureInterface(spgwcSXab_IfName,      configurationSXab,      62)
       vduHelper.configureInterface(spgwcS5S8_SGW_IfName,  configurationS5S8_SGW,  63)
