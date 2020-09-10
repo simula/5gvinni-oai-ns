@@ -115,7 +115,6 @@ def prepare_mme_build():
 
       # ====== Prepare system ===============================================
       vduHelper.beginBlock('Preparing system')
-      vduHelper.addDummyInterface('dummy0')
       vduHelper.configureInterface(mmeS6a_IfName, configurationS6a, 61)
       vduHelper.configureInterface(mmeS11_IfName, configurationS11, 62)
       vduHelper.configureInterface(mmeS1C_IfName, configurationS1C, 63)
