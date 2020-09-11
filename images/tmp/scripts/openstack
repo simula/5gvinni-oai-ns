@@ -19,22 +19,13 @@
 # Contact: dreibh@simula.no
 
 
-# ###### Clean up after installation ########################################
+# ###### OpenStack configuration ############################################
 
 # ------ Ubuntu -------------------------------------------------------------
 if [ -e /usr/bin/apt ] ; then
-   /usr/bin/apt update
-   if [ -e /usr/bin/apt-file ] ; then
-      /usr/bin/apt-file update
-   fi
-   /usr/bin/apt dist-upgrade -y
-   /usr/bin/apt autoremove -y --purge
-   /usr/bin/apt clean
+   /usr/bin/apt install -y cloud-init
 
 # ------ Fedora -------------------------------------------------------------
 elif [ -e /usr/bin/dnf ] ; then
-   /usr/bin/dnf clean all
+   /usr/bin/dnf install -y cloud-init
 fi
-
-updatedb
-fstrim -av

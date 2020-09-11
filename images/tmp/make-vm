@@ -173,6 +173,12 @@ fi
 
 if [ "${PROJECT}" == "NorNet" ] ; then
    PROVISIONERS="${PROVISIONERS} nornet"
+elif [ "${PROJECT}" == "NorNet-Development" ] ; then
+   PROVISIONERS="${PROVISIONERS} nornet development"
+elif [ "${PROJECT}" == "5gVINNI-OpenStack" ] ; then
+   PROVISIONERS="${PROVISIONERS} openstack"
+elif [ "${PROJECT}" == "5gVINNI-OpenStack-Development" ] ; then
+   PROVISIONERS="${PROVISIONERS} openstack development"
 fi
 
 PROVISIONERS="${PROVISIONERS} clean-up"

@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash -ex
 #
 # Autoinstall Scripts
 # Copyright (C) 2017-2020 by Thomas Dreibholz
@@ -34,5 +34,5 @@ if [ -e /usr/bin/apt ] ; then
 
 # ------ Fedora -------------------------------------------------------------
 elif [ -e /usr/bin/dnf ] ; then
-   dnf install -y virtualbox-guest-additions
+   /usr/bin/dnf install -y virtualbox-guest-additions
 fi
