@@ -27,6 +27,6 @@ UBUNTU="16.04 18.04 20.04"
 
 # ====== Build VMs ==========================================================
 for ubuntu in ${UBUNTU} ; do
-   ./make-vm -H ${HYPERVISOR} -P 5gVINNI-OpenStack -D Ubuntu -R ${ubuntu} -1
+   ./make-vm -H ${HYPERVISOR} -P 5gVINNI-OpenStack -D Ubuntu -R ${ubuntu} -1   &
 done
 wait
