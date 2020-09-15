@@ -22,11 +22,18 @@ set -e
 
 
 HYPERVISOR="VirtualBox"
-UBUNTU="16.04 18.04 20.04"
+UBUNTU="20.04"
 
+HOSTNAME="albacete.osm"
+USER_NAME="nornetpp"
+USER_PASSWORD="osm4us"
+USER_REALNAME="NorNet Praesum Presum"
 
 # ====== Build VMs ==========================================================
 for ubuntu in ${UBUNTU} ; do
-   ./make-vm -H ${HYPERVISOR} -P 5gVINNI-OpenStack -D Ubuntu -R ${ubuntu} -1   &
+   ./make-vm -H ${HYPERVISOR} \
+      --project 5gVINNI-OpenStack --distribution Ubuntu --release ${ubuntu} \
+      --username "${USER_NAME}" --realname "${USER_REALNAME}" --password "${USER_PASSWORD}" \
+      -1 &
 done
 wait

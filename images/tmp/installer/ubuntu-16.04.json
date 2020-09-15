@@ -20,12 +20,12 @@
   // ====== ISO settings ====================================================
   "iso_url": "https://releases.ubuntu.com/16.04/ubuntu-16.04.7-server-amd64.iso",
   "iso_checksum": "sha256:b23488689e16cad7a269eb2d3a3bf725d3457ee6b0868e00c8762d3816e25848",
-  "ssh_username": "nornetpp",
-  "ssh_password": "!NorNetInst!",
+  "ssh_username": "{{user `user_name`}}",
+  "ssh_password": "{{user `user_password`}}",
   "ssh_pty": true,
   "ssh_timeout": "60m",
   "ssh_handshake_attempts": "1024",
-  "shutdown_command": "echo '!NorNetInst!' | sudo -S shutdown -P now",
+  "shutdown_command": "echo '{{user `user_password`}}' | sudo -S shutdown -P now",
 
   // ====== Boot into installer =============================================
   "boot_wait": "3s",

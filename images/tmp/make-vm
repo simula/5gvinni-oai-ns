@@ -118,13 +118,13 @@ while [ $# -gt 0 ] ; do
    elif [ "$1" == "--hostname" -o "$1" == "-h" ] ; then
       HOSTNAME="$2"
       shift
-   elif [ "$1" == "--user" -o "$1" == "-u" ] ; then
+   elif [ "$1" == "--username" -o "$1" == "-u" ] ; then
       USER_NAME="$2"
       shift
    elif [ "$1" == "--realname" -o "$1" == "-r" ] ; then
       USER_REALNAME="$2"
       shift
-   elif [ "$1" == "--password" -o "$1" == "-P" ] ; then
+   elif [ "$1" == "--password" -o "$1" == "-p" ] ; then
       USER_PASSWORD="$2"
       shift
    elif [ "$1" == "--dry-run" -o "$1" == "-n" ] ; then
@@ -317,7 +317,7 @@ for provisioner in ${PROVISIONERS} ; do
    cat >>${JSONTMP} <<EOF
        {
          "type": "shell",
-         "execute_command": "echo '!NorNetInst!' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
+         "execute_command": "echo '${USER_PASSWORD}' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
          "script": "`realpath scripts/${provisioner}`"
        }
 EOF
@@ -404,4 +404,7 @@ env CHECKPOINT_DISABLE=1 PACKER_CACHE_DIR="${CACHE_DIRECTORY}" packer build \
    -var "vm_vendorurl=${vm_vendorurl}"     \
    -var "vm_product=${vm_product}"         \
    -var "vm_producturl=${vm_producturl}"   \
+   -var "user_name=${USER_NAME}"           \
+   -var "user_realname=${USER_REALNAME}"   \
+   -var "user_password=${USER_PASSWORD}"   \
    ${JSON}

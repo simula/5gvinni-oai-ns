@@ -1304,26 +1304,26 @@ configure_cassandra()
 configure_hss()
 restart_hss()
 
-install_mmecharm_proxy_charm()
-prepare_mme_build()
-configure_mme()
-restart_mme()
+#install_mmecharm_proxy_charm()
+#prepare_mme_build()
+#configure_mme()
+#restart_mme()
 
-install_spgwccharm_proxy_charm()
-prepare_spgwc_build()
-configure_spgwc()
-restart_spgwc()
+#install_spgwccharm_proxy_charm()
+#prepare_spgwc_build()
+#configure_spgwc()
+#restart_spgwc()
 
-install_spgwucharm_proxy_charm()
-prepare_spgwu_build()
-configure_spgwu()
-restart_spgwu()
+#install_spgwucharm_proxy_charm()
+#prepare_spgwu_build()
+#configure_spgwu()
+#restart_spgwu()
 
 
-install_flexrancharm_proxy_charm()
-prepare_flexran_build()
-configure_flexran()
-restart_flexran()
+#install_flexrancharm_proxy_charm()
+#prepare_flexran_build()
+#configure_flexran()
+#restart_flexran()
 
 
 #print(vduHelper.makeInterfaceConfiguration('ens4',

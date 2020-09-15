@@ -20,12 +20,12 @@
   // ====== ISO settings ====================================================
   "iso_url": "https://cdimage.ubuntu.com/ubuntu-server/daily-live/current/groovy-live-server-amd64.iso",
   "iso_checksum": "sha256:272ace8b13899c33d035b1016a06eb366e991ff848c49883292f66912d1797d2",
-  "ssh_username": "nornetpp",
-  "ssh_password": "!NorNetInst!",
+  "ssh_username": "{{user `user_name`}}",
+  "ssh_password": "{{user `user_password`}}",
   "ssh_pty": true,
   "ssh_timeout": "60m",
   "ssh_handshake_attempts": "1024",
-  "shutdown_command": "echo '!NorNetInst!' | sudo -S shutdown -P now",
+  "shutdown_command": "echo '{{user `user_password`}}' | sudo -S shutdown -P now",
 
   // ====== Boot into installer =============================================
   "boot_wait": "3s",

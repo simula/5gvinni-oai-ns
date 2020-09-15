@@ -20,12 +20,12 @@
   // ====== ISO settings ====================================================
   "iso_url": "https://download.freebsd.org/ftp/releases/ISO-IMAGES/12.1/FreeBSD-12.1-RELEASE-amd64-disc1.iso",
   "iso_checksum": "sha256:aa9d34b458826486999ed3e872436b6712ae38cede5ea41de4ab923e3419d461",
-  "ssh_username": "nornetpp",
-  "ssh_password": "!NorNetInst!",
+  "ssh_username": "{{user `user_name`}}",
+  "ssh_password": "{{user `user_password`}}",
   "ssh_pty": true,
   "ssh_timeout": "60m",
   "ssh_handshake_attempts": "1024",
-  "shutdown_command": "echo '!NorNetInst!' | sudo -S shutdown -P now",
+  "shutdown_command": "echo '{{user `user_password`}}' | sudo -S shutdown -P now",
 
   // ====== Boot into installer =============================================
   "boot_wait": "30s",
