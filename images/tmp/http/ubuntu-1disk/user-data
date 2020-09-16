@@ -172,7 +172,7 @@ autoinstall:
 
   # ###### Host and User Configuration ######################################
   identity:
-    hostname: <SET_HOSTNAME_HERE>
+    hostname: <SET_HOSTFQDN_HERE>
     username: <SET_USERNAME_HERE>
     realname: "<SET_REALNAME_HERE>"
     password: "<SET_HASHED_PASSWORD_HERE>"

@@ -1,4 +1,4 @@
-#!/bin/bash -ex
+#!/usr/bin/env bash
 #
 # Autoinstall Scripts
 # Copyright (C) 2017-2020 by Thomas Dreibholz
@@ -17,6 +17,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Contact: dreibh@simula.no
+
+# Bash options:
+set -ex
 
 
 # ###### Clean up after installation ########################################

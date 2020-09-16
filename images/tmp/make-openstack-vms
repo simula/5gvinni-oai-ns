@@ -24,7 +24,7 @@ set -e
 HYPERVISOR="VirtualBox"
 UBUNTU="20.04"
 
-HOSTNAME="albacete.osm"
+HOSTNAME="albacete.openstack"
 USER_NAME="nornetpp"
 USER_PASSWORD="osm4us"
 USER_REALNAME="NorNet Praesum Presum"
@@ -33,7 +33,8 @@ USER_REALNAME="NorNet Praesum Presum"
 for ubuntu in ${UBUNTU} ; do
    ./make-vm -H ${HYPERVISOR} \
       --project 5gVINNI-OpenStack --distribution Ubuntu --release ${ubuntu} \
+      --hostname "${HOSTNAME}" \
       --username "${USER_NAME}" --realname "${USER_REALNAME}" --password "${USER_PASSWORD}" \
-      -1 &
+      -1
 done
 wait

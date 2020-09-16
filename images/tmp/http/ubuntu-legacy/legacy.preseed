@@ -51,8 +51,8 @@ d-i netcfg/disable_dhcp                 boolean false
 # d-i netcfg/get_gateway                  string 169.254.100.1
 d-i netcfg/confirm_static               boolean true
 
-d-i netcfg/get_hostname                 string akerbrygge
-d-i netcfg/get_domain                   string simula.nornet
+d-i netcfg/get_hostname                 string <SET_HOSTNAME_HERE>
+d-i netcfg/get_domain                   string <SET_DOMAINNAME_HERE>
 
 # ====== Time ===============================================================
 d-i clock-setup/utc                     boolean true
@@ -63,9 +63,9 @@ d-i time/zone                           string Europe/Oslo
 # ====== User ===============================================================
 d-i passwd/root-login                   boolean false
 d-i passwd/make-user                    boolean true
-d-i passwd/user-fullname                string  NorNet Praesum Presum
-d-i passwd/username                     string  nornetpp
-d-i passwd/user-password-crypted        password $6$2NWrlKtE5C$u1zqajwW/sfrUMxeKBp7MH.ptmrXW0kvSv20Cf.kSSuAS5lFJUq.WI.iildLgru2Otf1WG1dndo4B8IxnM9Kn1
+d-i passwd/user-fullname                string  <SET_REALNAME_HERE>
+d-i passwd/username                     string  <SET_USERNAME_HERE>
+d-i passwd/user-password-crypted        password <SET_HASHED_PASSWORD_HERE>
 # NOTE: Example to add crypted password: echo "my password" | mkpasswd -s -m sha-512
 d-i passwd/user-uid                     string  1000
 d-i passwd/user-default-groups          string  adm cdrom sudo dip plugdev lpadmin sambashare
