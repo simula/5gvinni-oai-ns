@@ -29,7 +29,7 @@ if [ -e /etc/apt/sources.list ] ; then
    for list in /etc/apt/sources.list `find /etc/apt/sources.list.d -name "*.list"`; do
       cat ${list} | grep "^deb \(.*\)$" | sed -e "s/deb[ \t]*//g" | xargs -n1 -i§ echo "s@^#[ \t]*deb-src \(§\)[ \t]*\$@deb-src \\1@g" >${list}.sed
       cat ${list} | sed -f ${list}.sed >${list}.new
-      diff ${list} ${list}.new
+      diff ${list} ${list}.new || true
       mv ${list}.new ${list}
       rm -f ${list}.sed
    done

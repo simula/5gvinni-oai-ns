@@ -19,25 +19,23 @@
 # Contact: dreibh@simula.no
 
 # Bash options:
-set -x
+set -ex
 
 
 # ###### Install VirtualBox guest utilities #################################
 
-# # ------ Ubuntu -------------------------------------------------------------
-# if [ -e /usr/bin/apt ] ; then
-#    /usr/bin/apt install -y virtualbox-guest-utils virtualbox-guest-dkms
-#    if [ -e /usr/lib/systemd/system/sddm.service ] ; then
-#       # System has X11 -> also install X11 utilities as well:
-#       /usr/bin/apt install -y virtualbox-guest-x11
-#    fi
-#
-#    # cloud-init is not useful for VirtualBox VMs:
-#    /usr/bin/apt autoremove -y cloud-init
-#
-# # ------ Fedora -------------------------------------------------------------
-# elif [ -e /usr/bin/dnf ] ; then
-#    /usr/bin/dnf install -y virtualbox-guest-additions
-# fi
+# ------ Ubuntu -------------------------------------------------------------
+if [ -e /usr/bin/apt ] ; then
+   /usr/bin/apt install -y virtualbox-guest-utils virtualbox-guest-dkms || true
+   if [ -e /usr/lib/systemd/system/sddm.service ] ; then
+      # System has X11 -> also install X11 utilities as well:
+      /usr/bin/apt install -y virtualbox-guest-x11 || true
+   fi
 
-true
+   # cloud-init is not useful for VirtualBox VMs:
+   /usr/bin/apt autoremove -y cloud-init || true
+
+# ------ Fedora -------------------------------------------------------------
+elif [ -e /usr/bin/dnf ] ; then
+   /usr/bin/dnf install -y virtualbox-guest-additions
+fi
