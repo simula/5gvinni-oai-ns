@@ -51,6 +51,7 @@ vnfd:vnfd-catalog:
               - name: system_uptime
               - name: system_users
               - name: cpu_processes
+              - name: cpu_load_current
               - name: cpu_load_1min
               - name: cpu_load_5min
               - name: cpu_load_15min
