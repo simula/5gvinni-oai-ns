@@ -125,6 +125,12 @@ vnfd:vnfd-catalog:
             vdu-metric-name-ref: system_users
 
         # ====== CPU metrics ================================================
+        - id: metric_mgmtVM_cpu_load_current
+          name: metric_mgmtVM_cpu_load_current
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: mgmtVM
+            vdu-metric-name-ref: cpu_load_current
         - id: metric_mgmtVM_cpu_load_1min
           name: metric_mgmtVM_cpu_load_1min
           aggregation-type: AVERAGE
