@@ -24,6 +24,21 @@ set -x
 
 # ###### NorNet configuration ###############################################
 
+# ------ Ubuntu -------------------------------------------------------------
+if [ -e /usr/bin/apt ] ; then
+   /usr/bin/apt-get update
+   env DEBIAN_FRONTEND=noninteractive /usr/bin/apt-get install -y nornet-management nornet-autoupdate
+
+# ------ Fedora -------------------------------------------------------------
+elif [ -e /usr/bin/dnf ] ; then
+   /usr/bin/dnf install -y nornet-management nornet-autoupdate
+fi
+
+
+# ###### Prepare source repositories ########################################
+
+# NOTE: The repositories are not cloned here!
+
 sudo -u nornetpp mkdir -p /home/nornetpp/src/nornet-control
 cd /home/nornetpp/src/nornet-control
 sudo -u nornetpp git init

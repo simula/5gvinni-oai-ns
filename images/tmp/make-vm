@@ -176,9 +176,9 @@ if [ "${PROJECT}" == "NorNet" ] ; then
 elif [ "${PROJECT}" == "NorNet-Development" ] ; then
    PROVISIONERS="${PROVISIONERS} nornet development"
 elif [ "${PROJECT}" == "5gVINNI-OpenStack" ] ; then
-   PROVISIONERS="${PROVISIONERS} openstack"
+   PROVISIONERS="${PROVISIONERS} openstack nornet"
 elif [ "${PROJECT}" == "5gVINNI-OpenStack-Development" ] ; then
-   PROVISIONERS="${PROVISIONERS} openstack development"
+   PROVISIONERS="${PROVISIONERS} openstack nornet development"
 fi
 
 PROVISIONERS="${PROVISIONERS} clean-up"

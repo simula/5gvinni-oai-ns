@@ -31,7 +31,7 @@ if [ -e /usr/bin/apt-get ] ; then
       /usr/bin/apt-file update
    fi
    /usr/bin/apt-get dist-upgrade -y
-   /usr/bin/apt-get autoremove -y --purge
+   env DEBIAN_FRONTEND=noninteractive /usr/bin/apt-get autoremove -y --purge
    /usr/bin/apt-get clean
 
 # ------ Fedora -------------------------------------------------------------

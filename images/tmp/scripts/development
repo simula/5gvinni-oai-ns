@@ -27,7 +27,7 @@ set -ex
 # ------ Ubuntu -------------------------------------------------------------
 if [ -e /usr/bin/apt-get ] ; then
    /usr/bin/apt-get update
-   /usr/bin/apt-get install -y nornet-development
+   env DEBIAN_FRONTEND=noninteractive /usr/bin/apt-get install -y nornet-development
 
 # ------ Fedora -------------------------------------------------------------
 elif [ -e /usr/bin/dnf ] ; then

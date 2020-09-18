@@ -179,7 +179,6 @@ d-i preseed/late_command                            string \
  fi ; \
  in-target /usr/bin/apt-add-repository -s -y ppa:dreibh/ppa ; \
  in-target /usr/bin/apt-get update ; \
- in-target /usr/bin/apt-get install -y nornet-management nornet-autoupdate ; \
  in-target /bin/bash -c -- '/bin/echo "source /etc/network/interfaces.d/*" >/etc/network/interfaces' ; \
  in-target /bin/bash -c -- '/bin/echo "" >>/etc/network/interfaces' ; \
  in-target /bin/bash -c -- '/bin/echo "# The loopback network interface" >>/etc/network/interfaces' ; \

@@ -190,8 +190,6 @@ autoinstall:
         source: ppa:dreibh/ppa
   packages:
     - joe
-    - nornet-autoupdate
-    - nornet-management
   ssh:
     install-server: true
 

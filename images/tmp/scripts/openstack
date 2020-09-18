@@ -27,7 +27,7 @@ set -ex
 # ------ Ubuntu -------------------------------------------------------------
 if [ -e /usr/bin/apt ] ; then
    /usr/bin/apt-get update
-   /usr/bin/apt install -y cloud-init
+   env DEBIAN_FRONTEND=noninteractive /usr/bin/apt-get install -y cloud-init
 
 # ------ Fedora -------------------------------------------------------------
 elif [ -e /usr/bin/dnf ] ; then
