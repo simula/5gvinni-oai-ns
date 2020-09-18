@@ -24,6 +24,17 @@ set -x
 
 # ###### NorNet configuration ###############################################
 
+# !!! Ensure that growpart and resizefs are enabled !!!!!!!!!!!!!!!!!!!!!!!!!
+# With new Ubuntu autoinstaller:
+# /etc/cloud/cloud.cfg.d/99-installer.cfg disables growpart and resizefs
+# => fixing this here:
+if [ -e /etc/cloud/cloud.cfg.d/99-installer.cfg ] ; then
+   sed -e "s#growpart: {mode: 'off'}#growpart: {mode: 'auto'}#g" \
+       -e "s#resize_rootfs: false#resize_rootfs: true#g" \
+       -i /etc/cloud/cloud.cfg.d/99-installer.cfg
+fi
+
+
 # ------ Ubuntu -------------------------------------------------------------
 if [ -e /usr/bin/apt ] ; then
    /usr/bin/apt-get update

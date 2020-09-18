@@ -52,6 +52,7 @@
     [ "modifyvm", "{{.Name}}", "--vrde", "off" ],
     [ "modifyvm", "{{.Name}}", "--audio", "pulse", "--audiocontroller", "hda" ],
     [ "modifyvm", "{{.Name}}", "--graphicscontroller", "vmsvga", "--accelerate3d", "off" ],
+    [ "setextradata", "{{.Name}}", "GUI/SuppressMessages", "all" ],
     [ "setextradata", "{{.Name}}", "VBoxInternal2/EfiGraphicsResolution", "{{user `vm_video`}}" ],
     // VirtualBox seems to hang when there is no serial port but a serial port console configured:
     [ "modifyvm", "{{.Name}}", "--uart1", "0x03f8", "4", "--uartmode1", "file", "/dev/null" ],
