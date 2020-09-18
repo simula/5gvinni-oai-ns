@@ -58,4 +58,6 @@ if [ -e /etc/apt/sources.list ] ; then
 
    # Clean up old installer files:
    rm -f /etc/apt/sources.list.curtin.old /etc/apt/sources.list.save
+
+   /usr/bin/apt-get update
 fi

@@ -22,19 +22,36 @@ set -e
 
 
 HYPERVISOR="VirtualBox"
-UBUNTU="20.04"
+DISTRIBUTION="Ubuntu"
+RELEASES="16.04-LTS 18.04-LTS 20.04-LTS"
 
+PROJECTS="5gVINNI-OpenStack"
 HOSTNAME="albacete.openstack"
 USER_NAME="nornetpp"
 USER_PASSWORD="osm4us"
 USER_REALNAME="NorNet Praesum Presum"
 
+
 # ====== Build VMs ==========================================================
-for ubuntu in ${UBUNTU} ; do
-   ./make-vm -H ${HYPERVISOR} \
-      --project 5gVINNI-OpenStack --distribution Ubuntu --release ${ubuntu} \
-      --hostname "${HOSTNAME}" \
-      --username "${USER_NAME}" --realname "${USER_REALNAME}" --password "${USER_PASSWORD}" \
-      -1
+for project in ${PROJECTS} ; do
+   for release in ${RELEASES} ; do
+      (
+         name="${HYPERVISOR}-${project}-${DISTRIBUTION}-${release}"
+         logfile="${name}.log"
+         startTime=`date`
+         echo "${startTime}: Starting to build ${name} ..."
+         if ./make-vm -H ${HYPERVISOR} \
+               --project ${project} --distribution ${DISTRIBUTION} --release ${release} \
+               --hostname "${HOSTNAME}" \
+               --username "${USER_NAME}" --realname "${USER_REALNAME}" --password "${USER_PASSWORD}" \
+               -1   >${logfile} 2>&1 ; then
+            result="OK"
+         else
+            result="FAILED!"
+         fi
+         finishTime=`date`
+         echo "${startTime}: Finished to build ${name} - ${result} -> ${logfile}"
+      ) &
+   done
 done
 wait

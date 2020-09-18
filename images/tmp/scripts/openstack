@@ -26,6 +26,7 @@ set -ex
 
 # ------ Ubuntu -------------------------------------------------------------
 if [ -e /usr/bin/apt ] ; then
+   /usr/bin/apt-get update
    /usr/bin/apt install -y cloud-init
 
 # ------ Fedora -------------------------------------------------------------

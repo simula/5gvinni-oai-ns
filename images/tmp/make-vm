@@ -189,6 +189,7 @@ if [ ${USE_SEPARATE_DISKS} -ne 0 ] ; then
 fi
 
 if [ "${DISTRIBUTION}" == "Ubuntu" ] ; then
+   RELEASE="${RELEASE/-LTS/}"   # Remove "-LTS" from release
    BUILDER_INSTALL="ubuntu-${RELEASE}"
    NAME="${NAME}-Ubuntu-${RELEASE}"
    HTTP_DIRECTORY="http/ubuntu"
@@ -400,6 +401,7 @@ rm -rf ${vm_name}
 
 echo "Running Packer:"
 env CHECKPOINT_DISABLE=1 PACKER_CACHE_DIR="${CACHE_DIRECTORY}" packer build \
+   -on-error=abort                         \
    -var "vm_name=${vm_name}"               \
    -var "vm_version=${vm_version}"         \
    -var "vm_version=${vm_version}"         \

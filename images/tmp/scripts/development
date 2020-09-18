@@ -25,8 +25,9 @@ set -ex
 # ###### NorNet development configuration ###################################
 
 # ------ Ubuntu -------------------------------------------------------------
-if [ -e /usr/bin/apt ] ; then
-   /usr/bin/apt install -y nornet-development
+if [ -e /usr/bin/apt-get ] ; then
+   /usr/bin/apt-get update
+   /usr/bin/apt-get install -y nornet-development
 
 # ------ Fedora -------------------------------------------------------------
 elif [ -e /usr/bin/dnf ] ; then

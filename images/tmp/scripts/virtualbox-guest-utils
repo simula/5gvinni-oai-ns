@@ -25,15 +25,16 @@ set -ex
 # ###### Install VirtualBox guest utilities #################################
 
 # ------ Ubuntu -------------------------------------------------------------
-if [ -e /usr/bin/apt ] ; then
-   /usr/bin/apt install -y virtualbox-guest-utils virtualbox-guest-dkms || true
+if [ -e /usr/bin/apt-get ] ; then
+   /usr/bin/apt-get update
+   /usr/bin/apt-get install -y virtualbox-guest-utils || true
    if [ -e /usr/lib/systemd/system/sddm.service ] ; then
       # System has X11 -> also install X11 utilities as well:
-      /usr/bin/apt install -y virtualbox-guest-x11 || true
+      /usr/bin/apt-get install -y virtualbox-guest-x11 || true
    fi
 
-   # cloud-init is not useful for VirtualBox VMs:
-   /usr/bin/apt autoremove -y cloud-init || true
+#    # cloud-init is not useful for VirtualBox VMs:
+#    /usr/bin/apt-get autoremove -y cloud-init || true
 
 # ------ Fedora -------------------------------------------------------------
 elif [ -e /usr/bin/dnf ] ; then
