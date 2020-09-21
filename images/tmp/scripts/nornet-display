@@ -31,7 +31,9 @@ USER_NAME=nornetpp
 # ------ Ubuntu -------------------------------------------------------------
 if [ -e /usr/bin/apt-get ] ; then
    /usr/bin/apt-get update
-   env DEBIAN_FRONTEND=noninteractive /usr/bin/apt-get install -y nornet-display
+   env DEBIAN_FRONTEND=noninteractive /usr/bin/apt-get install -y nornet-display sddm \
+      kde-style-oxygen-qt5 gtk2-engines-oxygen \
+      plasma-theme-oxygen oxygen-cursor-theme oxygen-cursor-theme-extra oxygen-icon-theme oxygen-sounds
 
 # ------ Fedora -------------------------------------------------------------
 elif [ -e /usr/bin/dnf ] ; then
