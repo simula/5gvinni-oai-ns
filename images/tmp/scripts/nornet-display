@@ -50,7 +50,7 @@ chown ${USER_NAME}:${USER_NAME} /home/${USER_NAME}/.local
 
 # ====== Desktop configuration ==============================================
 cat >/home/${USER_NAME}/.config/kscreenlockerrc <<EOF
-[$Version]
+[\$Version]
 update_info=kscreenlocker.upd:0.1-autolock
 
 [Greeter][Wallpaper][org.kde.image][General]
@@ -302,16 +302,200 @@ chown ${USER_NAME}:${USER_NAME} /home/${USER_NAME}/.config/plasma-org.kde.plasma
 
 
 # ====== Window Manager configuration =======================================
+
+# ------ Set global theme ---------------------------------------------------
 cat >/home/${USER_NAME}/.config/kwinrc <<EOF
-[Desktops]
-Number=4
-Rows=2
+[TabBox]
+DesktopLayout=org.kde.breeze.desktop
+DesktopListLayout=org.kde.breeze.desktop
+LayoutName=org.kde.breeze.desktop
 
 [org.kde.kdecoration2]
 library=org.kde.oxygen
-theme=Breeze
+theme=Oxygen
 EOF
 chown ${USER_NAME}:${USER_NAME} /home/${USER_NAME}/.config/kwinrc
+
+# ------ Set Plasma style ---------------------------------------------------
+cat >/home/${USER_NAME}/.config/plasmarc <<EOF
+[Theme]
+name=air
+EOF
+
+chown ${USER_NAME}:${USER_NAME} /home/${USER_NAME}/.config/plasmarc
+
+# ------ Set KSplash theme --------------------------------------------------
+cat >/home/${USER_NAME}/.config/ksplashrc <<EOF
+[KSplash]
+Engine=KSplashQML
+Theme=org.kde.breeze.desktop
+EOF
+
+chown ${USER_NAME}:${USER_NAME} /home/${USER_NAME}/.config/ksplashrc
+
+# ------ Set mouse cursor theme ---------------------------------------------
+cat >/home/${USER_NAME}/.config/kcminputrc <<EOF
+[Mouse]
+cursorTheme=breeze_cursors
+EOF
+chown ${USER_NAME}:${USER_NAME} /home/${USER_NAME}/.config/kcminputrc
+
+# ------ Set global KDE settings --------------------------------------------
+# Includes: icons theme and colours
+cat >/home/${USER_NAME}/.config/kdeglobals <<EOF
+[\$Version]
+update_info=filepicker.upd:filepicker-remove-old-previews-entry,fonts_global.upd:Fonts_Global,fonts_global_toolbar.upd:Fonts_Global_Toolbar,icons_remove_effects.upd:IconsRemoveEffects,kwin.upd:animation-speed
+
+[ColorEffects:Disabled]
+ChangeSelectionColor=
+Color=56,56,56
+ColorAmount=0
+ColorEffect=0
+ContrastAmount=0.65
+ContrastEffect=1
+Enable=
+IntensityAmount=0.1
+IntensityEffect=2
+
+[ColorEffects:Inactive]
+ChangeSelectionColor=true
+Color=112,111,110
+ColorAmount=-0.9
+ColorEffect=1
+ContrastAmount=0.25
+ContrastEffect=2
+Enable=true
+IntensityAmount=0
+IntensityEffect=0
+
+[Colors:Button]
+BackgroundAlternate=224,223,222
+BackgroundNormal=223,220,217
+DecorationFocus=58,167,221
+DecorationHover=110,214,255
+ForegroundActive=146,76,157
+ForegroundInactive=137,136,135
+ForegroundLink=0,87,174
+ForegroundNegative=191,3,3
+ForegroundNeutral=176,128,0
+ForegroundNormal=34,31,30
+ForegroundPositive=0,110,40
+ForegroundVisited=100,74,155
+
+[Colors:Complementary]
+BackgroundAlternate=196,224,255
+BackgroundNormal=24,21,19
+DecorationFocus=58,167,221
+DecorationHover=110,214,255
+ForegroundActive=255,128,224
+ForegroundInactive=137,136,135
+ForegroundLink=88,172,255
+ForegroundNegative=191,3,3
+ForegroundNeutral=176,128,0
+ForegroundNormal=231,253,255
+ForegroundPositive=0,110,40
+ForegroundVisited=150,111,232
+
+[Colors:Selection]
+BackgroundAlternate=62,138,204
+BackgroundNormal=67,172,232
+DecorationFocus=58,167,221
+DecorationHover=110,214,255
+ForegroundActive=108,36,119
+ForegroundInactive=199,226,248
+ForegroundLink=0,49,110
+ForegroundNegative=156,14,14
+ForegroundNeutral=255,221,0
+ForegroundNormal=255,255,255
+ForegroundPositive=128,255,128
+ForegroundVisited=69,40,134
+
+[Colors:Tooltip]
+BackgroundAlternate=196,224,255
+BackgroundNormal=24,21,19
+DecorationFocus=58,167,221
+DecorationHover=110,214,255
+ForegroundActive=255,128,224
+ForegroundInactive=137,136,135
+ForegroundLink=88,172,255
+ForegroundNegative=191,3,3
+ForegroundNeutral=176,128,0
+ForegroundNormal=231,253,255
+ForegroundPositive=0,110,40
+ForegroundVisited=150,111,232
+
+[Colors:View]
+BackgroundAlternate=248,247,246
+BackgroundNormal=255,255,255
+DecorationFocus=58,167,221
+DecorationHover=110,214,255
+ForegroundActive=146,76,157
+ForegroundInactive=137,136,135
+ForegroundLink=0,87,174
+ForegroundNegative=191,3,3
+ForegroundNeutral=176,128,0
+ForegroundNormal=31,28,27
+ForegroundPositive=0,110,40
+ForegroundVisited=100,74,155
+
+[Colors:Window]
+BackgroundAlternate=218,217,216
+BackgroundNormal=214,210,208
+DecorationFocus=58,167,221
+DecorationHover=110,214,255
+ForegroundActive=146,76,157
+ForegroundInactive=137,136,135
+ForegroundLink=0,87,174
+ForegroundNegative=191,3,3
+ForegroundNeutral=176,128,0
+ForegroundNormal=34,31,30
+ForegroundPositive=0,110,40
+ForegroundVisited=100,74,155
+
+[General]
+ColorScheme=Oxygen
+Name=Breeze
+shadeSortColumn=true
+widgetStyle=Breeze
+
+[Icons]
+Theme=oxygen
+
+[KDE]
+ColorScheme=Breeze
+LookAndFeelPackage=org.kde.breeze.desktop
+contrast=4
+widgetStyle=Oxygen
+
+[KFileDialog Settings]
+Allow Expansion=false
+Automatically select filename extension=true
+Breadcrumb Navigation=true
+Decoration position=2
+LocationCombo Completionmode=5
+PathCombo Completionmode=5
+Show Bookmarks=false
+Show Full Path=false
+Show Inline Previews=true
+Show Preview=false
+Show Speedbar=true
+Show hidden files=false
+Sort by=Name
+Sort directories first=true
+Sort reversed=false
+Speedbar Width=138
+View Style=DetailTree
+
+[WM]
+activeBackground=48,174,232
+activeBlend=252,252,252
+activeForeground=255,255,255
+inactiveBackground=224,223,222
+inactiveBlend=75,71,67
+inactiveForeground=75,71,67
+EOF
+
+chown ${USER_NAME}:${USER_NAME} /home/${USER_NAME}/.config/kdeglobals
 
 
 # ====== Keyboard configuration =============================================
@@ -494,3 +678,119 @@ DefaultProfile=Profile 1.profile
 EOF
 
 chown ${USER_NAME}:${USER_NAME} /home/${USER_NAME}/.config/konsolerc
+
+
+cat >/home/${USER_NAME}/.config/katerc <<EOF
+[General]
+Close After Last=false
+Config Revision=10
+Days Meta Infos=30
+Modified Notification=false
+Quick Open List Mode=0
+Quick Open Search Mode=0
+Recent File List Entry Count=10
+Restore Window Configuration=true
+Save Meta Infos=true
+Show Full Path in Title=false
+Show Menu Bar=true
+Show Status Bar=true
+Show Tab Bar=true
+Startup Session=manual
+
+[KTextEditor Document]
+Allow End of Line Detection=true
+BOM=false
+Backup Local=false
+Backup Prefix=
+Backup Remote=false
+Backup Suffix=~
+Encoding=UTF-8
+End of Line=0
+Indent On Backspace=true
+Indent On Tab=true
+Indent On Text Paste=false
+Indentation Mode=normal
+Indentation Width=1
+Keep Extra Spaces=false
+Line Length Limit=10000
+Newline at End of File=true
+On-The-Fly Spellcheck=false
+Overwrite Mode=false
+PageUp/PageDown Moves Cursor=false
+Remove Spaces=1
+ReplaceTabsDyn=true
+Show Spaces=0
+Show Tabs=true
+Smart Home=true
+Swap Directory=
+Swap File Mode=1
+Swap Sync Interval=15
+Tab Handling=2
+Tab Width=3
+Trailing Marker Size=1
+Word Wrap=false
+Word Wrap Column=80
+
+[KTextEditor Editor]
+Encoding Prober Type=1
+Fallback Encoding=ISO 8859-15
+
+[KTextEditor Renderer]
+Animate Bracket Matching=false
+Schema=Normal
+Show Indentation Lines=false
+Show Whole Bracket Expression=false
+Word Wrap Marker=false
+
+[KTextEditor View]
+Allow Mark Menu=true
+Auto Brackets=false
+Auto Center Lines=0
+Auto Completion=true
+Backspace Remove Composed Characters=false
+Bookmark Menu Sorting=0
+Chars To Enclose Selection=
+Default Mark Type=1
+Dynamic Word Wrap=true
+Dynamic Word Wrap Align Indent=80
+Dynamic Word Wrap At Static Marker=false
+Dynamic Word Wrap Indicators=1
+Dynamic Wrap not at word boundaries=false
+Fold First Line=false
+Folding Bar=true
+Folding Preview=true
+Icon Bar=false
+Input Mode=0
+Keyword Completion=true
+Line Modification=true
+Line Numbers=true
+Maximum Search History Size=100
+Mouse Paste At Cursor Position=false
+Persistent Selection=false
+Scroll Bar Marks=false
+Scroll Bar Mini Map All=true
+Scroll Bar Mini Map Width=60
+Scroll Bar MiniMap=true
+Scroll Bar Preview=true
+Scroll Past End=false
+Search/Replace Flags=140
+Show Line Count=false
+Show Scrollbars=0
+Show Word Count=false
+Smart Copy Cut=false
+Text Drag And Drop=true
+User Sets Of Chars To Enclose Selection=
+Vi Input Mode Steal Keys=false
+Vi Relative Line Numbers=false
+Word Completion=true
+Word Completion Minimal Word Length=3
+Word Completion Remove Tail=true
+
+[Konsole]
+AutoSyncronize=true
+RemoveExtension=false
+RunPrefix=
+SetEditor=false
+EOF
+
+chown ${USER_NAME}:${USER_NAME} /home/${USER_NAME}/.config/katerc
