@@ -49,7 +49,7 @@ EOF
 
 # ###### Make some directories ##############################################
 sudo -u nornetpp mkdir -p /home/nornetpp/src
-sudo -u nornetpp chattr +c /home/nornetpp/src
+sudo -u nornetpp chattr +c /home/nornetpp/src || true
 sudo -u nornetpp mkdir -p /home/nornetpp/tmp
 
 sudo -u nornetpp mkdir -p /home/nornetpp/.ssh
