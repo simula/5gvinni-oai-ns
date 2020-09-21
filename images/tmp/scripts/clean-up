@@ -24,10 +24,12 @@ set -ex
 
 # ###### Clean up after installation ########################################
 
+# ====== Clean up packages  =================================================
+
 # ------ Ubuntu -------------------------------------------------------------
-if [ -e /usr/bin/apt-get ] ; then
+if [ -x /usr/bin/apt-get ] ; then
    /usr/bin/apt-get update
-   if [ -e /usr/bin/apt-file ] ; then
+   if [ -x /usr/bin/apt-file ] ; then
       /usr/bin/apt-file update
    fi
    /usr/bin/apt-get dist-upgrade -y
@@ -35,9 +37,17 @@ if [ -e /usr/bin/apt-get ] ; then
    /usr/bin/apt-get clean
 
 # ------ Fedora -------------------------------------------------------------
-elif [ -e /usr/bin/dnf ] ; then
+elif [ -x /usr/bin/dnf ] ; then
    /usr/bin/dnf clean all
 fi
 
-updatedb
-fstrim -av
+
+# ====== Update "locate" database ===========================================
+if [ -x /usr/bin/updatedb ] ; then
+   /usr/bin/updatedb
+fi
+
+# ====== Run fstrim =========================================================
+if [ -x /usr/bin/fstrim ] ; then
+   /usr/bin/fstrim -av
+fi

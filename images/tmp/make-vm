@@ -26,7 +26,7 @@ PROJECT="Template"
 HYPERVISOR="VirtualBox"
 DISTRIBUTION="Ubuntu"
 RELEASE="20.04"
-PROVISIONERS="user-settings development-system"   # "clean-up" will be added later!
+PROVISIONERS="user-settings"   # NOTE: "clean-up" will be added later!
 
 DRY_RUN=0
 
@@ -162,7 +162,7 @@ NAME=""
 if [ "${HYPERVISOR}" == "VirtualBox" ] ; then
    BUILDER_VMSETUP="virtualbox"
    NAME="VirtualBox"
-   PROVISIONERS="virtualbox-guest-utils ${PROVISIONERS}"
+   PROVISIONERS="install-virtualbox-guest-utils ${PROVISIONERS}"
 elif [ "${HYPERVISOR}" == "QEMU" ] ; then
    BUILDER_VMSETUP="qemu"
    NAME="QEMU"
@@ -171,18 +171,28 @@ else
    exit 1
 fi
 
-if [ "${PROJECT}" == "NorNet" ] ; then
-   PROVISIONERS="${PROVISIONERS} nornet"
-elif [ "${PROJECT}" == "NorNet-Development" ] ; then
-   PROVISIONERS="${PROVISIONERS} nornet development"
-elif [ "${PROJECT}" == "5gVINNI-OpenStack" ] ; then
-   PROVISIONERS="${PROVISIONERS} openstack nornet"
-elif [ "${PROJECT}" == "5gVINNI-OpenStack-Development" ] ; then
-   PROVISIONERS="${PROVISIONERS} openstack nornet development"
+projectConfiguration="projects/${PROJECT}.config"
+if [[ "${projectConfiguration}" =~ ^.*-OpenStack.*$ ]] ; then
+   projectConfiguration=${projectConfiguration/-OpenStack/}
+   PROVISIONERS="prepare-openstack-guest ${PROVISIONERS}"
 fi
+if [ ! -e "${projectConfiguration}" ] ; then
+   echo >&2 "ERROR: Configuration ${projectConfiguration} does not exist!"
+   exit 1
+fi
+. "${projectConfiguration}"
+
 
 PROVISIONERS="${PROVISIONERS} clean-up"
 NAME="${NAME}-${PROJECT}"
+
+
+if [ "`echo "${PROVISIONERS}" | xargs -n1 | sort`" !=  "`echo "${PROVISIONERS}" | xargs -n1 | sort -u`" ] ; then
+   echo >&2 "ERROR: Some provisioners seem to be listed twice!"
+   echo >&2 "PROVISIONERS=${PROVISIONERS}"
+   exit 1
+fi
+
 
 if [ ${USE_SEPARATE_DISKS} -ne 0 ] ; then
    BUILDER_VMSETUP="${BUILDER_VMSETUP}-3disks"
