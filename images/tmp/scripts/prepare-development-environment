@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+#
+# Autoinstall Scripts
+# Copyright (C) 2017-2020 by Thomas Dreibholz
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Contact: dreibh@simula.no
+
+# Bash options:
+set -ex
+
+
+# ###### NorNet development configuration ###################################
+
+# ------ Ubuntu -------------------------------------------------------------
+if [ -e /usr/bin/apt-get ] ; then
+   /usr/bin/apt-get update
+   env DEBIAN_FRONTEND=noninteractive /usr/bin/apt-get install -y nornet-development
+
+# ------ Fedora -------------------------------------------------------------
+elif [ -e /usr/bin/dnf ] ; then
+   /usr/bin/dnf install -y nornet-development
+fi
