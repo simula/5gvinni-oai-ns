@@ -33,6 +33,7 @@
     "s<enter><wait>",
     "cd /tmp && dhclient vtnet0 && ",
     "fetch http://{{ .HTTPIP }}:{{ .HTTPPort }}/installerconfig && ",
-    "bsdinstall script /tmp/installerconfig; reboot<enter>"
+    "bsdinstall script /tmp/installerconfig;<enter>"
+    // ;  reboot<enter>
    ]
 }

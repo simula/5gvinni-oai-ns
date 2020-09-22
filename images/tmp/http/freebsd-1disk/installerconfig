@@ -33,44 +33,81 @@ unset d
 ZFSBOOT_BEROOT_NAME=ROOT
 ZFSBOOT_BOOTFS_NAME=default
 ZFSBOOT_DATASETS="
-	# DATASET	OPTIONS (comma or space separated; or both)
+ # DATASET OPTIONS (comma or space separated; or both)
 
-	# Boot Environment [BE] root and default boot dataset
-	/$ZFSBOOT_BEROOT_NAME				mountpoint=none
-	/$ZFSBOOT_BEROOT_NAME/$ZFSBOOT_BOOTFS_NAME	mountpoint=/
+ # Boot Environment [BE] root and default boot dataset
+ /$ZFSBOOT_BEROOT_NAME    mountpoint=none
+ /$ZFSBOOT_BEROOT_NAME/$ZFSBOOT_BOOTFS_NAME mountpoint=/
 
-	# Compress /tmp, allow exec but not setuid
-	/tmp		mountpoint=/tmp,exec=on,setuid=off
+ # Compress /tmp, allow exec but not setuid
+ /tmp  mountpoint=/tmp,exec=on,setuid=off
 
-	# Don't mount /usr so that 'base' files go to the BEROOT
-	/usr		mountpoint=/usr,canmount=off
+ # Don't mount /usr so that 'base' files go to the BEROOT
+ /usr  mountpoint=/usr,canmount=off
 
-	# Home directories separated so they are common to all BEs
-	/home  mountpoint=/home
+ # Home directories separated so they are common to all BEs
+ /home  mountpoint=/home
 
-	# Ports tree
-	/usr/ports	setuid=off
+ # Ports tree
+ /usr/ports setuid=off
 
-	# Source tree (compressed)
-	/usr/src
+ # Source tree (compressed)
+ /usr/src
 
-	# Create /var and friends
-	/var		mountpoint=/var,canmount=off
-	/var/audit	exec=off,setuid=off
-	/var/crash	exec=off,setuid=off
-	/var/log	exec=off,setuid=off
-	/var/mail	atime=on
-	/var/tmp	setuid=off
+ # Create /var and friends
+ /var  mountpoint=/var,canmount=off
+ /var/audit exec=off,setuid=off
+ /var/crash exec=off,setuid=off
+ /var/log exec=off,setuid=off
+ /var/mail atime=on
+ /var/tmp setuid=off
 " # END-QUOTE
 
 export nonInteractive=YES
 
+
 #!/bin/sh
+
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 echo "packer" | pw usermod root -h 0
-echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
+echo "PermitRootLogin yes" >>/etc/ssh/sshd_config
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 sysrc sshd_enable="YES"
 interface="`ifconfig -l | cut -d' ' -f1`"
 sysrc ifconfig_$interface="dhcp"
 
-echo 'autoboot_delay="0"' >> /boot/loader.conf
+echo 'autoboot_delay="5"' >>/boot/loader.conf
+
+# UTF-8 console:
+echo 'kern.vty=vt' >>/boot/loader.conf
+
+
+# ====== User ===============================================================
+echo "<SET_PASSWORD_HERE>" | pw useradd -u 1000 -n <SET_USERNAME_HERE> -h 0 -s /bin/sh -G wheel -c "<SET_REALNAME_HERE>" -m
+
+mkdir -p /usr/local/etc/sudoers.d
+echo "nornetpp ALL=(ALL) NOPASSWD: ALL" >/usr/local/etc/sudoers.d/nornetpp
+chmod 0440 /usr/local/etc/sudoers.d/nornetpp
+
+
+# ====== Keymap =============================================================
+echo 'keymap="german.iso"' >>/etc/rc.conf
+
+# ====== Basic packages =====================================================
+echo "nameserver 1.1.1.1" >/etc/resolv.conf
+
+env PAGER=cat freebsd-update -v debug --not-running-from-cron fetch install || true
+
+mkdir -p /usr/local/etc/pkg/repos
+cat <<'EOF' >/usr/local/etc/pkg/repos/FreeBSD.conf
+FreeBSD: {
+ url: "pkg+http://pkg.FreeBSD.org/${ABI}/latest",
+}
+EOF
+
+pkg bootstrap -y
+pkg update
+pkg upgrade -y
+
+pkg install -y bash joe sudo
