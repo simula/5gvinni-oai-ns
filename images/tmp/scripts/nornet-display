@@ -31,21 +31,23 @@ USER_NAME=nornetpp
 # ------ Ubuntu -------------------------------------------------------------
 if [ -e /usr/bin/apt-get ] ; then
    /usr/bin/apt-get update
-   env DEBIAN_FRONTEND=noninteractive /usr/bin/apt-get install -y nornet-display sddm \
-      kde-style-oxygen-qt5 gtk2-engines-oxygen \
-      plasma-theme-oxygen oxygen-cursor-theme oxygen-cursor-theme-extra oxygen-icon-theme oxygen-sounds
+
+   packages="nornet-display sddm kde-style-oxygen-qt5 gtk2-engines-oxygen plasma-theme-oxygen oxygen-cursor-theme oxygen-cursor-theme-extra oxygen-icon-theme oxygen-sounds"
+
+   # Try 3 times, for the case of download issues:
+   env DEBIAN_FRONTEND=noninteractive /usr/bin/apt-get install -y ${packages} || \
+      sleep 30 && env DEBIAN_FRONTEND=noninteractive /usr/bin/apt-get install -y ${packages} || \
+         sleep 30 && env DEBIAN_FRONTEND=noninteractive /usr/bin/apt-get install -y ${packages}
 
 # ------ Fedora -------------------------------------------------------------
 elif [ -e /usr/bin/dnf ] ; then
-   /usr/bin/dnf install -y nornet-display
+   /usr/bin/dnf install -y nornet-display sddm @KDE qt5-style-oxygen oxygen-gtk2 plasma-oxygen oxygen-icon-theme oxygen-cursor-themes oxygen-sound-theme oxygen-fonts firefox
 fi
 
 
 # ====== Make directories ===================================================
 mkdir -p /home/${USER_NAME}/.config
-chown ${USER_NAME}:${USER_NAME} /home/${USER_NAME}/.config
 mkdir -p /home/${USER_NAME}/.local
-chown ${USER_NAME}:${USER_NAME} /home/${USER_NAME}/.local
 
 
 # ====== Desktop configuration ==============================================
@@ -56,7 +58,6 @@ update_info=kscreenlocker.upd:0.1-autolock
 [Greeter][Wallpaper][org.kde.image][General]
 Image=file:///usr/share/nornet-desktop/Desktop-without-Logo/Display1-3840x2160-plain.jpeg
 EOF
-chown ${USER_NAME}:${USER_NAME} /home/${USER_NAME}/.config/kscreenlockerrc
 
 
 cat >/home/${USER_NAME}/.config/kactivitymanagerdrc <<EOF
@@ -66,7 +67,6 @@ cat >/home/${USER_NAME}/.config/kactivitymanagerdrc <<EOF
 [main]
 currentActivity=6ef93fb7-d7a8-49cb-a444-4fa9ec9d9788
 EOF
-chown ${USER_NAME}:${USER_NAME} /home/${USER_NAME}/.config/kactivitymanagerdrc
 
 
 cat >/home/${USER_NAME}/.config/plasma-org.kde.plasma.desktop-appletsrc <<EOF
@@ -298,7 +298,6 @@ knownItems=org.kde.plasma.bluetooth,org.kde.kdeconnect,org.kde.plasma.battery,or
 [ScreenMapping]
 itemsOnDisabledScreens=
 EOF
-chown ${USER_NAME}:${USER_NAME} /home/${USER_NAME}/.config/plasma-org.kde.plasma.desktop-appletsrc
 
 
 # ====== Window Manager configuration =======================================
@@ -314,7 +313,7 @@ LayoutName=org.kde.breeze.desktop
 library=org.kde.oxygen
 theme=Oxygen
 EOF
-chown ${USER_NAME}:${USER_NAME} /home/${USER_NAME}/.config/kwinrc
+
 
 # ------ Set Plasma style ---------------------------------------------------
 cat >/home/${USER_NAME}/.config/plasmarc <<EOF
@@ -322,7 +321,6 @@ cat >/home/${USER_NAME}/.config/plasmarc <<EOF
 name=air
 EOF
 
-chown ${USER_NAME}:${USER_NAME} /home/${USER_NAME}/.config/plasmarc
 
 # ------ Set KSplash theme --------------------------------------------------
 cat >/home/${USER_NAME}/.config/ksplashrc <<EOF
@@ -331,14 +329,13 @@ Engine=KSplashQML
 Theme=org.kde.breeze.desktop
 EOF
 
-chown ${USER_NAME}:${USER_NAME} /home/${USER_NAME}/.config/ksplashrc
 
 # ------ Set mouse cursor theme ---------------------------------------------
 cat >/home/${USER_NAME}/.config/kcminputrc <<EOF
 [Mouse]
 cursorTheme=breeze_cursors
 EOF
-chown ${USER_NAME}:${USER_NAME} /home/${USER_NAME}/.config/kcminputrc
+
 
 # ------ Set global KDE settings --------------------------------------------
 # Includes: icons theme and colours
@@ -495,13 +492,8 @@ inactiveBlend=75,71,67
 inactiveForeground=75,71,67
 EOF
 
-chown ${USER_NAME}:${USER_NAME} /home/${USER_NAME}/.config/kdeglobals
-
 
 # ====== Keyboard configuration =============================================
-mkdir -p /home/${USER_NAME}/.config
-chown ${USER_NAME}:${USER_NAME} /home/${USER_NAME}/.config
-
 cat >/home/${USER_NAME}/.config/kxkbrc <<EOF
 [Layout]
 DisplayNames=,,
@@ -517,12 +509,9 @@ SwitchMode=Global
 Use=true
 EOF
 
-chown ${USER_NAME}:${USER_NAME} /home/${USER_NAME}/.config/kxkbrc
-
 
 # ====== Konsole configuration ==============================================
 mkdir -p /home/${USER_NAME}/.local/share/kxmlgui5/konsole
-chown ${USER_NAME}:${USER_NAME} /home/${USER_NAME}/.local/share/kxmlgui5/konsole
 
 cat >/home/${USER_NAME}/.local/share/kxmlgui5/konsole/konsoleui.rc <<EOF
 <!DOCTYPE kpartgui>
@@ -584,8 +573,6 @@ cat >/home/${USER_NAME}/.local/share/kxmlgui5/konsole/konsoleui.rc <<EOF
  </ActionProperties>
 </kpartgui>
 EOF
-
-chown ${USER_NAME}:${USER_NAME} /home/${USER_NAME}/.local/share/kxmlgui5/konsole/konsoleui.rc
 
 
 cat >/home/${USER_NAME}/.local/share/kxmlgui5/konsole/sessionui.rc <<EOF
@@ -655,8 +642,6 @@ cat >/home/${USER_NAME}/.local/share/kxmlgui5/konsole/sessionui.rc <<EOF
 </kpartgui>
 EOF
 
-chown ${USER_NAME}:${USER_NAME} /home/${USER_NAME}/.local/share/kxmlgui5/konsole/sessionui.rc
-
 
 mkdir -p /home/${USER_NAME}/.local/share/konsole
 
@@ -669,15 +654,11 @@ Name=Profile 1
 Parent=FALLBACK/
 EOF
 
-chown ${USER_NAME}:${USER_NAME} /home/${USER_NAME}/.local/share/konsole/Profile\ 1.profile
-
 
 cat >/home/${USER_NAME}/.config/konsolerc <<EOF
 [Desktop Entry]
 DefaultProfile=Profile 1.profile
 EOF
-
-chown ${USER_NAME}:${USER_NAME} /home/${USER_NAME}/.config/konsolerc
 
 
 cat >/home/${USER_NAME}/.config/katerc <<EOF
@@ -793,4 +774,7 @@ RunPrefix=
 SetEditor=false
 EOF
 
-chown ${USER_NAME}:${USER_NAME} /home/${USER_NAME}/.config/katerc
+
+# ====== Fix permissions ====================================================
+chown -R ${USER_NAME}:${USER_NAME} /home/${USER_NAME}/.config
+chown -R ${USER_NAME}:${USER_NAME} /home/${USER_NAME}/.local
