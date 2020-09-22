@@ -41,7 +41,7 @@ SSH_EPC="sudo -u dreibh sshpass -p osm4us ssh -4C -oStrictHostKeyChecking=no -J 
 
 # curl 'http://localhost:9091/api/v1/query_range?query=osm_cpu_load_5min&start=2020-09-11T06:00:00.000Z&end=2020-09-11T06:00:30.000Z&step=1s'
 PROMETHEUS='http://localhost:9091/api/v1/query_range'
-PROMETHEUS_METRICS="osm_cpu_load_15min osm_cpu_load_1min osm_cpu_load_5min osm_cpu_processes osm_disk_usage osm_memory_ram_usage osm_memory_swap_usage osm_network_mgmt_bytes_in osm_network_mgmt_bytes_out osm_network_mgmt_packets_in osm_network_mgmt_packets_out osm_network_S11_bytes_in osm_network_S11_bytes_out osm_network_S11_packets_in osm_network_S11_packets_out osm_network_S1C_bytes_in osm_network_S1C_bytes_out osm_network_S1C_packets_in osm_network_S1C_packets_out osm_network_S6a_bytes_in osm_network_S6a_bytes_out osm_network_S6a_packets_in osm_network_S6a_packets_out osm_system_random osm_system_uptime osm_system_users up"
+PROMETHEUS_METRICS="osm_cpu_load_current osm_cpu_load_15min osm_cpu_load_1min osm_cpu_load_5min osm_cpu_processes osm_disk_usage osm_memory_ram_usage osm_memory_swap_usage osm_network_mgmt_bytes_in osm_network_mgmt_bytes_out osm_network_mgmt_packets_in osm_network_mgmt_packets_out osm_network_S11_bytes_in osm_network_S11_bytes_out osm_network_S11_packets_in osm_network_S11_packets_out osm_network_S1C_bytes_in osm_network_S1C_bytes_out osm_network_S1C_packets_in osm_network_S1C_packets_out osm_network_S6a_bytes_in osm_network_S6a_bytes_out osm_network_S6a_packets_in osm_network_S6a_packets_out osm_system_random osm_system_uptime osm_system_users up"
 
 # ====== Initialise =========================================================
 if [ "${SUDO_UID}:${SUDO_GID}" == ":" ] ; then
