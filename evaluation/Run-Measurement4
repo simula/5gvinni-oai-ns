@@ -28,10 +28,10 @@
 # Contact: dreibh@simula.no
 
 
-DIRECTORY="Measurement4"
+DIRECTORY="Measurement4-0001"
 DESTINATION="10.1.1.249:9000"
 INTERFACE="any"
-RUNTIME=20
+RUNTIME=120
 
 IP_HSS="10.208.0.200"
 IP_MME="10.208.0.201"
@@ -79,7 +79,7 @@ SUMMARY_UPDATED="${DIRECTORY}/results.summary.updated"
 saturatedFlow="const0:const1400"
 streamingFlow="const60:const20000"   # 9.6 Mbit/s payload
 maxMsgSize=1400                      # Max. 1440 bytes per SCTP message/UDP packet
-tcpdumpSnaplens="64 65536"
+tcpdumpSnaplens="64"   # "64 65536"
 
 
 # ###### Start monitoring EPC component #####################################
