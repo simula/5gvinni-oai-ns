@@ -41,9 +41,14 @@ XKBLAYOUT="de"
 XKBVARIANT="nodeadkeys"
 XKBOPTIONS=""
 FQDN="akerbrygge.simula.nornet"
+
 USER_NAME="nornetpp"
 USER_REALNAME="NorNet Praesum Presum"
 USER_PASSWORD="!NorNetInst!"
+
+BACKGROUND_SDDM="/usr/share/nornet-desktop/Desktop-with-Logo/Server1-3840x2160-plain.jpeg"
+BACKGROUND_LOCKSCREEN="/usr/share/nornet-desktop/Desktop-with-Logo/FileSrv1-3840x2160-plain.jpeg"
+BACKGROUND_DESKTOP="/usr/share/nornet-desktop/Desktop-with-Logo/Display1-3840x2160-plain.jpeg"
 
 
 # ###### Handle command-line parameters #####################################
@@ -333,7 +338,18 @@ for provisioner in ${PROVISIONERS} ; do
        {
          "type": "shell",
          "execute_command": "echo '${USER_PASSWORD}' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
-         "script": "`realpath scripts/${provisioner}`"
+         "script": "`realpath scripts/${provisioner}`",
+         "environment_vars": [ "VIDEO=${VIDEO}",
+                               "XKBMODEL=${XKBMODEL}",
+                               "XKBLAYOUT=${XKBLAYOUT}",
+                               "XKBVARIANT=${XKBVARIANT}",
+                               "XKBOPTIONS=${XKBOPTIONS}",
+                               "FQDN=${FQDN}",
+                               "USER_NAME=${USER_NAME}",
+                               "USER_REALNAME=${USER_REALNAME}",
+                               "BACKGROUND_SDDM=${BACKGROUND_SDDM}",
+                               "BACKGROUND_LOCKSCREEN=${BACKGROUND_LOCKSCREEN}",
+                               "BACKGROUND_DESKTOP=${BACKGROUND_DESKTOP}" ]
        }
 EOF
 done

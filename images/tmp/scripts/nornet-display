@@ -22,11 +22,15 @@
 set -ex
 
 
-USER_NAME=nornetpp
+# NOTE:
+# The following environment variables are expected:
+# - USER_NAME
+# - BACKGROUND_SDDM
+# - BACKGROUND_LOCKSCREEN
+# - BACKGROUND_DESKTOP
 
 
-
-# ###### NorNet development configuration ###################################
+# ###### NorNet Desktop package installation ################################
 
 # ------ Ubuntu -------------------------------------------------------------
 if [ -e /usr/bin/apt-get ] ; then
@@ -42,8 +46,13 @@ if [ -e /usr/bin/apt-get ] ; then
 # ------ Fedora -------------------------------------------------------------
 elif [ -e /usr/bin/dnf ] ; then
    /usr/bin/dnf install -y nornet-display sddm @KDE qt5-style-oxygen oxygen-gtk2 plasma-oxygen oxygen-icon-theme oxygen-cursor-themes oxygen-sound-theme oxygen-fonts firefox
+
+   servicectl enable sddm.service
+   servicectl start sddm.service
 fi
 
+
+# ###### NorNet Desktop configuration #######################################
 
 # ====== Make directories ===================================================
 mkdir -p /home/${USER_NAME}/.config
@@ -56,7 +65,7 @@ cat >/home/${USER_NAME}/.config/kscreenlockerrc <<EOF
 update_info=kscreenlocker.upd:0.1-autolock
 
 [Greeter][Wallpaper][org.kde.image][General]
-Image=file:///usr/share/nornet-desktop/Desktop-without-Logo/Display1-3840x2160-plain.jpeg
+Image=file://${BACKGROUND_LOCKSCREEN}
 EOF
 
 
@@ -100,7 +109,7 @@ ToolBoxButtonState=topcenter
 ToolBoxButtonX=739
 
 [Containments][1][Wallpaper][org.kde.image][General]
-Image=file:///usr/share/nornet-desktop/Desktop-without-Logo/Background1-3840x2160-plain.png
+Image=file://${BACKGROUND_DESKTOP}
 
 [Containments][2]
 activityId=
@@ -772,6 +781,33 @@ AutoSyncronize=true
 RemoveExtension=false
 RunPrefix=
 SetEditor=false
+EOF
+
+
+# ====== SDDM ===============================================================
+cat >/etc/sddm.conf.d/kde_settings.conf <<EOF
+[Autologin]
+Relogin=false
+Session=
+User=
+
+[General]
+HaltCommand=
+RebootCommand=
+
+[Theme]
+Current=breeze
+
+[Users]
+MaximumUid=60000
+MinimumUid=1000
+EOF
+
+
+cat >/usr/share/sddm/themes/breeze/theme.conf.user  <<EOF
+[General]
+background=${BACKGROUND_SDDM}
+type=image
 EOF
 
 
