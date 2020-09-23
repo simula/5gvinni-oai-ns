@@ -785,6 +785,8 @@ EOF
 
 
 # ====== SDDM ===============================================================
+mkdir -p /etc/sddm.conf.d
+
 cat >/etc/sddm.conf.d/kde_settings.conf <<EOF
 [Autologin]
 Relogin=false
@@ -803,6 +805,8 @@ MaximumUid=60000
 MinimumUid=1000
 EOF
 
+
+mkdir -p /usr/share/sddm/themes/breeze
 
 cat >/usr/share/sddm/themes/breeze/theme.conf.user  <<EOF
 [General]
