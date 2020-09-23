@@ -109,6 +109,13 @@ pkg install -y sudo bash joe
 
 # ====== Keymap =============================================================
 echo 'keymap="german.iso"' >>/etc/rc.conf
+echo 'moused_enable="YES"' >>/etc/rc.conf
+echo 'allscreens_flags="-m on"' >>/etc/rc.conf
+
+echo 'powerd_enable="YES"' >>/etc/rc.conf
+echo 'ntpd_enable="YES"' >>/etc/rc.conf
+echo 'hald_enable="YES"' >>/etc/rc.conf
+echo 'dbus_enable="YES"' >>/etc/rc.conf
 
 
 # ====== UTF-8 ==============================================================
