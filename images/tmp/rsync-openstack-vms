@@ -3,7 +3,7 @@
 DESTINATION="nornetpp@odin.simula.nornet:images/"
 SSH_PROXY="oesthorn.nntb.no"
 
-imageNames=""
+imageFiles=""
 VMs=`find . -mindepth 1 -maxdepth 1 -type d -name "QEMU*OpenStack*"`
 for vm in ${VMs} ; do
    pushd ${vm} >/dev/null
@@ -13,8 +13,8 @@ for vm in ${VMs} ; do
          pushd ${imageDirectory} >/dev/null
          image=`ls -S .`
          if [ -e "${image}" ] ; then
-            echo "rsync -e  -e \"ssh -J ${SSH_PROXY}\" -Pav --partial  ${image} ${DESTINATION}${image}.qcow2"
-            imageNames="${imageNames} images/${image}.qcow2"
+            sh -c "rsync -e \"ssh -J ${SSH_PROXY}\" -Pv --partial  ${image} ${DESTINATION}${image}.qcow2"
+            imageFiles="${imageFiles} ${image}.qcow2"
          fi
          popd >/dev/null
       fi
@@ -25,7 +25,8 @@ done
 
 echo ""
 echo "------ OpenStack commands: ------"
-for imageName in ${imageNames} ; do
-   echo "image delete Template-${imageName}"
-   echo "image create Template-${imageName} --file images/${imageFile} --disk-format qcow2 --container-format bare --property hw_firmware_type=uefi --property architecture=amd64 --public"
+for imageFile in ${imageFiles} ; do
+   imageName="${imageFile/.qcow2/}"
+   echo "image delete ${imageName}"
+   echo "image create ${imageName} --file images/${imageFile} --disk-format qcow2 --container-format bare --property hw_firmware_type=uefi --property architecture=amd64 --public"
 done
