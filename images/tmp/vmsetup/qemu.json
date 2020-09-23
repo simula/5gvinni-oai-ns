@@ -21,7 +21,7 @@
   "output_directory": "{{user `vm_name`}}",
   "type": "qemu",
   "accelerator": "kvm",
-  "headless": true,
+  "headless": false,
   "format": "qcow2",
   "disk_interface": "virtio-scsi",
   "disk_cache": "unsafe",
@@ -34,6 +34,7 @@
   // "disk_additional_size": [
   // ],
   "qemuargs": [
-    [ "-bios", "OVMF.fd" ]
+    [ "-bios", "OVMF.fd" ],
+    [ "-vga", "qxl" ]
   ]
 }
