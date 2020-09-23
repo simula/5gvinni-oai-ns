@@ -445,3 +445,5 @@ env CHECKPOINT_DISABLE=1 PACKER_CACHE_DIR="${CACHE_DIRECTORY}" packer build \
    -var "user_realname=${USER_REALNAME}"   \
    -var "user_password=${USER_PASSWORD}"   \
    ${JSON}
+
+env LANG=C date >successfully-built.txt
