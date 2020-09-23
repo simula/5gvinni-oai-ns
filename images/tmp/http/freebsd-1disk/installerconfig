@@ -68,9 +68,9 @@ export nonInteractive=YES
 
 #!/bin/sh
 
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-echo "packer" | pw usermod root -h 0
-echo "PermitRootLogin yes" >>/etc/ssh/sshd_config
+# !!!!!! TEST ONLY! !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# echo "packer" | pw usermod root -h 0
+# echo "PermitRootLogin yes" >>/etc/ssh/sshd_config
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 sysrc sshd_enable="YES"
@@ -78,9 +78,6 @@ interface="`ifconfig -l | cut -d' ' -f1`"
 sysrc ifconfig_$interface="dhcp"
 
 echo 'autoboot_delay="5"' >>/boot/loader.conf
-
-# UTF-8 console:
-echo 'kern.vty=vt' >>/boot/loader.conf
 
 
 # ====== User ===============================================================
@@ -90,9 +87,6 @@ mkdir -p /usr/local/etc/sudoers.d
 echo "nornetpp ALL=(ALL) NOPASSWD: ALL" >/usr/local/etc/sudoers.d/nornetpp
 chmod 0440 /usr/local/etc/sudoers.d/nornetpp
 
-
-# ====== Keymap =============================================================
-echo 'keymap="german.iso"' >>/etc/rc.conf
 
 # ====== Basic packages =====================================================
 echo "nameserver 1.1.1.1" >/etc/resolv.conf
@@ -110,4 +104,19 @@ pkg bootstrap -y
 pkg update
 pkg upgrade -y
 
-pkg install -y bash joe sudo
+pkg install -y sudo bash joe
+
+
+# ====== Keymap =============================================================
+echo 'keymap="german.iso"' >>/etc/rc.conf
+
+
+# ====== UTF-8 ==============================================================
+
+# Enable Newcons:
+echo 'kern.vty=vt' >>/boot/loader.conf
+
+# Enable UTF-8:
+sed -e $'s#default:\\\\#default:\\\\\\\n\\\t:charset=UTF-8:\\\\\\\n\\\t:lang=C.UTF-8:\\\\#g' </etc/login.conf >/etc/login.conf.new
+mv /etc/login.conf.new /etc/login.conf
+cap_mkdb /etc/login.conf
