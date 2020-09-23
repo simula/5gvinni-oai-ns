@@ -28,7 +28,7 @@
   "shutdown_command": "echo '{{user `user_password`}}' | sudo -S shutdown -P now",
 
   // ====== Boot into installer =============================================
-  "boot_wait": "3s",
+  "boot_wait": "10s",
   "boot_command": [
     "<esc><wait>",
     "<esc><wait>",
