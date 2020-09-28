@@ -22,12 +22,12 @@ vnfd:vnfd-catalog:
       vdu:
         - id: mgmtVM
           name: mgmtVM
-          image: Template-Ubuntu-5gVINNI-Development-Bionic
+          image: 5gVINNI-OpenStack-Ubuntu-20.04-LTS
           count: '1'
           vm-flavor:
             vcpu-count: '1'
             memory-mb: '1024'
-            storage-gb: '10'
+            storage-gb: '16'
           interface:
             - name: mgmtVM-eth0
               position: '1'
@@ -68,21 +68,21 @@ vnfd:vnfd-catalog:
                   - name: ssh-hostname
                     value: <rw_mgmt_ip>
                   - name: ssh-username
-                    value: ubuntu
+                    value: nornetpp
                   - name: ssh-password
-                    value: osm4u
+                    value: osm4us
               - seq: '2'
                 name: touch
                 parameter:
                   - name: filename
                     data-type: STRING
-                    value: /home/ubuntu/first-touch
+                    value: /home/nornetpp/first-touch
             config-primitive:
               - name: touch
                 parameter:
                   - name: filename
                     data-type: STRING
-                    default-value: /home/ubuntu/touched
+                    default-value: /home/nornetpp/touched
 
           monitoring-param:
             - id: metric_mgmtVM_cpu
