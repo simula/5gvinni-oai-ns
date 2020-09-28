@@ -28,10 +28,10 @@
 # Contact: dreibh@simula.no
 
 
-DIRECTORY="Measurement4"
+DIRECTORY="Measurement4-0001"
 DESTINATION="10.1.1.249:9000"
 INTERFACE="any"
-RUNTIME=20
+RUNTIME=120
 
 IP_HSS="10.208.0.200"
 IP_MME="10.208.0.201"
@@ -39,6 +39,9 @@ IP_SPGWC="10.208.0.202"
 IP_SPGWU="10.208.0.203"
 SSH_EPC="sudo -u dreibh sshpass -p osm4us ssh -4C -oStrictHostKeyChecking=no -J nornetpp@10.1.1.85 nornetpp@"
 
+# curl 'http://localhost:9091/api/v1/query_range?query=osm_cpu_load_5min&start=2020-09-11T06:00:00.000Z&end=2020-09-11T06:00:30.000Z&step=1s'
+PROMETHEUS='http://localhost:9091/api/v1/query_range'
+PROMETHEUS_METRICS="osm_cpu_load_current osm_cpu_load_15min osm_cpu_load_1min osm_cpu_load_5min osm_cpu_processes osm_disk_usage osm_memory_ram_usage osm_memory_swap_usage osm_network_mgmt_bytes_in osm_network_mgmt_bytes_out osm_network_mgmt_packets_in osm_network_mgmt_packets_out osm_network_S11_bytes_in osm_network_S11_bytes_out osm_network_S11_packets_in osm_network_S11_packets_out osm_network_S1C_bytes_in osm_network_S1C_bytes_out osm_network_S1C_packets_in osm_network_S1C_packets_out osm_network_S6a_bytes_in osm_network_S6a_bytes_out osm_network_S6a_packets_in osm_network_S6a_packets_out osm_system_random osm_system_uptime osm_system_users up"
 
 # ====== Initialise =========================================================
 if [ "${SUDO_UID}:${SUDO_GID}" == ":" ] ; then
@@ -53,6 +56,13 @@ sudo -u#${SUDO_UID} -g#${SUDO_GID} ssh-keygen -q -R ${IP_HSS}   >/dev/null 2>&1
 sudo -u#${SUDO_UID} -g#${SUDO_GID} ssh-keygen -q -R ${IP_MME}   >/dev/null 2>&1
 sudo -u#${SUDO_UID} -g#${SUDO_GID} ssh-keygen -q -R ${IP_SPGWC} >/dev/null 2>&1
 sudo -u#${SUDO_UID} -g#${SUDO_GID} ssh-keygen -q -R ${IP_SPGWU} >/dev/null 2>&1
+
+echo "Checking Prometheus connection ..."
+if ! curl -o /dev/null "${PROMETHEUS}?query=osm_cpu_load_5min&start=2020-09-11T06:00:00.000Z&end=2020-09-11T06:00:30.000Z&step=1s" 2>/dev/null ; then
+   echo >&2 "ERROR: Unable to get data from Prometheus! Check tunnel!"
+   exit 1
+fi
+
 
 sudo -u#${SUDO_UID} -g#${SUDO_GID} mkdir -p ${DIRECTORY}
 
@@ -69,7 +79,7 @@ SUMMARY_UPDATED="${DIRECTORY}/results.summary.updated"
 saturatedFlow="const0:const1400"
 streamingFlow="const60:const20000"   # 9.6 Mbit/s payload
 maxMsgSize=1400                      # Max. 1440 bytes per SCTP message/UDP packet
-tcpdumpSnaplens="64 65536"
+tcpdumpSnaplens="64"   # "64 65536"
 
 
 # ###### Start monitoring EPC component #####################################
@@ -115,8 +125,29 @@ sudo -u dreibh rsync -Pavz -e "sshpass -p osm4us ssh -4C -oStrictHostKeyChecking
 }
 
 
+# ###### Get Prometheus metrics #############################################
+get-prometheus-metrics ()
+{
+   local id="$1"
+   local startTime="$2"
+   local endTime="$3"
+
+   echo "${startTime}" > ${DIRECTORY}/${id}-Prometheus-StartTime.txt
+   echo "${endTime}" > ${DIRECTORY}/${id}-Prometheus-EndTime.txt
+
+   # TEST: Start to query from 5 min earlier!
+   # let startTime=${startTime}-300
+
+   for metric in ${PROMETHEUS_METRICS} ; do
+      query="${PROMETHEUS}?query=${metric}&start=${startTime}&end=${endTime}&step=1s"
+      echo "Prometheus Query: ${query}"
+      curl -o ${DIRECTORY}/${id}-Prometheus-${metric}.json "${query}" || true
+   done
+}
+
+
 # ====== Run measurements ===================================================
-for scenario in Download Upload Bidirectional ; do   #  Download Upload Bidirectional
+for scenario in Download ; do   #  Download Upload Bidirectional
    for protocol in tcp ; do   # udp tcp sctp
       flowParameters="INVALID!"
       if [ "${protocol}" == "udp" ] ; then
@@ -155,7 +186,6 @@ for scenario in Download Upload Bidirectional ; do   #  Download Upload Bidirect
          echo "--input=${scalarFileP}"
       ) >>${SUMMARY_NEW}
 
-
       # ====== Start sysstat in EPC =========================================
       sysstatParameters="-bqr -n DEV,EDEV,IP,EIP,ICMP,EICMP,IP6,EIP6,ICMP6,EICMP6,TCP,ETCP,UDP,UDP6 1 600"
       start-monitoring ${id} hss   ${IP_HSS}   "${sysstatParameters}" &
@@ -172,9 +202,10 @@ for scenario in Download Upload Bidirectional ; do   #  Download Upload Bidirect
       done
       sleep 3
 
- 
+
       # ====== Run NetPerfMeter =============================================
       echo "Running NetPerfMeter ..."
+      startTime=`date +"%s"`
       sudo -u#${SUDO_UID} -g#${SUDO_GID} netperfmeter ${DESTINATION} \
          -quiet -runtime=${RUNTIME} \
          -vector="${vectorFile}" -scalar="${scalarFile}" \
@@ -183,6 +214,7 @@ for scenario in Download Upload Bidirectional ; do   #  Download Upload Bidirect
             -quiet -runtime=${RUNTIME} \
             -vector="${vectorFile}" -scalar="${scalarFile}" \
             -${protocol} ${flowParameters}
+      endTime=`date +"%s"`
 
       echo "Stopping tcpdump ..."
       killall tcpdump || true
@@ -197,6 +229,8 @@ for scenario in Download Upload Bidirectional ; do   #  Download Upload Bidirect
       stop-monitoring ${id} spgwu ${IP_SPGWU} &
       wait
 
+      # ====== Get metrics from Prometheus ==================================
+      get-prometheus-metrics "${id}" "${startTime}" "${endTime}"
 
       # ====== Set ownership and compress pcap files ========================
       chown ${SUDO_UID}:${SUDO_GID} ${prefix}*

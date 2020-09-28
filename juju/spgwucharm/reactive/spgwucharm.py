@@ -120,6 +120,7 @@ def prepare_spgwu_build():
       vduHelper.configureInterface(spgwuS1U_IfName,  configurationS1U,  62)
       vduHelper.configureInterface(spgwuSGi_IfName,  configurationSGi,  63)
       vduHelper.testNetworking('8.8.8.8')
+      vduHelper.waitForPackageUpdatesToComplete()
       vduHelper.endBlock()
 
       # ====== Prepare sources ==============================================

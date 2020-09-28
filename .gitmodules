@@ -4,3 +4,6 @@
 [submodule "baselayers/basic"]
 	path = baselayers/basic
 	url = https://github.com/juju-solutions/layer-basic.git
+[submodule "vmimage-builder-scripts"]
+	path = vmimage-builder-scripts
+	url = git@github.com:simula/nornet-vmimage-builder-scripts.git

@@ -107,8 +107,8 @@ class VDUHelper:
    def endBlockInException(self):
       exceptionType, exceptionValue, exceptionTraceback = sys.exc_info()
       exceptionTraceback = traceback.format_exception(exceptionType, exceptionValue, exceptionTraceback)
-      self.endBlock(False)
-      self.logger.error(str(''.join(map(str, exceptionTraceback))))
+      self.logger.error('Ending block with exception: ' + str(''.join(map(str, exceptionTraceback))))
+      return self.endBlock(False)
 
 
    # ###### Touch file ######################################################
@@ -268,6 +268,26 @@ echo -e \\\"{interfaceConfiguration}\\\" | sudo tee /etc/network/interfaces.d/{p
             timeout     = timeout,
             interval    = interval
          )
+         self.runInShell(commands)
+      except:
+         self.endBlock(False)
+         raise
+
+      self.endBlock()
+
+
+   # ###### Wait for all package updates to complete ########################
+   def waitForPackageUpdatesToComplete(self):
+      self.beginBlock('Waiting for package management to complete all running tasks ...')
+
+      # Based on https://gist.github.com/tedivm/e11ebfdc25dc1d7935a3d5640a1f1c90
+      commands = """\
+while sudo fuser /var/lib/dpkg/lock >/dev/null 2>&1 ; do sleep 1 ; done ; \\
+while sudo fuser /var/lib/apt/lists/lock >/dev/null 2>&1 ; do sleep 1 ; done ; \\
+if [ -f /var/log/unattended-upgrades/unattended-upgrades.log ]; then \\
+   while sudo fuser /var/log/unattended-upgrades/unattended-upgrades.log >/dev/null 2>&1 ; do sleep 1 ; done ; \\
+fi"""
+      try:
          self.runInShell(commands)
       except:
          self.endBlock(False)
