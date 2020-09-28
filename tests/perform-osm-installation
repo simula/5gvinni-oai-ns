@@ -1,13 +1,13 @@
 #!/bin/bash -e
 
-export RELEASE=ReleaseSEVEN
+export RELEASE=ReleaseEIGHT
 export REPOSITORY=stable
-export DOCKER_TAG=7
+export DOCKER_TAG=8
 
 
 cd ~
 rm -f install_osm.sh
-wget https://osm-download.etsi.org/ftp/osm-7.0-seven/install_osm.sh
+wget https://osm-download.etsi.org/ftp/osm-8.0-eight/install_osm.sh
 chmod +x install_osm.sh
 ./install_osm.sh -y -c k8s --k8s_monitor   2>&1 | tee osm_install_log.txt
 # --k8s_monitor
