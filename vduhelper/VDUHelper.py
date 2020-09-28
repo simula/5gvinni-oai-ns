@@ -107,8 +107,8 @@ class VDUHelper:
    def endBlockInException(self):
       exceptionType, exceptionValue, exceptionTraceback = sys.exc_info()
       exceptionTraceback = traceback.format_exception(exceptionType, exceptionValue, exceptionTraceback)
-      self.endBlock(False)
-      self.logger.error(str(''.join(map(str, exceptionTraceback))))
+      self.logger.error('Ending block with exception: ' + str(''.join(map(str, exceptionTraceback))))
+      return self.endBlock(False)
 
 
    # ###### Touch file ######################################################
