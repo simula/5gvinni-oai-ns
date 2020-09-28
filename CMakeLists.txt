@@ -215,7 +215,7 @@ FOREACH(vnfd IN LISTS VNFD_LIST)
                          COMMAND rm -rf ${charmCopyDirectory}
                          COMMAND mkdir -p ${charmCopyDirectory}
                          COMMAND cp -a ${charmOutputDirectory}/* ${charmCopyDirectory}/
-                         DEPENDS ${generate_charm})
+                         DEPENDS ${generate_charm} ${charmOutputDirectory}.stamp)
       ADD_CUSTOM_TARGET(${generate_vnfd_charm} DEPENDS ${charmCopyDirectory}/version)
       LIST(APPEND allCharmsInVNFD ${generate_vnfd_charm})
    ENDFOREACH()
