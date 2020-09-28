@@ -120,6 +120,7 @@ def prepare_mme_build():
       vduHelper.configureInterface(mmeS1C_IfName, configurationS1C, 63)
       vduHelper.configureInterface(mmeS10_IfName, configurationS10, 64)
       vduHelper.testNetworking('8.8.8.8')
+      vduHelper.waitForPackageUpdatesToComplete()
       vduHelper.endBlock()
 
       # ====== Prepare sources ==============================================

@@ -107,6 +107,7 @@ def prepare_spgwc_build():
       vduHelper.configureInterface(spgwcS5S8_SGW_IfName,  configurationS5S8_SGW,  63)
       vduHelper.configureInterface(spgwcS5S8_PGW_IfName,  configurationS5S8_PGW,  64)
       vduHelper.testNetworking('8.8.8.8')
+      vduHelper.waitForPackageUpdatesToComplete()
       vduHelper.endBlock()
 
       # ====== Prepare sources ==============================================

@@ -276,6 +276,26 @@ echo -e \\\"{interfaceConfiguration}\\\" | sudo tee /etc/network/interfaces.d/{p
       self.endBlock()
 
 
+   # ###### Wait for all package updates to complete ########################
+   def waitForPackageUpdatesToComplete(self):
+      self.beginBlock('Waiting for package management to complete all running tasks ...')
+
+      # Based on https://gist.github.com/tedivm/e11ebfdc25dc1d7935a3d5640a1f1c90
+      commands = """\
+while sudo fuser /var/lib/dpkg/lock >/dev/null 2>&1 ; do sleep 1 ; done ; \\
+while sudo fuser /var/lib/apt/lists/lock >/dev/null 2>&1 ; do sleep 1 ; done ; \\
+if [ -f /var/log/unattended-upgrades/unattended-upgrades.log ]; then \\
+   while sudo fuser /var/log/unattended-upgrades/unattended-upgrades.log >/dev/null 2>&1 ; do sleep 1 ; done ; \\
+fi"""
+      try:
+         self.runInShell(commands)
+      except:
+         self.endBlock(False)
+         raise
+
+      self.endBlock()
+
+
    # ###### Test networking #################################################
    def aptInstallPackages(self, packages, update = True):
       if len(packages) > 0:

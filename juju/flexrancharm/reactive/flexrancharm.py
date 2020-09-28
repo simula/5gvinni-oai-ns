@@ -110,6 +110,7 @@ def prepare_flexran_build():
       vduHelper.beginBlock('Preparing system')
       vduHelper.configureInterface(flexranService_IfName, configurationService, 61)
       vduHelper.testNetworking('8.8.8.8')
+      vduHelper.waitForPackageUpdatesToComplete()
       vduHelper.endBlock()
 
       # ====== Prepare sources ==============================================
