@@ -97,6 +97,7 @@ def prepare_cassandra_hss_build():
       vduHelper.beginBlock('Preparing system')
       vduHelper.configureInterface(hssS6a_IfName, configurationS6a, 61)
       vduHelper.testNetworking('8.8.8.8')
+      vduHelper.waitForPackageUpdatesToComplete()
       commands = "if [ \\\"`find /etc/apt/sources.list.d -name 'rmescandon-ubuntu-yq-*.list'`\\\" == \\\"\\\" ] ; then sudo add-apt-repository -y ppa:rmescandon/yq ; fi"
       vduHelper.runInShell(commands)
       vduHelper.aptInstallPackages([ 'yq' ])
