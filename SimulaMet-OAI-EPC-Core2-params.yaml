@@ -31,7 +31,7 @@ additionalParamsForVnf:
   - member-vnf-index: '1'
     additionalParams:
       # ====== HSS ==========================================================
-      hss_git_repository: 'https://github.com/OPENAIRINTERFACE/openair-cn.git'
+      hss_git_repository: 'https://github.com/simula/openairinterface-openair-cn.git'
       hss_git_commit: 'dreibh/cassandra-build-fix-03sep2020'
       hss_S6a_address: '172.16.6.129'
       network_realm: 'oslomet.nornet'
@@ -43,7 +43,7 @@ additionalParamsForVnf:
 
       # ====== MME ==========================================================
       # !!! Mosaic5G branch seems to be required !!!
-      # mme_git_repository: 'https://github.com/OPENAIRINTERFACE/openair-cn.git'
+      # mme_git_repository: 'https://github.com/simula/openairinterface-openair-cn.git'
       # mme_git_commit: '2020.w13'
       mme_git_repository: 'https://github.com/simula/mosaic5g-openair-cn.git'
       mme_git_commit: 'dreibh/mosaic5g'
@@ -58,14 +58,14 @@ additionalParamsForVnf:
       network_mnc: '89'
 
       # ====== SPGW_C =======================================================
-      spgwc_git_repository: 'https://github.com/OPENAIRINTERFACE/openair-cn-cups.git'
+      spgwc_git_repository: 'https://github.com/simula/openairinterface-openair-cn-cups.git'
       spgwc_git_commit: '2019.w47'
       spgwc_S11_ipv4_interface: '172.16.1.104/24'
       network_ipv4_dns1: '10.1.1.1'
       network_ipv4_dns2: '10.1.2.1'
 
       # ====== SPGW_U =======================================================
-      spgwu_git_repository: 'https://github.com/OPENAIRINTERFACE/openair-cn-cups.git'
+      spgwu_git_repository: 'https://github.com/simula/openairinterface-openair-cn-cups.git'
       spgwu_git_commit: 'dreibh/tx-checksum-ip-generic-off'
       spgwu_S1U_ipv4_interface: '192.168.250.159/24'
       spgwu_S1U_ipv4_gateway: '0.0.0.0'
