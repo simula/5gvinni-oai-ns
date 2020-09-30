@@ -9,7 +9,7 @@
 # =====================================================================
 #
 # SimulaMet OpenAirInterface Evolved Packet Core NS
-# Copyright (C) 2019 by Thomas Dreibholz
+# Copyright (C) 2019-2020 by Thomas Dreibholz
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -44,25 +44,25 @@ nsd:nsd-catalog:
       # ###### VLDs #########################################################
       vld:
         # ====== Management =================================================
-        - id: SimulaMet-OAI-EPC_nsd-mgmt
-          name: management
-          short-name: management
+        - id: SimulaMet-OAI-EPC_nsd-Management
+          name: SimulaMet-OAI-EPC_nsd-Management
+          short-name: SimulaMet-OAI-EPC_nsd-Management
           mgmt-network: 'true'
           type: ELAN
           vim-network-name: mgmt
           vnfd-connection-point-ref:
             - member-vnf-index-ref: 1
               vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
-              vnfd-connection-point-ref: mme-mgmt
+              vnfd-connection-point-ref: mme-mgmt-cp
             - member-vnf-index-ref: 1
               vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
-              vnfd-connection-point-ref: hss-mgmt
+              vnfd-connection-point-ref: hss-mgmt-cp
             - member-vnf-index-ref: 1
               vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
-              vnfd-connection-point-ref: spgwc-mgmt
+              vnfd-connection-point-ref: spgwc-mgmt-cp
             - member-vnf-index-ref: 1
               vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
-              vnfd-connection-point-ref: spgwu-mgmt
+              vnfd-connection-point-ref: spgwu-mgmt-cp
 
         # ====== S1-C =======================================================
         - id: SimulaMet-OAI-EPC_nsd-S1C
@@ -73,8 +73,8 @@ nsd:nsd-catalog:
           vnfd-connection-point-ref:
             - member-vnf-index-ref: 1
               vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
-              vnfd-connection-point-ref: mme-s1c
-              ip-address: 192.168.247.102
+              vnfd-connection-point-ref: mme-s1c-cp
+              #ip-address: 192.168.247.102
 
         # ====== S1-U =======================================================
         - id: SimulaMet-OAI-EPC_nsd-S1U
@@ -85,8 +85,8 @@ nsd:nsd-catalog:
           vnfd-connection-point-ref:
             - member-vnf-index-ref: 1
               vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
-              vnfd-connection-point-ref: spgwu-s1u
-              ip-address: 192.168.248.159
+              vnfd-connection-point-ref: spgwu-s1u-cp
+              #ip-address: 192.168.248.159
 
         # ====== SGi ========================================================
         - id: SimulaMet-OAI-EPC_nsd-SGi
@@ -97,4 +97,4 @@ nsd:nsd-catalog:
           vnfd-connection-point-ref:
             - member-vnf-index-ref: 1
               vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
-              vnfd-connection-point-ref: spgwu-sgi
+              vnfd-connection-point-ref: spgwu-sgi-cp

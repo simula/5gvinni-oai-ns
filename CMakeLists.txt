@@ -9,7 +9,7 @@
 # =====================================================================
 #
 # SimulaMet OpenAirInterface Evolved Packet Core VNF and NS
-# Copyright (C) 2019 by Thomas Dreibholz
+# Copyright (C) 2019-2020 by Thomas Dreibholz
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -39,6 +39,10 @@ PROJECT(SimulaMet-OAI-EPC C)
 # OPTIONS
 #############################################################################
 
+# Installed scripts:
+# SET(VALIDATE_DESCRIPTOR_SCRIPT "/usr/share/osm-devops/descriptor-packages/tools/validate_descriptor.py")
+# SET(GENERATE_DESCRIPTOR_SCRIPT "/usr/share/osm-devops/descriptor-packages/tools/generate_descriptor_pkg.sh")
+# Local scripts (NOTE: make sure to use scripts compatible with the current OSM setup!):
 SET(VALIDATE_DESCRIPTOR_SCRIPT "devops/descriptor-packages/tools/validate_descriptor.py")
 SET(GENERATE_DESCRIPTOR_SCRIPT "devops/descriptor-packages/tools/generate_descriptor_pkg.sh")
 
@@ -63,8 +67,9 @@ EXECUTE_PROCESS(COMMAND git ls-files
 MESSAGE("NSDs: ${NSD_LIST}")
 
 # Automatically obtain list of charms:
-SET(CHARMS_SOURCE_DIRECTORY "juju/")
-SET(CHARMS_BUILD_DIRECTORY  ".build/")
+SET(CHARMS_BASELAYERS_DIRECTORY "${CMAKE_SOURCE_DIR}/baselayers/")
+SET(CHARMS_SOURCE_DIRECTORY     "${CMAKE_SOURCE_DIR}/juju/")
+SET(CHARMS_BUILD_DIRECTORY      ".build/")
 EXECUTE_PROCESS(COMMAND git ls-files
                 COMMAND cut -d/ -f1
                 COMMAND sort -u
@@ -79,19 +84,24 @@ MESSAGE("Charms: ${CHARM_SOURCE_LIST}")
 # REQUIREMENTS
 #############################################################################
 
+FIND_PROGRAM(CHARM charm)
+IF(NOT CHARM)
+   MESSAGE(FATAL_ERROR "charm (Ubuntu: sudo snap install charm --classic) not found!")
+ENDIF()
+
 FIND_PROGRAM(YAMLLINT yamllint)
 IF(NOT YAMLLINT)
-   MESSAGE(FATAL_ERROR "yamllint (Ubuntu/Debian: yamllint) not found!")
+   MESSAGE(FATAL_ERROR "yamllint (Ubuntu: sudo apt install -y yamllint) not found!")
 ENDIF()
 
 FIND_PROGRAM(VALIDATE_DESCRIPTOR ${VALIDATE_DESCRIPTOR_SCRIPT})
 IF(NOT VALIDATE_DESCRIPTOR)
-   MESSAGE(FATAL_ERROR "validate_descriptor.py (${VALIDATE_DESCRIPTOR_SCRIPT}) not found!")
+   MESSAGE(FATAL_ERROR "validate_descriptor.py (Ubuntu: sudo apt install -y osm-devops python-osm-im) not found!")
 ENDIF()
 
 FIND_PROGRAM(GENERATE_DESCRIPTOR ${GENERATE_DESCRIPTOR_SCRIPT})
 IF(NOT GENERATE_DESCRIPTOR)
-   MESSAGE(FATAL_ERROR "validate_descriptor.py (${GENERATE_DESCRIPTOR_SCRIPT}) not found!")
+   MESSAGE(FATAL_ERROR "validate_descriptor.py (Ubuntu: sudo apt install -y osm-devops python-osm-im) not found!")
 ENDIF()
 
 
@@ -127,7 +137,7 @@ ENDFUNCTION()
 
 
 # ###### Validate YAML ######################################################
-EXECUTE_PROCESS(COMMAND git ls-files ${vnfd}
+EXECUTE_PROCESS(COMMAND git ls-files .
                 COMMAND grep -E ".yaml$"
                 COMMAND tr "\n" ";"
                 COMMAND sed -e "s/;$//g"
@@ -138,7 +148,8 @@ FOREACH(yamlFile IN LISTS yamlFiles)
 
    SET(timestampFile ".${validate_yaml}.stamp")
    ADD_CUSTOM_COMMAND(OUTPUT ${timestampFile}
-                      COMMAND ${YAMLLINT} -d '{extends: default, rules: {document-start: {present: no}}}' ${yamlFile}
+                      # COMMAND ${YAMLLINT} -d '{extends: default, rules: {document-start: {present: no}, line-length: {max: 80, allow-non-breakable-words: true, allow-non-breakable-inline-mappings: true}}}' ${yamlFile}
+                      COMMAND ${YAMLLINT} -d '{extends: default, rules: {document-start: {present: no}, line-length: {max: 4096}, comments-indentation: disable}}' ${yamlFile}
                       COMMAND touch ${timestampFile}
                       DEPENDS ${yamlFile})
    ADD_CUSTOM_TARGET(${validate_yaml} DEPENDS ${timestampFile})
@@ -147,11 +158,20 @@ FOREACH(yamlFile IN LISTS yamlFiles)
 ENDFOREACH()
 
 
+# ###### VDUHelper ##########################################################
+EXECUTE_PROCESS(COMMAND git ls-files vduhelper
+                COMMAND grep -v "README$"
+                COMMAND sed -e "s#^#${CMAKE_SOURCE_DIR}/#g"
+                COMMAND tr "\n" ";"
+                COMMAND sed -e "s/;$//g"
+                OUTPUT_VARIABLE vduHelperFiles OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+
 # ###### Generate Juju Charms ###############################################
-FILE(MAKE_DIRECTORY ${CHARMS_BUILD_DIRECTORY})
+GET_FILENAME_COMPONENT(charmBuildDirectory ${CHARMS_BUILD_DIRECTORY} ABSOLUTE)
+FILE(MAKE_DIRECTORY ${charmBuildDirectory})
 FOREACH(charmName IN LISTS CHARM_SOURCE_LIST)
    GET_FILENAME_COMPONENT(charmInputDirectory  ${CHARMS_SOURCE_DIRECTORY}/${charmName} ABSOLUTE)
-   GET_FILENAME_COMPONENT(charmBuildDirectory  ${CHARMS_BUILD_DIRECTORY}               ABSOLUTE)
    GET_FILENAME_COMPONENT(charmOutputDirectory ${charmBuildDirectory}/${charmName}     ABSOLUTE)
    EXECUTE_PROCESS(COMMAND git ls-files ${charmInputDirectory}
                    COMMAND tr "\n" ";"
@@ -161,13 +181,17 @@ FOREACH(charmName IN LISTS CHARM_SOURCE_LIST)
    makeUniqueTarget(generate_charm "generate_${charmName}")
    SET(timestampFile "${charmOutputDirectory}.stamp")
    ADD_CUSTOM_COMMAND(OUTPUT  ${timestampFile}
+                      COMMAND echo cp ${vduHelperFiles} ${charmInputDirectory}
+                      COMMAND cp ${vduHelperFiles} ${charmInputDirectory}/reactive
                       COMMAND rm -rf ${charmOutputDirectory}
-                      COMMAND charm build --build-dir ${charmBuildDirectory}
+                      COMMAND pwd
+                      COMMAND echo env CHARM_LAYERS_DIR=${CHARMS_BASELAYERS_DIRECTORY} ${CHARM} build --build-dir ${charmBuildDirectory}
+                      COMMAND env CHARM_LAYERS_DIR=${CHARMS_BASELAYERS_DIRECTORY} ${CHARM} build --build-dir ${charmBuildDirectory}
                       # FIXME!
                       # COMMAND sed -e "s#^import shlex#import shlex\\\\nimport traceback#g" -i ${charmOutputDirectory}/lib/charms/sshproxy.py
                       COMMAND touch ${timestampFile}
                       WORKING_DIRECTORY ${charmInputDirectory}
-                      DEPENDS ${charmInputFiles})
+                      DEPENDS ${charmInputFiles} ${vduHelperFiles} ${allYAMLs})
    ADD_CUSTOM_TARGET(${generate_charm} DEPENDS ${timestampFile})
 ENDFOREACH()
 
@@ -191,8 +215,8 @@ FOREACH(vnfd IN LISTS VNFD_LIST)
                          COMMAND rm -rf ${charmCopyDirectory}
                          COMMAND mkdir -p ${charmCopyDirectory}
                          COMMAND cp -a ${charmOutputDirectory}/* ${charmCopyDirectory}/
-                         DEPENDS ${charmOutputDirectory}/version)
-      ADD_CUSTOM_TARGET(${generate_vnfd_charm} DEPENDS ${charmCopyDirectory}/version ${allYAMLs} ${generate_charm})
+                         DEPENDS ${generate_charm} ${charmOutputDirectory}.stamp)
+      ADD_CUSTOM_TARGET(${generate_vnfd_charm} DEPENDS ${charmCopyDirectory}/version)
       LIST(APPEND allCharmsInVNFD ${generate_vnfd_charm})
    ENDFOREACH()
 
@@ -227,9 +251,8 @@ FOREACH(vnfd IN LISTS VNFD_LIST)
                       COMMAND ${VALIDATE_DESCRIPTOR} ${vnfdDefinition}
                       COMMAND ${GENERATE_DESCRIPTOR} -t vnfd -N ${vnfd}/
                       COMMAND du -k ${vnfdPackage}
-                      DEPENDS ${vnfdFiles})
-   ADD_CUSTOM_TARGET(${generate_vnfdPackage}
-                     DEPENDS ${vnfdPackage} ${allYAMLs} ${allVNFDCloudInitFiles} ${allCharmsInVNFD})
+                      DEPENDS ${vnfdFiles} ${allYAMLs} ${allVNFDCloudInitFiles} ${allCharmsInVNFD})
+   ADD_CUSTOM_TARGET(${generate_vnfdPackage} DEPENDS ${vnfdPackage})
 
    LIST(APPEND allVNFDs ${generate_vnfdPackage})
 ENDFOREACH()
@@ -251,7 +274,6 @@ FOREACH(nsd IN LISTS NSD_LIST)
                       COMMAND ${VALIDATE_DESCRIPTOR} ${nsdDefinition}
                       COMMAND ${GENERATE_DESCRIPTOR} -t nsd -N ${nsd}/
                       COMMAND du -k ${nsdPackage}
-                      DEPENDS ${nsdFiles})
-   ADD_CUSTOM_TARGET(${generate_nsdPackage}
-                     ALL DEPENDS ${nsdPackage} ${allYAMLs} ${allVNFDs})
+                      DEPENDS ${nsdFiles} ${allYAMLs} ${allVNFDs})
+   ADD_CUSTOM_TARGET(${generate_nsdPackage} ALL DEPENDS ${nsdPackage})
 ENDFOREACH()

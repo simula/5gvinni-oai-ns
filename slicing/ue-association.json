@@ -1,0 +1,14 @@
+{
+  "ueConfig": [
+    {
+      "imsi": 242881234500003,
+      "dlSliceId": 2,
+      "ulSliceId": 2
+    },
+    {
+      "imsi": 242891234500000,
+      "dlSliceId": 0,
+      "ulSliceId": 0
+    }
+  ]
+}

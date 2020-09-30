@@ -1,0 +1,34 @@
+#!/bin/bash
+
+
+# Random byte:
+od -A n -t d -N 1 /dev/urandom
+
+
+# Uptime in h:
+cat /proc/uptime | gawk '{ uptime_h=$1/3600.0 } END { print uptime_h }'
+
+# Users:
+who | wc -l
+
+# Processes:
+ps ax | wc -l
+
+# CPU load 1min/5min/15min:
+cat /proc/loadavg | gawk '{ load1min_pct=100.0*$1 } END { print load1min_pct }'
+cat /proc/loadavg | gawk '{ load5min_pct=100.0*$2 } END { print load5min_pct }'
+cat /proc/loadavg | gawk '{ load15min_pct=100.0*$3 } END { print load15min_pct }'
+
+# Memory usage in percent:
+cat /proc/meminfo | gawk '/^MemTotal:/ { total=$2 } /^MemAvailable:/ { available=$2 } END { print 100.0*(total-available)/total }'
+# Swap usage in percent:
+cat /proc/meminfo | gawk '/^SwapTotal:/ { total=$2 } /^SwapFree:/ { available=$2 } END { print 100.0*(total-available)/total }'
+
+# Disk usage for /:
+df / | tail -n1 | gawk '{ total=$2 ; used=$3 ; available=$4 ; print 100.0*(total-available)/total }'
+
+# Network for ens3:
+cat /proc/net/dev | gawk '/ens3:/ { inB=$2 ; inP=$3 ; outB=$10 ; outP=$11 ; print inB }'
+cat /proc/net/dev | gawk '/ens3:/ { inB=$2 ; inP=$3 ; outB=$10 ; outP=$11 ; print inP }'
+cat /proc/net/dev | gawk '/ens3:/ { inB=$2 ; inP=$3 ; outB=$10 ; outP=$11 ; print outB }'
+cat /proc/net/dev | gawk '/ens3:/ { inB=$2 ; inP=$3 ; outB=$10 ; outP=$11 ; print outP }'

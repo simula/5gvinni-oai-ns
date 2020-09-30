@@ -11,7 +11,7 @@
 # =====================================================================
 #
 # SimulaMet OpenAirInterface Evolved Packet Core NS
-# Copyright (C) 2019 by Thomas Dreibholz
+# Copyright (C) 2019-2020 by Thomas Dreibholz
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,10 +28,11 @@
 #
 # Contact: dreibh@simula.no
 
+
 from charmhelpers.core.hookenv import (
-    action_get,
-    action_fail,
-    action_set,
+    function_get,
+    function_fail,
+    function_set,
     status_set
 )
 from charms.reactive import (
@@ -40,75 +41,28 @@ from charms.reactive import (
     when,
     when_not
 )
-import charms.sshproxy
 import subprocess
 import sys
 import traceback
 from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
 
+from . import VDUHelper
 
-# ###########################################################################
-# #### Helper functions                                                  ####
-# ###########################################################################
-
-# ###### Execute command ####################################################
-def execute(commands):
-   return charms.sshproxy._run(commands)
+vduHelper = VDUHelper.VDUHelper()
 
 
-# ######  Get /etc/network/interfaces setup for interface ###################
-def configureInterface(name,
-                       ipv4Interface = IPv4Interface('0.0.0.0/0'), ipv4Gateway = None,
-                       ipv6Interface = None,                       ipv6Gateway = None,
-                       metric = 1):
-
-   # NOTE:
-   # Double escaping is required for \ and " in "configuration" string!
-   # 1. Python
-   # 2. bash -c "<command>"
-
-   configuration = 'auto ' + name + '\\\\n'
-
-   # ====== IPv4 ============================================================
-   if ipv4Interface == IPv4Interface('0.0.0.0/0'):
-      configuration = configuration + 'iface ' + name + ' inet dhcp'
-   else:
-      configuration = configuration + \
-         'iface ' + name + ' inet static\\\\n' + \
-         '\\\\taddress ' + str(ipv4Interface.ip)      + '\\\\n' + \
-         '\\\\tnetmask ' + str(ipv4Interface.netmask) + '\\\\n'
-      if ((ipv4Gateway != None) and (ipv4Gateway != IPv4Address('0.0.0.0'))):
-         configuration = configuration + \
-            '\\\\tgateway ' + str(ipv4Gateway) + '\\\\n' + \
-            '\\\\tmetric '  + str(metric)      + '\\\\n'
-      configuration = configuration + '\\\\n'
-
-   # ====== IPv6 ============================================================
-   if ipv6Interface == None:
-      configuration = configuration + \
-         '\\\\niface ' + name + ' inet6 manual\\\\n' + \
-         '\\\\tautoconf 0\\\\n'
-   elif ipv6Interface == IPv6Interface('::/0'):
-      configuration = configuration + \
-         '\\\\niface ' + name + ' inet6 dhcp\\\\n' + \
-         '\\\\tautoconf 0\\\\n'
-   else:
-      configuration = configuration + \
-         '\\\\niface ' + name + ' inet6 static\\\\n' + \
-         '\\\\tautoconf 0\\\\n' + \
-         '\\\\taddress ' + str(ipv6Interface.ip)                + '\\\\n' + \
-         '\\\\tnetmask ' + str(ipv6Interface.network.prefixlen) + '\\\\n'
-      if ((ipv6Gateway != None) and (ipv6Gateway != IPv6Address('::'))):
-         configuration = configuration + \
-            '\\\\tgateway ' + str(ipv6Gateway) + '\\\\n' + \
-            '\\\\tmetric '  + str(metric)      + '\\\\n'
-
-   return configuration
+# ***************************************************************************
+# NOTE:
+# Double escaping is required for \ and " in command string!
+# 1. Python
+# 2. bash -c "<command>"
+# That is: $ => \$ ; \ => \\ ; " => \\\"
+# ***************************************************************************
 
 
 
 # ###########################################################################
-# #### Charm functions                                                   ####
+# #### HSS Charm functions                                               ####
 # ###########################################################################
 
 # ###### Installation #######################################################
@@ -116,7 +70,7 @@ def configureInterface(name,
 @when_not('hsscharm.installed')
 def install_hsscharm_proxy_charm():
    set_flag('hsscharm.installed')
-   status_set('active', 'Ready!')
+   vduHelper.setStatus('install_hsscharm_proxy_charm: SSH proxy charm is READY')
 
 
 # ###### prepare-cassandra-hss-build function ###############################
@@ -124,92 +78,85 @@ def install_hsscharm_proxy_charm():
 @when('hsscharm.installed')
 @when_not('hsscharm.prepared-cassandra-hss-build')
 def prepare_cassandra_hss_build():
-   status_set('active', 'prepare-cassandra-hss-build: preparing Cassandra/HSS build ...')
-
-   # ====== Install Cassandra and the HSS ===================================
-   # For a documentation of the installation procedure, see:
-   # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
-
-   gitRepository = 'https://github.com/OPENAIRINTERFACE/openair-cn.git'
-   gitDirectory  = 'openair-cn'
-   gitCommit     = 'develop'
-
-   # Prepare network configurations:
-   hssS6a_IfName    = 'ens4'
-   configurationS6a = configureInterface(hssS6a_IfName, IPv4Interface('0.0.0.0/0'))
-
-   # NOTE:
-   # Double escaping is required for \ and " in "command" string!
-   # 1. Python
-   # 2. bash -c "<command>"
-   # That is: $ => \$ ; \ => \\ ; " => \\\"
-
-   commands = """\
-echo \\\"###### Preparing system ###############################################\\\" && \\
-echo -e \\\"{configurationS6a}\\\" | sudo tee /etc/network/interfaces.d/61-{hssS6a_IfName} && sudo ifup {hssS6a_IfName} || true && \\
-if [ \\\"`find /etc/apt/sources.list.d -name 'rmescandon-ubuntu-yq-*.list'`\\\" == \\\"\\\" ] ; then sudo add-apt-repository -y ppa:rmescandon/yq ; fi && \\
-DEBIAN_FRONTEND=noninteractive sudo apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends yq && \\
-echo \\\"###### Preparing sources ##############################################\\\" && \\
-cd /home/nornetpp/src && \\
-if [ ! -d \\\"{gitDirectory}\\\" ] ; then git clone --quiet {gitRepository} {gitDirectory} && cd {gitDirectory} ; else cd {gitDirectory} && git pull ; fi && \\
-git checkout {gitCommit} && \\
-cd scripts && \\
-echo \\\"###### Done! ##########################################################\\\"""".format(
-      gitRepository    = gitRepository,
-      gitDirectory     = gitDirectory,
-      gitCommit        = gitCommit,
-      hssS6a_IfName    = hssS6a_IfName,
-      configurationS6a = configurationS6a
-   )
-
+   vduHelper.beginBlock('prepare_cassandra_hss_build')
    try:
-       stdout, stderr = execute(commands)
-   except subprocess.CalledProcessError as e:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       action_fail(message.encode('utf-8'))
-       status_set('active', 'prepare-cassandra-hss-build: preparing Cassandra/HSS build FAILED!')
-   except:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       action_fail('Command execution failed: ' + str(err))
-       status_set('active', 'prepare-cassandra-hss-build: preparing Cassandra/HSS build FAILED!')
-   else:
+
+      # ====== Get HSS parameters ===========================================
+      # For a documentation of the installation procedure, see:
+      # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
+
+      gitRepository = function_get('hss-git-repository')
+      gitCommit     = function_get('hss-git-commit')
+      gitDirectory  = 'openair-cn'
+
+      # Prepare network configuration:
+      hssS6a_IfName    = 'ens4'
+      configurationS6a = vduHelper.makeInterfaceConfiguration(hssS6a_IfName, IPv4Interface('0.0.0.0/0'))
+
+      # ====== Prepare system ===============================================
+      vduHelper.beginBlock('Preparing system')
+      vduHelper.configureInterface(hssS6a_IfName, configurationS6a, 61)
+      vduHelper.testNetworking('8.8.8.8')
+      vduHelper.waitForPackageUpdatesToComplete()
+      commands = "if [ \\\"`find /etc/apt/sources.list.d -name 'rmescandon-ubuntu-yq-*.list'`\\\" == \\\"\\\" ] ; then sudo add-apt-repository -y ppa:rmescandon/yq ; fi"
+      vduHelper.runInShell(commands)
+      vduHelper.aptInstallPackages([ 'yq' ])
+      vduHelper.endBlock()
+
+      # ====== Prepare sources ==============================================
+      vduHelper.beginBlock('Preparing sources')
+      vduHelper.fetchGitRepository(gitDirectory, gitRepository, gitCommit)
+      vduHelper.endBlock()
+
+
+      message = vduHelper.endBlock()
+      function_set( { 'outout': message } )
       set_flag('hsscharm.prepared-cassandra-hss-build')
+   except:
+      message = vduHelper.endBlockInException()
+      function_fail(message)
+   finally:
       clear_flag('actions.prepare-cassandra-hss-build')
-      action_set( { 'output': stdout.encode('utf-8') } )
-      status_set('active', 'prepare-cassandra-hss-build: preparing Cassandra/HSS build COMPLETED')
 
 
 # ###### configure-cassandra function #######################################
 @when('actions.configure-cassandra')
 @when('hsscharm.prepared-cassandra-hss-build')
 def configure_cassandra():
-   status_set('active', 'configure-cassandra: configuring Cassandra ...')
+   vduHelper.beginBlock('configure_cassandra')
+   try:
 
-   # ====== Install Cassandra and the HSS ===================================
-   # For a documentation of the installation procedure, see:
-   # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
+      # ====== Get HSS parameters ===========================================
+      # For a documentation of the installation procedure, see:
+      # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
 
-   gitDirectory      = 'openair-cn'
-   cassandraServerIP = '172.16.6.129'
+      gitDirectory      = 'openair-cn'
+      cassandraServerIP = function_get('cassandra-server-ip')
 
-   # NOTE:
-   # Double escaping is required for \ and " in "command" string!
-   # 1. Python
-   # 2. bash -c "<command>"
-   # That is: $ => \$ ; \ => \\ ; " => \\\"
+      # NOTE:
+      # Double escaping is required for \ and " in "command" string!
+      # 1. Python
+      # 2. bash -c "<command>"
+      # That is: $ => \$ ; \ => \\ ; " => \\\"
 
-   commands = """\
-echo \\\"###### Building Cassandra #############################################\\\" && \\
+      # ====== Build Cassandra ==============================================
+      vduHelper.beginBlock('Building Cassandra')
+      commands = """\
 export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
-cd /home/nornetpp/src && \\
-cd {gitDirectory} && \\
-cd scripts && \\
+cd /home/nornetpp/src/{gitDirectory}/scripts && \\
 mkdir -p logs && \\
 sudo rm -f /etc/apt/sources.list.d/cassandra.sources.list && \\
-./build_cassandra --check-installed-software --force >logs/build_cassandra.log 2>&1 && \\
+./build_cassandra --check-installed-software --force >logs/build_cassandra.log 2>&1""".format(
+         gitDirectory      = gitDirectory,
+         cassandraServerIP = cassandraServerIP
+      )
+      vduHelper.runInShell(commands)
+      vduHelper.endBlock()
+
+      # ====== Configure Cassandra ==========================================
+      vduHelper.beginBlock('Configuring Cassandra')
+      commands = """\
+cd /home/nornetpp/src/{gitDirectory}/scripts && \\
 sudo update-alternatives --set java /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java && \\
 sudo service cassandra stop && \\
 sudo rm -rf /var/lib/cassandra/data/system/* && \\
@@ -224,73 +171,95 @@ sudo yq w -i /etc/cassandra/cassandra.yaml \\\"rpc_address\\\" \\\"{cassandraSer
 sudo yq w -i /etc/cassandra/cassandra.yaml \\\"endpoint_snitch\\\" \\\"GossipingPropertyFileSnitch\\\" && \\
 sudo service cassandra start && \\
 sleep 10 && \\
-sudo service cassandra status | cat && \\
-echo \\\"###### Done! ##########################################################\\\"""".format(
-      gitDirectory      = gitDirectory,
-      cassandraServerIP = cassandraServerIP
-   )
+sudo service cassandra status | cat""".format(
+         gitDirectory      = gitDirectory,
+         cassandraServerIP = cassandraServerIP
+      )
+      vduHelper.runInShell(commands)
+      vduHelper.endBlock()
 
-   try:
-       stdout, stderr = execute(commands)
-   except subprocess.CalledProcessError as e:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       action_fail(message.encode('utf-8'))
-       status_set('active', 'confiigure-cassandra: configuring Cassandra FAILED!')
+
+      message = vduHelper.endBlock()
+      function_set( { 'outout': message } )
+      set_flag('hsscharm.configured-cassandra')
    except:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       action_fail('Command execution failed: ' + str(err))
-       status_set('active', 'confiigure-cassandra: configuring Cassandra FAILED!')
-   else:
+      message = vduHelper.endBlockInException()
+      function_fail(message)
+   finally:
       clear_flag('actions.configure-cassandra')
-      action_set( { 'output': stdout.encode('utf-8') } )
-      status_set('active', 'confiigure-cassandra: configuring Cassandra COMPLETED')
 
 
 # ###### configure-hss function #############################################
 @when('actions.configure-hss')
 @when('hsscharm.configured-cassandra')
 def configure_hss():
-   status_set('active', 'configure-hss: configuring HSS ...')
+   vduHelper.beginBlock('configure_hss')
+   try:
 
-   # ====== Install Cassandra and the HSS ===================================
-   # For a documentation of the installation procedure, see:
-   # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
+      # ====== Get HSS parameters ===========================================
+      # For a documentation of the installation procedure, see:
+      # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
 
-   gitDirectory       = 'openair-cn'
-   cassandraServerIP  = '172.16.6.129'
-   networkRealm       = 'simula.nornet'
-   networkLTE_K       = '449c4b91aeacd0ace182cf3a5a72bfa1'
-   networkOP_K        = '1006020f0a478bf6b699f15c062e42b3'
-   networkIMSIFirst   = '242881234500000'
-   networkMSISDNFirst = '24288880000000'
-   networkUsers       = 1024
+      gitDirectory       = 'openair-cn'
+      cassandraServerIP  = function_get('cassandra-server-ip')
+      networkRealm       = function_get('network-realm')
+      networkOP          = function_get('network-op')
+      networkK           = function_get('network-k')
+      networkIMSIFirst   = function_get('network-imsi-first')
+      networkMSISDNFirst = function_get('network-msisdn-first')
+      networkUsers       = int(function_get('network-users'))
 
-   # NOTE:
-   # Double escaping is required for \ and " in "command" string!
-   # 1. Python
-   # 2. bash -c "<command>"
-   # That is: $ => \$ ; \ => \\ ; " => \\\"
+      hssS6a_IPv4Address = IPv4Address(function_get('hss-S6a-address'))
+      mmeS6a_IPv4Address = IPv4Address(function_get('mme-S6a-address'))
 
-   commands = """\
-echo \\\"###### Building HSS ###################################################\\\" && \\
+      # ====== Build HSS dependencies =======================================
+      vduHelper.beginBlock('Building HSS dependencies')
+      commands = """\
 export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
-cd /home/nornetpp/src && \\
-cd {gitDirectory} && \\
-cd scripts && \\
+cd /home/nornetpp/src/{gitDirectory}/scripts && \\
 mkdir -p logs && \\
-echo \\\"====== Building dependencies ... ======\\\" && \\
-./build_hss_rel14 --check-installed-software --force >logs/build_hss_rel14-1.log 2>&1 && \\
-echo \\\"====== Building service ... ======\\\" && \\
+./build_hss_rel14 --check-installed-software --force >logs/build_hss_rel14-1.log 2>&1""".format(gitDirectory = gitDirectory)
+      vduHelper.runInShell(commands)
+      vduHelper.endBlock()
+
+      # ====== Build HSS itself =============================================
+      vduHelper.beginBlock('Building HSS itself')
+      commands = """\
+export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
+cd /home/nornetpp/src/{gitDirectory}/scripts && \\
 ./build_hss_rel14 --clean >logs/build_hss_rel14-2.log 2>&1 && \\
-cqlsh --file ../src/hss_rel14/db/oai_db.cql {cassandraServerIP} && \\
-echo \\\"====== Provisioning users ... ======\\\" && \\
-./data_provisioning_users --apn default.{networkRealm} --apn2 internet.{networkRealm} --key {networkLTE_K} --imsi-first {networkIMSIFirst} --msisdn-first {networkMSISDNFirst} --mme-identity mme.{networkRealm} --no-of-users {networkUsers} --realm {networkRealm} --truncate True  --verbose True --cassandra-cluster {cassandraServerIP} >logs/data_provisioning_users.log 2>&1 && \\
-echo \\\"====== Provisioning MME ... ======\\\" && \\
-./data_provisioning_mme --id 3 --mme-identity mme.{networkRealm} --realm {networkRealm} --ue-reachability 1 --truncate True  --verbose True -C {cassandraServerIP} >logs/data_provisioning_mme.log 2>&1 && \\
-echo \\\"###### Creating HSS configuration files ###############################\\\" && \\
+cqlsh --file ../src/hss_rel14/db/oai_db.cql {cassandraServerIP} >logs/oai_db.log 2>&1""".format(
+         gitDirectory       = gitDirectory,
+         cassandraServerIP  = cassandraServerIP
+      )
+      vduHelper.runInShell(commands)
+      vduHelper.endBlock()
+
+
+      # ====== Provision users and MME ======================================
+      vduHelper.beginBlock('Provisioning users and MME')
+      commands = """\
+cd /home/nornetpp/src/{gitDirectory}/scripts && \\
+./data_provisioning_users --apn default.{networkRealm} --apn2 internet.{networkRealm} --key {networkK} --imsi-first {networkIMSIFirst} --msisdn-first {networkMSISDNFirst} --mme-identity mme.{networkRealm} --no-of-users {networkUsers} --realm {networkRealm} --truncate True  --verbose True --cassandra-cluster {cassandraServerIP} >logs/data_provisioning_users.log 2>&1 && \\
+./data_provisioning_mme --id 3 --mme-identity mme.{networkRealm} --realm {networkRealm} --ue-reachability 1 --truncate True  --verbose True -C {cassandraServerIP} >logs/data_provisioning_mme.log 2>&1""".format(
+         gitDirectory       = gitDirectory,
+         cassandraServerIP  = cassandraServerIP,
+         networkRealm       = networkRealm,
+         networkOP          = networkOP,
+         networkK           = networkK,
+         networkIMSIFirst   = networkIMSIFirst,
+         networkMSISDNFirst = networkMSISDNFirst,
+         networkUsers       = networkUsers
+      )
+      vduHelper.runInShell(commands)
+      vduHelper.endBlock()
+
+      # ====== Configure HSS ================================================
+      vduHelper.beginBlock('Configuring HSS')
+      commands = """\
+cd /home/nornetpp/src/{gitDirectory}/scripts && \\
+echo \\\"{hssS6a_IPv4Address}   hss.{networkRealm} hss\\\" | sudo tee -a /etc/hosts && \\
+echo \\\"{mmeS6a_IPv4Address}   mme.{networkRealm} mme\\\" | sudo tee -a /etc/hosts && \\
 openssl rand -out \$HOME/.rnd 128 && \\
 echo \\\"====== Configuring Diameter ... ======\\\" && \\
 PREFIX='/usr/local/etc/oai' && \\
@@ -306,46 +275,80 @@ HSS_CONF[@REALM@]='{networkRealm}' && \\
 HSS_CONF[@HSS_FQDN@]='hss.{networkRealm}' && \\
 HSS_CONF[@cassandra_Server_IP@]='{cassandraServerIP}' && \\
 HSS_CONF[@cassandra_IP@]='{cassandraServerIP}' && \\
-HSS_CONF[@OP_KEY@]='{networkOP_K}' && \\
+HSS_CONF[@OP_KEY@]='{networkOP}' && \\
 HSS_CONF[@ROAMING_ALLOWED@]='true' && \\
 for K in \\\"\${{!HSS_CONF[@]}}\\\"; do echo \\\"K=\$K ...\\\" && sudo egrep -lRZ \\\"\$K\\\" \$PREFIX | xargs -0 -l sudo sed -i -e \\\"s|\$K|\${{HSS_CONF[\$K]}}|g\\\" ; done && \\
 ../src/hss_rel14/bin/make_certs.sh hss {networkRealm} \$PREFIX && \\
 echo \\\"====== Updating key ... ======\\\" && \\
-oai_hss -j \$PREFIX/hss_rel14.json --onlyloadkey >logs/onlyloadkey.log 2>&1 && \\
-echo \\\"###### Done! ##########################################################\\\"""".format(
-      gitDirectory       = gitDirectory,
-      cassandraServerIP  = cassandraServerIP,
-      networkRealm       = networkRealm,
-      networkLTE_K       = networkLTE_K,
-      networkOP_K        = networkOP_K,
-      networkIMSIFirst   = networkIMSIFirst,
-      networkMSISDNFirst = networkMSISDNFirst,
-      networkUsers       = networkUsers
-   )
+oai_hss -j \$PREFIX/hss_rel14.json --onlyloadkey >logs/onlyloadkey.log 2>&1""".format(
+         gitDirectory       = gitDirectory,
+         cassandraServerIP  = cassandraServerIP,
+         hssS6a_IPv4Address = hssS6a_IPv4Address,
+         mmeS6a_IPv4Address = mmeS6a_IPv4Address,
+         networkRealm       = networkRealm,
+         networkOP          = networkOP,
+         networkK           = networkK,
+         networkIMSIFirst   = networkIMSIFirst,
+         networkMSISDNFirst = networkMSISDNFirst,
+         networkUsers       = networkUsers
+      )
+      vduHelper.runInShell(commands)
+      vduHelper.endBlock()
 
-   try:
-       stdout, stderr = execute(commands)
-   except subprocess.CalledProcessError as e:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       action_fail(message.encode('utf-8'))
-       status_set('active', 'confiigure-hss: configuring HSS FAILED!')
+      # ====== Set up HSS service ===========================================
+      vduHelper.beginBlock('Setting up HSS service')
+      commands = """\
+( echo \\\"[Unit]\\\" && \\
+echo \\\"Description=Home Subscriber Server (HSS)\\\" && \\
+echo \\\"After=ssh.target\\\" && \\
+echo \\\"\\\" && \\
+echo \\\"[Service]\\\" && \\
+echo \\\"ExecStart=/bin/sh -c \\\'exec /usr/local/bin/oai_hss -j /usr/local/etc/oai/hss_rel14.json >>/var/log/hss.log 2>&1\\\'\\\" && \\
+echo \\\"KillMode=process\\\" && \\
+echo \\\"Restart=on-failure\\\" && \\
+echo \\\"RestartPreventExitStatus=255\\\" && \\
+echo \\\"WorkingDirectory=/home/nornetpp/src/openair-cn/scripts\\\" && \\
+echo \\\"\\\" && \\
+echo \\\"[Install]\\\" && \\
+echo \\\"WantedBy=multi-user.target\\\" ) | sudo tee /lib/systemd/system/hss.service && \\
+sudo systemctl daemon-reload && \\
+( echo -e \\\"#\\x21/bin/sh\\\" && echo \\\"tail -f /var/log/hss.log\\\" ) | tee /home/nornetpp/log && \\
+chmod +x /home/nornetpp/log && \\
+( echo -e \\\"#\\x21/bin/sh\\\" && echo \\\"sudo service hss restart && ./log\\\" ) | tee /home/nornetpp/restart && \\
+chmod +x /home/nornetpp/restart"""
+      vduHelper.runInShell(commands)
+      vduHelper.endBlock()
+
+      # ====== Set up sysstat service =======================================
+      vduHelper.installSysStat()
+
+      # ====== Clean up =====================================================
+      vduHelper.cleanUp()
+
+      message = vduHelper.endBlock()
+      function_set( { 'outout': message } )
+      set_flag('hsscharm.configured-hss')
    except:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       action_fail('Command execution failed: ' + str(err))
-       status_set('active', 'confiigure-hss: configuring HSS FAILED!')
-   else:
+      message = vduHelper.endBlockInException()
+      function_fail(message)
+   finally:
       clear_flag('actions.configure-hss')
-      action_set( { 'output': stdout.encode('utf-8') } )
-      status_set('active', 'confiigure-hss: configuring HSS COMPLETED')
 
 
 # ###### restart-hss function ###############################################
 @when('actions.restart-hss')
 @when('hsscharm.configured-hss')
 def restart_hss():
-   commands = 'touch /tmp/restart-hss'
-   if execute(commands) == True:
+   vduHelper.beginBlock('restart_hss')
+   try:
+
+      commands = 'sudo service hss restart'
+      vduHelper.runInShell(commands)
+
+      message = vduHelper.endBlock()
+      function_set( { 'outout': message } )
+   except:
+      message = vduHelper.endBlockInException()
+      function_fail(message)
+   finally:
       clear_flag('actions.restart-hss')

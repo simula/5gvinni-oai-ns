@@ -1,0 +1,44 @@
+{
+  "ul": {
+    "algorithm": "Static",
+    "slices": [
+      {
+        "id": 0,
+        "label": "default",
+        "static": {
+          "posLow": 1,
+          "posHigh": 12
+        }
+      },
+      {
+        "id": 2,
+        "label": "two",
+        "static": {
+          "posLow": 13,
+          "posHigh": 23
+        }
+      }
+    ]
+  },
+  "dl": {
+    "algorithm": "Static",
+    "slices": [
+      {
+        "id": 0,
+        "label": "default",
+        "static": {
+          "posLow": 0,
+          "posHigh": 5
+        }
+      },
+      {
+        "id": 2,
+        "label": "two",
+        "static": {
+          "posLow": 6,
+          "posHigh": 12
+        }
+      }
+    ]
+  }
+}

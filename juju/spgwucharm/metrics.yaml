@@ -1,0 +1,121 @@
+metrics:
+   # ====== System metrics ==================================================
+   system_random:
+      type: gauge
+      description: "just a random byte"
+      command: od -A n -t d -N 1 /dev/urandom
+   system_uptime:
+      type: gauge
+      description: "Uptime in h"
+      command: cat /proc/uptime | gawk '{ uptime_h=$1/3600.0 } END { print uptime_h }'
+   system_users:
+      type: gauge
+      description: "Number of users"
+      command: who|wc -l
+
+   # ====== CPU metrics =====================================================
+   cpu_processes:
+      type: gauge
+      description: "Number of processes"
+      command: ps ax | wc -l
+   cpu_load_current:
+      type: gauge
+      description: "current load in percent"
+      command: env LANG=C top -b -n 2 | grep '^%Cpu' | tail -n1 | sed -e 's#^.* \([0-9]*\)[\.,]\([0-9]*[ \t]*\) id.*$#100.0-\1.\2#g' | bc
+   cpu_load_1min:
+      type: gauge
+      description: "1 minute load average in percent"
+      command: cat /proc/loadavg | gawk '{ load1min_pct=100.0*$1 } END { print load1min_pct }'
+   cpu_load_5min:
+      type: gauge
+      description: "5 minute load average in percent"
+      command: cat /proc/loadavg | gawk '{ load5min_pct=100.0*$2 } END { print load5min_pct }'
+   cpu_load_15min:
+      type: gauge
+      description: "15 minute load average in percent"
+      command: cat /proc/loadavg | gawk '{ load15min_pct=100.0*$3 } END { print load15min_pct }'
+
+   # ====== Memory metrics ==================================================
+   memory_ram_usage:
+      type: gauge
+      description: "RAM memory usage in percent"
+      command: cat /proc/meminfo | gawk '/^MemTotal:/ { total=$2 } /^MemAvailable:/ { available=$2 } END { print 100.0*(total-available)/total }'
+   memory_swap_usage:
+      type: gauge
+      description: "Swap memory usage in percent"
+      command: cat /proc/meminfo | gawk '/^SwapTotal:/ { total=$2 } /^SwapFree:/ { available=$2 } END { print 100.0*(total-available)/total }'
+
+   # ====== Disk metrics ====================================================
+   disk_usage:
+      type: gauge
+      description: "Disk usage for / in percent"
+      command: df / | tail -n1 | gawk '{ total=$2 ; used=$3 ; available=$4 ; print 100.0*(total-available)/total }'
+
+   # ====== Network metrics =================================================
+   network_mgmt_bytes_in:
+      type: gauge
+      description: "Bytes received on mgmt interface ens3"
+      command: cat /proc/net/dev | gawk '/ens3:/ { inB=$2 ; inP=$3 ; outB=$10 ; outP=$11 ; print inB }'
+   network_mgmt_packets_in:
+      type: gauge
+      description: "Packets received on mgmt interface ens3"
+      command: cat /proc/net/dev | gawk '/ens3:/ { inB=$2 ; inP=$3 ; outB=$10 ; outP=$11 ; print inP }'
+   network_mgmt_bytes_out:
+      type: gauge
+      description: "Bytes sent on mgmt interface ens3"
+      command: cat /proc/net/dev | gawk '/ens3:/ { inB=$2 ; inP=$3 ; outB=$10 ; outP=$11 ; print outB }'
+   network_mgmt_packets_out:
+      type: gauge
+      description: "Packets sent on mgmt interface ens3"
+      command: cat /proc/net/dev | gawk '/ens3:/ { inB=$2 ; inP=$3 ; outB=$10 ; outP=$11 ; print outP }'
+
+   network_SXab_bytes_in:
+      type: gauge
+      description: "Bytes received on SXab interface ens4"
+      command: cat /proc/net/dev | gawk '/ens4:/ { inB=$2 ; inP=$3 ; outB=$10 ; outP=$11 ; print inB }'
+   network_SXab_packets_in:
+      type: gauge
+      description: "Packets received on SXab interface ens4"
+      command: cat /proc/net/dev | gawk '/ens4:/ { inB=$2 ; inP=$3 ; outB=$10 ; outP=$11 ; print inP }'
+   network_SXab_bytes_out:
+      type: gauge
+      description: "Bytes sent on SXab interface ens4"
+      command: cat /proc/net/dev | gawk '/ens4:/ { inB=$2 ; inP=$3 ; outB=$10 ; outP=$11 ; print outB }'
+   network_SXab_packets_out:
+      type: gauge
+      description: "Packets sent on SXab interface ens4"
+      command: cat /proc/net/dev | gawk '/ens4:/ { inB=$2 ; inP=$3 ; outB=$10 ; outP=$11 ; print outP }'
+
+   network_S1U_bytes_in:
+      type: gauge
+      description: "Bytes received on S1U interface ens5"
+      command: cat /proc/net/dev | gawk '/ens5:/ { inB=$2 ; inP=$3 ; outB=$10 ; outP=$11 ; print inB }'
+   network_S1U_packets_in:
+      type: gauge
+      description: "Packets received on S1U interface ens5"
+      command: cat /proc/net/dev | gawk '/ens5:/ { inB=$2 ; inP=$3 ; outB=$10 ; outP=$11 ; print inP }'
+   network_S1U_bytes_out:
+      type: gauge
+      description: "Bytes sent on S1U interface ens5"
+      command: cat /proc/net/dev | gawk '/ens5:/ { inB=$2 ; inP=$3 ; outB=$10 ; outP=$11 ; print outB }'
+   network_S1U_packets_out:
+      type: gauge
+      description: "Packets sent on S1U interface ens5"
+      command: cat /proc/net/dev | gawk '/ens5:/ { inB=$2 ; inP=$3 ; outB=$10 ; outP=$11 ; print outP }'
+
+   network_SGi_bytes_in:
+      type: gauge
+      description: "Bytes received on SGi interface ens6"
+      command: cat /proc/net/dev | gawk '/ens6:/ { inB=$2 ; inP=$3 ; outB=$10 ; outP=$11 ; print inB }'
+   network_SGi_packets_in:
+      type: gauge
+      description: "Packets received on SGi interface ens6"
+      command: cat /proc/net/dev | gawk '/ens6:/ { inB=$2 ; inP=$3 ; outB=$10 ; outP=$11 ; print inP }'
+   network_SGi_bytes_out:
+      type: gauge
+      description: "Bytes sent on SGi interface ens6"
+      command: cat /proc/net/dev | gawk '/ens6:/ { inB=$2 ; inP=$3 ; outB=$10 ; outP=$11 ; print outB }'
+   network_SGi_packets_out:
+      type: gauge
+      description: "Packets sent on SGi interface ens6"
+      command: cat /proc/net/dev | gawk '/ens6:/ { inB=$2 ; inP=$3 ; outB=$10 ; outP=$11 ; print outP }'

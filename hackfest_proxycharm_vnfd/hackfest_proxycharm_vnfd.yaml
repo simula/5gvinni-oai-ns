@@ -3,7 +3,7 @@ vnfd:vnfd-catalog:
     - id: hackfest_proxycharm_vnfd
       name: hackfest_proxycharm_vnfd
       short-name: hackfest_proxycharm_vnfd
-      version: '1.0'
+      version: '1.1'
       description: |
         A VNF consisting of 1 VDU connected to two external VL, and one for
         data and another one for management
@@ -22,12 +22,12 @@ vnfd:vnfd-catalog:
       vdu:
         - id: mgmtVM
           name: mgmtVM
-          image: Template-Ubuntu-5gVINNI-Development-Bionic
+          image: 5gVINNI-OpenStack-Ubuntu-20.04-LTS
           count: '1'
           vm-flavor:
             vcpu-count: '1'
             memory-mb: '1024'
-            storage-gb: '10'
+            storage-gb: '16'
           interface:
             - name: mgmtVM-eth0
               position: '1'
@@ -42,28 +42,159 @@ vnfd:vnfd-catalog:
                 type: VIRTIO
               external-connection-point-ref: vnf-data
           cloud-init-file: cloud-config.txt
-      vnf-configuration:
-        juju:
-          charm: simple
-        initial-config-primitive:
-          - seq: '1'
-            name: config
-            parameter:
-              - name: ssh-hostname
-                value: <rw_mgmt_ip>
-              - name: ssh-username
-                value: ubuntu
-              - name: ssh-password
-                value: osm4u
-          - seq: '2'
-            name: touch
-            parameter:
-              - name: filename
-                data-type: STRING
-                value: /home/ubuntu/first-touch
-        config-primitive:
-          - name: touch
-            parameter:
-              - name: filename
-                data-type: STRING
-                default-value: /home/ubuntu/touched
+
+          vdu-configuration:
+            juju:
+              charm: simple
+            metrics:
+              - name: system_random
+              - name: system_uptime
+              - name: system_users
+              - name: cpu_processes
+              - name: cpu_load_current
+              - name: cpu_load_1min
+              - name: cpu_load_5min
+              - name: cpu_load_15min
+              - name: memory_ram_usage
+              - name: memory_swap_usage
+              - name: disk_usage
+              - name: network_mgmt_bytes_in
+              - name: network_mgmt_packets_in
+              - name: network_mgmt_bytes_out
+              - name: network_mgmt_packets_out
+            initial-config-primitive:
+              - seq: '1'
+                name: config
+                parameter:
+                  - name: ssh-hostname
+                    value: <rw_mgmt_ip>
+                  - name: ssh-username
+                    value: nornetpp
+                  - name: ssh-password
+                    value: osm4us
+              - seq: '2'
+                name: touch
+                parameter:
+                  - name: filename
+                    data-type: STRING
+                    value: /home/nornetpp/first-touch
+            config-primitive:
+              - name: touch
+                parameter:
+                  - name: filename
+                    data-type: STRING
+                    default-value: /home/nornetpp/touched
+
+          monitoring-param:
+            - id: metric_mgmtVM_cpu
+              nfvi-metric: cpu_utilization
+            - id: metric_mgmtVM_memory
+              nfvi-metric: average_memory_utilization
+
+      monitoring-param:
+        - id: metric_vim_vnf1_cpu
+          name: metric_vim_vnf1_cpu
+          aggregation-type: AVERAGE
+          vdu-monitoring-param:
+            vdu-ref: mgmtVM
+            vdu-monitoring-param-ref: metric_mgmtVM_cpu
+        - id: metric_vim_vnf1_memory
+          name: metric_vim_vnf1_memory
+          aggregation-type: AVERAGE
+          vdu-monitoring-param:
+            vdu-ref: mgmtVM
+            vdu-monitoring-param-ref: metric_mgmtVM_memory
+
+        # ====== System metrics =============================================
+        - id: metric_mgmtVM_system_random
+          name: metric_mgmtVM_system_random
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: mgmtVM
+            vdu-metric-name-ref: system_random
+        - id: metric_mgmtVM_system_uptime
+          name: metric_mgmtVM_system_uptime
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: mgmtVM
+            vdu-metric-name-ref: system_uptime
+        - id: metric_mgmtVM_system_users
+          name: metric_mgmtVM_system_users
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: mgmtVM
+            vdu-metric-name-ref: system_users
+
+        # ====== CPU metrics ================================================
+        - id: metric_mgmtVM_cpu_load_current
+          name: metric_mgmtVM_cpu_load_current
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: mgmtVM
+            vdu-metric-name-ref: cpu_load_current
+        - id: metric_mgmtVM_cpu_load_1min
+          name: metric_mgmtVM_cpu_load_1min
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: mgmtVM
+            vdu-metric-name-ref: cpu_load_1min
+        - id: metric_mgmtVM_cpu_load_5min
+          name: metric_mgmtVM_cpu_load_5min
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: mgmtVM
+            vdu-metric-name-ref: cpu_load_5min
+        - id: metric_mgmtVM_cpu_load_15min
+          name: metric_mgmtVM_cpu_load_15min
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: mgmtVM
+            vdu-metric-name-ref: cpu_load_15min
+
+        # ====== Memory metrics =============================================
+        - id: metric_mgmtVM_memory_ram_usage
+          name: metric_mgmtVM_memory_ram_usage
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: mgmtVM
+            vdu-metric-name-ref: memory_ram_usage
+        - id: metric_mgmtVM_memory_swap_usage
+          name: metric_mgmtVM_memory_swap_usage
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: mgmtVM
+            vdu-metric-name-ref: memory_swap_usage
+
+        # ====== Disk metrics ===============================================
+        - id: metric_mgmtVM_disk_usage
+          name: metric_mgmtVM_disk_usage
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: mgmtVM
+            vdu-metric-name-ref: disk_usage
+
+        # ====== Network metrics ============================================
+        - id: metric_mgmtVM_network_mgmt_bytes_in
+          name: metric_mgmtVM_network_mgmt_bytes_in
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: mgmtVM
+            vdu-metric-name-ref: network_mgmt_bytes_in
+        - id: metric_mgmtVM_network_mgmt_packets_in
+          name: metric_mgmtVM_network_mgmt_packets_in
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: mgmtVM
+            vdu-metric-name-ref: network_mgmt_packets_in
+        - id: metric_mgmtVM_network_mgmt_bytes_out
+          name: metric_mgmtVM_network_mgmt_bytes_out
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: mgmtVM
+            vdu-metric-name-ref: network_mgmt_bytes_out
+        - id: metric_mgmtVM_network_mgmt_packets_out
+          name: metric_mgmtVM_network_mgmt_packets_out
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: mgmtVM
+            vdu-metric-name-ref: network_mgmt_packets_out

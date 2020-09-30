@@ -9,7 +9,7 @@
 # =====================================================================
 #
 # SimulaMet OpenAirInterface Evolved Packet Core VNF
-# Copyright (C) 2019 by Thomas Dreibholz
+# Copyright (C) 2019-2020 by Thomas Dreibholz
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -38,93 +38,9 @@ vnfd:vnfd-catalog:
 
       # ###### Management Interface #########################################
       mgmt-interface:
-        cp: mme-mgmt
+        cp: mme-mgmt-cp
 
       vdu:
-
-        # ###### VDU: SPGW-U ################################################
-        # (Serving & Packet Data Network Gateway -- User Plane)
-        - id: SPGW-U
-          name: SPGW-U
-          description: SPGW-U
-          count: 1
-
-          # ====== VDU VM Configuration =====================================
-          vm-flavor:
-            vcpu-count: 4
-            memory-mb: 4096
-            storage-gb: 24
-          image: Template-Ubuntu-5gVINNI-Development-Bionic
-          cloud-init-file: spgwu-init
-          # guest-epa:
-          #     cpu-pinning-policy: DEDICATED
-          #     mempage-size: LARGE
-
-          # ====== Interfaces ===============================================
-          interface:
-            - name: eth0
-              type: EXTERNAL
-              mgmt-interface: true
-              virtual-interface:
-                type: PARAVIRT
-              external-connection-point-ref: spgwu-mgmt
-            - name: eth1
-              type: INTERNAL
-              virtual-interface:
-                type: PARAVIRT
-              internal-connection-point-ref: spgwu-sxab
-            - name: eth2
-              type: EXTERNAL
-              virtual-interface:
-                type: PARAVIRT
-              external-connection-point-ref: spgwu-s1u
-            - name: eth3
-              type: EXTERNAL
-              virtual-interface:
-                type: PARAVIRT
-              external-connection-point-ref: spgwu-sgi
-
-          # ====== Internal Connection Points ===============================
-          internal-connection-point:
-            - id: spgwu-sxab
-              name: spgwu-sxab
-              type: VPORT
-
-          # ====== Juju Charm ===============================================
-          vdu-configuration:
-            juju:
-              charm: spgwucharm
-            initial-config-primitive:
-              - seq: '1'
-                name: config
-                parameter:
-                  - name: ssh-hostname
-                    value: <rw_mgmt_ip>
-                  - name: ssh-username
-                    value: nornetpp
-                  - name: ssh-password
-                    value: <password>
-              - seq: '2'
-                name: prepare-spgwu-build
-                parameter:
-                  - name: mme-s1c-ip
-                    data-type: STRING
-                    value: <mme_s1c_ip>
-                  - name: spgwu-s1u-ip
-                    data-type: STRING
-                    value: <spgwu_s1u_ip>
-              - seq: '3'
-                name: configure-spgwu
-                parameter:
-                  - name: mme-s1c-ip
-                    data-type: STRING
-                    value: <mme_s1c_ip>
-                  - name: spgwu-s1u-ip
-                    data-type: STRING
-                    value: <spgwu_s1u_ip>
-              - seq: '4'
-                name: restart-spgwu
-
 
         # ###### VDU: HSS (Home Subscriber Server) ##########################
         - id: HSS
@@ -135,9 +51,9 @@ vnfd:vnfd-catalog:
           # ====== VDU VM Configuration =====================================
           vm-flavor:
             vcpu-count: 4
-            memory-mb: 4096
-            storage-gb: 24
-          image: Template-Ubuntu-5gVINNI-Development-Bionic
+            memory-mb: 3072
+            storage-gb: 16
+          image: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
           cloud-init-file: hss-init
 
           # ====== Interfaces ===============================================
@@ -147,23 +63,43 @@ vnfd:vnfd-catalog:
               mgmt-interface: true
               virtual-interface:
                 type: PARAVIRT
-              external-connection-point-ref: hss-mgmt
+              external-connection-point-ref: hss-mgmt-cp
             - name: eth1
               type: INTERNAL
               virtual-interface:
                 type: PARAVIRT
-              internal-connection-point-ref: hss-s6a
+              internal-connection-point-ref: hss-s6a-cp
 
           # ====== Internal Connection Points ===============================
           internal-connection-point:
-            - id: hss-s6a
-              name: hss-s6a
+            - id: hss-s6a-cp
+              name: hss-s6a-cp
               type: VPORT
 
           # ====== Juju Charm ===============================================
           vdu-configuration:
             juju:
               charm: hsscharm
+            metrics:
+              - name: system_random
+              - name: system_uptime
+              - name: system_users
+              - name: cpu_processes
+              - name: cpu_load_current
+              - name: cpu_load_1min
+              - name: cpu_load_5min
+              - name: cpu_load_15min
+              - name: memory_ram_usage
+              - name: memory_swap_usage
+              - name: disk_usage
+              - name: network_mgmt_bytes_in
+              - name: network_mgmt_packets_in
+              - name: network_mgmt_bytes_out
+              - name: network_mgmt_packets_out
+              - name: network_S6a_bytes_in
+              - name: network_S6a_packets_in
+              - name: network_S6a_bytes_out
+              - name: network_S6a_packets_out
             initial-config-primitive:
               - seq: '1'
                 name: config
@@ -177,30 +113,36 @@ vnfd:vnfd-catalog:
               - seq: '2'
                 name: prepare-cassandra-hss-build
                 parameter:
-                  - name: mme-s1c-ip
-                    data-type: STRING
-                    value: <mme_s1c_ip>
-                  - name: spgwu-s1u-ip
-                    data-type: STRING
-                    value: <spgwu_s1u_ip>
+                  - name: hss-git-repository
+                    value: <hss_git_repository>
+                  - name: hss-git-commit
+                    value: <hss_git_commit>
               - seq: '3'
                 name: configure-cassandra
                 parameter:
-                  - name: mme-s1c-ip
-                    data-type: STRING
-                    value: <mme_s1c_ip>
-                  - name: spgwu-s1u-ip
-                    data-type: STRING
-                    value: <spgwu_s1u_ip>
+                  - name: cassandra-server-ip
+                    value: 172.16.6.129
               - seq: '4'
                 name: configure-hss
                 parameter:
-                  - name: mme-s1c-ip
-                    data-type: STRING
-                    value: <mme_s1c_ip>
-                  - name: spgwu-s1u-ip
-                    data-type: STRING
-                    value: <spgwu_s1u_ip>
+                  - name: cassandra-server-ip
+                    value: 172.16.6.129
+                  - name: hss-S6a-address
+                    value: <hss_S6a_address>
+                  - name: mme-S6a-address
+                    value: <mme_S6a_address>
+                  - name: network-realm
+                    value: <network_realm>
+                  - name: network-op
+                    value: <network_op>
+                  - name: network-k
+                    value: <network_k>
+                  - name: network-imsi-first
+                    value: <network_imsi_first>
+                  - name: network-msisdn-first
+                    value: <network_msisdn_first>
+                  - name: network-users
+                    value: <network_users>
               - seq: '5'
                 name: restart-hss
 
@@ -214,9 +156,9 @@ vnfd:vnfd-catalog:
           # ====== VDU VM Configuration =====================================
           vm-flavor:
             vcpu-count: 4
-            memory-mb: 4096
-            storage-gb: 24
-          image: Template-Ubuntu-5gVINNI-Development-Bionic
+            memory-mb: 2048
+            storage-gb: 16
+          image: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
           cloud-init-file: mme-init
 
           # ====== Interfaces ===============================================
@@ -226,36 +168,64 @@ vnfd:vnfd-catalog:
               mgmt-interface: true
               virtual-interface:
                 type: PARAVIRT
-              external-connection-point-ref: mme-mgmt
+              external-connection-point-ref: mme-mgmt-cp
             - name: eth1
               type: INTERNAL
               virtual-interface:
                 type: PARAVIRT
-              internal-connection-point-ref: mme-s6a
+              internal-connection-point-ref: mme-s6a-cp
             - name: eth2
               type: INTERNAL
               virtual-interface:
                 type: PARAVIRT
-              internal-connection-point-ref: mme-s11
+              internal-connection-point-ref: mme-s11-cp
             - name: eth3
               type: EXTERNAL
               virtual-interface:
                 type: PARAVIRT
-              external-connection-point-ref: mme-s1c
+              external-connection-point-ref: mme-s1c-cp
 
           # ====== Internal Connection Points ===============================
           internal-connection-point:
-            - id: mme-s6a
-              name: mme-s6a
+            - id: mme-s6a-cp
+              name: mme-s6a-cp
               type: VPORT
-            - id: mme-s11
-              name: mme-s11
+            - id: mme-s11-cp
+              name: mme-s11-cp
               type: VPORT
 
           # ====== Juju Charm ===============================================
           vdu-configuration:
             juju:
               charm: mmecharm
+            metrics:
+              - name: system_random
+              - name: system_uptime
+              - name: system_users
+              - name: cpu_processes
+              - name: cpu_load_current
+              - name: cpu_load_1min
+              - name: cpu_load_5min
+              - name: cpu_load_15min
+              - name: memory_ram_usage
+              - name: memory_swap_usage
+              - name: disk_usage
+              - name: network_mgmt_bytes_in
+              - name: network_mgmt_packets_in
+              - name: network_mgmt_bytes_out
+              - name: network_mgmt_packets_out
+              - name: network_S6a_bytes_in
+              - name: network_S6a_packets_in
+              - name: network_S6a_bytes_out
+              - name: network_S6a_packets_out
+              - name: network_S11_bytes_in
+              - name: network_S11_packets_in
+              - name: network_S11_bytes_out
+              - name: network_S11_packets_out
+              - name: network_S1C_bytes_in
+              - name: network_S1C_packets_in
+              - name: network_S1C_bytes_out
+              - name: network_S1C_packets_out
             initial-config-primitive:
               - seq: '1'
                 name: config
@@ -269,21 +239,45 @@ vnfd:vnfd-catalog:
               - seq: '2'
                 name: prepare-mme-build
                 parameter:
-                  - name: mme-s1c-ip
-                    data-type: STRING
-                    value: <mme_s1c_ip>
-                  - name: spgwu-s1u-ip
-                    data-type: STRING
-                    value: <spgwu_s1u_ip>
+                  - name: mme-git-repository
+                    value: <mme_git_repository>
+                  - name: mme-git-commit
+                    value: <mme_git_commit>
+                  - name: mme-S1C-ipv4-interface
+                    value: <mme_S1C_ipv4_interface>
+                  - name: mme-S1C-ipv4-gateway
+                    value: <mme_S1C_ipv4_gateway>
+                  - name: mme-S1C-ipv6-interface
+                    value: <mme_S1C_ipv6_interface>
+                  - name: mme-S1C-ipv6-gateway
+                    value: <mme_S1C_ipv6_gateway>
               - seq: '3'
                 name: configure-mme
                 parameter:
-                  - name: mme-s1c-ip
-                    data-type: STRING
-                    value: <mme_s1c_ip>
-                  - name: spgwu-s1u-ip
-                    data-type: STRING
-                    value: <spgwu_s1u_ip>
+                  - name: mme-S1C-ipv4-interface
+                    value: <mme_S1C_ipv4_interface>
+                  - name: mme-S11-ipv4-interface
+                    value: <mme_S11_ipv4_interface>
+                  - name: spgwc-S11-ipv4-interface
+                    value: <spgwc_S11_ipv4_interface>
+                  - name: hss-S6a-address
+                    value: <hss_S6a_address>
+                  - name: network-realm
+                    value: <network_realm>
+                  - name: network-mcc
+                    value: <network_mcc>
+                  - name: network-mnc
+                    value: <network_mnc>
+                  - name: network-op
+                    value: <network_op>
+                  - name: network-k
+                    value: <network_k>
+                  - name: network-imsi-first
+                    value: <network_imsi_first>
+                  - name: network-msisdn-first
+                    value: <network_msisdn_first>
+                  - name: network-users
+                    value: <network_users>
               - seq: '4'
                 name: restart-mme
 
@@ -298,9 +292,9 @@ vnfd:vnfd-catalog:
           # ====== VDU VM Configuration =====================================
           vm-flavor:
             vcpu-count: 4
-            memory-mb: 4096
-            storage-gb: 24
-          image: Template-Ubuntu-5gVINNI-Development-Bionic
+            memory-mb: 3072
+            storage-gb: 16
+          image: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
           cloud-init-file: spgwc-init
 
           # ====== Interfaces ===============================================
@@ -310,31 +304,55 @@ vnfd:vnfd-catalog:
               mgmt-interface: true
               virtual-interface:
                 type: PARAVIRT
-              external-connection-point-ref: spgwc-mgmt
+              external-connection-point-ref: spgwc-mgmt-cp
             - name: eth1
               type: INTERNAL
               virtual-interface:
                 type: PARAVIRT
-              internal-connection-point-ref: spgwc-sxab
+              internal-connection-point-ref: spgwc-sxab-cp
             - name: eth2
               type: INTERNAL
               virtual-interface:
                 type: PARAVIRT
-              internal-connection-point-ref: spgwc-s11
+              internal-connection-point-ref: spgwc-s11-cp
 
           # ====== Internal Connection Points ===============================
           internal-connection-point:
-            - id: spgwc-sxab
-              name: spgwc-sxab
+            - id: spgwc-sxab-cp
+              name: spgwc-sxab-cp
               type: VPORT
-            - id: spgwc-s11
-              name: spgwc-s11
+            - id: spgwc-s11-cp
+              name: spgwc-s11-cp
               type: VPORT
 
           # ====== Juju Charm ===============================================
           vdu-configuration:
             juju:
               charm: spgwccharm
+            metrics:
+              - name: system_random
+              - name: system_uptime
+              - name: system_users
+              - name: cpu_processes
+              - name: cpu_load_current
+              - name: cpu_load_1min
+              - name: cpu_load_5min
+              - name: cpu_load_15min
+              - name: memory_ram_usage
+              - name: memory_swap_usage
+              - name: disk_usage
+              - name: network_mgmt_bytes_in
+              - name: network_mgmt_packets_in
+              - name: network_mgmt_bytes_out
+              - name: network_mgmt_packets_out
+              - name: network_SXab_bytes_in
+              - name: network_SXab_packets_in
+              - name: network_SXab_bytes_out
+              - name: network_SXab_packets_out
+              - name: network_S11_bytes_in
+              - name: network_S11_packets_in
+              - name: network_S11_bytes_out
+              - name: network_S11_packets_out
             initial-config-primitive:
               - seq: '1'
                 name: config
@@ -348,23 +366,139 @@ vnfd:vnfd-catalog:
               - seq: '2'
                 name: prepare-spgwc-build
                 parameter:
-                  - name: mme-s1c-ip
-                    data-type: STRING
-                    value: <mme_s1c_ip>
-                  - name: spgwu-s1u-ip
-                    data-type: STRING
-                    value: <spgwu_s1u_ip>
+                  - name: spgwc-git-repository
+                    value: <spgwc_git_repository>
+                  - name: spgwc-git-commit
+                    value: <spgwc_git_commit>
               - seq: '3'
                 name: configure-spgwc
                 parameter:
-                  - name: mme-s1c-ip
-                    data-type: STRING
-                    value: <mme_s1c_ip>
-                  - name: spgwu-s1u-ip
-                    data-type: STRING
-                    value: <spgwu_s1u_ip>
+                  - name: network-realm
+                    value: <network_realm>
+                  - name: network-ipv4-dns1
+                    value: <network_ipv4_dns1>
+                  - name: network-ipv4-dns2
+                    value: <network_ipv4_dns2>
               - seq: '4'
                 name: restart-spgwc
+
+
+        # ###### VDU: SPGW-U ################################################
+        # (Serving & Packet Data Network Gateway -- User Plane)
+        - id: SPGW-U
+          name: SPGW-U
+          description: SPGW-U
+          count: 1
+
+          # ====== VDU VM Configuration =====================================
+          vm-flavor:
+            vcpu-count: 4
+            memory-mb: 3072
+            storage-gb: 16
+          image: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
+          cloud-init-file: spgwu-init
+          # guest-epa:
+          #     cpu-pinning-policy: DEDICATED
+          #     mempage-size: LARGE
+
+          # ====== Interfaces ===============================================
+          interface:
+            - name: eth0
+              type: EXTERNAL
+              mgmt-interface: true
+              virtual-interface:
+                type: PARAVIRT
+              external-connection-point-ref: spgwu-mgmt-cp
+            - name: eth1
+              type: INTERNAL
+              virtual-interface:
+                type: PARAVIRT
+              internal-connection-point-ref: spgwu-sxab-cp
+            - name: eth2
+              type: EXTERNAL
+              virtual-interface:
+                type: PARAVIRT
+              external-connection-point-ref: spgwu-s1u-cp
+            - name: eth3
+              type: EXTERNAL
+              virtual-interface:
+                type: PARAVIRT
+              external-connection-point-ref: spgwu-sgi-cp
+
+          # ====== Internal Connection Points ===============================
+          internal-connection-point:
+            - id: spgwu-sxab-cp
+              name: spgwu-sxab-cp
+              type: VPORT
+
+          # ====== Juju Charm ===============================================
+          vdu-configuration:
+            juju:
+              charm: spgwucharm
+            metrics:
+              - name: system_random
+              - name: system_uptime
+              - name: system_users
+              - name: cpu_processes
+              - name: cpu_load_current
+              - name: cpu_load_1min
+              - name: cpu_load_5min
+              - name: cpu_load_15min
+              - name: memory_ram_usage
+              - name: memory_swap_usage
+              - name: disk_usage
+              - name: network_mgmt_bytes_in
+              - name: network_mgmt_packets_in
+              - name: network_mgmt_bytes_out
+              - name: network_mgmt_packets_out
+              - name: network_SXab_bytes_in
+              - name: network_SXab_packets_in
+              - name: network_SXab_bytes_out
+              - name: network_SXab_packets_out
+              - name: network_S1U_bytes_in
+              - name: network_S1U_packets_in
+              - name: network_S1U_bytes_out
+              - name: network_S1U_packets_out
+              - name: network_SGi_bytes_in
+              - name: network_SGi_packets_in
+              - name: network_SGi_bytes_out
+              - name: network_SGi_packets_out
+            initial-config-primitive:
+              - seq: '1'
+                name: config
+                parameter:
+                  - name: ssh-hostname
+                    value: <rw_mgmt_ip>
+                  - name: ssh-username
+                    value: nornetpp
+                  - name: ssh-password
+                    value: <password>
+              - seq: '2'
+                name: prepare-spgwu-build
+                parameter:
+                  - name: spgwu-git-repository
+                    value: <spgwu_git_repository>
+                  - name: spgwu-git-commit
+                    value: <spgwu_git_commit>
+                  - name: spgwu-S1U-ipv4-interface
+                    value: <spgwu_S1U_ipv4_interface>
+                  - name: spgwu-S1U-ipv4-gateway
+                    value: <spgwu_S1U_ipv4_gateway>
+                  - name: spgwu-SGi-ipv4-interface
+                    value: <spgwu_SGi_ipv4_interface>
+                  - name: spgwu-SGi-ipv4-gateway
+                    value: <spgwu_SGi_ipv4_gateway>
+                  - name: spgwu-SGi-ipv6-interface
+                    value: <spgwu_SGi_ipv6_interface>
+                  - name: spgwu-SGi-ipv6-gateway
+                    value: <spgwu_SGi_ipv6_gateway>
+              - seq: '3'
+                name: configure-spgwu
+                parameter:
+                  - name: spgwu-spgwc-list
+                    value: <spgwu_spgwc_list>
+              - seq: '4'
+                name: restart-spgwu
 
 
       # ###### Internal VLDs ################################################
@@ -399,37 +533,160 @@ vnfd:vnfd-catalog:
           ip-profile-ref: S6a
           name: S6a
           internal-connection-point:
-            - id-ref: mme-s6a
-            - id-ref: hss-s6a
+            - id-ref: mme-s6a-cp
+            - id-ref: hss-s6a-cp
         - id: s11
           name: S11
           ip-profile-ref: S11
           internal-connection-point:
-            - id-ref: mme-s11
-            - id-ref: spgwc-s11
+            - id-ref: mme-s11-cp
+            - id-ref: spgwc-s11-cp
         - id: sxab
           name: SXab
           ip-profile-ref: SXab
           internal-connection-point:
-            - id-ref: spgwu-sxab
-            - id-ref: spgwc-sxab
+            - id-ref: spgwu-sxab-cp
+            - id-ref: spgwc-sxab-cp
 
 
       # ###### External Connection Points ###################################
       connection-point:
-        - name: mme-mgmt
-        - name: mme-s1c
-        - name: hss-mgmt
-        - name: spgwc-mgmt
-        - name: spgwu-mgmt
-        - name: spgwu-s1u
-        - name: spgwu-sgi
+        - name: mme-mgmt-cp
+        - name: mme-s1c-cp
+        - name: hss-mgmt-cp
+        - name: spgwc-mgmt-cp
+        - name: spgwu-mgmt-cp
+        - name: spgwu-s1u-cp
+        - name: spgwu-sgi-cp
+
+
+      # ###### Monitoring ###################################################
+      monitoring-param:
+        # ###### VDU: HSS ###################################################
+        # ====== System metrics =============================================
+        - id: metric_HSS_system_random
+          name: metric_HSS_system_random
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: HSS
+            vdu-metric-name-ref: system_random
+        - id: metric_HSS_system_uptime
+          name: metric_HSS_system_uptime
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: HSS
+            vdu-metric-name-ref: system_uptime
+        - id: metric_HSS_system_users
+          name: metric_HSS_system_users
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: HSS
+            vdu-metric-name-ref: system_users
+
+        # ====== CPU metrics ================================================
+        - id: metric_HSS_cpu_load_current
+          name: metric_HSS_cpu_load_current
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: HSS
+            vdu-metric-name-ref: cpu_load_current
+        - id: metric_HSS_cpu_load_1min
+          name: metric_HSS_cpu_load_1min
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: HSS
+            vdu-metric-name-ref: cpu_load_1min
+        - id: metric_HSS_cpu_load_5min
+          name: metric_HSS_cpu_load_5min
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: HSS
+            vdu-metric-name-ref: cpu_load_5min
+        - id: metric_HSS_cpu_load_15min
+          name: metric_HSS_cpu_load_15min
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: HSS
+            vdu-metric-name-ref: cpu_load_15min
+
+        # ====== Memory metrics =============================================
+        - id: metric_HSS_memory_ram_usage
+          name: metric_HSS_memory_ram_usage
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: HSS
+            vdu-metric-name-ref: memory_ram_usage
+        - id: metric_HSS_memory_swap_usage
+          name: metric_HSS_memory_swap_usage
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: HSS
+            vdu-metric-name-ref: memory_swap_usage
+
+        # ====== Disk metrics ===============================================
+        - id: metric_HSS_disk_usage
+          name: metric_HSS_disk_usage
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: HSS
+            vdu-metric-name-ref: disk_usage
+
+        # ====== Network metrics ============================================
+        - id: metric_HSS_network_mgmt_bytes_in
+          name: metric_HSS_network_mgmt_bytes_in
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: HSS
+            vdu-metric-name-ref: network_mgmt_bytes_in
+        - id: metric_HSS_network_mgmt_packets_in
+          name: metric_HSS_network_mgmt_packets_in
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: HSS
+            vdu-metric-name-ref: network_mgmt_packets_in
+        - id: metric_HSS_network_mgmt_bytes_out
+          name: metric_HSS_network_mgmt_bytes_out
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: HSS
+            vdu-metric-name-ref: network_mgmt_bytes_out
+        - id: metric_HSS_network_mgmt_packets_out
+          name: metric_HSS_network_mgmt_packets_out
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: HSS
+            vdu-metric-name-ref: network_mgmt_packets_out
+
+        - id: metric_HSS_network_S6a_bytes_in
+          name: metric_HSS_network_S6a_bytes_in
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: HSS
+            vdu-metric-name-ref: network_S6a_bytes_in
+        - id: metric_HSS_network_S6a_packets_in
+          name: metric_HSS_network_S6a_packets_in
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: HSS
+            vdu-metric-name-ref: network_S6a_packets_in
+        - id: metric_HSS_network_S6a_bytes_out
+          name: metric_HSS_network_S6a_bytes_out
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: HSS
+            vdu-metric-name-ref: network_S6a_bytes_out
+        - id: metric_HSS_network_S6a_packets_out
+          name: metric_HSS_network_S6a_packets_out
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: HSS
+            vdu-metric-name-ref: network_S6a_packets_out
 
 
       # ###### Juju Charm ###################################################
       # vnf-configuration:
         # juju:
-          # charm: epccharm
+          # charm: simple
         # initial-config-primitive:
           # - seq: '1'
             # name: config
@@ -441,13 +698,7 @@ vnfd:vnfd-catalog:
               # - name: ssh-password
                 # value: osm4u
           # - seq: '2'
-            # name: configure-epc
+            # name: touch
             # parameter:
-              # - name: mme-s1c-ip
-                # data-type: STRING
-                # value: <mme_s1c_ip>
-              # - name: spgwu-s1u-ip
-                # data-type: STRING
-                # value: <spgwu_s1u_ip>
-          # - seq: '3'
-            # name: restart-epc
+              # - name: filename
+                # value: /tmp/touch1

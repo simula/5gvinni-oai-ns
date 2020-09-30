@@ -9,7 +9,7 @@
 # =====================================================================
 #
 # SimulaMet OpenAirInterface Evolved Packet Core VNF and NS
-# Copyright (C) 2019 by Thomas Dreibholz
+# Copyright (C) 2019-2020 by Thomas Dreibholz
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,32 +29,57 @@
 prepare-spgwu-build:
   description: Prepares SPGW-U sources
   params:
-    mme-s1c-ip:
-      description: MME S1-C IP
-      data-type: string
+    spgwu-git-repository:
+      description: SPGW-U Git repository
+      type: string
+      default: https://github.com/OPENAIRINTERFACE/openair-cn-cups.git
+    spgwu-git-commit:
+      description: SPGW-U Git commit
+      type: string
+      default: develop
+    spgwu-S1U-ipv4-interface:
+      description: SPGW-U S1U IPv4 interface
+      type: string
+      default: 192.168.248.159/24
+    spgwu-S1U-ipv4-gateway:
+      description: SPGW-U S1U IPv4 gateway
+      type: string
       default: 0.0.0.0
-    spgwu-s1u-ip:
-      description: SPGW-U S1-U IP
-      data-type: string
-      default: 0.0.0.0
+    spgwu-SGi-ipv4-interface:
+      description: SPGW-U SGi IPv4 interface
+      type: string
+      default: 10.254.1.203/24
+    spgwu-SGi-ipv4-gateway:
+      description: SPGW-U SGi IPv4 gateway
+      type: string
+      default: 10.254.1.1
+    spgwu-SGi-ipv6-interface:
+      description: SPGW-U SGi IPv6 interface
+      type: string
+      default: 3ffe::2/64
+    spgwu-SGi-ipv6-gateway:
+      description: SPGW-U SGi IPv6 gateway
+      type: string
+      default: 3ffe::1
   required:
-    - mme-s1c-ip
-    - spgwu-s1u-ip
+    - spgwu-git-repository
+    - spgwu-git-commit
+    - spgwu-S1U-ipv4-interface
+    - spgwu-S1U-ipv4-gateway
+    - spgwu-SGi-ipv4-interface
+    - spgwu-SGi-ipv4-gateway
+    - spgwu-SGi-ipv6-interface
+    - spgwu-SGi-ipv6-gateway
 
 configure-spgwu:
   description: Configures the SPGW-U
   params:
-    mme-s1c-ip:
-      description: MME S1-C IP
-      data-type: string
-      default: 0.0.0.0
-    spgwu-s1u-ip:
-      description: SPGW-U S1-U IP
-      data-type: string
-      default: 0.0.0.0
+    spgwu-spgwc-list:
+      description: SPGW-U SPGW-C list (comma-separated)
+      type: string
+      default: 172.55.55.101
   required:
-    - mme-s1c-ip
-    - spgwu-s1u-ip
+    - spgwu-spgwc-list
 
 restart-spgwu:
   description: Restarts the SPGW-U

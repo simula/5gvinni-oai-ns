@@ -4,9 +4,16 @@
 import functools
 import os
 import re
+import subprocess
 import sys
 import traceback
 from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
+
+# ------ VDUHelper ----------------------------------------------------------
+sys.path.append('../vduhelper')
+import VDUHelper
+
+vduHelper = VDUHelper.VDUHelper(True)   # Test Mode!!!
 
 
 # ###### Dummy function #####################################################
@@ -28,13 +35,70 @@ def status_set(tag, value):
 
 
 # ###### Dummy function #####################################################
-def action_set(values):
+MyParameters = {
+   # ====== HSS =============================================================
+   'hss-git-repository': 'https://github.com/OPENAIRINTERFACE/openair-cn.git',
+   'hss-git-commit': '2019.w45',
+   'hss-S6a-address': '172.16.6.129',
+   'network-realm': 'simula.nornet',
+   'network-k': '449C4B91AEACD0ACE182CF3A5A72BFA1',
+   'network-op': '1006020F0A478BF6B699F15C062E42B3',
+   'network-imsi-first': '242881234500000',
+   'network-msisdn-first': '24288880000000',
+   'network-users': '1024',
+   'cassandra-server-ip': '172.16.6.129',
+
+   # ====== MME =============================================================
+   'mme-git-repository': 'https://github.com/OPENAIRINTERFACE/openair-cn.git',
+   'mme-git-commit': '2019.w45',
+   'mme-S1C-ipv4-interface': '192.168.247.102/24',
+   'mme-S1C-ipv4-gateway': '0.0.0.0',
+   'mme-S11-ipv4-interface': '172.16.1.102/24',
+   'mme-S1C-ipv6-interface': '',
+   'mme-S1C-ipv6-gateway': '',
+   'mme-S6a-address': '172.16.6.2',
+   'spgwc-S11-ipv4-interface': '172.16.1.104/24',
+   'network-mcc': '242',
+   'network-mnc': '88',
+
+   # ====== SPGW-C ==========================================================
+   'spgwc-git-repository': 'https://github.com/OPENAIRINTERFACE/openair-cn-cups.git',
+   'spgwc-git-commit': 'develop',
+   'network-ipv4-dns1': '10.1.1.1',
+   'network-ipv4-dns2': '10.1.2.1',
+
+   # ====== SPGW-U ==========================================================
+   'spgwu-git-repository': 'https://github.com/OPENAIRINTERFACE/openair-cn-cups.git',
+   'spgwu-git-commit': 'develop',
+   'spgwu-S1U-ipv4-interface': '192.168.248.159/24',
+   'spgwu-S1U-ipv4-gateway': '0.0.0.0',
+   'spgwu-SGi-ipv4-interface': '10.254.1.203/24',
+   'spgwu-SGi-ipv4-gateway': '10.254.1.1',
+   'spgwu-SGi-ipv6-interface': '',
+   'spgwu-SGi-ipv6-gateway': '',
+   'spgwu-spgwc-list': '172.55.55.101',
+
+   # ====== FlexRAN =========================================================
+   'flexran-git-repository': 'https://gitlab.eurecom.fr/mosaic5g/mosaic5g',
+   'flexran-git-commit': 'master',
+   'flexran-service-ipv4-interface': '192.168.246.100/24',
+   'flexran-service-ipv4-gateway': '0.0.0.0',
+   'flexran-service-ipv6-interface': '',
+   'flexran-service-ipv6-gateway': ''
+}
+
+def function_get(flag):
+   return MyParameters[flag]
+
+
+# ###### Dummy function #####################################################
+def function_set(values):
    # Nothing to do!
    pass
 
 
 # ###### Dummy function #####################################################
-def action_fail(tag, value):
+def function_fail(message):
    # Nothing to do!
    pass
 
@@ -48,6 +112,7 @@ def when(*flags):
         return wrapper_when
     return decorator_when
 
+
 # ###### Dummy decorator ####################################################
 def when_not(*flags):
     def decorator_when(func):
@@ -58,72 +123,17 @@ def when_not(*flags):
     return decorator_when
 
 
-# ###### Execute command ####################################################
-def execute(commands):
-   sys.stdout.write('-----------------------------------------------------------------------------\n')
-   sys.stdout.write('time bash -c "' + commands + '"\n')
-   return [ '', '' ]
 
-
-# ######  Get /etc/network/interfaces setup for interface ###################
-def configureInterface(name,
-                       ipv4Interface = IPv4Interface('0.0.0.0/0'), ipv4Gateway = None,
-                       ipv6Interface = None,                       ipv6Gateway = None,
-                       metric = 1):
-
-   # NOTE:
-   # Double escaping is required for \ and " in "configuration" string!
-   # 1. Python
-   # 2. bash -c "<command>"
-   # That is: $ => \$ ; \ => \\ ; " => \\\"
-
-   configuration = 'auto ' + name + '\\\\n'
-
-   # ====== IPv4 ============================================================
-   if ipv4Interface == IPv4Interface('0.0.0.0/0'):
-      configuration = configuration + 'iface ' + name + ' inet dhcp'
-   else:
-      configuration = configuration + \
-         'iface ' + name + ' inet static\\\\n' + \
-         '\\\\taddress ' + str(ipv4Interface.ip)      + '\\\\n' + \
-         '\\\\tnetmask ' + str(ipv4Interface.netmask) + '\\\\n'
-      if ((ipv4Gateway != None) and (ipv4Gateway != IPv4Address('0.0.0.0'))):
-         configuration = configuration + \
-            '\\\\tgateway ' + str(ipv4Gateway) + '\\\\n' + \
-            '\\\\tmetric '  + str(metric)      + '\\\\n'
-      configuration = configuration + '\\\\n'
-
-   # ====== IPv6 ============================================================
-   if ipv6Interface == None:
-      configuration = configuration + \
-         '\\\\niface ' + name + ' inet6 manual\\\\n' + \
-         '\\\\tautoconf 0\\\\n'
-   elif ipv6Interface == IPv6Interface('::/0'):
-      configuration = configuration + \
-         '\\\\niface ' + name + ' inet6 dhcp\\\\n' + \
-         '\\\\tautoconf 0\\\\n'
-   else:
-      configuration = configuration + \
-         '\\\\niface ' + name + ' inet6 static\\\\n' + \
-         '\\\\tautoconf 0\\\\n' + \
-         '\\\\taddress ' + str(ipv6Interface.ip)                + '\\\\n' + \
-         '\\\\tnetmask ' + str(ipv6Interface.network.prefixlen) + '\\\\n'
-      if ((ipv6Gateway != None) and (ipv6Gateway != IPv6Address('::'))):
-         configuration = configuration + \
-            '\\\\tgateway ' + str(ipv6Gateway) + '\\\\n' + \
-            '\\\\tmetric '  + str(metric)      + '\\\\n'
-
-   return configuration
-
-
-
+# ###########################################################################
+# #### HSS Charm functions                                               ####
+# ###########################################################################
 
 # ###### Installation #######################################################
 @when('sshproxy.configured')
 @when_not('hsscharm.installed')
 def install_hsscharm_proxy_charm():
    set_flag('hsscharm.installed')
-   status_set('active', 'Ready!')
+   vduHelper.setStatus('install_hsscharm_proxy_charm: SSH proxy charm is READY')
 
 
 # ###### prepare-cassandra-hss-build function ###############################
@@ -131,92 +141,84 @@ def install_hsscharm_proxy_charm():
 @when('hsscharm.installed')
 @when_not('hsscharm.prepared-cassandra-hss-build')
 def prepare_cassandra_hss_build():
-   status_set('active', 'prepare-cassandra-hss-build: preparing Cassandra/HSS build ...')
-
-   # ====== Install Cassandra and the HSS ===================================
-   # For a documentation of the installation procedure, see:
-   # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
-
-   gitRepository = 'https://github.com/OPENAIRINTERFACE/openair-cn.git'
-   gitDirectory  = 'openair-cn'
-   gitCommit     = 'develop'
-
-   # Prepare network configurations:
-   hssS6a_IfName    = 'ens4'
-   configurationS6a = configureInterface(hssS6a_IfName, IPv4Interface('0.0.0.0/0'))
-
-   # NOTE:
-   # Double escaping is required for \ and " in "command" string!
-   # 1. Python
-   # 2. bash -c "<command>"
-   # That is: $ => \$ ; \ => \\ ; " => \\\"
-
-   commands = """\
-echo \\\"###### Preparing system ###############################################\\\" && \\
-echo -e \\\"{configurationS6a}\\\" | sudo tee /etc/network/interfaces.d/61-{hssS6a_IfName} && sudo ifup {hssS6a_IfName} || true && \\
-if [ \\\"`find /etc/apt/sources.list.d -name 'rmescandon-ubuntu-yq-*.list'`\\\" == \\\"\\\" ] ; then sudo add-apt-repository -y ppa:rmescandon/yq ; fi && \\
-DEBIAN_FRONTEND=noninteractive sudo apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends yq && \\
-echo \\\"###### Preparing sources ##############################################\\\" && \\
-cd /home/nornetpp/src && \\
-if [ ! -d \\\"{gitDirectory}\\\" ] ; then git clone --quiet {gitRepository} {gitDirectory} && cd {gitDirectory} ; else cd {gitDirectory} && git pull ; fi && \\
-git checkout {gitCommit} && \\
-cd scripts && \\
-echo \\\"###### Done! ##########################################################\\\"""".format(
-      gitRepository    = gitRepository,
-      gitDirectory     = gitDirectory,
-      gitCommit        = gitCommit,
-      hssS6a_IfName    = hssS6a_IfName,
-      configurationS6a = configurationS6a
-   )
-
+   vduHelper.beginBlock('prepare_cassandra_hss_build')
    try:
-       stdout, stderr = execute(commands)
-   except subprocess.CalledProcessError as e:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       action_fail(message.encode('utf-8'))
-       status_set('active', 'prepare-cassandra-hss-build: preparing Cassandra/HSS build FAILED!')
-   except:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       action_fail('Command execution failed: ' + str(err))
-       status_set('active', 'prepare-cassandra-hss-build: preparing Cassandra/HSS build FAILED!')
-   else:
+
+      # ====== Get HSS parameters ===========================================
+      # For a documentation of the installation procedure, see:
+      # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
+
+      gitRepository = function_get('hss-git-repository')
+      gitCommit     = function_get('hss-git-commit')
+      gitDirectory  = 'openair-cn'
+
+      # Prepare network configuration:
+      hssS6a_IfName    = 'ens4'
+      configurationS6a = vduHelper.makeInterfaceConfiguration(hssS6a_IfName, IPv4Interface('0.0.0.0/0'))
+
+      # ====== Prepare system ===============================================
+      vduHelper.beginBlock('Preparing system')
+      vduHelper.configureInterface(hssS6a_IfName, configurationS6a, 61)
+      vduHelper.testNetworking('8.8.8.8')
+      commands = "if [ \\\"`find /etc/apt/sources.list.d -name 'rmescandon-ubuntu-yq-*.list'`\\\" == \\\"\\\" ] ; then sudo add-apt-repository -y ppa:rmescandon/yq ; fi"
+      vduHelper.runInShell(commands)
+      vduHelper.aptInstallPackages([ 'yq' ])
+      vduHelper.endBlock()
+
+      # ====== Prepare sources ==============================================
+      vduHelper.beginBlock('Preparing sources')
+      vduHelper.fetchGitRepository(gitDirectory, gitRepository, gitCommit)
+      vduHelper.endBlock()
+
+
+      message = vduHelper.endBlock()
+      function_set( { 'outout': message } )
       set_flag('hsscharm.prepared-cassandra-hss-build')
+   except:
+      message = vduHelper.endBlockInException()
+      function_fail(message)
+   finally:
       clear_flag('actions.prepare-cassandra-hss-build')
-      action_set( { 'output': stdout.encode('utf-8') } )
-      status_set('active', 'prepare-cassandra-hss-build: preparing Cassandra/HSS build COMPLETED')
 
 
 # ###### configure-cassandra function #######################################
 @when('actions.configure-cassandra')
 @when('hsscharm.prepared-cassandra-hss-build')
 def configure_cassandra():
-   status_set('active', 'configure-cassandra: configuring Cassandra ...')
+   vduHelper.beginBlock('configure_cassandra')
+   try:
 
-   # ====== Install Cassandra and the HSS ===================================
-   # For a documentation of the installation procedure, see:
-   # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
+      # ====== Get HSS parameters ===========================================
+      # For a documentation of the installation procedure, see:
+      # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
 
-   gitDirectory      = 'openair-cn'
-   cassandraServerIP = '172.16.6.129'
+      gitDirectory      = 'openair-cn'
+      cassandraServerIP = function_get('cassandra-server-ip')
 
-   # NOTE:
-   # Double escaping is required for \ and " in "command" string!
-   # 1. Python
-   # 2. bash -c "<command>"
-   # That is: $ => \$ ; \ => \\ ; " => \\\"
+      # NOTE:
+      # Double escaping is required for \ and " in "command" string!
+      # 1. Python
+      # 2. bash -c "<command>"
+      # That is: $ => \$ ; \ => \\ ; " => \\\"
 
-   commands = """\
-echo \\\"###### Building Cassandra #############################################\\\" && \\
+      # ====== Build Cassandra ==============================================
+      vduHelper.beginBlock('Building Cassandra')
+      commands = """\
 export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
-cd /home/nornetpp/src && \\
-cd {gitDirectory} && \\
-cd scripts && \\
+cd /home/nornetpp/src/{gitDirectory}/scripts && \\
 mkdir -p logs && \\
 sudo rm -f /etc/apt/sources.list.d/cassandra.sources.list && \\
-./build_cassandra --check-installed-software --force >logs/build_cassandra.log 2>&1 && \\
+./build_cassandra --check-installed-software --force >logs/build_cassandra.log 2>&1""".format(
+         gitDirectory      = gitDirectory,
+         cassandraServerIP = cassandraServerIP
+      )
+      vduHelper.runInShell(commands)
+      vduHelper.endBlock()
+
+      # ====== Configure Cassandra ==========================================
+      vduHelper.beginBlock('Configuring Cassandra')
+      commands = """\
+cd /home/nornetpp/src/{gitDirectory}/scripts && \\
 sudo update-alternatives --set java /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java && \\
 sudo service cassandra stop && \\
 sudo rm -rf /var/lib/cassandra/data/system/* && \\
@@ -231,73 +233,95 @@ sudo yq w -i /etc/cassandra/cassandra.yaml \\\"rpc_address\\\" \\\"{cassandraSer
 sudo yq w -i /etc/cassandra/cassandra.yaml \\\"endpoint_snitch\\\" \\\"GossipingPropertyFileSnitch\\\" && \\
 sudo service cassandra start && \\
 sleep 10 && \\
-sudo service cassandra status | cat && \\
-echo \\\"###### Done! ##########################################################\\\"""".format(
-      gitDirectory      = gitDirectory,
-      cassandraServerIP = cassandraServerIP
-   )
+sudo service cassandra status | cat""".format(
+         gitDirectory      = gitDirectory,
+         cassandraServerIP = cassandraServerIP
+      )
+      vduHelper.runInShell(commands)
+      vduHelper.endBlock()
 
-   try:
-       stdout, stderr = execute(commands)
-   except subprocess.CalledProcessError as e:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       action_fail(message.encode('utf-8'))
-       status_set('active', 'confiigure-cassandra: configuring Cassandra FAILED!')
+
+      message = vduHelper.endBlock()
+      function_set( { 'outout': message } )
+      set_flag('hsscharm.configured-cassandra')
    except:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       action_fail('Command execution failed: ' + str(err))
-       status_set('active', 'confiigure-cassandra: configuring Cassandra FAILED!')
-   else:
+      message = vduHelper.endBlockInException()
+      function_fail(message)
+   finally:
       clear_flag('actions.configure-cassandra')
-      action_set( { 'output': stdout.encode('utf-8') } )
-      status_set('active', 'confiigure-cassandra: configuring Cassandra COMPLETED')
 
 
 # ###### configure-hss function #############################################
 @when('actions.configure-hss')
 @when('hsscharm.configured-cassandra')
 def configure_hss():
-   status_set('active', 'configure-hss: configuring HSS ...')
+   vduHelper.beginBlock('configure_hss')
+   try:
 
-   # ====== Install Cassandra and the HSS ===================================
-   # For a documentation of the installation procedure, see:
-   # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
+      # ====== Get HSS parameters ===========================================
+      # For a documentation of the installation procedure, see:
+      # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
 
-   gitDirectory       = 'openair-cn'
-   cassandraServerIP  = '172.16.6.129'
-   networkRealm       = 'simula.nornet'
-   networkLTE_K       = '449c4b91aeacd0ace182cf3a5a72bfa1'
-   networkOP_K        = '1006020f0a478bf6b699f15c062e42b3'
-   networkIMSIFirst   = '242881234500000'
-   networkMSISDNFirst = '24288880000000'
-   networkUsers       = 1024
+      gitDirectory       = 'openair-cn'
+      cassandraServerIP  = function_get('cassandra-server-ip')
+      networkRealm       = function_get('network-realm')
+      networkOP          = function_get('network-op')
+      networkK           = function_get('network-k')
+      networkIMSIFirst   = function_get('network-imsi-first')
+      networkMSISDNFirst = function_get('network-msisdn-first')
+      networkUsers       = int(function_get('network-users'))
 
-   # NOTE:
-   # Double escaping is required for \ and " in "command" string!
-   # 1. Python
-   # 2. bash -c "<command>"
-   # That is: $ => \$ ; \ => \\ ; " => \\\"
+      hssS6a_IPv4Address = IPv4Address(function_get('hss-S6a-address'))
+      mmeS6a_IPv4Address = IPv4Address(function_get('mme-S6a-address'))
 
-   commands = """\
-echo \\\"###### Building HSS ###################################################\\\" && \\
+      # ====== Build HSS dependencies =======================================
+      vduHelper.beginBlock('Building HSS dependencies')
+      commands = """\
 export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
-cd /home/nornetpp/src && \\
-cd {gitDirectory} && \\
-cd scripts && \\
+cd /home/nornetpp/src/{gitDirectory}/scripts && \\
 mkdir -p logs && \\
-echo \\\"====== Building dependencies ... ======\\\" && \\
-./build_hss_rel14 --check-installed-software --force >logs/build_hss_rel14-1.log 2>&1 && \\
-echo \\\"====== Building service ... ======\\\" && \\
+./build_hss_rel14 --check-installed-software --force >logs/build_hss_rel14-1.log 2>&1""".format(gitDirectory = gitDirectory)
+      vduHelper.runInShell(commands)
+      vduHelper.endBlock()
+
+      # ====== Build HSS itself =============================================
+      vduHelper.beginBlock('Building HSS itself')
+      commands = """\
+export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
+cd /home/nornetpp/src/{gitDirectory}/scripts && \\
 ./build_hss_rel14 --clean >logs/build_hss_rel14-2.log 2>&1 && \\
-cqlsh --file ../src/hss_rel14/db/oai_db.cql {cassandraServerIP} && \\
-echo \\\"====== Provisioning users ... ======\\\" && \\
-./data_provisioning_users --apn default.{networkRealm} --apn2 internet.{networkRealm} --key {networkLTE_K} --imsi-first {networkIMSIFirst} --msisdn-first {networkMSISDNFirst} --mme-identity mme.{networkRealm} --no-of-users {networkUsers} --realm {networkRealm} --truncate True  --verbose True --cassandra-cluster {cassandraServerIP} >logs/data_provisioning_users.log 2>&1 && \\
-echo \\\"====== Provisioning MME ... ======\\\" && \\
-./data_provisioning_mme --id 3 --mme-identity mme.{networkRealm} --realm {networkRealm} --ue-reachability 1 --truncate True  --verbose True -C {cassandraServerIP} >logs/data_provisioning_mme.log 2>&1 && \\
-echo \\\"###### Creating HSS configuration files ###############################\\\" && \\
+cqlsh --file ../src/hss_rel14/db/oai_db.cql {cassandraServerIP} >logs/oai_db.log 2>&1""".format(
+         gitDirectory       = gitDirectory,
+         cassandraServerIP  = cassandraServerIP
+      )
+      vduHelper.runInShell(commands)
+      vduHelper.endBlock()
+
+
+      # ====== Provision users and MME ======================================
+      vduHelper.beginBlock('Provisioning users and MME')
+      commands = """\
+cd /home/nornetpp/src/{gitDirectory}/scripts && \\
+./data_provisioning_users --apn default.{networkRealm} --apn2 internet.{networkRealm} --key {networkK} --imsi-first {networkIMSIFirst} --msisdn-first {networkMSISDNFirst} --mme-identity mme.{networkRealm} --no-of-users {networkUsers} --realm {networkRealm} --truncate True  --verbose True --cassandra-cluster {cassandraServerIP} >logs/data_provisioning_users.log 2>&1 && \\
+./data_provisioning_mme --id 3 --mme-identity mme.{networkRealm} --realm {networkRealm} --ue-reachability 1 --truncate True  --verbose True -C {cassandraServerIP} >logs/data_provisioning_mme.log 2>&1""".format(
+         gitDirectory       = gitDirectory,
+         cassandraServerIP  = cassandraServerIP,
+         networkRealm       = networkRealm,
+         networkOP          = networkOP,
+         networkK           = networkK,
+         networkIMSIFirst   = networkIMSIFirst,
+         networkMSISDNFirst = networkMSISDNFirst,
+         networkUsers       = networkUsers
+      )
+      vduHelper.runInShell(commands)
+      vduHelper.endBlock()
+
+      # ====== Configure HSS ================================================
+      vduHelper.beginBlock('Configuring HSS')
+      commands = """\
+cd /home/nornetpp/src/{gitDirectory}/scripts && \\
+echo \\\"{hssS6a_IPv4Address}   hss.{networkRealm} hss\\\" | sudo tee -a /etc/hosts && \\
+echo \\\"{mmeS6a_IPv4Address}   mme.{networkRealm} mme\\\" | sudo tee -a /etc/hosts && \\
 openssl rand -out \$HOME/.rnd 128 && \\
 echo \\\"====== Configuring Diameter ... ======\\\" && \\
 PREFIX='/usr/local/etc/oai' && \\
@@ -313,42 +337,96 @@ HSS_CONF[@REALM@]='{networkRealm}' && \\
 HSS_CONF[@HSS_FQDN@]='hss.{networkRealm}' && \\
 HSS_CONF[@cassandra_Server_IP@]='{cassandraServerIP}' && \\
 HSS_CONF[@cassandra_IP@]='{cassandraServerIP}' && \\
-HSS_CONF[@OP_KEY@]='{networkOP_K}' && \\
+HSS_CONF[@OP_KEY@]='{networkOP}' && \\
 HSS_CONF[@ROAMING_ALLOWED@]='true' && \\
 for K in \\\"\${{!HSS_CONF[@]}}\\\"; do echo \\\"K=\$K ...\\\" && sudo egrep -lRZ \\\"\$K\\\" \$PREFIX | xargs -0 -l sudo sed -i -e \\\"s|\$K|\${{HSS_CONF[\$K]}}|g\\\" ; done && \\
 ../src/hss_rel14/bin/make_certs.sh hss {networkRealm} \$PREFIX && \\
 echo \\\"====== Updating key ... ======\\\" && \\
-oai_hss -j \$PREFIX/hss_rel14.json --onlyloadkey >logs/onlyloadkey.log 2>&1 && \\
-echo \\\"###### Done! ##########################################################\\\"""".format(
-      gitDirectory       = gitDirectory,
-      cassandraServerIP  = cassandraServerIP,
-      networkRealm       = networkRealm,
-      networkLTE_K       = networkLTE_K,
-      networkOP_K        = networkOP_K,
-      networkIMSIFirst   = networkIMSIFirst,
-      networkMSISDNFirst = networkMSISDNFirst,
-      networkUsers       = networkUsers
-   )
+oai_hss -j \$PREFIX/hss_rel14.json --onlyloadkey >logs/onlyloadkey.log 2>&1""".format(
+         gitDirectory       = gitDirectory,
+         cassandraServerIP  = cassandraServerIP,
+         hssS6a_IPv4Address = hssS6a_IPv4Address,
+         mmeS6a_IPv4Address = mmeS6a_IPv4Address,
+         networkRealm       = networkRealm,
+         networkOP          = networkOP,
+         networkK           = networkK,
+         networkIMSIFirst   = networkIMSIFirst,
+         networkMSISDNFirst = networkMSISDNFirst,
+         networkUsers       = networkUsers
+      )
+      vduHelper.runInShell(commands)
+      vduHelper.endBlock()
 
-   try:
-       stdout, stderr = execute(commands)
-   except subprocess.CalledProcessError as e:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       action_fail(message.encode('utf-8'))
-       status_set('active', 'confiigure-hss: configuring HSS FAILED!')
+      # ====== Set up HSS service ===========================================
+      vduHelper.beginBlock('Setting up HSS service')
+      commands = """\
+( echo \\\"[Unit]\\\" && \\
+echo \\\"Description=Home Subscriber Server (HSS)\\\" && \\
+echo \\\"After=ssh.target\\\" && \\
+echo \\\"\\\" && \\
+echo \\\"[Service]\\\" && \\
+echo \\\"ExecStart=/bin/sh -c \\\'exec /usr/local/bin/oai_hss -j /usr/local/etc/oai/hss_rel14.json >>/var/log/hss.log 2>&1\\\'\\\" && \\
+echo \\\"KillMode=process\\\" && \\
+echo \\\"Restart=on-failure\\\" && \\
+echo \\\"RestartPreventExitStatus=255\\\" && \\
+echo \\\"WorkingDirectory=/home/nornetpp/src/openair-cn/scripts\\\" && \\
+echo \\\"\\\" && \\
+echo \\\"[Install]\\\" && \\
+echo \\\"WantedBy=multi-user.target\\\" ) | sudo tee /lib/systemd/system/hss.service && \\
+sudo systemctl daemon-reload && \\
+( echo -e \\\"#\\x21/bin/sh\\\" && echo \\\"tail -f /var/log/hss.log\\\" ) | tee /home/nornetpp/log && \\
+chmod +x /home/nornetpp/log && \\
+( echo -e \\\"#\\x21/bin/sh\\\" && echo \\\"sudo service hss restart && ./log\\\" ) | tee /home/nornetpp/restart && \\
+chmod +x /home/nornetpp/restart"""
+      vduHelper.runInShell(commands)
+      vduHelper.endBlock()
+
+      # ====== Set up sysstat service =======================================
+      vduHelper.installSysStat()
+
+      # ====== Clean up =====================================================
+      vduHelper.cleanUp()
+
+      message = vduHelper.endBlock()
+      function_set( { 'outout': message } )
+      set_flag('hsscharm.configured-hss')
    except:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       action_fail('Command execution failed: ' + str(err))
-       status_set('active', 'confiigure-hss: configuring HSS FAILED!')
-   else:
+      message = vduHelper.endBlockInException()
+      function_fail(message)
+   finally:
       clear_flag('actions.configure-hss')
-      action_set( { 'output': stdout.encode('utf-8') } )
-      status_set('active', 'confiigure-hss: configuring HSS COMPLETED')
 
 
+# ###### restart-hss function ###############################################
+@when('actions.restart-hss')
+@when('hsscharm.configured-hss')
+def restart_hss():
+   vduHelper.beginBlock('restart_hss')
+   try:
+
+      commands = 'sudo service hss restart'
+      vduHelper.runInShell(commands)
+
+      message = vduHelper.endBlock()
+      function_set( { 'outout': message } )
+   except:
+      message = vduHelper.endBlockInException()
+      function_fail(message)
+   finally:
+      clear_flag('actions.restart-hss')
+
+
+
+# ###########################################################################
+# #### MME Charm functions                                               ####
+# ###########################################################################
+
+# ###### Installation #######################################################
+@when('sshproxy.configured')
+@when_not('mmecharm.installed')
+def install_mmecharm_proxy_charm():
+   set_flag('mmecharm.installed')
+   vduHelper.setStatus('install_mmecharm_proxy_charm: SSH proxy charm is READY')
 
 
 # ###### prepare-mme-build function #########################################
@@ -356,133 +434,136 @@ echo \\\"###### Done! ##########################################################
 @when('mmecharm.installed')
 @when_not('mmecharm.prepared-mme-build')
 def prepare_mme_build():
-   status_set('active', 'prepare-mme-build: preparing MME build ...')
-
-   # ====== Install MME =====================================================
-   # For a documentation of the installation procedure, see:
-   # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-mme
-
-   gitRepository            = 'https://github.com/OPENAIRINTERFACE/openair-cn.git'
-   gitDirectory             = 'openair-cn'
-   gitCommit                = 'develop'
-   networkS1C_IPv4Interface = IPv4Interface('192.168.247.102/24')
-   networkS1C_IPv4Gateway   = IPv4Address('0.0.0.0')
-   networkS1C_IPv6Interface = None
-   networkS1C_IPv6Gateway   = None
-
-   # Prepare network configurations:
-   mmeS6a_IfName = 'ens4'
-   mmeS11_IfName = 'ens5'
-   mmeS1C_IfName = 'ens6'
-
-   configurationS6a = configureInterface(mmeS6a_IfName, IPv4Interface('0.0.0.0/0'))
-   configurationS11 = configureInterface(mmeS11_IfName, IPv4Interface('0.0.0.0/0'))
-   configurationS1C = configureInterface(mmeS1C_IfName, networkS1C_IPv4Interface, networkS1C_IPv4Gateway)
-
-   # NOTE:
-   # Double escaping is required for \ and " in "command" string!
-   # 1. Python
-   # 2. bash -c "<command>"
-   # That is: $ => \$ ; \ => \\ ; " => \\\"
-
-   commands = """\
-echo \\\"###### Preparing system ###############################################\\\" && \\
-echo -e \\\"{configurationS6a}\\\" | sudo tee /etc/network/interfaces.d/61-{mmeS6a_IfName} && sudo ifup {mmeS6a_IfName} || true && \\
-echo -e \\\"{configurationS11}\\\" | sudo tee /etc/network/interfaces.d/62-{mmeS11_IfName} && sudo ifup {mmeS11_IfName} || true && \\
-echo -e \\\"{configurationS1C}\\\" | sudo tee /etc/network/interfaces.d/63-{mmeS1C_IfName} && sudo ifup {mmeS1C_IfName} || true && \\
-echo \\\"###### Preparing sources ##############################################\\\" && \\
-cd /home/nornetpp/src && \\
-if [ ! -d \\\"{gitDirectory}\\\" ] ; then git clone --quiet {gitRepository} {gitDirectory} && cd {gitDirectory} ; else cd {gitDirectory} && git pull ; fi && \\
-git checkout {gitCommit} && \\
-cd scripts && \\
-echo \\\"###### Done! ##########################################################\\\"""".format(
-      gitRepository    = gitRepository,
-      gitDirectory     = gitDirectory,
-      gitCommit        = gitCommit,
-      mmeS6a_IfName    = mmeS6a_IfName,
-      mmeS11_IfName    = mmeS11_IfName,
-      mmeS1C_IfName    = mmeS1C_IfName,
-      configurationS6a = configurationS6a,
-      configurationS11 = configurationS11,
-      configurationS1C = configurationS1C
-   )
-
+   vduHelper.beginBlock('prepare_mme_build')
    try:
-       stdout, stderr = execute(commands)
-   except subprocess.CalledProcessError as e:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       action_fail(message.encode('utf-8'))
-       status_set('active', 'prepare-mme-build: preparing MME build FAILED!')
-   except:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       action_fail('Command execution failed: ' + str(err))
-       status_set('active', 'prepare-mme-build: preparing MME build FAILED!')
-   else:
+
+      # ====== Get MME parameters ===========================================
+      # For a documentation of the installation procedure, see:
+      # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-mme
+
+      gitRepository        = function_get('mme-git-repository')
+      gitCommit            = function_get('mme-git-commit')
+      gitDirectory         = 'openair-cn'
+
+      mmeS1C_IPv4Interface = IPv4Interface(function_get('mme-S1C-ipv4-interface'))
+      mmeS1C_IPv4Gateway   = IPv4Address(function_get('mme-S1C-ipv4-gateway'))
+      if function_get('mme-S1C-ipv6-interface') != '':
+         mmeS1C_IPv6Interface = IPv6Interface(function_get('mme-S1C-ipv6-interface'))
+      else:
+         mmeS1C_IPv6Interface = None
+      if function_get('mme-S1C-ipv6-gateway') != '':
+         mmeS1C_IPv6Gateway   = IPv6Address(function_get('mme-S1C-ipv6-gateway'))
+      else:
+         mmeS1C_IPv6Gateway = None
+
+      # Prepare network configurations:
+      mmeS6a_IfName = 'ens4'
+      mmeS11_IfName = 'ens5'
+      mmeS1C_IfName = 'ens6'
+
+      configurationS6a = vduHelper.makeInterfaceConfiguration(mmeS6a_IfName, IPv4Interface('0.0.0.0/0'))
+      configurationS11 = vduHelper.makeInterfaceConfiguration(mmeS11_IfName, IPv4Interface('0.0.0.0/0'))
+      configurationS1C = vduHelper.makeInterfaceConfiguration(mmeS1C_IfName, mmeS1C_IPv4Interface, mmeS1C_IPv4Gateway,
+                                                              mmeS1C_IPv6Interface, mmeS1C_IPv6Gateway)
+
+      # S10 dummy interface:
+      mmeS10_IfName    = 'dummy0:m10'
+      configurationS10 = vduHelper.makeInterfaceConfiguration(mmeS10_IfName, IPv4Interface('192.168.10.110/24'), createDummy = True)
+
+      # ====== Prepare system ===============================================
+      vduHelper.beginBlock('Preparing system')
+      vduHelper.configureInterface(mmeS6a_IfName, configurationS6a, 61)
+      vduHelper.configureInterface(mmeS11_IfName, configurationS11, 62)
+      vduHelper.configureInterface(mmeS1C_IfName, configurationS1C, 63)
+      vduHelper.configureInterface(mmeS10_IfName, configurationS10, 64)
+      vduHelper.testNetworking('8.8.8.8')
+      vduHelper.endBlock()
+
+      # ====== Prepare sources ==============================================
+      vduHelper.beginBlock('Preparing sources')
+      vduHelper.fetchGitRepository(gitDirectory, gitRepository, gitCommit)
+      vduHelper.endBlock()
+
+
+      message = vduHelper.endBlock()
+      function_set( { 'outout': message } )
       set_flag('mmecharm.prepared-mme-build')
+   except:
+      message = vduHelper.endBlockInException()
+      function_fail(message)
+   finally:
       clear_flag('actions.prepare-mme-build')
-      action_set( { 'output': stdout.encode('utf-8') } )
-      status_set('active', 'prepare-mme-build: preparing MME build COMPLETED')
 
 
 # ###### configure-mme function #############################################
 @when('actions.configure-mme')
 @when('mmecharm.prepared-mme-build')
 def configure_mme():
-   status_set('active', 'configure-mme: configuring MME ...')
+   vduHelper.beginBlock('configure-mme')
+   try:
 
-   # ====== Install MME =====================================================
-   # For a documentation of the installation procedure, see:
-   # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-mme
+      # ====== Get MME parameters ===========================================
+      # For a documentation of the installation procedure, see:
+      # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-mme
 
-   gitRepository          = 'https://github.com/OPENAIRINTERFACE/openair-cn.git'
-   gitDirectory           = 'openair-cn'
-   gitCommit              = 'develop'
-   hssS6a_IPv4Address     = '172.16.6.129'
-   mmeS1C_IPv4IfName      = 'ens6'
-   mmeS1C_IPv4Interface   = IPv4Interface('192.168.247.102/24')
-   mmeS11_IPv4IfName      = 'ens5'
-   mmeS11_IPv4Interface   = IPv4Interface('172.16.1.102/24')
-   spwgcS11_IPv4Interface = IPv4Interface('172.16.1.104/24')
-   networkRealm           = 'simula.nornet'
-   networkMCC             = 242
-   networkMNC             = 88
-   networkLTE_K           = '449c4b91aeacd0ace182cf3a5a72bfa1'
-   networkOP_K            = '1006020f0a478bf6b699f15c062e42b3'
-   networkIMSIFirst       = '242881234500000'
-   networkMSISDNFirst     = '24288880000000'
-   networkUsers           = 1024
+      gitDirectory           = 'openair-cn'
 
-   TAC_SGW_TEST = 7
-   TAC_SGW_0    = 600
-   TAC_MME_0    = 601
-   TAC_MME_1    = 602
+      hssS6a_IPv4Address     = IPv4Address(function_get('hss-S6a-address'))
+      mmeS1C_IPv4Interface   = IPv4Interface(function_get('mme-S1C-ipv4-interface'))
+      mmeS11_IPv4Interface   = IPv4Interface(function_get('mme-S11-ipv4-interface'))
+      mmeS10_IPv4Interface   = IPv4Interface('192.168.10.110/24')
+      spwgcS11_IPv4Interface = IPv4Interface(function_get('spgwc-S11-ipv4-interface'))
+      networkRealm           = function_get('network-realm')
+      networkMCC             = int(function_get('network-mcc'))
+      networkMNC             = int(function_get('network-mnc'))
+      networkOP              = function_get('network-op')
+      networkK               = function_get('network-k')
+      networkIMSIFirst       = function_get('network-imsi-first')
+      networkMSISDNFirst     = function_get('network-msisdn-first')
+      networkUsers           = int(function_get('network-users'))
 
-   tac_sgw_test = '{:04x}'.format(TAC_SGW_TEST)
-   tac_sgw_0    = '{:04x}'.format(TAC_SGW_0)
-   tac_mme_0    = '{:04x}'.format(TAC_MME_0)
-   tac_mme_1    = '{:04x}'.format(TAC_MME_1)
+      TAC_SGW_TEST = 7
+      TAC_SGW_0    = 600
+      TAC_MME_0    = 601
+      TAC_MME_1    = 602
 
-   # NOTE:
-   # Double escaping is required for \ and " in "command" string!
-   # 1. Python
-   # 2. bash -c "<command>"
-   # That is: $ => \$ ; \ => \\ ; " => \\\"
+      tac_sgw_test = '{:04x}'.format(TAC_SGW_TEST)
+      tac_sgw_0    = '{:04x}'.format(TAC_SGW_0)
+      tac_mme_0    = '{:04x}'.format(TAC_MME_0)
+      tac_mme_1    = '{:04x}'.format(TAC_MME_1)
 
-   commands = """\
-echo \\\"###### Building MME ####################################################\\\" && \\
+      # Prepare network configurations:
+      mmeS6a_IfName = 'ens4'
+      mmeS11_IfName = 'ens5'
+      mmeS1C_IfName = 'ens6'
+      mmeS10_IfName = 'dummy0:m10'
+
+      # ====== Build MME dependencies =======================================
+      vduHelper.beginBlock('Building MME dependencies')
+      commands = """\
 export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
-cd /home/nornetpp/src && \\
-cd {gitDirectory} && \\
-cd scripts && \\
+cd /home/nornetpp/src/{gitDirectory}/scripts && \\
 mkdir -p logs && \\
-echo \\\"====== Building dependencies ... ======\\\" && \\
-./build_mme --check-installed-software --force >logs/build_mme-1.log 2>&1 && \\
-echo \\\"====== Building service ... ======\\\" && \\
-./build_mme --clean >logs/build_mme-2.log 2>&1 && \\
-echo \\\"###### Creating MME configuration files ###############################\\\" && \\
+./build_mme --check-installed-software --force >logs/build_mme-1.log 2>&1""".format(gitDirectory = gitDirectory)
+      vduHelper.runInShell(commands)
+      vduHelper.endBlock()
+
+      # ====== Build MME itself =============================================
+      vduHelper.beginBlock('Building MME itself')
+      commands = """\
+export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
+cd /home/nornetpp/src/{gitDirectory}/scripts && \\
+./build_mme --clean >logs/build_mme-2.log 2>&1""".format(gitDirectory = gitDirectory)
+      vduHelper.runInShell(commands)
+      vduHelper.endBlock()
+
+      # ====== Configure MME ================================================
+      vduHelper.beginBlock('Configuring MME')
+      commands = """\
+export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
+cd /home/nornetpp/src/{gitDirectory}/scripts && \\
+echo \\\"127.0.1.1        mme.{networkRealm} mme\\\" | sudo tee -a /etc/hosts && \\
+echo \\\"{hssS6a_IPv4Address}     hss.{networkRealm} hss\\\" | sudo tee -a /etc/hosts && \\
 openssl rand -out \$HOME/.rnd 128 && \\
 INSTANCE=1 && \\
 PREFIX='/usr/local/etc/oai' && \\
@@ -507,237 +588,134 @@ MME_CONF[@MME_CODE@]='3' && \\
 MME_CONF[@TAC_0@]='600' && \\
 MME_CONF[@TAC_1@]='601' && \\
 MME_CONF[@TAC_2@]='602' && \\
-MME_CONF[@MME_INTERFACE_NAME_FOR_S1_MME@]='{mmeS1C_IPv4IfName}' && \\
+MME_CONF[@MME_INTERFACE_NAME_FOR_S1_MME@]='{mmeS1C_IfName}' && \\
 MME_CONF[@MME_IPV4_ADDRESS_FOR_S1_MME@]='{mmeS1C_IPv4Interface}' && \\
-MME_CONF[@MME_INTERFACE_NAME_FOR_S11@]='{mmeS11_IPv4IfName}' && \\
+MME_CONF[@MME_INTERFACE_NAME_FOR_S11@]='{mmeS11_IfName}' && \\
 MME_CONF[@MME_IPV4_ADDRESS_FOR_S11@]='{mmeS11_IPv4Interface}' && \\
-MME_CONF[@MME_INTERFACE_NAME_FOR_S10@]='eth0:m10' && \\
-MME_CONF[@MME_IPV4_ADDRESS_FOR_S10@]='192.168.10.110/24' && \\
+MME_CONF[@MME_INTERFACE_NAME_FOR_S10@]='{mmeS10_IfName}' && \\
+MME_CONF[@MME_IPV4_ADDRESS_FOR_S10@]='{mmeS10_IPv4Interface}' && \\
 MME_CONF[@OUTPUT@]='CONSOLE' && \\
 MME_CONF[@SGW_IPV4_ADDRESS_FOR_S11_TEST_0@]='{spwgcS11_IPv4Interface}' && \\
 MME_CONF[@SGW_IPV4_ADDRESS_FOR_S11_0@]='{spwgcS11_IPv4Interface}' && \\
 MME_CONF[@PEER_MME_IPV4_ADDRESS_FOR_S10_0@]='0.0.0.0/24' && \\
 MME_CONF[@PEER_MME_IPV4_ADDRESS_FOR_S10_1@]='0.0.0.0/24' && \\
-MME_CONF[@TAC-LB_SGW_TEST_0@]={tac_sgw_test_hi} && \\
-MME_CONF[@TAC-HB_SGW_TEST_0@]={tac_sgw_test_lo} && \\
+MME_CONF[@TAC-LB_SGW_TEST_0@]={tac_sgw_test_lo} && \\
+MME_CONF[@TAC-HB_SGW_TEST_0@]={tac_sgw_test_hi} && \\
 MME_CONF[@MCC_SGW_0@]={networkMCC} && \\
 MME_CONF[@MNC3_SGW_0@]={networkMNC:03d} && \\
-MME_CONF[@TAC-LB_SGW_0@]={tac_sgw_0_hi} && \\
-MME_CONF[@TAC-HB_SGW_0@]={tac_sgw_0_lo} && \\
+MME_CONF[@TAC-LB_SGW_0@]={tac_sgw_0_lo} && \\
+MME_CONF[@TAC-HB_SGW_0@]={tac_sgw_0_hi} && \\
 MME_CONF[@MCC_MME_0@]={networkMCC} && \\
 MME_CONF[@MNC3_MME_0@]={networkMNC:03d} && \\
-MME_CONF[@TAC-LB_MME_0@]={tac_mme_0_hi} && \\
-MME_CONF[@TAC-HB_MME_0@]={tac_mme_0_lo} && \\
+MME_CONF[@TAC-LB_MME_0@]={tac_mme_0_lo} && \\
+MME_CONF[@TAC-HB_MME_0@]={tac_mme_0_hi} && \\
 MME_CONF[@MCC_MME_1@]={networkMCC} && \\
 MME_CONF[@MNC3_MME_1@]={networkMNC:03d} && \\
-MME_CONF[@TAC-LB_MME_1@]={tac_mme_1_hi} && \\
-MME_CONF[@TAC-HB_MME_1@]={tac_mme_1_lo} && \\
+MME_CONF[@TAC-LB_MME_1@]={tac_mme_1_lo} && \\
+MME_CONF[@TAC-HB_MME_1@]={tac_mme_1_hi} && \\
 for K in \\\"\${{!MME_CONF[@]}}\\\"; do sudo egrep -lRZ \\\"\$K\\\" \$PREFIX | xargs -0 -l sudo sed -i -e \\\"s|\$K|\${{MME_CONF[\$K]}}|g\\\" ; ret=\$?;[[ ret -ne 0 ]] && echo \\\"Tried to replace \$K with \${{MME_CONF[\$K]}}\\\" || true ; done && \\
-sudo ./check_mme_s6a_certificate \$PREFIX/freeDiameter mme.{networkRealm} >logs/check_mme_s6a_certificate.log 2>&1 && \\
-echo \\\"###### Done! ##########################################################\\\"""".format(
-      gitRepository          = gitRepository,
-      gitDirectory           = gitDirectory,
-      gitCommit              = gitCommit,
-      hssS6a_IPv4Address     = hssS6a_IPv4Address,
-      mmeS1C_IPv4IfName      = mmeS1C_IPv4IfName,
-      mmeS1C_IPv4Interface   = mmeS1C_IPv4Interface,
-      mmeS11_IPv4IfName      = mmeS11_IPv4IfName,
-      mmeS11_IPv4Interface   = mmeS11_IPv4Interface,
-      spwgcS11_IPv4Interface = spwgcS11_IPv4Interface,
-      networkRealm           = networkRealm,
-      networkMCC             = networkMCC,
-      networkMNC             = networkMNC,
-      networkLTE_K           = networkLTE_K,
-      networkOP_K            = networkOP_K,
-      networkIMSIFirst       = networkIMSIFirst,
-      networkMSISDNFirst     = networkMSISDNFirst,
-      networkUsers           = networkUsers,
+sudo ./check_mme_s6a_certificate \$PREFIX/freeDiameter mme.{networkRealm} >logs/check_mme_s6a_certificate.log 2>&1""".format(
+         gitDirectory           = gitDirectory,
+         hssS6a_IPv4Address     = hssS6a_IPv4Address,
+         mmeS1C_IfName          = mmeS1C_IfName,
+         mmeS1C_IPv4Interface   = mmeS1C_IPv4Interface,
+         mmeS11_IfName          = mmeS11_IfName,
+         mmeS11_IPv4Interface   = mmeS11_IPv4Interface,
+         mmeS10_IfName          = mmeS10_IfName,
+         mmeS10_IPv4Interface   = mmeS10_IPv4Interface,
 
-      tac_sgw_test_hi        = tac_sgw_test[0:2],
-      tac_sgw_test_lo        = tac_sgw_test[2:4],
-      tac_sgw_0_hi           = tac_sgw_0[0:2],
-      tac_sgw_0_lo           = tac_sgw_0[2:4],
-      tac_mme_0_hi           = tac_mme_0[0:2],
-      tac_mme_0_lo           = tac_mme_0[2:4],
-      tac_mme_1_hi           = tac_mme_1[0:2],
-      tac_mme_1_lo           = tac_mme_1[2:4]
-   )
+         spwgcS11_IPv4Interface = spwgcS11_IPv4Interface,
+         networkRealm           = networkRealm,
+         networkMCC             = networkMCC,
+         networkMNC             = networkMNC,
+         networkOP              = networkOP,
+         networkK               = networkK,
+         networkIMSIFirst       = networkIMSIFirst,
+         networkMSISDNFirst     = networkMSISDNFirst,
+         networkUsers           = networkUsers,
 
-   try:
-       stdout, stderr = execute(commands)
-   except subprocess.CalledProcessError as e:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       action_fail(message.encode('utf-8'))
-       status_set('active', 'confiigure-mme: configuring MME FAILED!')
+         tac_sgw_test_hi        = tac_sgw_test[0:2],
+         tac_sgw_test_lo        = tac_sgw_test[2:4],
+         tac_sgw_0_hi           = tac_sgw_0[0:2],
+         tac_sgw_0_lo           = tac_sgw_0[2:4],
+         tac_mme_0_hi           = tac_mme_0[0:2],
+         tac_mme_0_lo           = tac_mme_0[2:4],
+         tac_mme_1_hi           = tac_mme_1[0:2],
+         tac_mme_1_lo           = tac_mme_1[2:4]
+      )
+      vduHelper.runInShell(commands)
+      vduHelper.endBlock()
+
+      # ====== Set up MME service ===========================================
+      vduHelper.beginBlock('Setting up MME service')
+      commands = """\
+( echo \\\"[Unit]\\\" && \\
+echo \\\"Description=Mobility Management Entity (MME)\\\" && \\
+echo \\\"After=ssh.target\\\" && \\
+echo \\\"\\\" && \\
+echo \\\"[Service]\\\" && \\
+echo \\\"ExecStart=/bin/sh -c \\\'exec /usr/local/bin/mme -c /usr/local/etc/oai/mme.conf >>/var/log/mme.log 2>&1\\\'\\\" && \\
+echo \\\"KillMode=process\\\" && \\
+echo \\\"Restart=on-failure\\\" && \\
+echo \\\"RestartPreventExitStatus=255\\\" && \\
+echo \\\"WorkingDirectory=/home/nornetpp/src/openair-cn/scripts\\\" && \\
+echo \\\"\\\" && \\
+echo \\\"[Install]\\\" && \\
+echo \\\"WantedBy=multi-user.target\\\" ) | sudo tee /lib/systemd/system/mme.service && \\
+sudo systemctl daemon-reload && \\
+( echo -e \\\"#\\x21/bin/sh\\\" && echo \\\"tail -f /var/log/mme.log\\\" ) | tee /home/nornetpp/log && \\
+chmod +x /home/nornetpp/log && \\
+( echo -e \\\"#\\x21/bin/sh\\\" && echo \\\"sudo service mme restart && ./log\\\" ) | tee /home/nornetpp/restart && \\
+chmod +x /home/nornetpp/restart"""
+      vduHelper.runInShell(commands)
+      vduHelper.endBlock()
+
+      # ====== Set up sysstat service =======================================
+      vduHelper.installSysStat()
+
+      # ====== Clean up =====================================================
+      vduHelper.cleanUp()
+
+      message = vduHelper.endBlock()
+      function_set( { 'outout': message } )
+      set_flag('mmecharm.configured-mme')
    except:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       action_fail('Command execution failed: ' + str(err))
-       status_set('active', 'confiigure-mme: configuring MME FAILED!')
-   else:
+      message = vduHelper.endBlockInException()
+      function_fail(message)
+   finally:
       clear_flag('actions.configure-mme')
-      action_set( { 'output': stdout.encode('utf-8') } )
-      status_set('active', 'confiigure-mme: configuring MME COMPLETED')
 
 
-
-
-# ###### prepare-spgwu-build function #######################################
-@when('actions.prepare-spgwu-build')
-@when('spgwucharm.installed')
-@when_not('spgwucharm.prepared-spgwu-build')
-def prepare_spgwu_build():
-   status_set('active', 'prepare-spgwu-build: preparing SPGW-U build ...')
-
-   # ====== Install SPGW-U ==================================================
-   # For a documentation of the installation procedure, see:
-   # https://github.com/OPENAIRINTERFACE/openair-cn-cups/wiki/OpenAirSoftwareSupport#install-spgw-u
-
-   gitRepository            = 'https://github.com/OPENAIRINTERFACE/openair-cn-cups.git'
-   gitDirectory             = 'openair-cn-cups'
-   gitCommit                = 'develop'
-
-   spgwuSXab_IfName         = 'ens4'
-   spgwuS1U_IfName          = 'ens5'
-   spgwuSGi_IfName          = 'ens6'
-
-   networkS1U_IPv4Interface = IPv4Interface('192.168.248.159/24')
-   networkSGi_IPv4Interface = IPv4Interface('10.254.1.203/24')
-   networkSGi_IPv4Gateway   = IPv4Address('10.254.1.1')
-   networkSGi_IPv6Interface = IPv6Interface('3ffe::2/64')
-   networkSGi_IPv6Gateway   = IPv6Address('3ffe::1')
-
-   # Prepare network configurations:
-   configurationSXab = configureInterface(spgwuSXab_IfName, IPv4Interface('0.0.0.0/0'))
-   configurationS1U  = configureInterface(spgwuS1U_IfName, networkS1U_IPv4Interface, IPv4Address('0.0.0.0'))
-   configurationSGi  = configureInterface(spgwuSGi_IfName, networkSGi_IPv4Interface, networkSGi_IPv4Gateway,
-                                                           networkSGi_IPv6Interface, networkSGi_IPv6Gateway)
-
-   # NOTE:
-   # Double escaping is required for \ and " in "command" string!
-   # 1. Python
-   # 2. bash -c "<command>"
-   # That is: $ => \$ ; \ => \\ ; " => \\\"
-
-   commands = """\
-echo \\\"###### Preparing system ###############################################\\\" && \\
-echo -e \\\"{configurationSXab}\\\" | sudo tee /etc/network/interfaces.d/61-{spgwuSXab_IfName} && sudo ifup {spgwuSXab_IfName} || true && \\
-echo -e \\\"{configurationS1U}\\\" | sudo tee /etc/network/interfaces.d/62-{spgwuS1U_IfName} && sudo ifup {spgwuS1U_IfName} || true && \\
-echo -e \\\"{configurationSGi}\\\" | sudo tee /etc/network/interfaces.d/63-{spgwuSGi_IfName} && sudo ifup {spgwuSGi_IfName} || true && \\
-echo \\\"###### Preparing sources ##############################################\\\" && \\
-cd /home/nornetpp/src && \\
-if [ ! -d \\\"{gitDirectory}\\\" ] ; then git clone --quiet {gitRepository} {gitDirectory} && cd {gitDirectory} ; else cd {gitDirectory} && git pull ; fi && \\
-git checkout {gitCommit} && \\
-cd build/scripts && \\
-echo \\\"###### Done! ##########################################################\\\"""".format(
-      gitRepository     = gitRepository,
-      gitDirectory      = gitDirectory,
-      gitCommit         = gitCommit,
-      spgwuSXab_IfName  = spgwuSXab_IfName,
-      spgwuS1U_IfName   = spgwuS1U_IfName,
-      spgwuSGi_IfName   = spgwuSGi_IfName,
-      configurationSXab = configurationSXab,
-      configurationS1U  = configurationS1U,
-      configurationSGi  = configurationSGi
-   )
-
+# ###### restart-mme function ###############################################
+@when('actions.restart-mme')
+@when('mmecharm.configured-mme')
+def restart_mme():
+   vduHelper.beginBlock('restart_mme')
    try:
-       stdout, stderr = execute(commands)
-   except subprocess.CalledProcessError as e:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       action_fail(message.encode('utf-8'))
-       status_set('active', 'prepare-spgwu-build: preparing SPGW-U build FAILED!')
+
+      commands = 'sudo service mme restart'
+      vduHelper.runInShell(commands)
+
+      message = vduHelper.endBlock()
+      function_set( { 'outout': message } )
    except:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       action_fail('Command execution failed: ' + str(err))
-       status_set('active', 'prepare-spgwu-build: preparing SPGW-U build FAILED!')
-   else:
-      set_flag('spgwucharm.prepared-spgwu-build')
-      clear_flag('actions.prepare-spgwu-build')
-      action_set( { 'output': stdout.encode('utf-8') } )
-      status_set('active', 'prepare-spgwu-build: preparing SPGW-U build COMPLETED')
+      message = vduHelper.endBlockInException()
+      function_fail(message)
+   finally:
+      clear_flag('actions.restart-mme')
 
 
-# ###### configure-spgwu function ###########################################
-@when('actions.configure-spgwu')
-@when('spgwucharm.prepared-spgwu-build')
-def configure_spgwu():
-   status_set('active', 'configure-spgwu: configuring SPGW-U ...')
 
-   # ====== Install SPGW-U ==================================================
-   # For a documentation of the installation procedure, see:
-   # https://github.com/OPENAIRINTERFACE/openair-cn-cups/wiki/OpenAirSoftwareSupport#install-spgw-u
+# ###########################################################################
+# #### SPGW-C Charm functions                                            ####
+# ###########################################################################
 
-   gitRepository    = 'https://github.com/OPENAIRINTERFACE/openair-cn-cups.git'
-   gitDirectory     = 'openair-cn-cups'
-   gitCommit        = 'develop'
-
-   spgwuSXab_IfName = 'ens4'
-   spgwuS1U_IfName  = 'ens5'
-   spgwuSGi_IfName  = 'ens6'
-
-   # NOTE:
-   # Double escaping is required for \ and " in "command" string!
-   # 1. Python
-   # 2. bash -c "<command>"
-   # That is: $ => \$ ; \ => \\ ; " => \\\"
-
-   commands = """\
-echo \\\"###### Building SPGW-U ################################################\\\" && \\
-export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
-cd /home/nornetpp/src && \\
-cd {gitDirectory} && \\
-cd build/scripts && \\
-mkdir -p logs && \\
-echo \\\"====== Building dependencies ... ======\\\" && \\
-./build_spgwu -I -f >logs/build_spgwu-1.log 2>&1 && \\
-echo \\\"====== Building service ... ======\\\" && \\
-./build_spgwu -c -V -b Debug -j >logs/build_spgwu-2.log 2>&1 && \\
-INSTANCE=1 && \\
-PREFIX='/usr/local/etc/oai' && \\
-sudo mkdir -m 0777 -p \$PREFIX && \\
-sudo cp ../../etc/spgw_u.conf  \$PREFIX && \\
-declare -A SPGWU_CONF && \\
-SPGWU_CONF[@INSTANCE@]=\$INSTANCE && \\
-SPGWU_CONF[@PREFIX@]=\$PREFIX && \\
-SPGWU_CONF[@PID_DIRECTORY@]='/var/run' && \\
-SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_S1U_S12_S4_UP@]='{spgwuS1U_IfName}' && \\
-SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_SX@]='{spgwuSXab_IfName}' && \\
-SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_SGI@]='{spgwuSGi_IfName}' && \\
-for K in \\\"\${{!SPGWU_CONF[@]}}\\\"; do sudo egrep -lRZ \\\"\$K\\\" \$PREFIX | xargs -0 -l sudo sed -i -e \\\"s|\$K|\${{SPGWU_CONF[\$K]}}|g\\\" ; ret=\$?;[[ ret -ne 0 ]] && echo \\\"Tried to replace \$K with \${{SPGWU_CONF[\$K]}}\\\" || true ; done && \\
-echo \\\"###### Done! ##########################################################\\\"""".format(
-      gitRepository     = gitRepository,
-      gitDirectory      = gitDirectory,
-      gitCommit         = gitCommit,
-      spgwuSXab_IfName  = spgwuSXab_IfName,
-      spgwuS1U_IfName   = spgwuS1U_IfName,
-      spgwuSGi_IfName   = spgwuSGi_IfName,
-   )
-
-   try:
-       stdout, stderr = execute(commands)
-   except subprocess.CalledProcessError as e:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       action_fail(message.encode('utf-8'))
-       status_set('active', 'confiigure-spgwu: configuring SPGW-U FAILED!')
-   except:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       action_fail('Command execution failed: ' + str(err))
-       status_set('active', 'confiigure-spgwu: configuring SPGW-U FAILED!')
-   else:
-      clear_flag('actions.configure-spgwu')
-      action_set( { 'output': stdout.encode('utf-8') } )
-      status_set('active', 'confiigure-spgwu: configuring SPGW-U COMPLETED')
-
-
+# ###### Installation #######################################################
+@when('sshproxy.configured')
+@when_not('spgwccharm.installed')
+def install_spgwccharm_proxy_charm():
+   set_flag('spgwccharm.installed')
+   vduHelper.setStatus('install_spgwccharm_proxy_charm: SSH proxy charm is READY')
 
 
 # ###### prepare-spgwc-build function #######################################
@@ -745,118 +723,100 @@ echo \\\"###### Done! ##########################################################
 @when('spgwccharm.installed')
 @when_not('spgwccharm.prepared-spgwc-build')
 def prepare_spgwc_build():
-   status_set('active', 'prepare-spgwc-build: preparing SPGW-C build ...')
-
-   # ====== Install SPGW-C ==================================================
-   # For a documentation of the installation procedure, see:
-   # https://github.com/OPENAIRINTERFACE/openair-cn-cups/wiki/OpenAirSoftwareSupport#install-spgw-c
-
-   gitRepository         = 'https://github.com/OPENAIRINTERFACE/openair-cn-cups.git'
-   gitDirectory          = 'openair-cn-cups'
-   gitCommit             = 'develop'
-
-   # Prepare network configurations:
-   spgwcS11_IfName       = 'ens5'
-   spgwcSXab_IfName      = 'ens4'
-   configurationS11      = configureInterface(spgwcS11_IfName,  IPv4Interface('0.0.0.0/0'))
-   configurationSXab     = configureInterface(spgwcSXab_IfName, IPv4Interface('0.0.0.0/0'))
-
-   # S5S8 dummy interfaces:
-   spgwcS5S8_SGW_IfName  = 'dummy0:s5c'
-   configurationS5S8_SGW = configureInterface(spgwcS5S8_SGW_IfName, IPv4Interface('172.58.58.102/24'))
-   spgwcS5S8_PGW_IfName  = 'dummy0:p5c'
-   configurationS5S8_PGW = configureInterface(spgwcS5S8_PGW_IfName, IPv4Interface('172.58.58.101/24'))
-
-   # NOTE:
-   # Double escaping is required for \ and " in "command" string!
-   # 1. Python
-   # 2. bash -c "<command>"
-   # That is: $ => \$ ; \ => \\ ; " => \\\"
-
-   commands = """\
-echo \\\"###### Preparing system ###############################################\\\" && \\
-echo -e \\\"{configurationS11}\\\" | sudo tee /etc/network/interfaces.d/61-{spgwcS11_IfName} && sudo ifup {spgwcS11_IfName} || true && \\
-echo -e \\\"{configurationSXab}\\\" | sudo tee /etc/network/interfaces.d/62-{spgwcSXab_IfName} && sudo ifup {spgwcSXab_IfName} || true && \\
-sudo ip link add dummy0 type dummy || true && \\
-echo -e \\\"{configurationS5S8_SGW}\\\" | sudo tee /etc/network/interfaces.d/63-{spgwcS5S8_SGW_IfName} && sudo ifup {spgwcS5S8_SGW_IfName} || true && \\
-echo -e \\\"{configurationS5S8_PGW}\\\" | sudo tee /etc/network/interfaces.d/64-{spgwcS5S8_PGW_IfName} && sudo ifup {spgwcS5S8_PGW_IfName} || true && \\
-echo \\\"###### Preparing sources ##############################################\\\" && \\
-cd /home/nornetpp/src && \\
-if [ ! -d \\\"{gitDirectory}\\\" ] ; then git clone --quiet {gitRepository} {gitDirectory} && cd {gitDirectory} ; else cd {gitDirectory} && git pull ; fi && \\
-git checkout {gitCommit} && \\
-cd build/scripts && \\
-echo \\\"###### Done! ##########################################################\\\"""".format(
-      gitRepository          = gitRepository,
-      gitDirectory           = gitDirectory,
-      gitCommit              = gitCommit,
-      spgwcS11_IfName        = spgwcS11_IfName,
-      spgwcSXab_IfName       = spgwcSXab_IfName,
-      spgwcS5S8_SGW_IfName   = spgwcS5S8_SGW_IfName,
-      spgwcS5S8_PGW_IfName   = spgwcS5S8_PGW_IfName,
-      configurationS11       = configurationS11,
-      configurationSXab      = configurationSXab,
-      configurationS5S8_SGW  = configurationS5S8_SGW,
-      configurationS5S8_PGW  = configurationS5S8_PGW
-   )
-
+   vduHelper.beginBlock('prepare_spgwc_build')
    try:
-       stdout, stderr = execute(commands)
-   except subprocess.CalledProcessError as e:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       action_fail(message.encode('utf-8'))
-       status_set('active', 'prepare-spgwc-build: preparing SPGW-C build FAILED!')
-   except:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       action_fail('Command execution failed: ' + str(err))
-       status_set('active', 'prepare-spgwc-build: preparing SPGW-C build FAILED!')
-   else:
+
+      # ====== Get SPGW-C parameters ========================================
+      # For a documentation of the installation procedure, see:
+      # https://github.com/OPENAIRINTERFACE/openair-cn-cups/wiki/OpenAirSoftwareSupport#install-spgw-c
+
+      gitRepository     = function_get('spgwc-git-repository')
+      gitCommit         = function_get('spgwc-git-commit')
+      gitDirectory      = 'openair-cn-cups'
+
+      # Prepare network configurations:
+      spgwcS11_IfName   = 'ens5'
+      spgwcSXab_IfName  = 'ens4'
+      configurationS11  = vduHelper.makeInterfaceConfiguration(spgwcS11_IfName,  IPv4Interface('0.0.0.0/0'))
+      configurationSXab = vduHelper.makeInterfaceConfiguration(spgwcSXab_IfName, IPv4Interface('0.0.0.0/0'))
+
+      # S5S8 dummy interfaces:
+      spgwcS5S8_SGW_IfName  = 'dummy0:s5c'
+      configurationS5S8_SGW = vduHelper.makeInterfaceConfiguration(spgwcS5S8_SGW_IfName, IPv4Interface('172.58.58.102/24'), createDummy = True)
+      spgwcS5S8_PGW_IfName  = 'dummy0:p5c'
+      configurationS5S8_PGW = vduHelper.makeInterfaceConfiguration(spgwcS5S8_PGW_IfName, IPv4Interface('172.58.58.101/24'), createDummy = True)
+
+      # ====== Prepare system ===============================================
+      vduHelper.beginBlock('Preparing system')
+      vduHelper.configureInterface(spgwcS11_IfName,       configurationS11,       61)
+      vduHelper.configureInterface(spgwcSXab_IfName,      configurationSXab,      62)
+      vduHelper.configureInterface(spgwcS5S8_SGW_IfName,  configurationS5S8_SGW,  63)
+      vduHelper.configureInterface(spgwcS5S8_PGW_IfName,  configurationS5S8_PGW,  64)
+      vduHelper.testNetworking('8.8.8.8')
+      vduHelper.endBlock()
+
+      # ====== Prepare sources ==============================================
+      vduHelper.beginBlock('Preparing sources')
+      vduHelper.fetchGitRepository(gitDirectory, gitRepository, gitCommit)
+      vduHelper.endBlock()
+
+
+      message = vduHelper.endBlock()
+      function_set( { 'outout': message } )
       set_flag('spgwccharm.prepared-spgwc-build')
+   except:
+      message = vduHelper.endBlockInException()
+      function_fail(message)
+   finally:
       clear_flag('actions.prepare-spgwc-build')
-      action_set( { 'output': stdout.encode('utf-8') } )
-      status_set('active', 'prepare-spgwc-build: preparing SPGW-C build COMPLETED')
 
 
 # ###### configure-spgwc function ###########################################
 @when('actions.configure-spgwc')
 @when('spgwccharm.prepared-spgwc-build')
 def configure_spgwc():
-   status_set('active', 'configure-spgwc: configuring SPGW-C ...')
+   vduHelper.beginBlock('configure_spgwc')
+   try:
 
-   # ====== Install SPGW-C ==================================================
-   # For a documentation of the installation procedure, see:
-   # https://github.com/OPENAIRINTERFACE/openair-cn-cups/wiki/OpenAirSoftwareSupport#install-spgw-c
+      # ====== Get SPGW-C parameters ========================================
+      # For a documentation of the installation procedure, see:
+      # https://github.com/OPENAIRINTERFACE/openair-cn-cups/wiki/OpenAirSoftwareSupport#install-spgw-c
 
-   gitDirectory         = 'openair-cn-cups'
-   networkRealm         = 'simula.nornet'
-   networkDNS1_IPv4     = IPv4Address('10.1.1.1')
-   networkDNS2_IPv4     = IPv4Address('10.1.2.1')
+      gitDirectory         = 'openair-cn-cups'
 
-   spgwcSXab_IfName     = 'ens4'
-   spgwcS11_IfName      = 'ens5'
-   spgwcS5S8_SGW_IfName = 'dummy0:s5c'
-   spgwcS5S8_PGW_IfName = 'dummy0:p5c'
+      networkRealm         = function_get('network-realm')
+      networkDNS1_IPv4     = IPv4Address(function_get('network-ipv4-dns1'))
+      networkDNS2_IPv4     = IPv4Address(function_get('network-ipv4-dns2'))
 
-   # NOTE:
-   # Double escaping is required for \ and " in "command" string!
-   # 1. Python
-   # 2. bash -c "<command>"
-   # That is: $ => \$ ; \ => \\ ; " => \\\"
+      # Prepare network configurations:
+      spgwcSXab_IfName     = 'ens4'
+      spgwcS11_IfName      = 'ens5'
+      spgwcS5S8_SGW_IfName = 'dummy0:s5c'
+      spgwcS5S8_PGW_IfName = 'dummy0:p5c'
 
-   commands = """\
-echo \\\"###### Building SPGW-C ################################################\\\" && \\
+      # ====== Build SPGW-C dependencies ====================================
+      vduHelper.beginBlock('Building SPGW-C dependencies')
+      commands = """\
 export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
-cd /home/nornetpp/src && \\
-cd {gitDirectory} && \\
-cd build/scripts && \\
+cd /home/nornetpp/src/{gitDirectory}/build/scripts && \\
 mkdir -p logs && \\
-echo \\\"====== Building dependencies ... ======\\\" && \\
-./build_spgwc -I -f >logs/build_spgwc-1.log 2>&1 && \\
-echo \\\"====== Building service ... ======\\\" && \\
-./build_spgwc -c -V -b Debug -j >logs/build_spgwc-2.log 2>&1 && \\
-echo \\\"###### Creating SPGW-C configuration files ############################\\\" && \\
+./build_spgwc -I -f >logs/build_spgwc-1.log 2>&1""".format(gitDirectory = gitDirectory)
+      vduHelper.runInShell(commands)
+      vduHelper.endBlock()
+
+      # ====== Build SPGW-C itself ==========================================
+      vduHelper.beginBlock('Building SPGW-C itself')
+      commands = """\
+export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
+cd /home/nornetpp/src/{gitDirectory}/build/scripts && \\
+./build_spgwc -c -V -b Debug -j >logs/build_spgwc-2.log 2>&1""".format(gitDirectory = gitDirectory)
+      vduHelper.runInShell(commands)
+      vduHelper.endBlock()
+
+      # ====== Configure SPGW-C =============================================
+      vduHelper.beginBlock('Configuring SPGW-C')
+      commands = """\
+cd /home/nornetpp/src/{gitDirectory}/build/scripts && \\
 INSTANCE=1 && \\
 PREFIX='/usr/local/etc/oai' && \\
 sudo mkdir -m 0777 -p \$PREFIX && \\
@@ -872,48 +832,502 @@ SPGWC_CONF[@PGW_INTERFACE_NAME_FOR_SX@]='{spgwcSXab_IfName}' && \\
 SPGWC_CONF[@DEFAULT_DNS_IPV4_ADDRESS@]='{networkDNS1_IPv4}' && \\
 SPGWC_CONF[@DEFAULT_DNS_SEC_IPV4_ADDRESS@]='{networkDNS2_IPv4}' && \\
 for K in \\\"\${{!SPGWC_CONF[@]}}\\\"; do sudo egrep -lRZ \\\"\$K\\\" \$PREFIX | xargs -0 -l sudo sed -i -e \\\"s|\$K|\${{SPGWC_CONF[\$K]}}|g\\\" ; ret=\$?;[[ ret -ne 0 ]] && echo \\\"Tried to replace \$K with \${{SPGWC_CONF[\$K]}}\\\" || true ; done && \\
-echo \\\"###### Done! ##########################################################\\\"""".format(
-      gitDirectory         = gitDirectory,
-      networkRealm         = networkRealm,
-      networkDNS1_IPv4     = networkDNS1_IPv4,
-      networkDNS2_IPv4     = networkDNS2_IPv4,
-      spgwcSXab_IfName     = spgwcSXab_IfName,
-      spgwcS11_IfName      = spgwcS11_IfName,
-      spgwcS5S8_SGW_IfName = spgwcS5S8_SGW_IfName,
-      spgwcS5S8_PGW_IfName = spgwcS5S8_PGW_IfName
-   )
+sudo sed -e \\\"s/APN_NI = \\\\\\"default\\\\\\"/APN_NI = \\\\\\"default.{networkRealm}\\\\\\"/g\\\" -i /usr/local/etc/oai/spgw_c.conf && \\
+sudo sed -e \\\"s/APN_NI = \\\\\\"apn1\\\\\\"/APN_NI = \\\\\\"internet.{networkRealm}\\\\\\"/g\\\" -i /usr/local/etc/oai/spgw_c.conf""".format(
+         gitDirectory         = gitDirectory,
+         networkRealm         = networkRealm,
+         networkDNS1_IPv4     = networkDNS1_IPv4,
+         networkDNS2_IPv4     = networkDNS2_IPv4,
+         spgwcSXab_IfName     = spgwcSXab_IfName,
+         spgwcS11_IfName      = spgwcS11_IfName,
+         spgwcS5S8_SGW_IfName = spgwcS5S8_SGW_IfName,
+         spgwcS5S8_PGW_IfName = spgwcS5S8_PGW_IfName
+      )
+      vduHelper.runInShell(commands)
+      vduHelper.endBlock()
 
-   try:
-       stdout, stderr = execute(commands)
-   except subprocess.CalledProcessError as e:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       message = 'Command execution failed: ' + str(err) + '\nOutput: ' + e.output.decode('utf-8')
-       action_fail(message.encode('utf-8'))
-       status_set('active', 'confiigure-spgwc: configuring SPGW-C FAILED!')
+
+      # ====== Set up SPGW-C service ========================================
+      vduHelper.beginBlock('Setting up SPGW-C service')
+      commands = """\
+( echo \\\"[Unit]\\\" && \\
+echo \\\"Description=Serving and Packet Data Network Gateway -- Control Plane (SPGW-C)\\\" && \\
+echo \\\"After=ssh.target\\\" && \\
+echo \\\"\\\" && \\
+echo \\\"[Service]\\\" && \\
+echo \\\"ExecStart=/bin/sh -c \\\'exec /usr/local/bin/spgwc -c /usr/local/etc/oai/spgw_c.conf -o >>/var/log/spgwc.log 2>&1\\\'\\\" && \\
+echo \\\"KillMode=process\\\" && \\
+echo \\\"Restart=on-failure\\\" && \\
+echo \\\"RestartPreventExitStatus=255\\\" && \\
+echo \\\"WorkingDirectory=/home/nornetpp/src/openair-cn-cups/build/scripts\\\" && \\
+echo \\\"\\\" && \\
+echo \\\"[Install]\\\" && \\
+echo \\\"WantedBy=multi-user.target\\\" ) | sudo tee /lib/systemd/system/spgwc.service && \\
+sudo systemctl daemon-reload && \\
+( echo -e \\\"#\\x21/bin/sh\\\" && echo \\\"tail -f /var/log/spgwc.log\\\" ) | tee /home/nornetpp/log && \\
+chmod +x /home/nornetpp/log && \\
+( echo -e \\\"#\\x21/bin/sh\\\" && echo \\\"sudo service spgwc restart && ./log\\\" ) | tee /home/nornetpp/restart && \\
+chmod +x /home/nornetpp/restart"""
+
+      vduHelper.runInShell(commands)
+      vduHelper.endBlock()
+
+      # ====== Set up sysstat service =======================================
+      vduHelper.installSysStat()
+
+      # ====== Clean up =====================================================
+      vduHelper.cleanUp()
+
+      message = vduHelper.endBlock()
+      function_set( { 'outout': message } )
+      set_flag('spgwccharm.configured-spgwc')
    except:
-       exc_type, exc_value, exc_traceback = sys.exc_info()
-       err = traceback.format_exception(exc_type, exc_value, exc_traceback)
-       action_fail('Command execution failed: ' + str(err))
-       status_set('active', 'confiigure-spgwc: configuring SPGW-C FAILED!')
-   else:
+      message = vduHelper.endBlockInException()
+      function_fail(message)
+   finally:
       clear_flag('actions.configure-spgwc')
-      action_set( { 'output': stdout.encode('utf-8') } )
-      status_set('active', 'confiigure-spgwc: configuring SPGW-C COMPLETED')
 
+
+# ###### restart-spgwc function #############################################
+@when('actions.restart-spgwc')
+@when('spgwccharm.configured-spgwc')
+def restart_spgwc():
+   vduHelper.beginBlock('restart_spgwc')
+   try:
+
+      commands = 'sudo service spgwc restart'
+      vduHelper.runInShell(commands)
+
+      message = vduHelper.endBlock()
+      function_set( { 'outout': message } )
+   except:
+      message = vduHelper.endBlockInException()
+      function_fail(message)
+   finally:
+      clear_flag('actions.restart-spgwc')
 
 
 
 # ###########################################################################
-#prepare_cassandra_hss_build()
-#configure_cassandra()
-#configure_hss()
+# #### SPGW-U Charm functions                                            ####
+# ###########################################################################
 
+# ###### Installation #######################################################
+@when('sshproxy.configured')
+@when_not('spgwucharm.installed')
+def install_spgwucharm_proxy_charm():
+   set_flag('spgwucharm.installed')
+   vduHelper.setStatus('install_spgwucharm_proxy_charm: SSH proxy charm is READY')
+
+
+# ###### prepare-spgwu-build function #######################################
+@when('actions.prepare-spgwu-build')
+@when('spgwucharm.installed')
+@when_not('spgwucharm.prepared-spgwu-build')
+def prepare_spgwu_build():
+   vduHelper.beginBlock('prepare_spgwu_build')
+   try:
+
+      # ====== Get SPGW-U parameters ========================================
+      # For a documentation of the installation procedure, see:
+      # https://github.com/OPENAIRINTERFACE/openair-cn-cups/wiki/OpenAirSoftwareSupport#install-spgw-u
+
+      gitRepository          = function_get('spgwu-git-repository')
+      gitCommit              = function_get('spgwu-git-commit')
+      gitDirectory           = 'openair-cn-cups'
+
+      spgwuS1U_IPv4Interface = IPv4Interface(function_get('spgwu-S1U-ipv4-interface'))
+      spgwuS1U_IPv4Gateway   = IPv4Address(function_get('spgwu-S1U-ipv4-gateway'))
+
+      spgwuSGi_IPv4Interface = IPv4Interface(function_get('spgwu-SGi-ipv4-interface'))
+      spgwuSGi_IPv4Gateway   = IPv4Address(function_get('spgwu-SGi-ipv4-gateway'))
+      if function_get('spgwu-SGi-ipv6-interface') == '':
+         spgwuSGi_IPv6Interface = None
+      else:
+         spgwuSGi_IPv6Interface = IPv6Interface(function_get('spgwu-SGi-ipv6-interface'))
+      if function_get('spgwu-SGi-ipv6-gateway') == '':
+         spgwuSGi_IPv6Gateway = None
+      else:
+         spgwuSGi_IPv6Gateway = IPv6Address(function_get('spgwu-SGi-ipv6-gateway'))
+
+      # Prepare network configurations:
+      spgwuSXab_IfName       = 'ens4'
+      spgwuS1U_IfName        = 'ens5'
+      spgwuSGi_IfName        = 'ens6'
+
+      configurationSXab = vduHelper.makeInterfaceConfiguration(spgwuSXab_IfName, IPv4Interface('0.0.0.0/0'), metric=61)
+      configurationS1U  = vduHelper.makeInterfaceConfiguration(spgwuS1U_IfName, spgwuS1U_IPv4Interface, spgwuS1U_IPv4Gateway, metric=62)
+      configurationSGi  = vduHelper.makeInterfaceConfiguration(spgwuSGi_IfName, spgwuSGi_IPv4Interface, spgwuSGi_IPv4Gateway,
+                                                               spgwuSGi_IPv6Interface, spgwuSGi_IPv6Gateway,
+                                                               metric=1, pdnInterface = 'pdn')
+
+
+      # ====== Prepare system ===============================================
+      vduHelper.beginBlock('Preparing system')
+      vduHelper.configureInterface(spgwuSXab_IfName, configurationSXab, 61)
+      vduHelper.configureInterface(spgwuS1U_IfName,  configurationS1U,  62)
+      vduHelper.configureInterface(spgwuSGi_IfName,  configurationSGi,  63)
+      vduHelper.testNetworking('8.8.8.8')
+      vduHelper.endBlock()
+
+      # ====== Prepare sources ==============================================
+      vduHelper.beginBlock('Preparing sources')
+      vduHelper.fetchGitRepository(gitDirectory, gitRepository, gitCommit)
+      vduHelper.endBlock()
+
+
+      message = vduHelper.endBlock()
+      function_set( { 'outout': message } )
+      set_flag('spgwucharm.prepared-spgwu-build')
+   except:
+      message = vduHelper.endBlockInException()
+      function_fail(message)
+   finally:
+      clear_flag('actions.prepare-spgwu-build')
+
+
+# ###### configure-spgwu function ###########################################
+@when('actions.configure-spgwu')
+@when('spgwucharm.prepared-spgwu-build')
+def configure_spgwu():
+   vduHelper.beginBlock('configure_spgwu')
+   try:
+
+      # ====== Get SPGW-U parameters ========================================
+      # For a documentation of the installation procedure, see:
+      # https://github.com/OPENAIRINTERFACE/openair-cn-cups/wiki/OpenAirSoftwareSupport#install-spgw-u
+
+      gitRepository    = 'https://github.com/OPENAIRINTERFACE/openair-cn-cups.git'
+      gitDirectory     = 'openair-cn-cups'
+      gitCommit        = 'develop'
+
+      spgwuSXab_IfName = 'ens4'
+      spgwuS1U_IfName  = 'ens5'
+      spgwuSGi_IfName  = 'ens6'
+
+      spgwcListString  = function_get('spgwu-spgwc-list').split(',')
+      spgwcList        = ''
+      for spgwc in spgwcListString:
+         spgwcAddress = IPv4Address(spgwc)
+         if len(spgwcList) > 0:
+            spgwcList = spgwcList + ', '
+         spgwcList = spgwcList + '{{ IPV4_ADDRESS=\\\\\\"{spgwcAddress}\\\\\\"; }}'.format(spgwcAddress = str(spgwcAddress))
+
+#       # NOTE:
+#       # Double escaping is required for \ and " in "command" string!
+#       # 1. Python
+#       # 2. bash -c "<command>"
+#       # That is: $ => \$ ; \ => \\ ; " => \\\"
+
+      # ====== Build SPGW-U dependencies ====================================
+      vduHelper.beginBlock('Building SPGW-U dependencies')
+      commands = """\
+export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
+cd /home/nornetpp/src/{gitDirectory}/build/scripts && \\
+mkdir -p logs && \\
+./build_spgwu -I -f >logs/build_spgwu-1.log 2>&1""".format(gitDirectory = gitDirectory)
+      vduHelper.runInShell(commands)
+      vduHelper.endBlock()
+
+      # ====== Build SPGW-U itself ==========================================
+      vduHelper.beginBlock('Building SPGW-U itself')
+      commands = """\
+export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
+cd /home/nornetpp/src/{gitDirectory}/build/scripts && \\
+./build_spgwu -c -V -b Debug -j >logs/build_spgwu-2.log 2>&1""".format(gitDirectory = gitDirectory)
+      vduHelper.runInShell(commands)
+      vduHelper.endBlock()
+
+      # ====== Configure SPGW-U =============================================
+      vduHelper.beginBlock('Configuring SPGW-U')
+      commands = """\
+cd /home/nornetpp/src/{gitDirectory}/build/scripts && \\
+INSTANCE=1 && \\
+PREFIX='/usr/local/etc/oai' && \\
+sudo mkdir -m 0777 -p \$PREFIX && \\
+sudo cp ../../etc/spgw_u.conf  \$PREFIX && \\
+declare -A SPGWU_CONF && \\
+SPGWU_CONF[@INSTANCE@]=\$INSTANCE && \\
+SPGWU_CONF[@PREFIX@]=\$PREFIX && \\
+SPGWU_CONF[@PID_DIRECTORY@]='/var/run' && \\
+SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_S1U_S12_S4_UP@]='{spgwuS1U_IfName}' && \\
+SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_SX@]='{spgwuSXab_IfName}' && \\
+SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_SGI@]='{spgwuSGi_IfName}' && \\
+for K in \\\"\${{!SPGWU_CONF[@]}}\\\"; do sudo egrep -lRZ \\\"\$K\\\" \$PREFIX | xargs -0 -l sudo sed -i -e \\\"s|\$K|\${{SPGWU_CONF[\$K]}}|g\\\" ; ret=\$?;[[ ret -ne 0 ]] && echo \\\"Tried to replace \$K with \${{SPGWU_CONF[\$K]}}\\\" || true ; done && \\
+sudo sed -e \\\"s/{{.*IPV4_ADDRESS=\\\\\\"192.168.160.100\\\\\\".*;.*}}/{spgwcList}/g\\\" -i /usr/local/etc/oai/spgw_u.conf""".format(
+         gitRepository     = gitRepository,
+         gitDirectory      = gitDirectory,
+         gitCommit         = gitCommit,
+         spgwuSXab_IfName  = spgwuSXab_IfName,
+         spgwuS1U_IfName   = spgwuS1U_IfName,
+         spgwuSGi_IfName   = spgwuSGi_IfName,
+         spgwcList         = spgwcList
+      )
+      vduHelper.runInShell(commands)
+      vduHelper.endBlock()
+
+
+      # ====== Set up SPGW-U service ========================================
+      vduHelper.beginBlock('Setting up SPGW-U service')
+      commands = """\
+( echo \\\"[Unit]\\\" && \\
+echo \\\"Description=Serving and Packet Data Network Gateway -- User Plane (SPGW-U)\\\" && \\
+echo \\\"After=ssh.target\\\" && \\
+echo \\\"\\\" && \\
+echo \\\"[Service]\\\" && \\
+echo \\\"ExecStart=/bin/sh -c \\\'exec /usr/local/bin/spgwu -c /usr/local/etc/oai/spgw_u.conf -o >>/var/log/spgwu.log 2>&1\\\'\\\" && \\
+echo \\\"KillMode=process\\\" && \\
+echo \\\"Restart=on-failure\\\" && \\
+echo \\\"RestartPreventExitStatus=255\\\" && \\
+echo \\\"WorkingDirectory=/home/nornetpp/src/openair-cn-cups/build/scripts\\\" && \\
+echo \\\"\\\" && \\
+echo \\\"[Install]\\\" && \\
+echo \\\"WantedBy=multi-user.target\\\" ) | sudo tee /lib/systemd/system/spgwu.service && \\
+sudo systemctl daemon-reload && \\
+( echo -e \\\"#\\x21/bin/sh\\\" && echo \\\"tail -f /var/log/spgwu.log\\\" ) | tee /home/nornetpp/log && \\
+chmod +x /home/nornetpp/log && \\
+( echo -e \\\"#\\x21/bin/sh\\\" && echo \\\"sudo service spgwu restart && ./log\\\" ) | tee /home/nornetpp/restart && \\
+chmod +x /home/nornetpp/restart"""
+      vduHelper.runInShell(commands)
+      vduHelper.endBlock()
+
+      # ====== Set up sysstat service =======================================
+      vduHelper.installSysStat()
+
+      # ====== Clean up =====================================================
+      vduHelper.cleanUp()
+
+      message = vduHelper.endBlock()
+      function_set( { 'outout': message } )
+      set_flag('spgwucharm.configured-spgwu')
+   except:
+      message = vduHelper.endBlockInException()
+      function_fail(message)
+   finally:
+      clear_flag('actions.configure-spgwu')
+
+
+# ###### restart-spgwu function #############################################
+@when('actions.restart-spgwu')
+@when('spgwucharm.configured-spgwu')
+def restart_spgwu():
+   vduHelper.beginBlock('restart_spgwu')
+   try:
+
+      commands = 'sudo service spgwu restart'
+      vduHelper.runInShell(commands)
+
+      message = vduHelper.endBlock()
+      function_set( { 'outout': message } )
+   except:
+      message = vduHelper.endBlockInException()
+      function_fail(message)
+   finally:
+      clear_flag('actions.restart-spgwu')
+
+
+
+# ###########################################################################
+# #### FlexRAN Charm functions                                           ####
+# ###########################################################################
+
+# ###### Installation #######################################################
+@when('sshproxy.configured')
+@when_not('flexrancharm.installed')
+def install_flexrancharm_proxy_charm():
+   set_flag('flexrancharm.installed')
+   vduHelper.setStatus('install_flexrancharm_proxy_charm: SSH proxy charm is READY')
+
+
+# ###### prepare-flexran-build function #####################################
+@when('actions.prepare-flexran-build')
+@when('flexrancharm.installed')
+@when_not('flexrancharm.prepared-flexran-build')
+def prepare_flexran_build():
+   vduHelper.beginBlock('prepare_flexran_build')
+   try:
+
+      # ====== Get FlexRAN parameters ===========================================
+      # For a documentation of the installation procedure, see:
+      # https://gitlab.eurecom.fr/mosaic5g/mosaic5g/-/wikis/tutorials/slicing
+
+      gitRepository = function_get('flexran-git-repository')
+      gitCommit     = function_get('flexran-git-commit')
+      gitDirectory  = 'mosaic5g'
+
+      flexranService_IPv4Interface = IPv4Interface(function_get('flexran-service-ipv4-interface'))
+      flexranService_IPv4Gateway   = IPv4Address(function_get('flexran-service-ipv4-gateway'))
+      if function_get('flexran-service-ipv6-interface') != '':
+         flexranService_IPv6Interface = IPv6Interface(function_get('flexran-service-ipv6-interface'))
+      else:
+         flexranService_IPv6Interface = None
+      if function_get('flexran-service-ipv6-gateway') != '':
+         flexranService_IPv6Gateway   = IPv6Address(function_get('flexran-service-ipv6-gateway'))
+      else:
+         flexranService_IPv6Gateway = None
+
+      # Prepare network configuration:
+      flexranService_IfName = 'ens4'
+      configurationService = vduHelper.makeInterfaceConfiguration(flexranService_IfName,
+                                                                  flexranService_IPv4Interface, flexranService_IPv4Gateway,
+                                                                  flexranService_IPv6Interface, flexranService_IPv6Gateway)
+
+      # ====== Prepare system ===============================================
+      vduHelper.beginBlock('Preparing system')
+      vduHelper.configureInterface(flexranService_IfName, configurationService, 61)
+      vduHelper.testNetworking('8.8.8.8')
+      vduHelper.endBlock()
+
+      # ====== Prepare sources ==============================================
+      vduHelper.beginBlock('Preparing sources')
+      vduHelper.fetchGitRepository(gitDirectory, gitRepository, gitCommit)
+      commands = """\
+cd /home/nornetpp/src/{gitDirectory} && \\
+git submodule init && \\
+git submodule update flexran""".format(
+         gitDirectory       = gitDirectory
+      )
+      vduHelper.runInShell(commands)
+      vduHelper.endBlock()
+
+
+      message = vduHelper.endBlock()
+      function_set( { 'outout': message } )
+      set_flag('flexrancharm.prepared-flexran-build')
+   except:
+      message = vduHelper.endBlockInException()
+      function_fail(message)
+   finally:
+      clear_flag('actions.prepare-flexran-build')
+
+
+# ###### configure-flexran function #########################################
+@when('actions.configure-flexran')
+@when('flexrancharm.prepared-flexran-build')
+def configure_flexran():
+   vduHelper.beginBlock('configure_flexran')
+   try:
+
+      # ====== Get FlexRAN parameters =======================================
+      # For a documentation of the installation procedure, see:
+      # https://gitlab.eurecom.fr/mosaic5g/mosaic5g/-/wikis/tutorials/slicing
+
+      gitDirectory = 'mosaic5g'
+      #networkUsers       = int(function_get('network-users'))
+
+      # ====== Build FlexRAN ================================================
+      vduHelper.beginBlock('Building FlexRAN itself')
+      commands = """\
+export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
+cd /home/nornetpp/src/{gitDirectory} && \\
+mkdir -p logs && \\
+./build_m5g -f >logs/build_flexran.log 2>&1""".format(
+         gitDirectory       = gitDirectory
+      )
+      vduHelper.runInShell(commands)
+      vduHelper.endBlock()
+
+      # ====== Configure FlexRAN ================================================
+      vduHelper.beginBlock('Configuring FlexRAN')
+      commands = """\
+cd /home/nornetpp/src/{gitDirectory}/flexran""".format(
+         gitDirectory = gitDirectory
+      )
+      vduHelper.runInShell(commands)
+      vduHelper.endBlock()
+
+      # ====== Set up FlexRAN service ===========================================
+      vduHelper.beginBlock('Setting up FlexRAN service')
+      commands = """\
+( echo \\\"[Unit]\\\" && \\
+echo \\\"Description=FlexRAN Controller\\\" && \\
+echo \\\"After=ssh.target\\\" && \\
+echo \\\"\\\" && \\
+echo \\\"[Service]\\\" && \\
+echo \\\"ExecStart=/bin/sh -c \\\'exec /usr/bin/env FLEXRAN_RTC_HOME=/home/nornetpp/src/mosaic5g/flexran FLEXRAN_RTC_EXEC=/home/nornetpp/src/mosaic5g/flexran/build ./build/rt_controller -c log_config/basic_log >>/var/log/flexran.log 2>&1\\\'\\\" && \\
+echo \\\"KillMode=process\\\" && \\
+echo \\\"Restart=on-failure\\\" && \\
+echo \\\"RestartPreventExitStatus=255\\\" && \\
+echo \\\"WorkingDirectory=/home/nornetpp/src/mosaic5g/flexran\\\" && \\
+echo \\\"\\\" && \\
+echo \\\"[Install]\\\" && \\
+echo \\\"WantedBy=multi-user.target\\\" ) | sudo tee /lib/systemd/system/flexran.service && \\
+sudo systemctl daemon-reload && \\
+( echo -e \\\"#\\x21/bin/sh\\\" && echo \\\"tail -f /var/log/flexran.log\\\" ) | tee /home/nornetpp/log && \\
+chmod +x /home/nornetpp/log && \\
+( echo -e \\\"#\\x21/bin/sh\\\" && echo \\\"sudo service flexran restart && ./log\\\" ) | tee /home/nornetpp/restart && \\
+chmod +x /home/nornetpp/restart"""
+      vduHelper.runInShell(commands)
+      vduHelper.endBlock()
+
+      # ====== Set up sysstat service =======================================
+      vduHelper.installSysStat()
+
+      # ====== Clean up =====================================================
+      vduHelper.cleanUp()
+
+      message = vduHelper.endBlock()
+      function_set( { 'outout': message } )
+      set_flag('flexrancharm.configured-flexran')
+   except:
+      message = vduHelper.endBlockInException()
+      function_fail(message)
+   finally:
+      clear_flag('actions.configure-flexran')
+
+
+# ###### restart-flexran function ###############################################
+@when('actions.restart-flexran')
+@when('flexrancharm.configured-flexran')
+def restart_flexran():
+   vduHelper.beginBlock('restart_flexran')
+   try:
+
+      commands = 'sudo service flexran restart'
+      vduHelper.runInShell(commands)
+
+      message = vduHelper.endBlock()
+      function_set( { 'outout': message } )
+   except:
+      message = vduHelper.endBlockInException()
+      function_fail(message)
+   finally:
+      clear_flag('actions.restart-flexran')
+
+
+
+# ###########################################################################
+
+install_hsscharm_proxy_charm()
+prepare_cassandra_hss_build()
+configure_cassandra()
+configure_hss()
+restart_hss()
+
+#install_mmecharm_proxy_charm()
 #prepare_mme_build()
 #configure_mme()
+#restart_mme()
 
-prepare_spgwu_build()
-configure_spgwu()
-
+#install_spgwccharm_proxy_charm()
 #prepare_spgwc_build()
 #configure_spgwc()
+#restart_spgwc()
+
+#install_spgwucharm_proxy_charm()
+#prepare_spgwu_build()
+#configure_spgwu()
+#restart_spgwu()
+
+
+#install_flexrancharm_proxy_charm()
+#prepare_flexran_build()
+#configure_flexran()
+#restart_flexran()
+
+
+#print(vduHelper.makeInterfaceConfiguration('ens4',
+         #IPv4Interface('0.0.0.0/0')))
+#print(vduHelper.makeInterfaceConfiguration('dummy0:s5c',
+         #IPv4Interface('172.58.58.101/24'),
+         #createDummy = True))
