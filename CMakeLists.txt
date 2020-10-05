@@ -208,10 +208,13 @@ ENDFOREACH()
 
 # ###### Generate Juju Charms ###############################################
 MESSAGE("Generating charms ...")
-FILE(MAKE_DIRECTORY ${CHARMS_BUILD_DIRECTORY})
+
+GET_FILENAME_COMPONENT(charmsOutputDirectory ${CHARMS_BUILD_DIRECTORY} ABSOLUTE)
+FILE(MAKE_DIRECTORY ${charmsOutputDirectory})
+
 FOREACH(charmName IN LISTS CHARM_SOURCE_LIST)
    GET_FILENAME_COMPONENT(charmSourceDirectory ${CHARMS_SOURCE_DIRECTORY}/${charmName} ABSOLUTE)
-   GET_FILENAME_COMPONENT(charmBuildDirectory  ${CHARMS_BUILD_DIRECTORY}/${charmName}  ABSOLUTE)
+   GET_FILENAME_COMPONENT(charmBuildDirectory  ${charmsOutputDirectory}/${charmName}  ABSOLUTE)
    EXECUTE_PROCESS(COMMAND git ls-files ${charmSourceDirectory}
                    COMMAND tr "\n" ";"
                    COMMAND sed -e "s/;$//g"
@@ -224,8 +227,8 @@ FOREACH(charmName IN LISTS CHARM_SOURCE_LIST)
                       COMMAND cp ${vduHelperFiles} ${charmSourceDirectory}/reactive
                       COMMAND rm -rf ${charmBuildDirectory}
                       COMMAND pwd
-                      COMMAND echo env CHARM_LAYERS_DIR=${CHARMS_BASELAYERS_DIRECTORY} ${CHARM} build --build-dir ${charmBuildDirectory}
-                      COMMAND env CHARM_LAYERS_DIR=${CHARMS_BASELAYERS_DIRECTORY} ${CHARM} build --build-dir ${charmBuildDirectory}
+                      COMMAND echo env CHARM_LAYERS_DIR=${CHARMS_BASELAYERS_DIRECTORY} ${CHARM} build --build-dir ${charmsOutputDirectory}
+                      COMMAND env CHARM_LAYERS_DIR=${CHARMS_BASELAYERS_DIRECTORY} ${CHARM} build --build-dir ${charmsOutputDirectory}
                       # FIXME!
                       # COMMAND sed -e "s#^import shlex#import shlex\\\\nimport traceback#g" -i ${charmBuildDirectory}/lib/charms/sshproxy.py
                       COMMAND touch ${charmBuildTimestampFile}
@@ -253,8 +256,9 @@ FOREACH(vnfd IN LISTS VNFD_LIST)
    # ====== Copy the built Juju Charms ======================================
    SET(allCharmsCopyedIntoVNFD "")
    FOREACH(charmName IN LISTS ${vnfd}_charms)
-      GET_FILENAME_COMPONENT(charmBuildDirectory ${CHARMS_BUILD_DIRECTORY}/${charmName} ABSOLUTE)
-      GET_FILENAME_COMPONENT(charmCopyDirectory  ${vnfd}/charms/${charmName}            ABSOLUTE)
+      GET_FILENAME_COMPONENT(charmBuildDirectory ${CHARMS_BUILD_DIRECTORY}/${charmName}   ABSOLUTE)
+      GET_FILENAME_COMPONENT(charmCharmsInVNFDirectory ${vnfd}/charms                     ABSOLUTE)
+      GET_FILENAME_COMPONENT(charmCopyDirectory ${charmCharmsInVNFDirectory}/${charmName} ABSOLUTE)
 
       makeUniqueTarget(generate_charmBuildTimestampFile "generate_charm_${charmName}")
       SET(charmBuildTimestampFile "${charmBuildDirectory}.stamp")
@@ -262,10 +266,9 @@ FOREACH(vnfd IN LISTS VNFD_LIST)
       SET(charmCopiedTimestampFile "${charmBuildDirectory}-in-vnfd-${vnfd}.stamp")
 
       ADD_CUSTOM_COMMAND(OUTPUT  ${charmCopiedTimestampFile}
+                         COMMAND mkdir -p ${charmCharmsInVNFDirectory}
                          COMMAND rm -rf ${charmCopyDirectory}
-                         COMMAND mkdir -p ${charmCopyDirectory}
-                         COMMAND cp -a ${charmBuildDirectory}/ ${charmCopyDirectory}/
-                         # COMMAND rsync -Pav --delete ${charmBuildDirectory}/ ${charmCopyDirectory}/
+                         COMMAND cp -a ${charmBuildDirectory} ${charmCopyDirectory}
                          COMMAND touch ${charmCopiedTimestampFile}
                          DEPENDS ${generate_charmBuildTimestampFile} ${charmBuildTimestampFile})
       ADD_CUSTOM_TARGET(${generate_charmCopiedTimestampFile} DEPENDS ${charmCopiedTimestampFile})
