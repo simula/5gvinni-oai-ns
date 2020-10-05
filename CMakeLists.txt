@@ -34,6 +34,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.0.2)
 PROJECT(SimulaMet-OAI-EPC C)
 
+<<<<<<< HEAD
 
 #############################################################################
 # OPTIONS
@@ -42,21 +43,22 @@ PROJECT(SimulaMet-OAI-EPC C)
 # Installed scripts:
 SET(VALIDATE_DESCRIPTOR_SCRIPT "/usr/share/osm-devops/descriptor-packages/tools/validate_descriptor.py")
 SET(GENERATE_DESCRIPTOR_SCRIPT "/usr/share/osm-devops/descriptor-packages/tools/generate_descriptor_pkg.sh")
+=======
+# ====== OSM scripts ========================================================
+# SET(VALIDATE_DESCRIPTOR_SCRIPT "/usr/share/osm-devops/descriptor-packages/tools/validate_descriptor.py")
+# SET(GENERATE_DESCRIPTOR_SCRIPT "/usr/share/osm-devops/descriptor-packages/tools/generate_descriptor_pkg.sh")
+>>>>>>> eb43b42ff2608fbf2d189371791522b769c3d43a
 # Local scripts (NOTE: make sure to use scripts compatible with the current OSM setup!):
 # SET(VALIDATE_DESCRIPTOR_SCRIPT "devops/descriptor-packages/tools/validate_descriptor.py")
 # SET(GENERATE_DESCRIPTOR_SCRIPT "devops/descriptor-packages/tools/generate_descriptor_pkg.sh")
 
-# Automatically obtain list of VNFDs:
-EXECUTE_PROCESS(COMMAND git ls-files
-                COMMAND cut -d/ -f1
-                COMMAND sort -u
-                COMMAND grep "vnfd$"
-                COMMAND tr "\n" ";"
-                COMMAND sed -e "s/;$//g"
-                OUTPUT_VARIABLE VNFD_LIST OUTPUT_STRIP_TRAILING_WHITESPACE)
-MESSAGE("VNFDs: ${VNFD_LIST}")
 
-# Automatically obtain list of NSDs:
+
+#############################################################################
+# DEPENDENCIES
+#############################################################################
+
+# ====== Obtain list of all NSs =============================================
 EXECUTE_PROCESS(COMMAND git ls-files
                 COMMAND cut -d/ -f1
                 COMMAND sort -u
@@ -66,7 +68,19 @@ EXECUTE_PROCESS(COMMAND git ls-files
                 OUTPUT_VARIABLE NSD_LIST OUTPUT_STRIP_TRAILING_WHITESPACE)
 MESSAGE("NSDs: ${NSD_LIST}")
 
-# Automatically obtain list of charms:
+
+# ====== Obtain list of all VNFDs ===========================================
+EXECUTE_PROCESS(COMMAND git ls-files
+                COMMAND cut -d/ -f1
+                COMMAND sort -u
+                COMMAND grep "vnfd$"
+                COMMAND tr "\n" ";"
+                COMMAND sed -e "s/;$//g"
+                OUTPUT_VARIABLE VNFD_LIST OUTPUT_STRIP_TRAILING_WHITESPACE)
+MESSAGE("VNFDs: ${VNFD_LIST}")
+
+
+# ====== Obtain list of all Charms ==========================================
 SET(CHARMS_BASELAYERS_DIRECTORY "${CMAKE_SOURCE_DIR}/baselayers/")
 SET(CHARMS_SOURCE_DIRECTORY     "${CMAKE_SOURCE_DIR}/juju/")
 SET(CHARMS_BUILD_DIRECTORY      ".build/")
@@ -78,6 +92,40 @@ EXECUTE_PROCESS(COMMAND git ls-files
                 WORKING_DIRECTORY ${CHARMS_SOURCE_DIRECTORY}
                 OUTPUT_VARIABLE CHARM_SOURCE_LIST OUTPUT_STRIP_TRAILING_WHITESPACE)
 MESSAGE("Charms: ${CHARM_SOURCE_LIST}")
+
+
+# ====== Obtain Charm dependencies of each VNFD =============================
+FOREACH(vnfd IN LISTS VNFD_LIST)
+   EXECUTE_PROCESS(COMMAND grep "^[ ]*charm:" ${vnfd}/${vnfd}.yaml
+                   COMMAND sed -e "s/charm://g" -e "s/[ \t]*//g"
+                   COMMAND sort -u
+                   COMMAND tr "\n" ";"
+                   COMMAND sed -e "s/;$//g"
+                   OUTPUT_VARIABLE ${vnfd}_charms)
+   MESSAGE("Charm dependencies of VNFD ${vnfd}: ${${vnfd}_charms}")
+ENDFOREACH()
+
+
+# ====== Obtain VNFD dependencies of each NSD ===============================
+FOREACH(nsd IN LISTS NSD_LIST)
+   EXECUTE_PROCESS(COMMAND grep "^[ -]*vnfd-id-ref:" ${nsd}/${nsd}.yaml
+                   COMMAND sed -e "s/^[ -]*vnfd-id-ref://g" -e "s/[ \t]*//g"
+                   COMMAND sort -u
+                   COMMAND tr "\n" ";"
+                   COMMAND sed -e "s/;$//g"
+                   OUTPUT_VARIABLE ${nsd}_vnfds)
+   MESSAGE("VNFD dependencies of NSD ${nsd}: ${${nsd}_vnfds}")
+ENDFOREACH()
+
+
+# ====== Obtain list of VDUHelper files =====================================
+EXECUTE_PROCESS(COMMAND git ls-files vduhelper
+                COMMAND grep -v "README$"
+                COMMAND sed -e "s#^#${CMAKE_SOURCE_DIR}/#g"
+                COMMAND tr "\n" ";"
+                COMMAND sed -e "s/;$//g"
+                OUTPUT_VARIABLE vduHelperFiles OUTPUT_STRIP_TRAILING_WHITESPACE)
+MESSAGE("VDUHelper files: ${vduHelperFiles}")
 
 
 #############################################################################
@@ -106,7 +154,7 @@ ENDIF()
 
 
 #############################################################################
-# Build VNFDs
+# Validate all YAML files
 #############################################################################
 
 # ###### Create unique target name from file name ###########################
@@ -136,68 +184,72 @@ FUNCTION(makeUniqueTarget target fileName)
 ENDFUNCTION()
 
 
-# ###### Validate YAML ######################################################
+# ###### Run yamllint for each YAML file ====================================
 EXECUTE_PROCESS(COMMAND git ls-files .
                 COMMAND grep -E ".yaml$"
                 COMMAND tr "\n" ";"
                 COMMAND sed -e "s/;$//g"
                 OUTPUT_VARIABLE yamlFiles OUTPUT_STRIP_TRAILING_WHITESPACE)
-SET(allYAMLs "")
+SET(allYAMLsChecked "")
 FOREACH(yamlFile IN LISTS yamlFiles)
    makeUniqueTarget(validate_yaml "validate_${yamlFile}")
 
-   SET(timestampFile ".${validate_yaml}.stamp")
-   ADD_CUSTOM_COMMAND(OUTPUT ${timestampFile}
+   SET(yamlCheckedTimestampFile ".${validate_yaml}.stamp")
+   ADD_CUSTOM_COMMAND(OUTPUT ${yamlCheckedTimestampFile}
                       # COMMAND ${YAMLLINT} -d '{extends: default, rules: {document-start: {present: no}, line-length: {max: 80, allow-non-breakable-words: true, allow-non-breakable-inline-mappings: true}}}' ${yamlFile}
                       COMMAND ${YAMLLINT} -d '{extends: default, rules: {document-start: {present: no}, line-length: {max: 4096}, comments-indentation: disable}}' ${yamlFile}
-                      COMMAND touch ${timestampFile}
+                      COMMAND touch ${yamlCheckedTimestampFile}
                       DEPENDS ${yamlFile})
-   ADD_CUSTOM_TARGET(${validate_yaml} DEPENDS ${timestampFile})
+   ADD_CUSTOM_TARGET(${validate_yaml} DEPENDS ${yamlCheckedTimestampFile})
 
-   LIST(APPEND allYAMLs ${validate_yaml})
+   LIST(APPEND allYAMLsChecked ${validate_yaml})
 ENDFOREACH()
 
 
-# ###### VDUHelper ##########################################################
-EXECUTE_PROCESS(COMMAND git ls-files vduhelper
-                COMMAND grep -v "README$"
-                COMMAND sed -e "s#^#${CMAKE_SOURCE_DIR}/#g"
-                COMMAND tr "\n" ";"
-                COMMAND sed -e "s/;$//g"
-                OUTPUT_VARIABLE vduHelperFiles OUTPUT_STRIP_TRAILING_WHITESPACE)
 
+#############################################################################
+# Generate Charms
+#############################################################################
 
 # ###### Generate Juju Charms ###############################################
+MESSAGE("Generating charms ...")
 GET_FILENAME_COMPONENT(charmBuildDirectory ${CHARMS_BUILD_DIRECTORY} ABSOLUTE)
 FILE(MAKE_DIRECTORY ${charmBuildDirectory})
 FOREACH(charmName IN LISTS CHARM_SOURCE_LIST)
-   GET_FILENAME_COMPONENT(charmInputDirectory  ${CHARMS_SOURCE_DIRECTORY}/${charmName} ABSOLUTE)
-   GET_FILENAME_COMPONENT(charmOutputDirectory ${charmBuildDirectory}/${charmName}     ABSOLUTE)
-   EXECUTE_PROCESS(COMMAND git ls-files ${charmInputDirectory}
+   GET_FILENAME_COMPONENT(charmSourceDirectory ${CHARMS_SOURCE_DIRECTORY}/${charmName} ABSOLUTE)
+   GET_FILENAME_COMPONENT(charmBuildDirectory  ${charmBuildDirectory}/${charmName}     ABSOLUTE)
+   EXECUTE_PROCESS(COMMAND git ls-files ${charmSourceDirectory}
                    COMMAND tr "\n" ";"
                    COMMAND sed -e "s/;$//g"
                    OUTPUT_VARIABLE charmInputFiles OUTPUT_STRIP_TRAILING_WHITESPACE)
 
    makeUniqueTarget(generate_charm "generate_${charmName}")
-   SET(timestampFile "${charmOutputDirectory}.stamp")
-   ADD_CUSTOM_COMMAND(OUTPUT  ${timestampFile}
-                      COMMAND echo cp ${vduHelperFiles} ${charmInputDirectory}
-                      COMMAND cp ${vduHelperFiles} ${charmInputDirectory}/reactive
-                      COMMAND rm -rf ${charmOutputDirectory}
+   SET(charmBuildTimestampFile "${charmBuildDirectory}.stamp")
+   ADD_CUSTOM_COMMAND(OUTPUT  ${charmBuildTimestampFile}
+                      COMMAND echo cp ${vduHelperFiles} ${charmSourceDirectory}
+                      COMMAND cp ${vduHelperFiles} ${charmSourceDirectory}/reactive
+                      COMMAND rm -rf ${charmBuildDirectory}
                       COMMAND pwd
                       COMMAND echo env CHARM_LAYERS_DIR=${CHARMS_BASELAYERS_DIRECTORY} ${CHARM} build --build-dir ${charmBuildDirectory}
                       COMMAND env CHARM_LAYERS_DIR=${CHARMS_BASELAYERS_DIRECTORY} ${CHARM} build --build-dir ${charmBuildDirectory}
                       # FIXME!
-                      # COMMAND sed -e "s#^import shlex#import shlex\\\\nimport traceback#g" -i ${charmOutputDirectory}/lib/charms/sshproxy.py
-                      COMMAND touch ${timestampFile}
-                      WORKING_DIRECTORY ${charmInputDirectory}
-                      DEPENDS ${charmInputFiles} ${vduHelperFiles} ${allYAMLs})
-   ADD_CUSTOM_TARGET(${generate_charm} DEPENDS ${timestampFile})
+                      # COMMAND sed -e "s#^import shlex#import shlex\\\\nimport traceback#g" -i ${charmBuildDirectory}/lib/charms/sshproxy.py
+                      COMMAND touch ${charmBuildTimestampFile}
+                      WORKING_DIRECTORY ${charmSourceDirectory}
+                      DEPENDS ${charmInputFiles} ${vduHelperFiles} ${allYAMLsChecked})
+   ADD_CUSTOM_TARGET(${generate_charm} DEPENDS ${charmBuildTimestampFile})
+
+   MESSAGE("Charm to build: ${charmName}")
 ENDFOREACH()
 
 
+
+#############################################################################
+# Generate VNFDs
+#############################################################################
+
 # ###### Generate VNFDs #####################################################
-SET(allVNFDs "")
+MESSAGE("Generating VNFDs ...")
 FOREACH(vnfd IN LISTS VNFD_LIST)
    EXECUTE_PROCESS(COMMAND git ls-files ${vnfd}
                    COMMAND tr "\n" ";"
@@ -205,19 +257,20 @@ FOREACH(vnfd IN LISTS VNFD_LIST)
                    OUTPUT_VARIABLE vnfdFiles OUTPUT_STRIP_TRAILING_WHITESPACE)
 
    # ====== Copy the built Juju Charms ======================================
-   SET(allCharmsInVNFD "")
-   FOREACH(charmName IN LISTS CHARM_SOURCE_LIST)
+   SET(allCharmsCopyedIntoVNFD "")
+   FOREACH(charmName IN LISTS ${${vnfd}_charms})
       makeUniqueTarget(generate_charm      "generate_${charmName}")
       makeUniqueTarget(generate_vnfd_charm "generate_${vnfd}_${charmName}")
-      GET_FILENAME_COMPONENT(charmOutputDirectory ${CHARMS_BUILD_DIRECTORY}/${charmName} ABSOLUTE)
-      GET_FILENAME_COMPONENT(charmCopyDirectory   ${vnfd}/charms/${charmName}            ABSOLUTE)
-      ADD_CUSTOM_COMMAND(OUTPUT  ${charmCopyDirectory}/version
+      GET_FILENAME_COMPONENT(charmBuildDirectory ${CHARMS_BUILD_DIRECTORY}/${charmName} ABSOLUTE)
+      GET_FILENAME_COMPONENT(charmCopyDirectory  ${vnfd}/charms/${charmName}            ABSOLUTE)
+      ADD_CUSTOM_COMMAND(OUTPUT  ${charmCopyDirectory}/.stamp
                          COMMAND rm -rf ${charmCopyDirectory}
                          COMMAND mkdir -p ${charmCopyDirectory}
-                         COMMAND cp -a ${charmOutputDirectory}/* ${charmCopyDirectory}/
-                         DEPENDS ${generate_charm} ${charmOutputDirectory}.stamp)
-      ADD_CUSTOM_TARGET(${generate_vnfd_charm} DEPENDS ${charmCopyDirectory}/version)
-      LIST(APPEND allCharmsInVNFD ${generate_vnfd_charm})
+                         COMMAND echo "Copying: ${charmBuildDirectory}/ -> ${charmCopyDirectory}/"
+                         COMMAND rsync -Pav --delete ${charmBuildDirectory}/ ${charmCopyDirectory}/
+                         DEPENDS ${generate_charm} ${charmBuildDirectory}.stamp)
+      ADD_CUSTOM_TARGET(${generate_vnfd_charm} DEPENDS ${charmCopyDirectory}/.stamp)
+      LIST(APPEND allCharmsCopyedIntoVNFD ${generate_vnfd_charm} ${charmCopyDirectory}/.stamp)
    ENDFOREACH()
 
    # ====== Validate cloud-init YAML files ==================================
@@ -226,20 +279,19 @@ FOREACH(vnfd IN LISTS VNFD_LIST)
                    COMMAND tr "\n" ";"
                    COMMAND sed -e "s/;$//g"
                    OUTPUT_VARIABLE vnfdCloudInitFiles OUTPUT_STRIP_TRAILING_WHITESPACE)
-   MESSAGE("COMMAND git ls-files ${vnfd}/cloud-init: Cloud-Init: ${vnfdCloudInitFiles}")
 
-   SET(allVNFDCloudInitFiles "")
+   SET(allCloudInitFilesChecked "")
    FOREACH(vnfdCloudInitFile IN LISTS vnfdCloudInitFiles)
       makeUniqueTarget(validate_cloudinit "validate_${vnfdCloudInitFile}")
 
-      SET(timestampFile ".${validate_cloudinit}.stamp")
-      ADD_CUSTOM_COMMAND(OUTPUT ${timestampFile}
+      SET(cloudInitCheckedTimestampFile ".${validate_cloudinit}.stamp")
+      ADD_CUSTOM_COMMAND(OUTPUT ${cloudInitCheckedTimestampFile}
                          COMMAND ${YAMLLINT} -d '{extends: relaxed, rules: {document-start: {present: no}}}' ${vnfdCloudInitFile}
-                         COMMAND touch ${timestampFile}
+                         COMMAND touch ${cloudInitCheckedTimestampFile}
                          DEPENDS ${vnfdCloudInitFile})
-      ADD_CUSTOM_TARGET(${validate_cloudinit} DEPENDS ${timestampFile})
+      ADD_CUSTOM_TARGET(${validate_cloudinit} DEPENDS ${cloudInitCheckedTimestampFile})
 
-      LIST(APPEND allVNFDCloudInitFiles ${validate_cloudinit})
+      LIST(APPEND allCloudInitFilesChecked ${validate_cloudinit})
    ENDFOREACH()
 
    # ====== Generate the VNFD ===============================================
@@ -251,19 +303,28 @@ FOREACH(vnfd IN LISTS VNFD_LIST)
                       COMMAND ${VALIDATE_DESCRIPTOR} ${vnfdDefinition}
                       COMMAND ${GENERATE_DESCRIPTOR} -t vnfd -N ${vnfd}/
                       COMMAND du -k ${vnfdPackage}
-                      DEPENDS ${vnfdFiles} ${allYAMLs} ${allVNFDCloudInitFiles} ${allCharmsInVNFD})
+                      DEPENDS ${vnfdFiles} ${allYAMLsChecked} ${allCloudInitFilesChecked} ${allCharmsCopyedIntoVNFD})
    ADD_CUSTOM_TARGET(${generate_vnfdPackage} DEPENDS ${vnfdPackage})
 
-   LIST(APPEND allVNFDs ${generate_vnfdPackage})
+   MESSAGE("VNFD to build: ${vnfd}, depending on Charms ${${vnfd}_charms}")
 ENDFOREACH()
 
 
 # ###### Generate NSDs ######################################################
+MESSAGE("Generating NSDs ...")
 FOREACH(nsd IN LISTS NSD_LIST)
    EXECUTE_PROCESS(COMMAND git ls-files ${nsd}
                    COMMAND tr "\n" ";"
                    COMMAND sed -e "s/;$//g"
                    OUTPUT_VARIABLE nsdFiles OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+   # ====== Obtain all required VNFD packages ===============================
+   SET(allRequiredVNFDPackages "")
+   FOREACH(vnfd IN LISTS ${${nsd}_vnfds})
+      SET(vnfdPackage "${vnfd}.tar.gz")
+      makeUniqueTarget(generate_vnfdPackage "generate_${vnfdPackage}")
+      LIST(APPEND allRequiredVNFDPackages ${generate_vnfdPackage} ${vnfdPackage})
+   ENDFOREACH()
 
    # ====== Generate the NSD ================================================
    SET(nsdDefinition "${nsd}/${nsd}.yaml")
@@ -274,6 +335,8 @@ FOREACH(nsd IN LISTS NSD_LIST)
                       COMMAND ${VALIDATE_DESCRIPTOR} ${nsdDefinition}
                       COMMAND ${GENERATE_DESCRIPTOR} -t nsd -N ${nsd}/
                       COMMAND du -k ${nsdPackage}
-                      DEPENDS ${nsdFiles} ${allYAMLs} ${allVNFDs})
+                      DEPENDS ${nsdFiles} ${allYAMLsChecked} ${allRequiredVNFDPackages})
    ADD_CUSTOM_TARGET(${generate_nsdPackage} ALL DEPENDS ${nsdPackage})
+
+   MESSAGE("NSD to build: ${nsd}, depending on VNFDs ${${nsd}_vnfds}")
 ENDFOREACH()
