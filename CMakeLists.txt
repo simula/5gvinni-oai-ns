@@ -217,7 +217,7 @@ FOREACH(charmName IN LISTS CHARM_SOURCE_LIST)
                    COMMAND sed -e "s/;$//g"
                    OUTPUT_VARIABLE charmInputFiles OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-   makeUniqueTarget(generate_charm "generate_charm_${charmName}")
+   makeUniqueTarget(generate_charmBuildTimestampFile "generate_charm_${charmName}")
    SET(charmBuildTimestampFile "${charmBuildDirectory}.stamp")
    ADD_CUSTOM_COMMAND(OUTPUT  ${charmBuildTimestampFile}
                       COMMAND echo cp ${vduHelperFiles} ${charmSourceDirectory}
@@ -231,7 +231,7 @@ FOREACH(charmName IN LISTS CHARM_SOURCE_LIST)
                       COMMAND touch ${charmBuildTimestampFile}
                       WORKING_DIRECTORY ${charmSourceDirectory}
                       DEPENDS ${charmInputFiles} ${vduHelperFiles} ${allYAMLsChecked})
-   ADD_CUSTOM_TARGET(${generate_charm} DEPENDS ${charmBuildTimestampFile})
+   ADD_CUSTOM_TARGET(${generate_charmBuildTimestampFile} DEPENDS ${charmBuildTimestampFile})
 
    MESSAGE("Charm to build: ${charmName}")
    MESSAGE("   ÜÜÜ   ${charmBuildTimestampFile}")
@@ -254,23 +254,25 @@ FOREACH(vnfd IN LISTS VNFD_LIST)
    # ====== Copy the built Juju Charms ======================================
    SET(allCharmsCopyedIntoVNFD "")
    FOREACH(charmName IN LISTS ${vnfd}_charms)
-      makeUniqueTarget(generate_charm      "generate_charm_${charmName}")
-      makeUniqueTarget(generate_vnfd_charm "generate_charm-in-vnfd-${vnfd}_${charmName}")
-      SET(charmCopiedTimestampFile ".${generate_vnfd_charm}.stamp")
-
       GET_FILENAME_COMPONENT(charmBuildDirectory ${CHARMS_BUILD_DIRECTORY}/${charmName} ABSOLUTE)
       GET_FILENAME_COMPONENT(charmCopyDirectory  ${vnfd}/charms/${charmName}            ABSOLUTE)
+
+      makeUniqueTarget(generate_charmBuildTimestampFile "generate_charm_${charmName}")
+      SET(charmBuildTimestampFile "${charmBuildDirectory}.stamp")
+      makeUniqueTarget(generate_charmCopiedTimestampFile "generate_charm-in-vnfd-${vnfd}_${charmName}")
+      SET(charmCopiedTimestampFile "${charmBuildDirectory}-in-vnfd-${vnfd}.stamp")
+
       MESSAGE("@@@@@@@@@@@@@qq generate_${vnfd}_${charmName}   ${charmCopyDirectory}/.stamp")
       ADD_CUSTOM_COMMAND(OUTPUT  ${charmCopiedTimestampFile}
                          COMMAND rm -rf ${charmCopyDirectory}
                          COMMAND mkdir -p ${charmCopyDirectory}
-                         COMMAND echo "Copying: ${charmBuildDirectory}/ -> ${charmCopyDirectory}/"
+#                         COMMAND echo "Copying: ${charmBuildDirectory}/ -> ${charmCopyDirectory}/"
                          COMMAND cp -a ${charmBuildDirectory}/ ${charmCopyDirectory}/
                          # COMMAND rsync -Pav --delete ${charmBuildDirectory}/ ${charmCopyDirectory}/
                          COMMAND touch ${charmCopiedTimestampFile}
-                         DEPENDS ${generate_charm} ${charmBuildDirectory}.stamp)
-      ADD_CUSTOM_TARGET(${generate_vnfd_charm} DEPENDS ${charmCopiedTimestampFile})
-      LIST(APPEND allCharmsCopyedIntoVNFD ${generate_vnfd_charm} ${charmCopiedTimestampFile})
+                         DEPENDS ${generate_charmBuildTimestampFile} ${charmBuildTimestampFile})
+      ADD_CUSTOM_TARGET(${generate_charmCopiedTimestampFile} DEPENDS ${charmCopiedTimestampFile})
+      LIST(APPEND allCharmsCopyedIntoVNFD ${generate_charmCopiedTimestampFile} ${charmCopiedTimestampFile})
    ENDFOREACH()
    MESSAGE("ÜÜÜ   ${allCharmsCopyedIntoVNFD}")
 
