@@ -187,17 +187,17 @@ EXECUTE_PROCESS(COMMAND git ls-files .
                 OUTPUT_VARIABLE yamlFiles OUTPUT_STRIP_TRAILING_WHITESPACE)
 SET(allYAMLsChecked "")
 FOREACH(yamlFile IN LISTS yamlFiles)
-   makeUniqueTarget(validate_yaml "validate_${yamlFile}")
+   makeUniqueTarget(generate_yamlCheckedTimestampFile "validate_${yamlFile}")
+   SET(yamlCheckedTimestampFile ".${generate_yamlCheckedTimestampFile}.stamp")
 
-   SET(yamlCheckedTimestampFile ".${validate_yaml}.stamp")
    ADD_CUSTOM_COMMAND(OUTPUT ${yamlCheckedTimestampFile}
                       # COMMAND ${YAMLLINT} -d '{extends: default, rules: {document-start: {present: no}, line-length: {max: 80, allow-non-breakable-words: true, allow-non-breakable-inline-mappings: true}}}' ${yamlFile}
                       COMMAND ${YAMLLINT} -d '{extends: default, rules: {document-start: {present: no}, line-length: {max: 4096}, comments-indentation: disable}}' ${yamlFile}
                       COMMAND touch ${yamlCheckedTimestampFile}
                       DEPENDS ${yamlFile})
-   ADD_CUSTOM_TARGET(${validate_yaml} DEPENDS ${yamlCheckedTimestampFile})
+   ADD_CUSTOM_TARGET(${generate_yamlCheckedTimestampFile} DEPENDS ${yamlCheckedTimestampFile})
 
-   LIST(APPEND allYAMLsChecked ${validate_yaml})
+   LIST(APPEND allYAMLsChecked ${generate_yamlCheckedTimestampFile})
 ENDFOREACH()
 
 
@@ -253,11 +253,12 @@ FOREACH(vnfd IN LISTS VNFD_LIST)
 
    # ====== Copy the built Juju Charms ======================================
    SET(allCharmsCopyedIntoVNFD "")
-   FOREACH(charmName IN LISTS ${${vnfd}_charms})
+   FOREACH(charmName IN LISTS ${vnfd}_charms)
       makeUniqueTarget(generate_charm      "generate_${charmName}")
       makeUniqueTarget(generate_vnfd_charm "generate_${vnfd}_${charmName}")
       GET_FILENAME_COMPONENT(charmBuildDirectory ${CHARMS_BUILD_DIRECTORY}/${charmName} ABSOLUTE)
       GET_FILENAME_COMPONENT(charmCopyDirectory  ${vnfd}/charms/${charmName}            ABSOLUTE)
+      MESSAGE("*** generate_${vnfd}_${charmName}   ${charmCopyDirectory}/.stamp")
       ADD_CUSTOM_COMMAND(OUTPUT  ${charmCopyDirectory}/.stamp
                          COMMAND rm -rf ${charmCopyDirectory}
                          COMMAND mkdir -p ${charmCopyDirectory}
@@ -267,6 +268,7 @@ FOREACH(vnfd IN LISTS VNFD_LIST)
       ADD_CUSTOM_TARGET(${generate_vnfd_charm} DEPENDS ${charmCopyDirectory}/.stamp)
       LIST(APPEND allCharmsCopyedIntoVNFD ${generate_vnfd_charm} ${charmCopyDirectory}/.stamp)
    ENDFOREACH()
+   MESSAGE("ÜÜÜ   ${allCharmsCopyedIntoVNFD}")
 
    # ====== Validate cloud-init YAML files ==================================
    EXECUTE_PROCESS(COMMAND git ls-files ${vnfd}/cloud_init
@@ -277,16 +279,16 @@ FOREACH(vnfd IN LISTS VNFD_LIST)
 
    SET(allCloudInitFilesChecked "")
    FOREACH(vnfdCloudInitFile IN LISTS vnfdCloudInitFiles)
-      makeUniqueTarget(validate_cloudinit "validate_${vnfdCloudInitFile}")
+      makeUniqueTarget(generate_cloudInitCheckedTimestampFile "validate_${vnfdCloudInitFile}")
+      SET(cloudInitCheckedTimestampFile ".${generate_cloudInitCheckedTimestampFile}.stamp")
 
-      SET(cloudInitCheckedTimestampFile ".${validate_cloudinit}.stamp")
       ADD_CUSTOM_COMMAND(OUTPUT ${cloudInitCheckedTimestampFile}
                          COMMAND ${YAMLLINT} -d '{extends: relaxed, rules: {document-start: {present: no}}}' ${vnfdCloudInitFile}
                          COMMAND touch ${cloudInitCheckedTimestampFile}
                          DEPENDS ${vnfdCloudInitFile})
-      ADD_CUSTOM_TARGET(${validate_cloudinit} DEPENDS ${cloudInitCheckedTimestampFile})
+      ADD_CUSTOM_TARGET(${generate_cloudInitCheckedTimestampFile} DEPENDS ${cloudInitCheckedTimestampFile})
 
-      LIST(APPEND allCloudInitFilesChecked ${validate_cloudinit})
+      LIST(APPEND allCloudInitFilesChecked ${generate_cloudInitCheckedTimestampFile} ${cloudInitCheckedTimestampFile})
    ENDFOREACH()
 
    # ====== Generate the VNFD ===============================================
