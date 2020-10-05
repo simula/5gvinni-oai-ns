@@ -234,7 +234,6 @@ FOREACH(charmName IN LISTS CHARM_SOURCE_LIST)
    ADD_CUSTOM_TARGET(${generate_charmBuildTimestampFile} DEPENDS ${charmBuildTimestampFile})
 
    MESSAGE("Charm to build: ${charmName}")
-   MESSAGE("   ÜÜÜ   ${charmBuildTimestampFile}")
 ENDFOREACH()
 
 
@@ -262,11 +261,9 @@ FOREACH(vnfd IN LISTS VNFD_LIST)
       makeUniqueTarget(generate_charmCopiedTimestampFile "generate_charm-in-vnfd-${vnfd}_${charmName}")
       SET(charmCopiedTimestampFile "${charmBuildDirectory}-in-vnfd-${vnfd}.stamp")
 
-      MESSAGE("@@@@@@@@@@@@@qq generate_${vnfd}_${charmName}   ${charmCopyDirectory}/.stamp")
       ADD_CUSTOM_COMMAND(OUTPUT  ${charmCopiedTimestampFile}
                          COMMAND rm -rf ${charmCopyDirectory}
                          COMMAND mkdir -p ${charmCopyDirectory}
-#                         COMMAND echo "Copying: ${charmBuildDirectory}/ -> ${charmCopyDirectory}/"
                          COMMAND cp -a ${charmBuildDirectory}/ ${charmCopyDirectory}/
                          # COMMAND rsync -Pav --delete ${charmBuildDirectory}/ ${charmCopyDirectory}/
                          COMMAND touch ${charmCopiedTimestampFile}
@@ -274,7 +271,6 @@ FOREACH(vnfd IN LISTS VNFD_LIST)
       ADD_CUSTOM_TARGET(${generate_charmCopiedTimestampFile} DEPENDS ${charmCopiedTimestampFile})
       LIST(APPEND allCharmsCopyedIntoVNFD ${generate_charmCopiedTimestampFile} ${charmCopiedTimestampFile})
    ENDFOREACH()
-   MESSAGE("ÜÜÜ   ${allCharmsCopyedIntoVNFD}")
 
    # ====== Validate cloud-init YAML files ==================================
    EXECUTE_PROCESS(COMMAND git ls-files ${vnfd}/cloud_init
@@ -342,5 +338,4 @@ FOREACH(nsd IN LISTS NSD_LIST)
    ADD_CUSTOM_TARGET(${generate_nsdPackage} ALL DEPENDS ${nsdPackage})
 
    MESSAGE("NSD to build: ${nsd}, depending on VNFDs ${${nsd}_vnfds}")
-   MESSAGE("  ÜÜÜ   ${allRequiredVNFDPackages}")
 ENDFOREACH()
