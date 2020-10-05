@@ -208,17 +208,16 @@ ENDFOREACH()
 
 # ###### Generate Juju Charms ###############################################
 MESSAGE("Generating charms ...")
-GET_FILENAME_COMPONENT(charmBuildDirectory ${CHARMS_BUILD_DIRECTORY} ABSOLUTE)
-FILE(MAKE_DIRECTORY ${charmBuildDirectory})
+FILE(MAKE_DIRECTORY ${CHARMS_BUILD_DIRECTORY})
 FOREACH(charmName IN LISTS CHARM_SOURCE_LIST)
    GET_FILENAME_COMPONENT(charmSourceDirectory ${CHARMS_SOURCE_DIRECTORY}/${charmName} ABSOLUTE)
-   GET_FILENAME_COMPONENT(charmBuildDirectory  ${charmBuildDirectory}/${charmName}     ABSOLUTE)
+   GET_FILENAME_COMPONENT(charmBuildDirectory  ${CHARMS_BUILD_DIRECTORY}/${charmName}  ABSOLUTE)
    EXECUTE_PROCESS(COMMAND git ls-files ${charmSourceDirectory}
                    COMMAND tr "\n" ";"
                    COMMAND sed -e "s/;$//g"
                    OUTPUT_VARIABLE charmInputFiles OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-   makeUniqueTarget(generate_charm "generate_${charmName}")
+   makeUniqueTarget(generate_charm "generate_charm_${charmName}")
    SET(charmBuildTimestampFile "${charmBuildDirectory}.stamp")
    ADD_CUSTOM_COMMAND(OUTPUT  ${charmBuildTimestampFile}
                       COMMAND echo cp ${vduHelperFiles} ${charmSourceDirectory}
@@ -235,6 +234,7 @@ FOREACH(charmName IN LISTS CHARM_SOURCE_LIST)
    ADD_CUSTOM_TARGET(${generate_charm} DEPENDS ${charmBuildTimestampFile})
 
    MESSAGE("Charm to build: ${charmName}")
+   MESSAGE("   ÜÜÜ   ${charmBuildTimestampFile}")
 ENDFOREACH()
 
 
@@ -254,19 +254,23 @@ FOREACH(vnfd IN LISTS VNFD_LIST)
    # ====== Copy the built Juju Charms ======================================
    SET(allCharmsCopyedIntoVNFD "")
    FOREACH(charmName IN LISTS ${vnfd}_charms)
-      makeUniqueTarget(generate_charm      "generate_${charmName}")
-      makeUniqueTarget(generate_vnfd_charm "generate_${vnfd}_${charmName}")
+      makeUniqueTarget(generate_charm      "generate_charm_${charmName}")
+      makeUniqueTarget(generate_vnfd_charm "generate_charm-in-vnfd-${vnfd}_${charmName}")
+      SET(charmCopiedTimestampFile ".${generate_vnfd_charm}.stamp")
+
       GET_FILENAME_COMPONENT(charmBuildDirectory ${CHARMS_BUILD_DIRECTORY}/${charmName} ABSOLUTE)
       GET_FILENAME_COMPONENT(charmCopyDirectory  ${vnfd}/charms/${charmName}            ABSOLUTE)
-      MESSAGE("*** generate_${vnfd}_${charmName}   ${charmCopyDirectory}/.stamp")
-      ADD_CUSTOM_COMMAND(OUTPUT  ${charmCopyDirectory}/.stamp
+      MESSAGE("@@@@@@@@@@@@@qq generate_${vnfd}_${charmName}   ${charmCopyDirectory}/.stamp")
+      ADD_CUSTOM_COMMAND(OUTPUT  ${charmCopiedTimestampFile}
                          COMMAND rm -rf ${charmCopyDirectory}
                          COMMAND mkdir -p ${charmCopyDirectory}
                          COMMAND echo "Copying: ${charmBuildDirectory}/ -> ${charmCopyDirectory}/"
-                         COMMAND rsync -Pav --delete ${charmBuildDirectory}/ ${charmCopyDirectory}/
+                         COMMAND cp -a ${charmBuildDirectory}/ ${charmCopyDirectory}/
+                         # COMMAND rsync -Pav --delete ${charmBuildDirectory}/ ${charmCopyDirectory}/
+                         COMMAND touch ${charmCopiedTimestampFile}
                          DEPENDS ${generate_charm} ${charmBuildDirectory}.stamp)
-      ADD_CUSTOM_TARGET(${generate_vnfd_charm} DEPENDS ${charmCopyDirectory}/.stamp)
-      LIST(APPEND allCharmsCopyedIntoVNFD ${generate_vnfd_charm} ${charmCopyDirectory}/.stamp)
+      ADD_CUSTOM_TARGET(${generate_vnfd_charm} DEPENDS ${charmCopiedTimestampFile})
+      LIST(APPEND allCharmsCopyedIntoVNFD ${generate_vnfd_charm} ${charmCopiedTimestampFile})
    ENDFOREACH()
    MESSAGE("ÜÜÜ   ${allCharmsCopyedIntoVNFD}")
 
@@ -294,7 +298,7 @@ FOREACH(vnfd IN LISTS VNFD_LIST)
    # ====== Generate the VNFD ===============================================
    SET(vnfdDefinition "${vnfd}/${vnfd}.yaml")
    SET(vnfdPackage    "${vnfd}.tar.gz")
-   makeUniqueTarget(generate_vnfdPackage "generate_${vnfdPackage}")
+   makeUniqueTarget(generate_vnfdPackage "generate_vnfd_${vnfdPackage}")
 
    ADD_CUSTOM_COMMAND(OUTPUT  ${vnfdPackage}
                       COMMAND ${VALIDATE_DESCRIPTOR} ${vnfdDefinition}
@@ -317,16 +321,16 @@ FOREACH(nsd IN LISTS NSD_LIST)
 
    # ====== Obtain all required VNFD packages ===============================
    SET(allRequiredVNFDPackages "")
-   FOREACH(vnfd IN LISTS ${${nsd}_vnfds})
+   FOREACH(vnfd IN LISTS ${nsd}_vnfds)
       SET(vnfdPackage "${vnfd}.tar.gz")
-      makeUniqueTarget(generate_vnfdPackage "generate_${vnfdPackage}")
+      makeUniqueTarget(generate_vnfdPackage "generate_vnfd_${vnfdPackage}")
       LIST(APPEND allRequiredVNFDPackages ${generate_vnfdPackage} ${vnfdPackage})
    ENDFOREACH()
 
    # ====== Generate the NSD ================================================
    SET(nsdDefinition "${nsd}/${nsd}.yaml")
    SET(nsdPackage    "${nsd}.tar.gz")
-   makeUniqueTarget(generate_nsdPackage "generate_${nsdPackage}")
+   makeUniqueTarget(generate_nsdPackage "generate_nsd_${nsdPackage}")
 
    ADD_CUSTOM_COMMAND(OUTPUT  ${nsdPackage}
                       COMMAND ${VALIDATE_DESCRIPTOR} ${nsdDefinition}
@@ -336,4 +340,5 @@ FOREACH(nsd IN LISTS NSD_LIST)
    ADD_CUSTOM_TARGET(${generate_nsdPackage} ALL DEPENDS ${nsdPackage})
 
    MESSAGE("NSD to build: ${nsd}, depending on VNFDs ${${nsd}_vnfds}")
+   MESSAGE("  ÜÜÜ   ${allRequiredVNFDPackages}")
 ENDFOREACH()
