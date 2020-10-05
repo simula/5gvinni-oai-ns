@@ -34,20 +34,15 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.0.2)
 PROJECT(SimulaMet-OAI-EPC C)
 
-<<<<<<< HEAD
+
 
 #############################################################################
 # OPTIONS
 #############################################################################
 
-# Installed scripts:
+# ====== OSM scripts ========================================================
 SET(VALIDATE_DESCRIPTOR_SCRIPT "/usr/share/osm-devops/descriptor-packages/tools/validate_descriptor.py")
 SET(GENERATE_DESCRIPTOR_SCRIPT "/usr/share/osm-devops/descriptor-packages/tools/generate_descriptor_pkg.sh")
-=======
-# ====== OSM scripts ========================================================
-# SET(VALIDATE_DESCRIPTOR_SCRIPT "/usr/share/osm-devops/descriptor-packages/tools/validate_descriptor.py")
-# SET(GENERATE_DESCRIPTOR_SCRIPT "/usr/share/osm-devops/descriptor-packages/tools/generate_descriptor_pkg.sh")
->>>>>>> eb43b42ff2608fbf2d189371791522b769c3d43a
 # Local scripts (NOTE: make sure to use scripts compatible with the current OSM setup!):
 # SET(VALIDATE_DESCRIPTOR_SCRIPT "devops/descriptor-packages/tools/validate_descriptor.py")
 # SET(GENERATE_DESCRIPTOR_SCRIPT "devops/descriptor-packages/tools/generate_descriptor_pkg.sh")
