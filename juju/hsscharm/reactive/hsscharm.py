@@ -41,6 +41,8 @@ from charms.reactive import (
     when,
     when_not
 )
+import charms.sshproxy
+
 import subprocess
 import sys
 import traceback

@@ -22,7 +22,7 @@ vnfd:vnfd-catalog:
       vdu:
         - id: mgmtVM
           name: mgmtVM
-          image: 5gVINNI-OpenStack-Ubuntu-20.04-LTS
+          image: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
           count: '1'
           vm-flavor:
             vcpu-count: '1'
