@@ -154,20 +154,6 @@ class VDUHelper:
          return True
 
 
-   # ###### Get IP routing rules for PDN interface ##########################
-   def makePDNRules(pdnInterface, interface, gateway):
-      rules = \
-         '\\\\tpost-up /bin/ip rule add from ' + str(interface.network) + ' lookup 1000 pref 100\\\\n' + \
-         '\\\\tpost-up /bin/ip rule add iif pdn lookup 1000 pref 100\\\\n' + \
-         '\\\\tpost-up /bin/ip route add ' + str(interface.network) + ' scope link dev ' + interfaceName + ' table 1000\\\\n' + \
-         '\\\\tpost-up /bin/ip route add default via ' + str(gateway) + ' dev ' + interfaceName + ' table 1000\\\\n' + \
-         '\\\\tpre-down /bin/ip route del default via ' + str(gateway) + ' dev ' + interfaceName + ' table 1000 || true\\\\n' + \
-         '\\\\tpre-down /bin/ip route del ' + str(interface.network) + ' scope link dev ' + interfaceName + ' table 1000 || true\\\\n' + \
-         '\\\\tpre-down /bin/ip rule del iif pdn lookup 1000 pref 100 || true\\\\n' + \
-         '\\\\tpre-down /bin/ip rule del from ' + str(interface.network) + ' lookup 1000 pref 100 || true\\\\n'
-      return rules
-
-
    # ######  Get /etc/network/interfaces setup for interface ###################
    def makeInterfaceConfiguration(self,
                                   interfaceName,
@@ -176,6 +162,7 @@ class VDUHelper:
                                   ipv6Interface = None,
                                   ipv6Gateway   = None,
                                   metric        = 1,
+                                  pdnInterface  = None,
                                   createDummy   = False):
 
       # NOTE:
@@ -202,6 +189,7 @@ class VDUHelper:
 
 
       # ====== Addressing ===================================================
+      networks = []
       if ipv4Interface == ipaddress.IPv4Interface('0.0.0.0/0'):
          interfaceConfiguration = interfaceConfiguration + '      dhcp4: true\\\\n'
       else:
@@ -223,43 +211,113 @@ class VDUHelper:
                str(ipv4Interface.ip) + '/' + \
                str(ipv4Interface.network.prefixlen) + \
                '\\\\n'
+            networks.append(ipv4Interface.network)
 
          if ((ipv6Interface == None) and (ipv6Interface == ipaddress.IPv6Interface('::/0'))):
             interfaceConfiguration = interfaceConfiguration + '        - ' + \
                str(ipv6Interface.ip) + '/' + \
                str(ipv6Interface.network.prefixlen) + \
                '\\\\n'
+            networks.append(ipv6Interface,network)
 
       # ====== Routing ======================================================
+      postUpRules, preDownRules = None, None
       if ( ((ipv4Gateway != None) and (ipv4Gateway != ipaddress.IPv4Address('0.0.0.0'))) or
            ((ipv6Gateway != None) and (ipv6Gateway != ipaddress.IPv6Address('::'))) ):
 
          interfaceConfiguration = interfaceConfiguration + '      routes:\\\\n'
 
+         gateways = []
          if ((ipv4Gateway != None) and (ipv4Gateway != ipaddress.IPv4Address('0.0.0.0'))):
             interfaceConfiguration = interfaceConfiguration + \
                 '        - to: 0.0.0.0/0\\\\n' + \
                 '          via: ' + str(ipv4Gateway) + '\\\\n' + \
                 '          metric: ' + str(metric) + '\\\\n'
+            gateways.append(ipv4Gateway)
 
          if ((ipv6Gateway != None) and (ipv6Gateway != ipaddress.IPv6Address('::'))):
             interfaceConfiguration = interfaceConfiguration + \
                 '        - to: ::/0\\\\n' + \
                 '          via: ' + str(ipv6Gateway) + '\\\\n' + \
                 '          metric: ' + str(metric) + '\\\\n'
+            gateways.append(ipv6Gateway)
 
-      return interfaceConfiguration
+         if ((pdnInterface != None) and (len(networks) > 0) and (len(gateways) > 0)):
+            postUpRules, preDownRules = self.makeRoutingRules(pdnInterface, interfaceName, networks, gateways)
+
+      return [ interfaceConfiguration, postUpRules, preDownRules ]
+
+
+
+
+   # ###### Get IP routing rules for PDN interface ##########################
+   def makeRoutingRules(self, pdnInterface, interfaceName, networks, gateways):
+      # ------ Create post-up rules -----------------------------------------
+      postUp = \
+         '#\\x21/bin/sh\\\\n' + \
+         'if [ \\\\\\"\\\\\\$IFACE\\\\\\" = \\\\\\"' + interfaceName + '\\\\\\" ] ; then\\\\n'
+      for network in networks:
+         postUp = postUp + \
+            '   /bin/ip rule add from ' + str(network) + ' lookup 1000 pref 100\\\\n'
+      postUp = postUp + \
+         '   /bin/ip rule add iif ' + pdnInterface + ' lookup 1000 pref 100\\\\n'
+      for network in networks:
+         postUp = postUp + \
+            '   /bin/ip route add ' + str(network) + ' scope link dev ' + interfaceName + ' table 1000\\\\n'
+      for gateway in gateways:
+         postUp = postUp + \
+         '   /bin/ip route add default via ' + str(gateway) + ' dev ' + interfaceName + ' table 1000\\\\n'
+      postUp = postUp + \
+         'fi\\\\n'
+
+      # ------ Create pre-down rules ----------------------------------------
+      preDown = \
+         '#\\x21/bin/sh\\\\n' + \
+         'if [ \\\\\\"\\\\\\$IFACE\\\\\\" = \\\\\\"' + interfaceName + '\\\\\\" ] ; then\\\\n'
+      for gateway in gateways:
+         preDown = preDown + \
+         '   /bin/ip route del default via ' + str(gateway) + ' dev ' + interfaceName + ' table 1000\\\\n'
+      for network in networks:
+         preDown = preDown + \
+            '   /bin/ip route del ' + str(network) + ' scope link dev ' + interfaceName + ' table 1000\\\\n'
+      preDown = preDown + \
+         '   /bin/ip rule del iif ' + pdnInterface + ' lookup 1000 pref 100\\\\n'
+      for network in networks:
+         preDown = preDown + \
+            '   /bin/ip rule del from ' + str(network) + ' lookup 1000 pref 100\\\\n'
+      preDown = preDown + \
+         'fi\\\\n'
+
+      return postUp, preDown
 
 
    # ###### Configuration and activate network interface ####################
-   def configureInterface(self, interfaceName, interfaceConfiguration, priority = 61):
+   def configureInterface(self, interfaceName, interfaceConfiguration, priority = 60):
       self.beginBlock('Configuring and activating ' + interfaceName)
 
       try:
-         commands = """\
+         commands = ''
+
+         if interfaceConfiguration[1] != None:
+            commands = commands + """\
+echo -e \\\"{postUpRules}\\\" | sudo tee /etc/networkd-dispatcher/routable.d/{priority}-{interfaceName} && sudo chmod +x /etc/networkd-dispatcher/routable.d/{priority}-{interfaceName} ; """ .format(
+               interfaceName = interfaceName,
+               postUpRules   = interfaceConfiguration[1],
+               priority      = priority
+            )
+
+         if interfaceConfiguration[2] != None:
+            commands = commands + """\
+echo -e \\\"{preDownRules}\\\" | sudo tee /etc/networkd-dispatcher/off.d/{priority}-{interfaceName} && sudo chmod +x /etc/networkd-dispatcher/off.d/{priority}-{interfaceName} ; """ .format(
+               interfaceName = interfaceName,
+               preDownRules  = interfaceConfiguration[2],
+               priority      = priority
+            )
+
+         commands = commands + """\
 echo -e \\\"{interfaceConfiguration}\\\" | sudo tee /etc/netplan/{interfaceName}.yaml && sudo netplan apply || true""".format(
             interfaceName          = interfaceName,
-            interfaceConfiguration = interfaceConfiguration,
+            interfaceConfiguration = interfaceConfiguration[0],
             priority               = priority
          )
          self.runInShell(commands)

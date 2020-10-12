@@ -959,9 +959,7 @@ def prepare_spgwu_build():
       configurationS1U  = vduHelper.makeInterfaceConfiguration(spgwuS1U_IfName, spgwuS1U_IPv4Interface, spgwuS1U_IPv4Gateway, metric=62)
       configurationSGi  = vduHelper.makeInterfaceConfiguration(spgwuSGi_IfName, spgwuSGi_IPv4Interface, spgwuSGi_IPv4Gateway,
                                                                spgwuSGi_IPv6Interface, spgwuSGi_IPv6Gateway,
-                                                               metric=1)
-# FIXME!
-#, pdnInterface = 'pdn'
+                                                               metric=1, pdnInterface = 'pdn')
 
       # ====== Prepare system ===============================================
       vduHelper.beginBlock('Preparing system')
@@ -1314,13 +1312,13 @@ def restart_flexran():
 
 # ------ SPGW-C -------------------------------------------------------------
 #install_spgwccharm_proxy_charm()
-prepare_spgwc_build()
+#prepare_spgwc_build()
 #configure_spgwc()
 #restart_spgwc()
 
 # ------ SPGW-U -------------------------------------------------------------
 #install_spgwucharm_proxy_charm()
-#prepare_spgwu_build()
+prepare_spgwu_build()
 #configure_spgwu()
 #restart_spgwu()
 
