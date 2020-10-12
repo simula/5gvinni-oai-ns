@@ -28,6 +28,7 @@
 #
 # Contact: dreibh@simula.no
 
+import base64
 import ipaddress
 import logging
 import logging.config
@@ -154,7 +155,19 @@ class VDUHelper:
          return True
 
 
-   # ######  Get /etc/network/interfaces setup for interface ###################
+   # ###### Encode string to base64 ##########################################
+   def makeBase64(self, string):
+      # NOTE: Handling multiple levels of string encapsulation with Python, bash,
+      # etc. is just a total mess! Therefore, using a straightforward approach here:
+      # Create the command string as is, apply base64 encoding, and decode it at the
+      # VDU's shell by using "base64 -d".
+
+      if string != None:
+         return base64.b64encode(string.encode('utf-8')).decode('ascii')
+      return None
+
+
+   # ######  Get /etc/network/interfaces setup for interface #################
    def makeInterfaceConfiguration(self,
                                   interfaceName,
                                   ipv4Interface = ipaddress.IPv4Interface('0.0.0.0/0'),
@@ -165,59 +178,52 @@ class VDUHelper:
                                   pdnInterface  = None,
                                   createDummy   = False):
 
-      # NOTE:
-      # Double escaping is required for \ and " in "interfaceConfiguration" string!
-      # 1. Python
-      # 2. bash -c "<command>"
-      # That is: $ => \$ ; \ => \\ ; " => \\\"
-
-
       # ====== Create header ================================================
       interfaceConfiguration = \
-         'network:\\\\n' + \
-         '\\tversion: 2\\\\n' + \
-         '\\trenderer: networkd\\\\n'
+         'network:\n' + \
+         '  version: 2\n' + \
+         '  renderer: networkd\n'
       if createDummy == False:
         interfaceConfiguration = interfaceConfiguration + \
-           '\\tethernets:\\\\n' + \
-           '\\t\\t' + interfaceName + ':\\\\n'
+           '  ethernets:\n' + \
+           '    ' + interfaceName + ':\n'
       else:
         interfaceConfiguration = interfaceConfiguration + \
-           '\\tbridges:\\\\n' + \
-           '\\t\\t' + interfaceName + ':\\\\n' + \
-           '\\t\\t\\tinterfaces: [ ]\\\\n'
+           '  bridges:\n' + \
+           '    ' + interfaceName + ':\n' + \
+           '      interfaces: [ ]\n'
 
 
       # ====== Addressing ===================================================
       networks = []
       if ipv4Interface == ipaddress.IPv4Interface('0.0.0.0/0'):
-         interfaceConfiguration = interfaceConfiguration + '\\t\\t\\tdhcp4: true\\\\n'
+         interfaceConfiguration = interfaceConfiguration + '      dhcp4: true\n'
       else:
-         interfaceConfiguration = interfaceConfiguration + '\\t\\t\\tdhcp4: false\\\\n'
+         interfaceConfiguration = interfaceConfiguration + '      dhcp4: false\n'
 
       if ((ipv6Interface == None) and (ipv6Interface == ipaddress.IPv6Interface('::/0'))):
-         interfaceConfiguration = interfaceConfiguration + '\\t\\t\\tdhcp6: true\\\\n'
+         interfaceConfiguration = interfaceConfiguration + '      dhcp6: true\n'
       else:
-         interfaceConfiguration = interfaceConfiguration + '\\t\\t\\tdhcp6: false\\\\n'
-         interfaceConfiguration = interfaceConfiguration + '\\t\\t\\taccept-ra: no\\\\n'
+         interfaceConfiguration = interfaceConfiguration + '      dhcp6: false\n'
+         interfaceConfiguration = interfaceConfiguration + '      accept-ra: no\n'
 
       if ( (ipv4Interface != ipaddress.IPv4Interface('0.0.0.0/0')) or
            ((ipv6Interface == None) and (ipv6Interface == ipaddress.IPv6Interface('::/0'))) ):
 
-         interfaceConfiguration = interfaceConfiguration + '\\t\\t\\taddresses:\\\\n'
+         interfaceConfiguration = interfaceConfiguration + '      addresses:\n'
 
          if ipv4Interface != ipaddress.IPv4Interface('0.0.0.0/0'):
-            interfaceConfiguration = interfaceConfiguration + '\\t\\t\\t  - ' + \
+            interfaceConfiguration = interfaceConfiguration + '        - ' + \
                str(ipv4Interface.ip) + '/' + \
                str(ipv4Interface.network.prefixlen) + \
-               '\\\\n'
+               '\n'
             networks.append(ipv4Interface.network)
 
          if ((ipv6Interface == None) and (ipv6Interface == ipaddress.IPv6Interface('::/0'))):
-            interfaceConfiguration = interfaceConfiguration + '\\t\\t\\t  - ' + \
+            interfaceConfiguration = interfaceConfiguration + '        - ' + \
                str(ipv6Interface.ip) + '/' + \
                str(ipv6Interface.network.prefixlen) + \
-               '\\\\n'
+               '\n'
             networks.append(ipv6Interface,network)
 
       # ====== Routing ======================================================
@@ -225,68 +231,68 @@ class VDUHelper:
       if ( ((ipv4Gateway != None) and (ipv4Gateway != ipaddress.IPv4Address('0.0.0.0'))) or
            ((ipv6Gateway != None) and (ipv6Gateway != ipaddress.IPv6Address('::'))) ):
 
-         interfaceConfiguration = interfaceConfiguration + '\\t\\t\\troutes:\\\\n'
+         interfaceConfiguration = interfaceConfiguration + '      routes:\n'
 
          gateways = []
          if ((ipv4Gateway != None) and (ipv4Gateway != ipaddress.IPv4Address('0.0.0.0'))):
             interfaceConfiguration = interfaceConfiguration + \
-                '\\t\\t\\t - to: 0.0.0.0/0\\\\n' + \
-                '\\t\\t\\t   via: ' + str(ipv4Gateway) + '\\\\n' + \
-                '\\t\\t\\t   metric: ' + str(metric) + '\\\\n'
+                '       - to: 0.0.0.0/0\n' + \
+                '         via: ' + str(ipv4Gateway) + '\n' + \
+                '         metric: ' + str(metric) + '\n'
             gateways.append(ipv4Gateway)
 
          if ((ipv6Gateway != None) and (ipv6Gateway != ipaddress.IPv6Address('::'))):
             interfaceConfiguration = interfaceConfiguration + \
-                '\\t\\t\\t - to: ::/0\\\\n' + \
-                '\\t\\t\\t   via: ' + str(ipv6Gateway) + '\\\\n' + \
-                '\\t\\t\\t   metric: ' + str(metric) + '\\\\n'
+                '       - to: ::/0\n' + \
+                '         via: ' + str(ipv6Gateway) + '\n' + \
+                '         metric: ' + str(metric) + '\n'
             gateways.append(ipv6Gateway)
 
          if ((pdnInterface != None) and (len(networks) > 0) and (len(gateways) > 0)):
             postUpRules, preDownRules = self.makeRoutingRules(pdnInterface, interfaceName, networks, gateways)
 
-      return [ interfaceConfiguration, postUpRules, preDownRules ]
-
-
+      return [ self.makeBase64(interfaceConfiguration),
+               self.makeBase64(postUpRules),
+               self.makeBase64(preDownRules) ]
 
 
    # ###### Get IP routing rules for PDN interface ##########################
    def makeRoutingRules(self, pdnInterface, interfaceName, networks, gateways):
       # ------ Create post-up rules -----------------------------------------
       postUp = \
-         '#\\x21/bin/sh\\\\n' + \
-         'if [ \\\\\\"\\\\\\$IFACE\\\\\\" = \\\\\\"' + interfaceName + '\\\\\\" ] ; then\\\\n'
+         '#!/bin/sh\n' + \
+         'if [ "$IFACE" = "' + interfaceName + '" ] ; then\n'
       for network in networks:
          postUp = postUp + \
-            '   /bin/ip rule add from ' + str(network) + ' lookup 1000 pref 100\\\\n'
+            '   /bin/ip rule add from ' + str(network) + ' lookup 1000 pref 100\n'
       postUp = postUp + \
-         '   /bin/ip rule add iif ' + pdnInterface + ' lookup 1000 pref 100\\\\n'
+         '   /bin/ip rule add iif ' + pdnInterface + ' lookup 1000 pref 100\n'
       for network in networks:
          postUp = postUp + \
-            '   /bin/ip route add ' + str(network) + ' scope link dev ' + interfaceName + ' table 1000\\\\n'
+            '   /bin/ip route add ' + str(network) + ' scope link dev ' + interfaceName + ' table 1000\n'
       for gateway in gateways:
          postUp = postUp + \
-         '   /bin/ip route add default via ' + str(gateway) + ' dev ' + interfaceName + ' table 1000\\\\n'
+         '   /bin/ip route add default via ' + str(gateway) + ' dev ' + interfaceName + ' table 1000\n'
       postUp = postUp + \
-         'fi\\\\n'
+         'fi\n'
 
       # ------ Create pre-down rules ----------------------------------------
       preDown = \
-         '#\\x21/bin/sh\\\\n' + \
-         'if [ \\\\\\"\\\\\\$IFACE\\\\\\" = \\\\\\"' + interfaceName + '\\\\\\" ] ; then\\\\n'
+         '#\\x21/bin/sh\n' + \
+         'if [ "$IFACE" = "' + interfaceName + '" ] ; then\n'
       for gateway in gateways:
          preDown = preDown + \
-         '   /bin/ip route del default via ' + str(gateway) + ' dev ' + interfaceName + ' table 1000\\\\n'
+         '   /bin/ip route del default via ' + str(gateway) + ' dev ' + interfaceName + ' table 1000\n'
       for network in networks:
          preDown = preDown + \
-            '   /bin/ip route del ' + str(network) + ' scope link dev ' + interfaceName + ' table 1000\\\\n'
+            '   /bin/ip route del ' + str(network) + ' scope link dev ' + interfaceName + ' table 1000\n'
       preDown = preDown + \
-         '   /bin/ip rule del iif ' + pdnInterface + ' lookup 1000 pref 100\\\\n'
+         '   /bin/ip rule del iif ' + pdnInterface + ' lookup 1000 pref 100\n'
       for network in networks:
          preDown = preDown + \
-            '   /bin/ip rule del from ' + str(network) + ' lookup 1000 pref 100\\\\n'
+            '   /bin/ip rule del from ' + str(network) + ' lookup 1000 pref 100\n'
       preDown = preDown + \
-         'fi\\\\n'
+         'fi\n'
 
       return postUp, preDown
 
@@ -297,10 +303,9 @@ class VDUHelper:
 
       try:
          commands = ''
-
          if interfaceConfiguration[1] != None:
             commands = commands + """\
-echo -e \\\"{postUpRules}\\\" | sudo tee /etc/networkd-dispatcher/routable.d/{priority}-{interfaceName} && sudo chmod +x /etc/networkd-dispatcher/routable.d/{priority}-{interfaceName} ; """ .format(
+echo \\\"{postUpRules}\\\" | base64 -d | sudo tee /etc/networkd-dispatcher/routable.d/{priority}-{interfaceName} && sudo chmod +x /etc/networkd-dispatcher/routable.d/{priority}-{interfaceName} ; """ .format(
                interfaceName = interfaceName,
                postUpRules   = interfaceConfiguration[1],
                priority      = priority
@@ -308,14 +313,14 @@ echo -e \\\"{postUpRules}\\\" | sudo tee /etc/networkd-dispatcher/routable.d/{pr
 
          if interfaceConfiguration[2] != None:
             commands = commands + """\
-echo -e \\\"{preDownRules}\\\" | sudo tee /etc/networkd-dispatcher/off.d/{priority}-{interfaceName} && sudo chmod +x /etc/networkd-dispatcher/off.d/{priority}-{interfaceName} ; """ .format(
+echo \\\"{preDownRules}\\\" | base64 -d | sudo tee /etc/networkd-dispatcher/off.d/{priority}-{interfaceName} && sudo chmod +x /etc/networkd-dispatcher/off.d/{priority}-{interfaceName} ; """ .format(
                interfaceName = interfaceName,
                preDownRules  = interfaceConfiguration[2],
                priority      = priority
             )
 
          commands = commands + """\
-echo -e \\\"{interfaceConfiguration}\\\" | sed \\\"s#\\t#  #g\\\" | sudo tee /etc/netplan/{interfaceName}.yaml && sudo netplan apply || true""".format(
+echo \\\"{interfaceConfiguration}\\\" | base64 -d | sudo tee /etc/netplan/{interfaceName}.yaml && sudo netplan apply || true""".format(
             interfaceName          = interfaceName,
             interfaceConfiguration = interfaceConfiguration[0],
             priority               = priority
