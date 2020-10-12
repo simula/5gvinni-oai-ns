@@ -961,6 +961,7 @@ def prepare_spgwu_build():
                                                                spgwuSGi_IPv6Interface, spgwuSGi_IPv6Gateway,
                                                                metric=1, pdnInterface = 'pdn')
 
+
       # ====== Prepare system ===============================================
       vduHelper.beginBlock('Preparing system')
       vduHelper.configureInterface(spgwuSXab_IfName, configurationSXab, 61)
@@ -1298,36 +1299,36 @@ def restart_flexran():
 # ###########################################################################
 
 # ------ HSS ----------------------------------------------------------------
-#install_hsscharm_proxy_charm()
-#prepare_cassandra_hss_build()
-#configure_cassandra()
-#configure_hss()
-#restart_hss()
+install_hsscharm_proxy_charm()
+prepare_cassandra_hss_build()
+configure_cassandra()
+configure_hss()
+restart_hss()
 
 # ------ MME ----------------------------------------------------------------
-#install_mmecharm_proxy_charm()
-#prepare_mme_build()
-#configure_mme()
-#restart_mme()
+install_mmecharm_proxy_charm()
+prepare_mme_build()
+configure_mme()
+restart_mme()
 
 # ------ SPGW-C -------------------------------------------------------------
-#install_spgwccharm_proxy_charm()
-#prepare_spgwc_build()
-#configure_spgwc()
-#restart_spgwc()
+install_spgwccharm_proxy_charm()
+prepare_spgwc_build()
+configure_spgwc()
+restart_spgwc()
 
 # ------ SPGW-U -------------------------------------------------------------
-#install_spgwucharm_proxy_charm()
+install_spgwucharm_proxy_charm()
 prepare_spgwu_build()
-#configure_spgwu()
-#restart_spgwu()
+configure_spgwu()
+restart_spgwu()
 
 
 # ------ FlexRAN Controller -------------------------------------------------
-#install_flexrancharm_proxy_charm()
-#prepare_flexran_build()
-#configure_flexran()
-#restart_flexran()
+install_flexrancharm_proxy_charm()
+prepare_flexran_build()
+configure_flexran()
+restart_flexran()
 
 
 # ------ Interface configuration tests --------------------------------------
