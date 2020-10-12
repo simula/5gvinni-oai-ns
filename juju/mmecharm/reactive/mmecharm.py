@@ -112,7 +112,7 @@ def prepare_mme_build():
                                                               mmeS1C_IPv6Interface, mmeS1C_IPv6Gateway)
 
       # S10 dummy interface:
-      mmeS10_IfName    = 'dummy0:m10'
+      mmeS10_IfName    = 'dummy0'
       configurationS10 = vduHelper.makeInterfaceConfiguration(mmeS10_IfName, IPv4Interface('192.168.10.110/24'), createDummy = True)
 
       # ====== Prepare system ===============================================

@@ -251,6 +251,8 @@ class VDUHelper:
          if ((pdnInterface != None) and (len(networks) > 0) and (len(gateways) > 0)):
             postUpRules, preDownRules = self.makeRoutingRules(pdnInterface, interfaceName, networks, gateways)
 
+      print(interfaceConfiguration)
+
       return [ self.makeBase64(interfaceConfiguration),
                self.makeBase64(postUpRules),
                self.makeBase64(preDownRules) ]

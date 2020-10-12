@@ -467,7 +467,7 @@ def prepare_mme_build():
                                                               mmeS1C_IPv6Interface, mmeS1C_IPv6Gateway)
 
       # S10 dummy interface:
-      mmeS10_IfName    = 'dummy0:m10'
+      mmeS10_IfName    = 'dummy0'
       configurationS10 = vduHelper.makeInterfaceConfiguration(mmeS10_IfName, IPv4Interface('192.168.10.110/24'), createDummy = True)
 
       # ====== Prepare system ===============================================
@@ -536,7 +536,7 @@ def configure_mme():
       mmeS6a_IfName = 'ens4'
       mmeS11_IfName = 'ens5'
       mmeS1C_IfName = 'ens6'
-      mmeS10_IfName = 'dummy0:m10'
+      mmeS10_IfName = 'dummy0'
 
       # ====== Build MME dependencies =======================================
       vduHelper.beginBlock('Building MME dependencies')
@@ -741,9 +741,9 @@ def prepare_spgwc_build():
       configurationSXab = vduHelper.makeInterfaceConfiguration(spgwcSXab_IfName, IPv4Interface('0.0.0.0/0'))
 
       # S5S8 dummy interfaces:
-      spgwcS5S8_SGW_IfName  = 'dummy0:s5c'
+      spgwcS5S8_SGW_IfName  = 'dummy0'   # 'dummy0:s5c'
       configurationS5S8_SGW = vduHelper.makeInterfaceConfiguration(spgwcS5S8_SGW_IfName, IPv4Interface('172.58.58.102/24'), createDummy = True)
-      spgwcS5S8_PGW_IfName  = 'dummy0:p5c'
+      spgwcS5S8_PGW_IfName  = 'dummy1'   # 'dummy0:s5c'
       configurationS5S8_PGW = vduHelper.makeInterfaceConfiguration(spgwcS5S8_PGW_IfName, IPv4Interface('172.58.58.101/24'), createDummy = True)
 
       # ====== Prepare system ===============================================
@@ -1298,35 +1298,35 @@ def restart_flexran():
 
 # ###########################################################################
 
-# ------ HSS ----------------------------------------------------------------
-install_hsscharm_proxy_charm()
-prepare_cassandra_hss_build()
-configure_cassandra()
-configure_hss()
-restart_hss()
+## ------ HSS ----------------------------------------------------------------
+#install_hsscharm_proxy_charm()
+#prepare_cassandra_hss_build()
+#configure_cassandra()
+#configure_hss()
+#restart_hss()
 
 # ------ MME ----------------------------------------------------------------
-install_mmecharm_proxy_charm()
-prepare_mme_build()
-configure_mme()
-restart_mme()
+#install_mmecharm_proxy_charm()
+#prepare_mme_build()
+#configure_mme()
+#restart_mme()
 
-# ------ SPGW-C -------------------------------------------------------------
-install_spgwccharm_proxy_charm()
+## ------ SPGW-C -------------------------------------------------------------
+#install_spgwccharm_proxy_charm()
 prepare_spgwc_build()
-configure_spgwc()
-restart_spgwc()
+#configure_spgwc()
+#restart_spgwc()
 
-# ------ SPGW-U -------------------------------------------------------------
-install_spgwucharm_proxy_charm()
-prepare_spgwu_build()
-configure_spgwu()
-restart_spgwu()
+## ------ SPGW-U -------------------------------------------------------------
+#install_spgwucharm_proxy_charm()
+#prepare_spgwu_build()
+#configure_spgwu()
+#restart_spgwu()
 
 
-# ------ FlexRAN Controller -------------------------------------------------
+## ------ FlexRAN Controller -------------------------------------------------
 #install_flexrancharm_proxy_charm()
-prepare_flexran_build()
+#prepare_flexran_build()
 #configure_flexran()
 #restart_flexran()
 
