@@ -1325,10 +1325,10 @@ restart_spgwu()
 
 
 # ------ FlexRAN Controller -------------------------------------------------
-install_flexrancharm_proxy_charm()
+#install_flexrancharm_proxy_charm()
 prepare_flexran_build()
-configure_flexran()
-restart_flexran()
+#configure_flexran()
+#restart_flexran()
 
 
 # ------ Interface configuration tests --------------------------------------

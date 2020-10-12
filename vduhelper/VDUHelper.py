@@ -175,46 +175,46 @@ class VDUHelper:
       # ====== Create header ================================================
       interfaceConfiguration = \
          'network:\\\\n' + \
-         '  version: 2\\\\n' + \
-         '  renderer: networkd\\\\n'
+         '\\tversion: 2\\\\n' + \
+         '\\trenderer: networkd\\\\n'
       if createDummy == False:
         interfaceConfiguration = interfaceConfiguration + \
-           '  ethernets:\\\\n' + \
-           '    ' + interfaceName + ':\\\\n'
+           '\\tethernets:\\\\n' + \
+           '\\t\\t' + interfaceName + ':\\\\n'
       else:
         interfaceConfiguration = interfaceConfiguration + \
-           '  bridges:\\\\n' + \
-           '    ' + interfaceName + ':\\\\n' + \
-           '      interfaces: [ ]\\\\n'
+           '\\tbridges:\\\\n' + \
+           '\\t\\t' + interfaceName + ':\\\\n' + \
+           '\\t\\t\\tinterfaces: [ ]\\\\n'
 
 
       # ====== Addressing ===================================================
       networks = []
       if ipv4Interface == ipaddress.IPv4Interface('0.0.0.0/0'):
-         interfaceConfiguration = interfaceConfiguration + '      dhcp4: true\\\\n'
+         interfaceConfiguration = interfaceConfiguration + '\\t\\t\\tdhcp4: true\\\\n'
       else:
-         interfaceConfiguration = interfaceConfiguration + '      dhcp4: false\\\\n'
+         interfaceConfiguration = interfaceConfiguration + '\\t\\t\\tdhcp4: false\\\\n'
 
       if ((ipv6Interface == None) and (ipv6Interface == ipaddress.IPv6Interface('::/0'))):
-         interfaceConfiguration = interfaceConfiguration + '      dhcp6: true\\\\n'
+         interfaceConfiguration = interfaceConfiguration + '\\t\\t\\tdhcp6: true\\\\n'
       else:
-         interfaceConfiguration = interfaceConfiguration + '      dhcp6: false\\\\n'
-         interfaceConfiguration = interfaceConfiguration + '      accept-ra: no\\\\n'
+         interfaceConfiguration = interfaceConfiguration + '\\t\\t\\tdhcp6: false\\\\n'
+         interfaceConfiguration = interfaceConfiguration + '\\t\\t\\taccept-ra: no\\\\n'
 
       if ( (ipv4Interface != ipaddress.IPv4Interface('0.0.0.0/0')) or
            ((ipv6Interface == None) and (ipv6Interface == ipaddress.IPv6Interface('::/0'))) ):
 
-         interfaceConfiguration = interfaceConfiguration + '      addresses:\\\\n'
+         interfaceConfiguration = interfaceConfiguration + '\\t\\t\\taddresses:\\\\n'
 
          if ipv4Interface != ipaddress.IPv4Interface('0.0.0.0/0'):
-            interfaceConfiguration = interfaceConfiguration + '        - ' + \
+            interfaceConfiguration = interfaceConfiguration + '\\t\\t\\t  - ' + \
                str(ipv4Interface.ip) + '/' + \
                str(ipv4Interface.network.prefixlen) + \
                '\\\\n'
             networks.append(ipv4Interface.network)
 
          if ((ipv6Interface == None) and (ipv6Interface == ipaddress.IPv6Interface('::/0'))):
-            interfaceConfiguration = interfaceConfiguration + '        - ' + \
+            interfaceConfiguration = interfaceConfiguration + '\\t\\t\\t  - ' + \
                str(ipv6Interface.ip) + '/' + \
                str(ipv6Interface.network.prefixlen) + \
                '\\\\n'
@@ -225,21 +225,21 @@ class VDUHelper:
       if ( ((ipv4Gateway != None) and (ipv4Gateway != ipaddress.IPv4Address('0.0.0.0'))) or
            ((ipv6Gateway != None) and (ipv6Gateway != ipaddress.IPv6Address('::'))) ):
 
-         interfaceConfiguration = interfaceConfiguration + '      routes:\\\\n'
+         interfaceConfiguration = interfaceConfiguration + '\\t\\t\\troutes:\\\\n'
 
          gateways = []
          if ((ipv4Gateway != None) and (ipv4Gateway != ipaddress.IPv4Address('0.0.0.0'))):
             interfaceConfiguration = interfaceConfiguration + \
-                '        - to: 0.0.0.0/0\\\\n' + \
-                '          via: ' + str(ipv4Gateway) + '\\\\n' + \
-                '          metric: ' + str(metric) + '\\\\n'
+                '\\t\\t\\t - to: 0.0.0.0/0\\\\n' + \
+                '\\t\\t\\t   via: ' + str(ipv4Gateway) + '\\\\n' + \
+                '\\t\\t\\t   metric: ' + str(metric) + '\\\\n'
             gateways.append(ipv4Gateway)
 
          if ((ipv6Gateway != None) and (ipv6Gateway != ipaddress.IPv6Address('::'))):
             interfaceConfiguration = interfaceConfiguration + \
-                '        - to: ::/0\\\\n' + \
-                '          via: ' + str(ipv6Gateway) + '\\\\n' + \
-                '          metric: ' + str(metric) + '\\\\n'
+                '\\t\\t\\t - to: ::/0\\\\n' + \
+                '\\t\\t\\t   via: ' + str(ipv6Gateway) + '\\\\n' + \
+                '\\t\\t\\t   metric: ' + str(metric) + '\\\\n'
             gateways.append(ipv6Gateway)
 
          if ((pdnInterface != None) and (len(networks) > 0) and (len(gateways) > 0)):
@@ -315,7 +315,7 @@ echo -e \\\"{preDownRules}\\\" | sudo tee /etc/networkd-dispatcher/off.d/{priori
             )
 
          commands = commands + """\
-echo -e \\\"{interfaceConfiguration}\\\" | sudo tee /etc/netplan/{interfaceName}.yaml && sudo netplan apply || true""".format(
+echo -e \\\"{interfaceConfiguration}\\\" | sed \\\"s#\\t#  #g\\\" | sudo tee /etc/netplan/{interfaceName}.yaml && sudo netplan apply || true""".format(
             interfaceName          = interfaceName,
             interfaceConfiguration = interfaceConfiguration[0],
             priority               = priority
