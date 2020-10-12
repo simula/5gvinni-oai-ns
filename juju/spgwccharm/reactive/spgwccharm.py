@@ -100,6 +100,7 @@ def prepare_spgwc_build():
       spgwcS5S8_SGW_IfName  = 'dummy0'   # 'dummy0:s5c'
       configurationS5S8_SGW = vduHelper.makeInterfaceConfiguration(spgwcS5S8_SGW_IfName, IPv4Interface('172.58.58.102/24'), createDummy = True)
       spgwcS5S8_PGW_IfName  = 'dummy1'   # 'dummy0:s5c'
+      configurationS5S8_PGW = vduHelper.makeInterfaceConfiguration(spgwcS5S8_PGW_IfName, IPv4Interface('172.58.58.101/24'), createDummy = True)
 
       # ====== Prepare system ===============================================
       vduHelper.beginBlock('Preparing system')
