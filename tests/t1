@@ -959,8 +959,9 @@ def prepare_spgwu_build():
       configurationS1U  = vduHelper.makeInterfaceConfiguration(spgwuS1U_IfName, spgwuS1U_IPv4Interface, spgwuS1U_IPv4Gateway, metric=62)
       configurationSGi  = vduHelper.makeInterfaceConfiguration(spgwuSGi_IfName, spgwuSGi_IPv4Interface, spgwuSGi_IPv4Gateway,
                                                                spgwuSGi_IPv6Interface, spgwuSGi_IPv6Gateway,
-                                                               metric=1, pdnInterface = 'pdn')
-
+                                                               metric=1)
+# FIXME!
+#, pdnInterface = 'pdn'
 
       # ====== Prepare system ===============================================
       vduHelper.beginBlock('Preparing system')
@@ -1313,7 +1314,7 @@ def restart_flexran():
 
 # ------ SPGW-C -------------------------------------------------------------
 #install_spgwccharm_proxy_charm()
-#prepare_spgwc_build()
+prepare_spgwc_build()
 #configure_spgwc()
 #restart_spgwc()
 
@@ -1332,36 +1333,34 @@ def restart_flexran():
 
 
 # ------ Interface configuration tests --------------------------------------
-spgwuS1U_IPv4Interface = IPv4Interface(function_get('spgwu-S1U-ipv4-interface'))
-spgwuS1U_IPv4Gateway   = IPv4Address(function_get('spgwu-S1U-ipv4-gateway'))
+#spgwuS1U_IPv4Interface = IPv4Interface(function_get('spgwu-S1U-ipv4-interface'))
+#spgwuS1U_IPv4Gateway   = IPv4Address(function_get('spgwu-S1U-ipv4-gateway'))
 
-spgwuSGi_IPv4Interface = IPv4Interface(function_get('spgwu-SGi-ipv4-interface'))
-spgwuSGi_IPv4Gateway   = IPv4Address(function_get('spgwu-SGi-ipv4-gateway'))
-if function_get('spgwu-SGi-ipv6-interface') == '':
-   spgwuSGi_IPv6Interface = None
-else:
-   spgwuSGi_IPv6Interface = IPv6Interface(function_get('spgwu-SGi-ipv6-interface'))
-if function_get('spgwu-SGi-ipv6-gateway') == '':
-   spgwuSGi_IPv6Gateway = None
-else:
-   spgwuSGi_IPv6Gateway = IPv6Address(function_get('spgwu-SGi-ipv6-gateway'))
+#spgwuSGi_IPv4Interface = IPv4Interface(function_get('spgwu-SGi-ipv4-interface'))
+#spgwuSGi_IPv4Gateway   = IPv4Address(function_get('spgwu-SGi-ipv4-gateway'))
+#if function_get('spgwu-SGi-ipv6-interface') == '':
+   #spgwuSGi_IPv6Interface = None
+#else:
+   #spgwuSGi_IPv6Interface = IPv6Interface(function_get('spgwu-SGi-ipv6-interface'))
+#if function_get('spgwu-SGi-ipv6-gateway') == '':
+   #spgwuSGi_IPv6Gateway = None
+#else:
+   #spgwuSGi_IPv6Gateway = IPv6Address(function_get('spgwu-SGi-ipv6-gateway'))
 
-# Prepare network configurations:
-spgwuSXab_IfName       = 'ens4'
-spgwuS1U_IfName        = 'ens5'
-spgwuSGi_IfName        = 'ens6'
+## Prepare network configurations:
+#spgwuSXab_IfName       = 'ens4'
+#spgwuS1U_IfName        = 'ens5'
+#spgwuSGi_IfName        = 'ens6'
 
-configurationSXab = vduHelper.makeInterfaceConfiguration(spgwuSXab_IfName, IPv4Interface('0.0.0.0/0'), metric=61)
-print(configurationSXab)
-configurationS1U  = vduHelper.makeInterfaceConfiguration(spgwuS1U_IfName, spgwuS1U_IPv4Interface, spgwuS1U_IPv4Gateway, metric=62)
-print(configurationS1U)
-configurationSGi  = vduHelper.makeInterfaceConfiguration(spgwuSGi_IfName, spgwuSGi_IPv4Interface, spgwuSGi_IPv4Gateway,
-                                                         spgwuSGi_IPv6Interface, spgwuSGi_IPv6Gateway,
-                                                         metric=1, pdnInterface = 'pdn')
-print(configurationSGi)
+#configurationSXab = vduHelper.makeInterfaceConfiguration(spgwuSXab_IfName, IPv4Interface('0.0.0.0/0'), metric=61)
+#vduHelper.configureInterface(spgwuSXab_IfName, configurationSXab)
+#configurationS1U  = vduHelper.makeInterfaceConfiguration(spgwuS1U_IfName, spgwuS1U_IPv4Interface, spgwuS1U_IPv4Gateway, metric=62)
+#vduHelper.configureInterface(spgwuS1U_IfName, configurationS1U)
+#configurationSGi  = vduHelper.makeInterfaceConfiguration(spgwuSGi_IfName, spgwuSGi_IPv4Interface, spgwuSGi_IPv4Gateway,
+                                                         #spgwuSGi_IPv6Interface, spgwuSGi_IPv6Gateway,
+                                                         #metric=1)
+#vduHelper.configureInterface(spgwuSGi_IfName, configurationSGi)
 
-print(vduHelper.makeInterfaceConfiguration('ens4',
-         IPv4Interface('0.0.0.0/0')))
-print(vduHelper.makeInterfaceConfiguration('dummy0:s5c',
-         IPv4Interface('172.58.58.101/24'),
-         createDummy = True))
+#vduHelper.configureInterface('ens4', vduHelper.makeInterfaceConfiguration('ens4', IPv4Interface('0.0.0.0/0')))
+#vduHelper.configureInterface('dummy0:s5c', vduHelper.makeInterfaceConfiguration('dummy0:s5c',
+                             #IPv4Interface('172.58.58.101/24'), createDummy = True))

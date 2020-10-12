@@ -133,7 +133,7 @@ class VDUHelper:
          self.sshproxy_module._run(commands)
 
       else:
-         sys.stdout.write('-----------------------------------------------------------------------------\n')
+         sys.stdout.write('# ---------------------------------------------------------------------------\n')
          sys.stdout.write('time bash -c "' + commands + '"\n')
 
          # commands = 'echo "' + commands + '"'
@@ -154,6 +154,20 @@ class VDUHelper:
          return True
 
 
+   # ###### Get IP routing rules for PDN interface ##########################
+   def makePDNRules(pdnInterface, interface, gateway):
+      rules = \
+         '\\\\tpost-up /bin/ip rule add from ' + str(interface.network) + ' lookup 1000 pref 100\\\\n' + \
+         '\\\\tpost-up /bin/ip rule add iif pdn lookup 1000 pref 100\\\\n' + \
+         '\\\\tpost-up /bin/ip route add ' + str(interface.network) + ' scope link dev ' + interfaceName + ' table 1000\\\\n' + \
+         '\\\\tpost-up /bin/ip route add default via ' + str(gateway) + ' dev ' + interfaceName + ' table 1000\\\\n' + \
+         '\\\\tpre-down /bin/ip route del default via ' + str(gateway) + ' dev ' + interfaceName + ' table 1000 || true\\\\n' + \
+         '\\\\tpre-down /bin/ip route del ' + str(interface.network) + ' scope link dev ' + interfaceName + ' table 1000 || true\\\\n' + \
+         '\\\\tpre-down /bin/ip rule del iif pdn lookup 1000 pref 100 || true\\\\n' + \
+         '\\\\tpre-down /bin/ip rule del from ' + str(interface.network) + ' lookup 1000 pref 100 || true\\\\n'
+      return rules
+
+
    # ######  Get /etc/network/interfaces setup for interface ###################
    def makeInterfaceConfiguration(self,
                                   interfaceName,
@@ -162,7 +176,6 @@ class VDUHelper:
                                   ipv6Interface = None,
                                   ipv6Gateway   = None,
                                   metric        = 1,
-                                  pdnInterface  = None,
                                   createDummy   = False):
 
       # NOTE:
@@ -172,69 +185,68 @@ class VDUHelper:
       # That is: $ => \$ ; \ => \\ ; " => \\\"
 
 
-      # ====== Dummy interface configuration ================================
-      dummyInterfaceConfiguration = ''
-      if createDummy == True:
-         dummyInterfaceName = interfaceName.split(':')
-         if len(dummyInterfaceName) > 0:
-            dummyInterfaceName = dummyInterfaceName[0]
-            dummyInterfaceConfiguration = \
-               '\\\\tpre-up ip link add ' + dummyInterfaceName + ' type dummy || true\\\\n'
-
-
-      interfaceConfiguration = 'auto ' + interfaceName + '\\\\n'
-
-      # ====== Helper function =================================================
-      def makePDNRules(pdnInterface, interface, gateway):
-         rules = \
-            '\\\\tpost-up /bin/ip rule add from ' + str(interface.network) + ' lookup 1000 pref 100\\\\n' + \
-            '\\\\tpost-up /bin/ip rule add iif pdn lookup 1000 pref 100\\\\n' + \
-            '\\\\tpost-up /bin/ip route add ' + str(interface.network) + ' scope link dev ' + interfaceName + ' table 1000\\\\n' + \
-            '\\\\tpost-up /bin/ip route add default via ' + str(gateway) + ' dev ' + interfaceName + ' table 1000\\\\n' + \
-            '\\\\tpre-down /bin/ip route del default via ' + str(gateway) + ' dev ' + interfaceName + ' table 1000 || true\\\\n' + \
-            '\\\\tpre-down /bin/ip route del ' + str(interface.network) + ' scope link dev ' + interfaceName + ' table 1000 || true\\\\n' + \
-            '\\\\tpre-down /bin/ip rule del iif pdn lookup 1000 pref 100 || true\\\\n' + \
-            '\\\\tpre-down /bin/ip rule del from ' + str(interface.network) + ' lookup 1000 pref 100 || true\\\\n'
-         return rules
-
-      # ====== IPv4 ============================================================
-      if ipv4Interface == ipaddress.IPv4Interface('0.0.0.0/0'):
-         interfaceConfiguration = interfaceConfiguration + 'iface ' + interfaceName + ' inet dhcp'
+      # ====== Create header ================================================
+      interfaceConfiguration = \
+         'network:\\\\n' + \
+         '  version: 2\\\\n' + \
+         '  renderer: networkd\\\\n'
+      if createDummy == False:
+        interfaceConfiguration = interfaceConfiguration + \
+           '  ethernets:\\\\n' + \
+           '    ' + interfaceName + ':\\\\n'
       else:
-         interfaceConfiguration = interfaceConfiguration + \
-            'iface ' + interfaceName + ' inet static\\\\n' + \
-            '\\\\taddress ' + str(ipv4Interface.ip)      + '\\\\n' + \
-            '\\\\tnetmask ' + str(ipv4Interface.netmask) + '\\\\n'
+        interfaceConfiguration = interfaceConfiguration + \
+           '  bridges:\\\\n' + \
+           '    ' + interfaceName + ':\\\\n' + \
+           '      interfaces: [ ]\\\\n'
+
+
+      # ====== Addressing ===================================================
+      if ipv4Interface == ipaddress.IPv4Interface('0.0.0.0/0'):
+         interfaceConfiguration = interfaceConfiguration + '      dhcp4: true\\\\n'
+      else:
+         interfaceConfiguration = interfaceConfiguration + '      dhcp4: false\\\\n'
+
+      if ((ipv6Interface == None) and (ipv6Interface == ipaddress.IPv6Interface('::/0'))):
+         interfaceConfiguration = interfaceConfiguration + '      dhcp6: true\\\\n'
+      else:
+         interfaceConfiguration = interfaceConfiguration + '      dhcp6: false\\\\n'
+         interfaceConfiguration = interfaceConfiguration + '      accept-ra: no\\\\n'
+
+      if ( (ipv4Interface != ipaddress.IPv4Interface('0.0.0.0/0')) or
+           ((ipv6Interface == None) and (ipv6Interface == ipaddress.IPv6Interface('::/0'))) ):
+
+         interfaceConfiguration = interfaceConfiguration + '      addresses:\\\\n'
+
+         if ipv4Interface != ipaddress.IPv4Interface('0.0.0.0/0'):
+            interfaceConfiguration = interfaceConfiguration + '        - ' + \
+               str(ipv4Interface.ip) + '/' + \
+               str(ipv4Interface.network.prefixlen) + \
+               '\\\\n'
+
+         if ((ipv6Interface == None) and (ipv6Interface == ipaddress.IPv6Interface('::/0'))):
+            interfaceConfiguration = interfaceConfiguration + '        - ' + \
+               str(ipv6Interface.ip) + '/' + \
+               str(ipv6Interface.network.prefixlen) + \
+               '\\\\n'
+
+      # ====== Routing ======================================================
+      if ( ((ipv4Gateway != None) and (ipv4Gateway != ipaddress.IPv4Address('0.0.0.0'))) or
+           ((ipv6Gateway != None) and (ipv6Gateway != ipaddress.IPv6Address('::'))) ):
+
+         interfaceConfiguration = interfaceConfiguration + '      routes:\\\\n'
+
          if ((ipv4Gateway != None) and (ipv4Gateway != ipaddress.IPv4Address('0.0.0.0'))):
             interfaceConfiguration = interfaceConfiguration + \
-               '\\\\tgateway ' + str(ipv4Gateway) + '\\\\n' + \
-               '\\\\tmetric '  + str(metric)      + '\\\\n'
-         if pdnInterface != None:
-            interfaceConfiguration = interfaceConfiguration + makePDNRules(pdnInterface, ipv4Interface, ipv4Gateway)
-      interfaceConfiguration = interfaceConfiguration + dummyInterfaceConfiguration + '\\\\n'
+                '        - to: 0.0.0.0/0\\\\n' + \
+                '          via: ' + str(ipv4Gateway) + '\\\\n' + \
+                '          metric: ' + str(metric) + '\\\\n'
 
-      # ====== IPv6 ============================================================
-      if ipv6Interface == None:
-         interfaceConfiguration = interfaceConfiguration + \
-            '\\\\niface ' + interfaceName + ' inet6 manual\\\\n' + \
-            '\\\\tautoconf 0\\\\n'
-      elif ipv6Interface == IPv6Interface('::/0'):
-         interfaceConfiguration = interfaceConfiguration + \
-            '\\\\niface ' + interfaceName + ' inet6 dhcp\\\\n' + \
-            '\\\\tautoconf 0\\\\n'
-      else:
-         interfaceConfiguration = interfaceConfiguration + \
-            '\\\\niface ' + interfaceName + ' inet6 static\\\\n' + \
-            '\\\\tautoconf 0\\\\n' + \
-            '\\\\taddress ' + str(ipv6Interface.ip)                + '\\\\n' + \
-            '\\\\tnetmask ' + str(ipv6Interface.network.prefixlen) + '\\\\n'
          if ((ipv6Gateway != None) and (ipv6Gateway != ipaddress.IPv6Address('::'))):
             interfaceConfiguration = interfaceConfiguration + \
-               '\\\\tgateway ' + str(ipv6Gateway) + '\\\\n' + \
-               '\\\\tmetric '  + str(metric)      + '\\\\n'
-         if pdnInterface != None:
-            interfaceConfiguration = interfaceConfiguration + makePDNRules(pdnInterface, ipv6Interface, ipv6Gateway)
-      interfaceConfiguration = interfaceConfiguration + dummyInterfaceConfiguration
+                '        - to: ::/0\\\\n' + \
+                '          via: ' + str(ipv6Gateway) + '\\\\n' + \
+                '          metric: ' + str(metric) + '\\\\n'
 
       return interfaceConfiguration
 
@@ -245,7 +257,7 @@ class VDUHelper:
 
       try:
          commands = """\
-echo -e \\\"{interfaceConfiguration}\\\" | sudo tee /etc/network/interfaces.d/{priority}-{interfaceName} && sudo ifup {interfaceName} || true""".format(
+echo -e \\\"{interfaceConfiguration}\\\" | sudo tee /etc/netplan/{interfaceName}.yaml && sudo netplan apply || true""".format(
             interfaceName          = interfaceName,
             interfaceConfiguration = interfaceConfiguration,
             priority               = priority
