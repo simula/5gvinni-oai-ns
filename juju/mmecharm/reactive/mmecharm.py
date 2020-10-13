@@ -182,7 +182,7 @@ def configure_mme():
       mmeS6a_IfName = 'ens4'
       mmeS11_IfName = 'ens5'
       mmeS1C_IfName = 'ens6'
-      mmeS10_IfName = 'dummy0:m10'
+      mmeS10_IfName = 'dummy0'
 
       # ====== Build MME dependencies =======================================
       vduHelper.beginBlock('Building MME dependencies')
