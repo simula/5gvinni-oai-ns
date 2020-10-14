@@ -357,13 +357,17 @@ echo \\\"{interfaceConfiguration}\\\" | base64 -d | sudo tee /etc/netplan/{inter
    def waitForPackageUpdatesToComplete(self):
       self.beginBlock('Waiting for package management to complete all running tasks ...')
 
-      # Based on https://gist.github.com/tedivm/e11ebfdc25dc1d7935a3d5640a1f1c90
+      # Partly based on https://gist.github.com/tedivm/e11ebfdc25dc1d7935a3d5640a1f1c90
       commands = """\
 while sudo fuser /var/lib/dpkg/lock >/dev/null 2>&1 ; do sleep 1 ; done ; \\
 while sudo fuser /var/lib/apt/lists/lock >/dev/null 2>&1 ; do sleep 1 ; done ; \\
+while sudo fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1 ; do sleep 1 ; done ; \\
 if [ -f /var/log/unattended-upgrades/unattended-upgrades.log ]; then \\
    while sudo fuser /var/log/unattended-upgrades/unattended-upgrades.log >/dev/null 2>&1 ; do sleep 1 ; done ; \\
-fi"""
+fi ; \\
+sudo apt update || true; \\
+DEBIAN_FRONTEND=noninteractive sudo apt dist-upgrade -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef || true
+"""
       try:
          self.runInShell(commands)
       except:
