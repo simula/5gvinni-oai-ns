@@ -42,8 +42,10 @@ additionalParamsForVnf:
       network_users: '1024'
 
       # ====== MME ==========================================================
-      mme_git_repository: 'https://github.com/simula/openairinterface-openair-mme.git'
-      mme_git_commit: '2020.w36'
+      # mme_git_repository: 'https://github.com/simula/openairinterface-openair-mme.git'
+      # mme_git_commit: '2020.w36'
+      mme_git_repository: 'https://github.com/simula/openairinterface-openair-cn.git'
+      mme_git_commit: '2020.w13'
       mme_S1C_ipv4_interface: '192.168.247.102/24'
       mme_S1C_ipv4_gateway: '0.0.0.0'
       mme_S1C_ipv6_interface: ''
