@@ -357,14 +357,19 @@ echo \\\"{interfaceConfiguration}\\\" | base64 -d | sudo tee /etc/netplan/{inter
    def waitForPackageUpdatesToComplete(self):
       self.beginBlock('Waiting for package management to complete all running tasks ...')
 
-      # Partly based on https://askubuntu.com/questions/132059/how-to-make-a-package-manager-wait-if-another-instance-of-apt-is-running/373478#373478
-      commands = """\
-sudo apt update || true ; \\
-DEBIAN_FRONTEND=noninteractive sudo apt upgrade -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef || true ; \\
-while sudo fuser /var/{lib/{dpkg,apt/lists},cache/apt/archives}/lock >/dev/null 2>&1; do sleep 1 ; done ; \\
-sudo apt update || true; \\
-DEBIAN_FRONTEND=noninteractive sudo apt upgrade -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef || true
-"""
+#      # Partly based on https://askubuntu.com/questions/132059/how-to-make-a-package-manager-wait-if-another-instance-of-apt-is-running/373478#373478
+#      commands = """\
+#sudo apt update || true ; \\
+#DEBIAN_FRONTEND=noninteractive sudo apt upgrade -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef || true ; \\
+#while sudo fuser /var/{lib/{dpkg,apt/lists},cache/apt/archives}/lock >/dev/null 2>&1; do sleep 1 ; done ; \\
+#sudo apt update || true; \\
+#DEBIAN_FRONTEND=noninteractive sudo apt upgrade -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef || true
+#"""
+
+      # Trying the most straightforward solution: explicitly calling the
+      # updater script, to make sure it finishes!
+      commands = "sudo /usr/lib/apt/apt.systemd.daily"
+
       try:
          self.runInShell(commands)
       except:
