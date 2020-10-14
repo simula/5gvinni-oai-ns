@@ -1,0 +1,3 @@
+#!/bin/sh
+
+juju show-action-status |grep -B3 -A2 fail
