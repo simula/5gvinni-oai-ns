@@ -88,7 +88,7 @@ def prepare_spgwu_build():
 
       gitRepository          = function_get('spgwu-git-repository')
       gitCommit              = function_get('spgwu-git-commit')
-      gitDirectory           = 'openair-cn-cups'
+      gitDirectory           = 'openair-spgwu-tiny'
 
       spgwuS1U_IPv4Interface = IPv4Interface(function_get('spgwu-S1U-ipv4-interface'))
       spgwuS1U_IPv4Gateway   = IPv4Address(function_get('spgwu-S1U-ipv4-gateway'))
@@ -152,9 +152,7 @@ def configure_spgwu():
       # For a documentation of the installation procedure, see:
       # https://github.com/OPENAIRINTERFACE/openair-cn-cups/wiki/OpenAirSoftwareSupport#install-spgw-u
 
-      gitRepository    = 'https://github.com/OPENAIRINTERFACE/openair-cn-cups.git'
-      gitDirectory     = 'openair-cn-cups'
-      gitCommit        = 'develop'
+      gitDirectory     = 'openair-spgwu-tiny'
 
       spgwuSXab_IfName = 'ens4'
       spgwuS1U_IfName  = 'ens5'
@@ -209,10 +207,8 @@ SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_S1U_S12_S4_UP@]='{spgwuS1U_IfName}' && \\
 SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_SX@]='{spgwuSXab_IfName}' && \\
 SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_SGI@]='{spgwuSGi_IfName}' && \\
 for K in \\\"\${{!SPGWU_CONF[@]}}\\\"; do sudo egrep -lRZ \\\"\$K\\\" \$PREFIX | xargs -0 -l sudo sed -i -e \\\"s|\$K|\${{SPGWU_CONF[\$K]}}|g\\\" ; ret=\$?;[[ ret -ne 0 ]] && echo \\\"Tried to replace \$K with \${{SPGWU_CONF[\$K]}}\\\" || true ; done && \\
-sudo sed -e \\\"s/{{.*IPV4_ADDRESS=\\\\\\"192.168.160.100\\\\\\".*;.*}}/{spgwcList}/g\\\" -i /usr/local/etc/oai/spgw_u.conf""".format(
-         gitRepository     = gitRepository,
+sudo sed -e \\\"s/{{.*IPV4_ADDRESS=\\\\\\"192.168.160.100|\\\\\\".*;.*}}\|{{.*IPV4_ADDRESS=\\\\\\"@SPGWC0_IP_ADDRESS@\\\\\\".*;.*}}/{spgwcList}/g\\\" -i /usr/local/etc/oai/spgw_u.conf""".format(
          gitDirectory      = gitDirectory,
-         gitCommit         = gitCommit,
          spgwuSXab_IfName  = spgwuSXab_IfName,
          spgwuS1U_IfName   = spgwuS1U_IfName,
          spgwuSGi_IfName   = spgwuSGi_IfName,
