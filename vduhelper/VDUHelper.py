@@ -420,16 +420,16 @@ class VDUHelper:
             commands = 'sudo apt update && \\\n'
          else:
             commands = ''
-         commands = commands + 'DEBIAN_FRONTEND=noninteractive sudo apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends '
+         commands = commands + 'DEBIAN_FRONTEND=noninteractive sudo apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends'
          for package in packages:
-            commands = commands + package
+            commands = commands + ' ' + package
          self.runInShell(commands)
 
 
    # ###### Configure System-Info banner ####################################
    def configureSystemInfo(self, banner, information):
       self.beginBlock('Configuring System-Info')
-      self.aptInstallPackages('td-system-info figlet', False)
+      self.aptInstallPackages(['td-system-info', 'figlet'], False)
       self.createFileFromString('/etc/system-info.d/90-vduhelper',
 """
 #!/bin/bash -e
