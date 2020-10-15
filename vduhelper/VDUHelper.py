@@ -338,6 +338,18 @@ class VDUHelper:
       self.endBlock()
 
 
+   # ###### Execute command-line from string ################################
+   def executeFromString(self, commandLineString):
+      commandLineBase64 = self.makeBase64(commandLineString)
+      try:
+         commands = 'echo \\\"{commandLineBase64}\\\" | base64 -d | /bin/bash -x'.format(
+                       commandLineBase64 = commandLineBase64)
+         self.runInShell(commands)
+      except:
+         self.endBlock(False)
+         raise
+
+
    # ###### Test networking #################################################
    def testNetworking(self, destination = ipaddress.IPv4Address('8.8.8.8'), timeout = 60, interval = 0.333):
       self.beginBlock('Testing networking')

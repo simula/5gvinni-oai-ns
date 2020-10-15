@@ -150,7 +150,6 @@ def configure_flexran():
       # https://gitlab.eurecom.fr/mosaic5g/mosaic5g/-/wikis/tutorials/slicing
 
       gitDirectory = 'mosaic5g'
-      #networkUsers       = int(function_get('network-users'))
 
       # ====== Build FlexRAN ================================================
       vduHelper.beginBlock('Building FlexRAN itself')
@@ -175,26 +174,30 @@ cd /home/nornetpp/src/{gitDirectory}/flexran""".format(
 
       # ====== Set up FlexRAN service ===========================================
       vduHelper.beginBlock('Setting up FlexRAN service')
-      commands = """\
-( echo \\\"[Unit]\\\" && \\
-echo \\\"Description=FlexRAN Controller\\\" && \\
-echo \\\"After=ssh.target\\\" && \\
-echo \\\"\\\" && \\
-echo \\\"[Service]\\\" && \\
-echo \\\"ExecStart=/bin/sh -c \\\'exec /usr/bin/env FLEXRAN_RTC_HOME=/home/nornetpp/src/mosaic5g/flexran FLEXRAN_RTC_EXEC=/home/nornetpp/src/mosaic5g/flexran/build ./build/rt_controller -c log_config/basic_log >>/var/log/flexran.log 2>&1\\\'\\\" && \\
-echo \\\"KillMode=process\\\" && \\
-echo \\\"Restart=on-failure\\\" && \\
-echo \\\"RestartPreventExitStatus=255\\\" && \\
-echo \\\"WorkingDirectory=/home/nornetpp/src/mosaic5g/flexran\\\" && \\
-echo \\\"\\\" && \\
-echo \\\"[Install]\\\" && \\
-echo \\\"WantedBy=multi-user.target\\\" ) | sudo tee /lib/systemd/system/flexran.service && \\
-sudo systemctl daemon-reload && \\
-( echo -e \\\"#\\x21/bin/sh\\\" && echo \\\"tail -f /var/log/flexran.log\\\" ) | tee /home/nornetpp/log && \\
-chmod +x /home/nornetpp/log && \\
-( echo -e \\\"#\\x21/bin/sh\\\" && echo \\\"sudo service flexran restart && ./log\\\" ) | tee /home/nornetpp/restart && \\
-chmod +x /home/nornetpp/restart"""
-      vduHelper.runInShell(commands)
+      vduHelper.createFileFromString('/lib/systemd/system/flexran.service',
+"""[Unit]
+Description=FlexRAN Controller
+After=ssh.target
+
+[Service]
+ExecStart=/bin/sh -c 'exec /usr/bin/env FLEXRAN_RTC_HOME=/home/nornetpp/src/mosaic5g/flexran FLEXRAN_RTC_EXEC=/home/nornetpp/src/mosaic5g/flexran/build ./build/rt_controller -c log_config/basic_log >>/var/log/flexran.log 2>&1'
+KillMode=process
+Restart=on-failure
+RestartPreventExitStatus=255
+WorkingDirectory=/home/nornetpp/src/mosaic5g/flexran
+
+[Install]
+WantedBy=multi-user.target""")
+
+      vduHelper.createFileFromString('/home/nornetpp/log',
+"""#!/bin/sh
+tail -f /var/log/flexran.log""", True)
+
+      vduHelper.createFileFromString('/home/nornetpp/restart',
+"""#!/bin/sh
+DIRECTORY=`dirname $0`
+sudo service flexran restart && $DIRECTORY/log
+""", True)
       vduHelper.endBlock()
 
       # ====== Set up sysstat service =======================================
