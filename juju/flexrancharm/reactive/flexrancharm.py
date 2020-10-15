@@ -181,14 +181,14 @@ Description=FlexRAN Controller
 After=ssh.target
 
 [Service]
-ExecStart=/bin/sh -c 'exec /usr/bin/env FLEXRAN_RTC_HOME=/home/nornetpp/src/mosaic5g/flexran FLEXRAN_RTC_EXEC=/home/nornetpp/src/mosaic5g/flexran/build ./build/rt_controller -c log_config/basic_log >>/var/log/flexran.log 2>&1'
+ExecStart=/bin/sh -c 'exec /usr/bin/env FLEXRAN_RTC_HOME=/home/nornetpp/src/{gitDirectory}/flexran FLEXRAN_RTC_EXEC=/home/nornetpp/src/{gitDirectory}/flexran/build ./build/rt_controller -c log_config/basic_log >>/var/log/flexran.log 2>&1'
 KillMode=process
 Restart=on-failure
 RestartPreventExitStatus=255
-WorkingDirectory=/home/nornetpp/src/mosaic5g/flexran
+WorkingDirectory=/home/nornetpp/src/{gitDirectory}/flexran
 
 [Install]
-WantedBy=multi-user.target""")
+WantedBy=multi-user.target""".format(gitDirectory = gitDirectory))
 
       vduHelper.createFileFromString('/home/nornetpp/log',
 """#!/bin/sh
@@ -197,8 +197,7 @@ tail -f /var/log/flexran.log""", True)
       vduHelper.createFileFromString('/home/nornetpp/restart',
 """#!/bin/sh
 DIRECTORY=`dirname $0`
-sudo service flexran restart && $DIRECTORY/log
-""", True)
+sudo service flexran restart && $DIRECTORY/log""", True)
       vduHelper.endBlock()
 
       # ====== Set up sysstat service =======================================

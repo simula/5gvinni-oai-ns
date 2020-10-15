@@ -429,7 +429,7 @@ class VDUHelper:
    # ###### Configure System-Info banner ####################################
    def configureSystemInfo(self, banner, information):
       self.beginBlock('Configuring System-Info')
-      self.aptInstallPackages(['td-system-info', 'figlet'], False)
+      self.aptInstallPackages([ 'td-system-info', 'figlet' ], False)
       self.createFileFromString('/etc/system-info.d/90-vduhelper',
 """
 #!/bin/bash -e
@@ -493,7 +493,7 @@ exit 1   # With exit code 1, no further files in /etc/system-info.d are processe
    # ###### Install SysStat #################################################
    def installSysStat(self):
       self.beginBlock('Setting up sysstat service')
-      self.aptInstallPackages('sysstat', False)
+      self.aptInstallPackages([ 'sysstat' ], False)
       self.executeFromString("""\
 sudo sed -e "s/^ENABLED=.*$/ENABLED=\\"true\\"/g" -i /etc/default/sysstat && \\
 sudo sed -e "s/^SADC_OPTIONS=.*$/SADC_OPTIONS=\\"-S ALL\\"/g" -i /etc/sysstat/sysstat && \\
