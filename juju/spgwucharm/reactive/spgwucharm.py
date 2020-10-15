@@ -121,7 +121,7 @@ def prepare_spgwu_build():
       vduHelper.configureInterface(spgwuSXab_IfName, configurationSXab, 61)
       vduHelper.configureInterface(spgwuS1U_IfName,  configurationS1U,  62)
       vduHelper.configureInterface(spgwuSGi_IfName,  configurationSGi,  63)
-      vduHelper.testNetworking('8.8.8.8')
+      vduHelper.testNetworking()
       vduHelper.waitForPackageUpdatesToComplete()
       vduHelper.endBlock()
 
@@ -231,6 +231,7 @@ ROUTER_INTERFACE_RIGHT=pdn""")
 
       # ====== Set up SPGW-U service ========================================
       vduHelper.beginBlock('Setting up SPGW-U service')
+      vduHelper.configureSystemInfo('SPGW-U', 'This is the SPGW-U of the SimulaMet OAI VNF!')
       commands = """\
 ( echo \\\"[Unit]\\\" && \\
 echo \\\"Description=Serving and Packet Data Network Gateway -- User Plane (SPGW-U)\\\" && \\

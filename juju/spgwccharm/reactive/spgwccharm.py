@@ -88,7 +88,7 @@ def prepare_spgwc_build():
 
       gitRepository     = function_get('spgwc-git-repository')
       gitCommit         = function_get('spgwc-git-commit')
-      gitDirectory      = 'openair-cn-cups'
+      gitDirectory      = 'openair-spgwc'
 
       # Prepare network configurations:
       spgwcS11_IfName   = 'ens5'
@@ -108,7 +108,7 @@ def prepare_spgwc_build():
       vduHelper.configureInterface(spgwcSXab_IfName,      configurationSXab,      62)
       vduHelper.configureInterface(spgwcS5S8_SGW_IfName,  configurationS5S8_SGW,  63)
       vduHelper.configureInterface(spgwcS5S8_PGW_IfName,  configurationS5S8_PGW,  64)
-      vduHelper.testNetworking('8.8.8.8')
+      vduHelper.testNetworking()
       vduHelper.waitForPackageUpdatesToComplete()
       vduHelper.endBlock()
 
@@ -139,7 +139,7 @@ def configure_spgwc():
       # For a documentation of the installation procedure, see:
       # https://github.com/OPENAIRINTERFACE/openair-cn-cups/wiki/OpenAirSoftwareSupport#install-spgw-c
 
-      gitDirectory         = 'openair-cn-cups'
+      gitDirectory         = 'openair-spgwc'
 
       networkRealm         = function_get('network-realm')
       networkDNS1_IPv4     = IPv4Address(function_get('network-ipv4-dns1'))
@@ -206,6 +206,7 @@ sudo sed -e \\\"s/APN_NI = \\\\\\"apn1\\\\\\"/APN_NI = \\\\\\"internet.{networkR
 
       # ====== Set up SPGW-C service ========================================
       vduHelper.beginBlock('Setting up SPGW-C service')
+      vduHelper.configureSystemInfo('SPGW-C', 'This is the SPGW-C of the SimulaMet OAI VNF!')
       commands = """\
 ( echo \\\"[Unit]\\\" && \\
 echo \\\"Description=Serving and Packet Data Network Gateway -- Control Plane (SPGW-C)\\\" && \\

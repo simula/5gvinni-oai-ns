@@ -1077,6 +1077,7 @@ ROUTER_INTERFACE_RIGHT=pdn""")
 
       # ====== Set up SPGW-U service ========================================
       vduHelper.beginBlock('Setting up SPGW-U service')
+      vduHelper.configureSystemInfo('SPGW-U', 'This is the SPGW-U of the SimulaMet OAI VNF!')
       commands = """\
 ( echo \\\"[Unit]\\\" && \\
 echo \\\"Description=Serving and Packet Data Network Gateway -- User Plane (SPGW-U)\\\" && \\
@@ -1184,6 +1185,7 @@ def prepare_flexran_build():
       vduHelper.beginBlock('Preparing system')
       vduHelper.configureInterface(flexranService_IfName, configurationService, 61)
       vduHelper.testNetworking('8.8.8.8')
+      vduHelper.waitForPackageUpdatesToComplete()
       vduHelper.endBlock()
 
       # ====== Prepare sources ==============================================
@@ -1245,6 +1247,7 @@ cd /home/nornetpp/src/{gitDirectory}/flexran""".format(
 
       # ====== Set up FlexRAN service ===========================================
       vduHelper.beginBlock('Setting up FlexRAN service')
+      vduHelper.configureSystemInfo('FlexRAN Controller', 'This is the FlexRAN Controller of the SimulaMet FlexRAN VNF!')
       vduHelper.createFileFromString('/lib/systemd/system/flexran.service',
 """[Unit]
 Description=FlexRAN Controller

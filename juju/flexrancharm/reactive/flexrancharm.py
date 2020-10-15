@@ -111,7 +111,7 @@ def prepare_flexran_build():
       # ====== Prepare system ===============================================
       vduHelper.beginBlock('Preparing system')
       vduHelper.configureInterface(flexranService_IfName, configurationService, 61)
-      vduHelper.testNetworking('8.8.8.8')
+      vduHelper.testNetworking()
       vduHelper.waitForPackageUpdatesToComplete()
       vduHelper.endBlock()
 
@@ -174,6 +174,7 @@ cd /home/nornetpp/src/{gitDirectory}/flexran""".format(
 
       # ====== Set up FlexRAN service ===========================================
       vduHelper.beginBlock('Setting up FlexRAN service')
+      vduHelper.configureSystemInfo('FlexRAN Controller', 'This is the FlexRAN Controller of the SimulaMet FlexRAN VNF!')
       vduHelper.createFileFromString('/lib/systemd/system/flexran.service',
 """[Unit]
 Description=FlexRAN Controller

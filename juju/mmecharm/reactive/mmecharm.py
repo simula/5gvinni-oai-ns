@@ -88,7 +88,7 @@ def prepare_mme_build():
 
       gitRepository        = function_get('mme-git-repository')
       gitCommit            = function_get('mme-git-commit')
-      gitDirectory         = 'openair-cn'
+      gitDirectory         = 'openair-mme'
 
       mmeS1C_IPv4Interface = IPv4Interface(function_get('mme-S1C-ipv4-interface'))
       mmeS1C_IPv4Gateway   = IPv4Address(function_get('mme-S1C-ipv4-gateway'))
@@ -121,7 +121,7 @@ def prepare_mme_build():
       vduHelper.configureInterface(mmeS11_IfName, configurationS11, 62)
       vduHelper.configureInterface(mmeS1C_IfName, configurationS1C, 63)
       vduHelper.configureInterface(mmeS10_IfName, configurationS10, 64)
-      vduHelper.testNetworking('8.8.8.8')
+      vduHelper.testNetworking()
       vduHelper.waitForPackageUpdatesToComplete()
       vduHelper.endBlock()
 
@@ -152,7 +152,7 @@ def configure_mme():
       # For a documentation of the installation procedure, see:
       # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-mme
 
-      gitDirectory           = 'openair-cn'
+      gitDirectory           = 'openair-mme'
 
       hssS6a_IPv4Address     = IPv4Address(function_get('hss-S6a-address'))
       mmeS1C_IPv4Interface   = IPv4Interface(function_get('mme-S1C-ipv4-interface'))
@@ -294,6 +294,7 @@ sudo ./check_mme_s6a_certificate \$PREFIX/freeDiameter mme.{networkRealm} >logs/
 
       # ====== Set up MME service ===========================================
       vduHelper.beginBlock('Setting up MME service')
+      vduHelper.configureSystemInfo('MME', 'This is the MME of the SimulaMet OAI VNF!')
       commands = """\
 ( echo \\\"[Unit]\\\" && \\
 echo \\\"Description=Mobility Management Entity (MME)\\\" && \\

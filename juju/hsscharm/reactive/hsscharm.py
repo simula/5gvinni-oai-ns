@@ -89,7 +89,7 @@ def prepare_cassandra_hss_build():
 
       gitRepository = function_get('hss-git-repository')
       gitCommit     = function_get('hss-git-commit')
-      gitDirectory  = 'openair-cn'
+      gitDirectory  = 'openair-hss'
 
       # Prepare network configuration:
       hssS6a_IfName    = 'ens4'
@@ -98,7 +98,7 @@ def prepare_cassandra_hss_build():
       # ====== Prepare system ===============================================
       vduHelper.beginBlock('Preparing system')
       vduHelper.configureInterface(hssS6a_IfName, configurationS6a, 61)
-      vduHelper.testNetworking('8.8.8.8')
+      vduHelper.testNetworking()
       vduHelper.waitForPackageUpdatesToComplete()
       commands = "if [ \\\"`find /etc/apt/sources.list.d -name 'rmescandon-ubuntu-yq-*.list'`\\\" == \\\"\\\" ] ; then sudo add-apt-repository -y ppa:rmescandon/yq ; fi"
       vduHelper.runInShell(commands)
@@ -132,7 +132,7 @@ def configure_cassandra():
       # For a documentation of the installation procedure, see:
       # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
 
-      gitDirectory      = 'openair-cn'
+      gitDirectory      = 'openair-hss'
       cassandraServerIP = function_get('cassandra-server-ip')
 
       # NOTE:
@@ -202,7 +202,7 @@ def configure_hss():
       # For a documentation of the installation procedure, see:
       # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
 
-      gitDirectory       = 'openair-cn'
+      gitDirectory       = 'openair-hss'
       cassandraServerIP  = function_get('cassandra-server-ip')
       networkRealm       = function_get('network-realm')
       networkOP          = function_get('network-op')
@@ -299,6 +299,7 @@ oai_hss -j \$PREFIX/hss_rel14.json --onlyloadkey >logs/onlyloadkey.log 2>&1""".f
 
       # ====== Set up HSS service ===========================================
       vduHelper.beginBlock('Setting up HSS service')
+      vduHelper.configureSystemInfo('HSS', 'This is the HSS of the SimulaMet OAI VNF!')
       commands = """\
 ( echo \\\"[Unit]\\\" && \\
 echo \\\"Description=Home Subscriber Server (HSS)\\\" && \\
