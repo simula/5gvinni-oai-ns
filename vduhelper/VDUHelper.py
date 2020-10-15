@@ -251,11 +251,7 @@ class VDUHelper:
          if ((pdnInterface != None) and (len(networks) > 0) and (len(gateways) > 0)):
             postUpRules, preDownRules = self.makeRoutingRules(pdnInterface, interfaceName, networks, gateways)
 
-      print(interfaceConfiguration)
-
-      return [ self.makeBase64(interfaceConfiguration),
-               self.makeBase64(postUpRules),
-               self.makeBase64(preDownRules) ]
+      return [ interfaceConfiguration, postUpRules, preDownRules ]
 
 
    # ###### Get IP routing rules for PDN interface ##########################
@@ -304,29 +300,36 @@ class VDUHelper:
       self.beginBlock('Configuring and activating ' + interfaceName)
 
       try:
-         commands = ''
          if interfaceConfiguration[1] != None:
-            commands = commands + """\
-echo \\\"{postUpRules}\\\" | base64 -d | sudo tee /etc/networkd-dispatcher/routable.d/{priority}-{interfaceName} && sudo chmod +x /etc/networkd-dispatcher/routable.d/{priority}-{interfaceName} ; """ .format(
-               interfaceName = interfaceName,
-               postUpRules   = interfaceConfiguration[1],
-               priority      = priority
-            )
+            self.createFileFromString('/etc/networkd-dispatcher/routable.d/{priority}-{interfaceName}'.format(
+                                         interfaceName = interfaceName, priority = priority),
+                                      interfaceConfiguration[1], True)
 
          if interfaceConfiguration[2] != None:
-            commands = commands + """\
-echo \\\"{preDownRules}\\\" | base64 -d | sudo tee /etc/networkd-dispatcher/off.d/{priority}-{interfaceName} && sudo chmod +x /etc/networkd-dispatcher/off.d/{priority}-{interfaceName} ; """ .format(
-               interfaceName = interfaceName,
-               preDownRules  = interfaceConfiguration[2],
-               priority      = priority
-            )
+            self.createFileFromString('/etc/networkd-dispatcher/off.d/{priority}-{interfaceName}'.format(
+                                         interfaceName = interfaceName, priority = priority),
+                                      interfaceConfiguration[2], True)
 
-         commands = commands + """\
-echo \\\"{interfaceConfiguration}\\\" | base64 -d | sudo tee /etc/netplan/{interfaceName}.yaml && sudo netplan apply || true""".format(
-            interfaceName          = interfaceName,
-            interfaceConfiguration = interfaceConfiguration[0],
-            priority               = priority
-         )
+         self.createFileFromString('/etc/netplan/{interfaceName}.yaml'.format(interfaceName = interfaceName),
+                                   interfaceConfiguration[0])
+         self.runInShell('sudo netplan apply')
+      except:
+         self.endBlock(False)
+         raise
+
+      self.endBlock()
+
+
+   # ###### Store string into file ##########################################
+   def createFileFromString(self, fileName, contentString, makeExecutable = False):
+      self.beginBlock('Creating file ' + fileName)
+
+      contentBase64 = self.makeBase64(contentString)
+      try:
+         commands = 'echo \\\"{contentBase64}\\\" | base64 -d | sudo tee {fileName}'.format(
+                       fileName = fileName, contentBase64 = contentBase64)
+         if makeExecutable == False:
+            commands = commands + ' && \\\nsudo chmod +x {fileName}'.format(fileName = fileName)
          self.runInShell(commands)
       except:
          self.endBlock(False)
@@ -356,15 +359,6 @@ echo \\\"{interfaceConfiguration}\\\" | base64 -d | sudo tee /etc/netplan/{inter
    # ###### Wait for all package updates to complete ########################
    def waitForPackageUpdatesToComplete(self):
       self.beginBlock('Waiting for package management to complete all running tasks ...')
-
-#      # Partly based on https://askubuntu.com/questions/132059/how-to-make-a-package-manager-wait-if-another-instance-of-apt-is-running/373478#373478
-#      commands = """\
-#sudo apt update || true ; \\
-#DEBIAN_FRONTEND=noninteractive sudo apt upgrade -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef || true ; \\
-#while sudo fuser /var/{lib/{dpkg,apt/lists},cache/apt/archives}/lock >/dev/null 2>&1; do sleep 1 ; done ; \\
-#sudo apt update || true; \\
-#DEBIAN_FRONTEND=noninteractive sudo apt upgrade -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef || true
-#"""
 
       # Trying the most straightforward solution: explicitly calling the
       # updater script, to make sure it finishes!
