@@ -355,7 +355,7 @@ class VDUHelper:
       self.beginBlock('Testing networking')
 
       try:
-         commands = """ping -W{timeout}  -i{interval} -c3 {destination}""".format(
+         commands = 'ping -W{timeout}  -i{interval} -c3 {destination}'.format(
             destination = str(destination),
             timeout     = timeout,
             interval    = interval
@@ -399,12 +399,11 @@ class VDUHelper:
    # ###### Install SysStat #################################################
    def installSysStat(self):
       self.beginBlock('Setting up sysstat service')
-      commands = """\
+      self.executeFromString("""\
 DEBIAN_FRONTEND=noninteractive sudo apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends sysstat && \\
-sudo sed -e \\\"s/^ENABLED=.*$/ENABLED=\\\\\\"true\\\\\\"/g\\\" -i /etc/default/sysstat && \\
-sudo sed -e \\\"s/^SADC_OPTIONS=.*$/SADC_OPTIONS=\\\\\\"-S ALL\\\\\\"/g\\\" -i /etc/sysstat/sysstat && \\
-sudo service sysstat restart"""
-      self.runInShell(commands)
+sudo sed -e "s/^ENABLED=.*$/ENABLED=\\"true\\"/g" -i /etc/default/sysstat && \\
+sudo sed -e "s/^SADC_OPTIONS=.*$/SADC_OPTIONS=\\"-S ALL\\"/g" -i /etc/sysstat/sysstat && \\
+sudo service sysstat restart""")
       self.endBlock()
 
 
@@ -432,7 +431,6 @@ git checkout {gitCommit}""".format(
    # ###### Clean up ########################################################
    def cleanUp(self):
       self.beginBlock('Cleaning up')
-      commands = """\
-sudo updatedb"""
+      commands = """sudo updatedb"""
       self.runInShell(commands)
       self.endBlock()
