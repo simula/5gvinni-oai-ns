@@ -426,11 +426,75 @@ class VDUHelper:
          self.runInShell(commands)
 
 
+   # ###### Configure System-Info banner ####################################
+   def configureSystemInfo(self, banner, information):
+      self.beginBlock('Configuring System-Info')
+      self.aptInstallPackages('td-system-info figlet', False)
+      self.createFileFromString('/etc/system-info.d/90-vduhelper',
+"""
+#!/bin/bash -e
+
+# ###### Center text in console #############################################
+center ()
+{{
+   local text="$1"
+   local length=${{#text}}
+   local width=`tput cols`   # Console width
+
+   let indent=(${{width}} - ${{length}})/2
+   if [ ${{indent}} -lt 0 ] ; then
+      indent=0
+   fi
+   printf "%${{indent}}s%s\n" "" "${{text}}"
+}}
+
+
+# ###### Print centered separator in console ################################
+separator ()
+{{
+   local separatorCharacter="="
+   local separator=""
+   local width=`tput cols`   # Console width
+   local separatorWidth
+
+   let separatorWidth=${{width}}-4
+   local i=0
+   while [ $i -lt ${{separatorWidth}} ] ; do
+      separator="${{separator}}${{separatorCharacter}}"
+      let i=$i+1
+   done
+   center "<${{separator}}>"
+}}
+
+
+# ====== Print banner =======================================================
+
+# NOTE:
+# You can produce ASCII text banners with "sysvbanner".
+# More advanced, UTF-8-capable tools are e.g. figlet and toilet.
+
+echo -en "\x1b[1;34m"
+separator
+echo -en "\x1b[1;31m"
+figlet -w`tput cols` -c "{banner}"
+echo -en "\x1b[1;34m"
+# echo ""
+center "{information}"
+separator
+echo -e "\x1b[0m"
+
+exit 1   # With exit code 1, no further files in /etc/system-info.d are processed!
+
+# Use exit code 0 to process further files!
+""".format(banner = banner, information = information), True)
+      self.endBlock()
+
+
    # ###### Install SysStat #################################################
    def installSysStat(self):
       self.beginBlock('Setting up sysstat service')
+      self.aptInstallPackages('sysstat', False)
       self.executeFromString("""\
-DEBIAN_FRONTEND=noninteractive sudo apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends sysstat && \\
 sudo sed -e "s/^ENABLED=.*$/ENABLED=\\"true\\"/g" -i /etc/default/sysstat && \\
 sudo sed -e "s/^SADC_OPTIONS=.*$/SADC_OPTIONS=\\"-S ALL\\"/g" -i /etc/sysstat/sysstat && \\
 sudo service sysstat restart""")
