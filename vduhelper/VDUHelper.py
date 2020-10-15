@@ -360,12 +360,10 @@ class VDUHelper:
    def waitForPackageUpdatesToComplete(self):
       self.beginBlock('Waiting for package management to complete all running tasks ...')
 
-      # Trying the most straightforward solution: explicitly calling the
-      # updater script, to make sure it finishes!
-      commands = "sudo /usr/lib/apt/apt.systemd.daily"
-
       try:
-         self.runInShell(commands)
+         # Trying the most straightforward solution: explicitly calling the
+         # updater script, to make sure it finishes!
+         self.runInShell('sudo /usr/lib/apt/apt.systemd.daily')
       except:
          self.endBlock(False)
          raise
