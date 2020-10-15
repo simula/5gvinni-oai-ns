@@ -358,7 +358,7 @@ class VDUHelper:
       try:
          commands = 'echo \\\"{contentBase64}\\\" | base64 -d | sudo tee {fileName}'.format(
                        fileName = fileName, contentBase64 = contentBase64)
-         if makeExecutable == False:
+         if makeExecutable == True:
             commands = commands + ' && \\\nsudo chmod +x {fileName}'.format(fileName = fileName)
          self.runInShell(commands)
       except:

@@ -218,6 +218,17 @@ sudo sed -e \\\"s/{{.*IPV4_ADDRESS=\\\\\\"192.168.160.100|\\\\\\".*;.*}}\|{{.*IP
       vduHelper.endBlock()
 
 
+      # ====== Configure HENCSAT QoS Setup ==================================
+      vduHelper.beginBlock('Configuring QoS Setup')
+      vduHelper.createFileFromString('/etc/hencsat/hencsat-router.conf',
+"""# HENCSAT Router Configuration
+
+ROUTER_INTERFACE_LEFT=ens6
+ROUTER_INTERFACE_RIGHT=pdn""")
+      vduHelper.aptInstallPackages('hencsat-router', False)
+      vduHelper.endBlock()
+
+
       # ====== Set up SPGW-U service ========================================
       vduHelper.beginBlock('Setting up SPGW-U service')
       commands = """\
