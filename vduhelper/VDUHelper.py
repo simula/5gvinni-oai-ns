@@ -117,7 +117,7 @@ class VDUHelper:
       self.beginBlock('Touch ' + fileName)
 
       try:
-         commands = """touch {}""".format(fileName)
+         commands = 'touch {}'.format(fileName)
          self.runInShell(commands)
       except:
          self.endBlock(False)
@@ -153,6 +153,36 @@ class VDUHelper:
          return False
       else:
          return True
+
+
+   # ###### Store string into file ##########################################
+   def createFileFromString(self, fileName, contentString, makeExecutable = False):
+      self.beginBlock('Creating file ' + fileName)
+
+      contentBase64 = self.makeBase64(contentString)
+      try:
+         commands = 'echo \\\"{contentBase64}\\\" | base64 -d | sudo tee {fileName}'.format(
+                       fileName = fileName, contentBase64 = contentBase64)
+         if makeExecutable == False:
+            commands = commands + ' && \\\nsudo chmod +x {fileName}'.format(fileName = fileName)
+         self.runInShell(commands)
+      except:
+         self.endBlock(False)
+         raise
+
+      self.endBlock()
+
+
+   # ###### Execute command-line from string ################################
+   def executeFromString(self, commandLineString):
+      commandLineBase64 = self.makeBase64(commandLineString)
+      try:
+         commands = 'echo \\\"{commandLineBase64}\\\" | base64 -d | /bin/bash -x'.format(
+                       commandLineBase64 = commandLineBase64)
+         self.runInShell(commands)
+      except:
+         self.endBlock(False)
+         raise
 
 
    # ###### Encode string to base64 ##########################################
