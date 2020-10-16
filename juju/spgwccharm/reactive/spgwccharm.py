@@ -146,7 +146,7 @@ def configure_spgwc():
       # ====== Build SPGW-C dependencies ====================================
       vduHelper.beginBlock('Building SPGW-C dependencies')
       vduHelper.executeFromString("""\
-export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
+export MAKEFLAGS="-j`nproc`" && \\
 cd /home/nornetpp/src/{gitDirectory}/build/scripts && \\
 mkdir -p logs && \\
 ./build_spgwc -I -f >logs/build_spgwc-1.log 2>&1

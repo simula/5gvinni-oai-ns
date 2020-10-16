@@ -340,8 +340,7 @@ def restart_mme():
    vduHelper.beginBlock('restart_mme')
    try:
 
-      commands = 'sudo service mme restart'
-      vduHelper.runInShell(commands)
+      vduHelper.runInShell('sudo service mme restart')
 
       message = vduHelper.endBlock()
       function_set( { 'outout': message } )
