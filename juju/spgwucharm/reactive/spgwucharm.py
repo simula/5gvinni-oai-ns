@@ -228,7 +228,8 @@ ROUTER_INTERFACE_RIGHT=pdn
       vduHelper.beginBlock('Setting up SPGW-U service')
       vduHelper.configureSystemInfo('SPGW-U', 'This is the SPGW-U of the SimulaMet OAI VNF!')
       vduHelper.createFileFromString('/lib/systemd/system/spgwu.service',
-"""[Unit]
+"""\
+[Unit]
 Description=Serving and Packet Data Network Gateway -- User Plane (SPGW-U)
 After=ssh.target
 
@@ -240,16 +241,21 @@ RestartPreventExitStatus=255
 WorkingDirectory=/home/nornetpp/src/{gitDirectory}/build/scripts
 
 [Install]
-WantedBy=multi-user.target""".format(gitDirectory = gitDirectory))
+WantedBy=multi-user.target
+""".format(gitDirectory = gitDirectory))
 
       vduHelper.createFileFromString('/home/nornetpp/log',
-"""#!/bin/sh
-tail -f /var/log/spgwu.log""", True)
+"""\
+#!/bin/sh
+tail -f /var/log/spgwu.log
+""", True)
 
       vduHelper.createFileFromString('/home/nornetpp/restart',
-"""#!/bin/sh
+"""\
+#!/bin/sh
 DIRECTORY=`dirname $0`
-sudo service spgwu restart && $DIRECTORY/log""", True)
+sudo service spgwu restart && $DIRECTORY/log
+""", True)
       vduHelper.endBlock()
 
       # ====== Set up sysstat service =======================================
