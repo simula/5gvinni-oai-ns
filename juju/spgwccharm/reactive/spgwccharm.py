@@ -206,7 +206,8 @@ sudo sed -e "s/APN_NI = \\"apn1\\"/APN_NI = \\"internet.{networkRealm}\\"/g" -i 
       vduHelper.beginBlock('Setting up SPGW-C service')
       vduHelper.configureSystemInfo('SPGW-C', 'This is the SPGW-C of the SimulaMet OAI VNF!')
       vduHelper.createFileFromString('/lib/systemd/system/spgwc.service',
-"""[Unit]
+"""\
+[Unit]
 Description=Serving and Packet Data Network Gateway -- Control Plane (SPGW-C)
 After=ssh.target
 
@@ -218,16 +219,21 @@ RestartPreventExitStatus=255
 WorkingDirectory=/home/nornetpp/src/{gitDirectory}/build/scripts
 
 [Install]
-WantedBy=multi-user.target""".format(gitDirectory = gitDirectory))
+WantedBy=multi-user.target
+""".format(gitDirectory = gitDirectory))
 
       vduHelper.createFileFromString('/home/nornetpp/log',
-"""#!/bin/sh
-tail -f /var/log/spgwc.log""", True)
+"""\
+#!/bin/sh
+tail -f /var/log/spgwc.log
+""", True)
 
       vduHelper.createFileFromString('/home/nornetpp/restart',
-"""#!/bin/sh
+"""\
+#!/bin/sh
 DIRECTORY=`dirname $0`
-sudo service spgwc restart && $DIRECTORY/log""", True)
+sudo service spgwc restart && $DIRECTORY/log
+""", True)
       vduHelper.endBlock()
 
       # ====== Set up sysstat service =======================================
