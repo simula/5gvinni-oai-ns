@@ -1124,8 +1124,7 @@ def restart_spgwu():
    vduHelper.beginBlock('restart_spgwu')
    try:
 
-      commands = 'sudo service spgwu restart'
-      vduHelper.runInShell(commands)
+      vduHelper.runInShell('sudo service spgwu restart')
 
       message = vduHelper.endBlock()
       function_set( { 'outout': message } )
