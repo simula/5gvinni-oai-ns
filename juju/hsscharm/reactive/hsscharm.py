@@ -53,15 +53,6 @@ from . import VDUHelper
 vduHelper = VDUHelper.VDUHelper()
 
 
-# ***************************************************************************
-# NOTE:
-# Double escaping is required for \ and " in command string!
-# 1. Python
-# 2. bash -c "<command>"
-# That is: $ => \$ ; \ => \\ ; " => \\\"
-# ***************************************************************************
-
-
 
 # ###########################################################################
 # #### HSS Charm functions                                               ####
@@ -100,8 +91,7 @@ def prepare_cassandra_hss_build():
       vduHelper.configureInterface(hssS6a_IfName, configurationS6a, 61)
       vduHelper.testNetworking()
       vduHelper.waitForPackageUpdatesToComplete()
-      commands = "if [ \\\"`find /etc/apt/sources.list.d -name 'rmescandon-ubuntu-yq-*.list'`\\\" == \\\"\\\" ] ; then sudo add-apt-repository -y ppa:rmescandon/yq ; fi"
-      vduHelper.runInShell(commands)
+      vduHelper.executeFromString("""if [ "`find /etc/apt/sources.list.d -name 'rmescandon-ubuntu-yq-*.list'`" == "" ] ; then sudo add-apt-repository -y ppa:rmescandon/yq ; fi""")
       vduHelper.aptInstallPackages([ 'yq' ])
       vduHelper.endBlock()
 
@@ -135,29 +125,23 @@ def configure_cassandra():
       gitDirectory      = 'openair-hss'
       cassandraServerIP = function_get('cassandra-server-ip')
 
-      # NOTE:
-      # Double escaping is required for \ and " in "command" string!
-      # 1. Python
-      # 2. bash -c "<command>"
-      # That is: $ => \$ ; \ => \\ ; " => \\\"
-
       # ====== Build Cassandra ==============================================
       vduHelper.beginBlock('Building Cassandra')
-      commands = """\
-export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
+      vduHelper.executeFromString("""\
+export MAKEFLAGS="-j`nproc`" && \\
 cd /home/nornetpp/src/{gitDirectory}/scripts && \\
 mkdir -p logs && \\
 sudo rm -f /etc/apt/sources.list.d/cassandra.sources.list && \\
-./build_cassandra --check-installed-software --force >logs/build_cassandra.log 2>&1""".format(
+./build_cassandra --check-installed-software --force >logs/build_cassandra.log 2>&1
+""".format(
          gitDirectory      = gitDirectory,
          cassandraServerIP = cassandraServerIP
-      )
-      vduHelper.runInShell(commands)
+      ))
       vduHelper.endBlock()
 
       # ====== Configure Cassandra ==========================================
       vduHelper.beginBlock('Configuring Cassandra')
-      commands = """\
+      vduHelper.executeFromString("""\
 cd /home/nornetpp/src/{gitDirectory}/scripts && \\
 sudo update-alternatives --set java /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java && \\
 sudo service cassandra stop && \\
@@ -165,19 +149,19 @@ sudo rm -rf /var/lib/cassandra/data/system/* && \\
 sudo rm -rf /var/lib/cassandra/commitlog/* && \\
 sudo rm -rf /var/lib/cassandra/data/system_traces/* && \\
 sudo rm -rf /var/lib/cassandra/saved_caches/* && \\
-sudo yq w -i /etc/cassandra/cassandra.yaml \\\"cluster_name\\\" \\\"HSS Cluster\\\" && \\
-sudo yq w -i /etc/cassandra/cassandra.yaml \\\"seed_provider[0].class_name\\\" \\\"org.apache.cassandra.locator.SimpleSeedProvider\\\" && \\
-sudo yq w -i /etc/cassandra/cassandra.yaml \\\"seed_provider[0].parameters[0].seeds\\\" \\\"{cassandraServerIP}\\\" && \\
-sudo yq w -i /etc/cassandra/cassandra.yaml \\\"listen_address\\\" \\\"{cassandraServerIP}\\\" && \\
-sudo yq w -i /etc/cassandra/cassandra.yaml \\\"rpc_address\\\" \\\"{cassandraServerIP}\\\" && \\
-sudo yq w -i /etc/cassandra/cassandra.yaml \\\"endpoint_snitch\\\" \\\"GossipingPropertyFileSnitch\\\" && \\
+sudo yq w -i /etc/cassandra/cassandra.yaml "cluster_name" "HSS Cluster" && \\
+sudo yq w -i /etc/cassandra/cassandra.yaml "seed_provider[0].class_name" "org.apache.cassandra.locator.SimpleSeedProvider" && \\
+sudo yq w -i /etc/cassandra/cassandra.yaml "seed_provider[0].parameters[0].seeds" "{cassandraServerIP}" && \\
+sudo yq w -i /etc/cassandra/cassandra.yaml "listen_address" "{cassandraServerIP}" && \\
+sudo yq w -i /etc/cassandra/cassandra.yaml "rpc_address" "{cassandraServerIP}" && \\
+sudo yq w -i /etc/cassandra/cassandra.yaml "endpoint_snitch" "GossipingPropertyFileSnitch" && \\
 sudo service cassandra start && \\
 sleep 10 && \\
-sudo service cassandra status | cat""".format(
+sudo service cassandra status | cat
+""".format(
          gitDirectory      = gitDirectory,
          cassandraServerIP = cassandraServerIP
-      )
-      vduHelper.runInShell(commands)
+      ))
       vduHelper.endBlock()
 
 
@@ -216,34 +200,35 @@ def configure_hss():
 
       # ====== Build HSS dependencies =======================================
       vduHelper.beginBlock('Building HSS dependencies')
-      commands = """\
-export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
+      vduHelper.executeFromString("""\
+export MAKEFLAGS="-j`nproc`" && \\
 cd /home/nornetpp/src/{gitDirectory}/scripts && \\
 mkdir -p logs && \\
-./build_hss_rel14 --check-installed-software --force >logs/build_hss_rel14-1.log 2>&1""".format(gitDirectory = gitDirectory)
-      vduHelper.runInShell(commands)
+./build_hss_rel14 --check-installed-software --force >logs/build_hss_rel14-1.log 2>&1
+""".format(gitDirectory = gitDirectory))
       vduHelper.endBlock()
 
       # ====== Build HSS itself =============================================
       vduHelper.beginBlock('Building HSS itself')
-      commands = """\
-export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
+      vduHelper.executeFromString("""\
+export MAKEFLAGS="-j`nproc`" && \\
 cd /home/nornetpp/src/{gitDirectory}/scripts && \\
 ./build_hss_rel14 --clean >logs/build_hss_rel14-2.log 2>&1 && \\
-cqlsh --file ../src/hss_rel14/db/oai_db.cql {cassandraServerIP} >logs/oai_db.log 2>&1""".format(
+cqlsh --file ../src/hss_rel14/db/oai_db.cql {cassandraServerIP} >logs/oai_db.log 2>&1
+""".format(
          gitDirectory       = gitDirectory,
          cassandraServerIP  = cassandraServerIP
-      )
-      vduHelper.runInShell(commands)
+      ))
       vduHelper.endBlock()
 
 
       # ====== Provision users and MME ======================================
       vduHelper.beginBlock('Provisioning users and MME')
-      commands = """\
+      vduHelper.executeFromString("""\
 cd /home/nornetpp/src/{gitDirectory}/scripts && \\
 ./data_provisioning_users --apn default.{networkRealm} --apn2 internet.{networkRealm} --key {networkK} --imsi-first {networkIMSIFirst} --msisdn-first {networkMSISDNFirst} --mme-identity mme.{networkRealm} --no-of-users {networkUsers} --realm {networkRealm} --truncate True  --verbose True --cassandra-cluster {cassandraServerIP} >logs/data_provisioning_users.log 2>&1 && \\
-./data_provisioning_mme --id 3 --mme-identity mme.{networkRealm} --realm {networkRealm} --ue-reachability 1 --truncate True  --verbose True -C {cassandraServerIP} >logs/data_provisioning_mme.log 2>&1""".format(
+./data_provisioning_mme --id 3 --mme-identity mme.{networkRealm} --realm {networkRealm} --ue-reachability 1 --truncate True  --verbose True -C {cassandraServerIP} >logs/data_provisioning_mme.log 2>&1
+""".format(
          gitDirectory       = gitDirectory,
          cassandraServerIP  = cassandraServerIP,
          networkRealm       = networkRealm,
@@ -252,37 +237,37 @@ cd /home/nornetpp/src/{gitDirectory}/scripts && \\
          networkIMSIFirst   = networkIMSIFirst,
          networkMSISDNFirst = networkMSISDNFirst,
          networkUsers       = networkUsers
-      )
-      vduHelper.runInShell(commands)
+      ))
       vduHelper.endBlock()
 
       # ====== Configure HSS ================================================
       vduHelper.beginBlock('Configuring HSS')
-      commands = """\
+      vduHelper.executeFromString("""\
 cd /home/nornetpp/src/{gitDirectory}/scripts && \\
-echo \\\"{hssS6a_IPv4Address}   hss.{networkRealm} hss\\\" | sudo tee -a /etc/hosts && \\
-echo \\\"{mmeS6a_IPv4Address}   mme.{networkRealm} mme\\\" | sudo tee -a /etc/hosts && \\
-openssl rand -out \$HOME/.rnd 128 && \\
-echo \\\"====== Configuring Diameter ... ======\\\" && \\
+echo "{hssS6a_IPv4Address}   hss.{networkRealm} hss" | sudo tee -a /etc/hosts && \\
+echo "{mmeS6a_IPv4Address}   mme.{networkRealm} mme" | sudo tee -a /etc/hosts && \\
+openssl rand -out $HOME/.rnd 128 && \\
+echo "====== Configuring Diameter ... ======" && \\
 PREFIX='/usr/local/etc/oai' && \\
-sudo mkdir -m 0777 -p \$PREFIX && \\
-sudo mkdir -m 0777 -p \$PREFIX/freeDiameter && \\
-sudo cp ../etc/acl.conf ../etc/hss_rel14_fd.conf \$PREFIX/freeDiameter && \\
-sudo cp ../etc/hss_rel14.conf ../etc/hss_rel14.json \$PREFIX && \\
-sudo sed -i -e 's/#ListenOn/ListenOn/g' \$PREFIX/freeDiameter/hss_rel14_fd.conf && \\
-echo \\\"====== Updating configuration files ... ======\\\" && \\
+sudo mkdir -m 0777 -p $PREFIX && \\
+sudo mkdir -m 0777 -p $PREFIX/freeDiameter && \\
+sudo cp ../etc/acl.conf ../etc/hss_rel14_fd.conf $PREFIX/freeDiameter && \\
+sudo cp ../etc/hss_rel14.conf ../etc/hss_rel14.json $PREFIX && \\
+sudo sed -i -e 's/#ListenOn/ListenOn/g' $PREFIX/freeDiameter/hss_rel14_fd.conf && \\
+echo "====== Updating configuration files ... ======" && \\
 declare -A HSS_CONF && \\
-HSS_CONF[@PREFIX@]=\$PREFIX && \\
+HSS_CONF[@PREFIX@]=$PREFIX && \\
 HSS_CONF[@REALM@]='{networkRealm}' && \\
 HSS_CONF[@HSS_FQDN@]='hss.{networkRealm}' && \\
 HSS_CONF[@cassandra_Server_IP@]='{cassandraServerIP}' && \\
 HSS_CONF[@cassandra_IP@]='{cassandraServerIP}' && \\
 HSS_CONF[@OP_KEY@]='{networkOP}' && \\
 HSS_CONF[@ROAMING_ALLOWED@]='true' && \\
-for K in \\\"\${{!HSS_CONF[@]}}\\\"; do echo \\\"K=\$K ...\\\" && sudo egrep -lRZ \\\"\$K\\\" \$PREFIX | xargs -0 -l sudo sed -i -e \\\"s|\$K|\${{HSS_CONF[\$K]}}|g\\\" ; done && \\
-../src/hss_rel14/bin/make_certs.sh hss {networkRealm} \$PREFIX && \\
-echo \\\"====== Updating key ... ======\\\" && \\
-oai_hss -j \$PREFIX/hss_rel14.json --onlyloadkey >logs/onlyloadkey.log 2>&1""".format(
+for K in "${{!HSS_CONF[@]}}"; do echo "K=$K ..." && sudo egrep -lRZ "$K" $PREFIX | xargs -0 -l sudo sed -i -e "s|$K|${{HSS_CONF[$K]}}|g" ; done && \\
+../src/hss_rel14/bin/make_certs.sh hss {networkRealm} $PREFIX && \\
+echo "====== Updating key ... ======" && \\
+oai_hss -j $PREFIX/hss_rel14.json --onlyloadkey >logs/onlyloadkey.log 2>&1
+""".format(
          gitDirectory       = gitDirectory,
          cassandraServerIP  = cassandraServerIP,
          hssS6a_IPv4Address = hssS6a_IPv4Address,
@@ -293,33 +278,41 @@ oai_hss -j \$PREFIX/hss_rel14.json --onlyloadkey >logs/onlyloadkey.log 2>&1""".f
          networkIMSIFirst   = networkIMSIFirst,
          networkMSISDNFirst = networkMSISDNFirst,
          networkUsers       = networkUsers
-      )
-      vduHelper.runInShell(commands)
+      ))
       vduHelper.endBlock()
 
       # ====== Set up HSS service ===========================================
       vduHelper.beginBlock('Setting up HSS service')
       vduHelper.configureSystemInfo('HSS', 'This is the HSS of the SimulaMet OAI VNF!')
-      commands = """\
-( echo \\\"[Unit]\\\" && \\
-echo \\\"Description=Home Subscriber Server (HSS)\\\" && \\
-echo \\\"After=ssh.target\\\" && \\
-echo \\\"\\\" && \\
-echo \\\"[Service]\\\" && \\
-echo \\\"ExecStart=/bin/sh -c \\\'exec /usr/local/bin/oai_hss -j /usr/local/etc/oai/hss_rel14.json >>/var/log/hss.log 2>&1\\\'\\\" && \\
-echo \\\"KillMode=process\\\" && \\
-echo \\\"Restart=on-failure\\\" && \\
-echo \\\"RestartPreventExitStatus=255\\\" && \\
-echo \\\"WorkingDirectory=/home/nornetpp/src/openair-cn/scripts\\\" && \\
-echo \\\"\\\" && \\
-echo \\\"[Install]\\\" && \\
-echo \\\"WantedBy=multi-user.target\\\" ) | sudo tee /lib/systemd/system/hss.service && \\
-sudo systemctl daemon-reload && \\
-( echo -e \\\"#\\x21/bin/sh\\\" && echo \\\"tail -f /var/log/hss.log\\\" ) | tee /home/nornetpp/log && \\
-chmod +x /home/nornetpp/log && \\
-( echo -e \\\"#\\x21/bin/sh\\\" && echo \\\"sudo service hss restart && ./log\\\" ) | tee /home/nornetpp/restart && \\
-chmod +x /home/nornetpp/restart"""
-      vduHelper.runInShell(commands)
+      vduHelper.createFileFromString('/lib/systemd/system/hss.service',
+"""\
+[Unit]
+Description=Home Subscriber Server (HSS)
+After=ssh.target
+
+[Service]
+ExecStart=/bin/sh -c 'exec /usr/local/bin/oai_hss -j /usr/local/etc/oai/hss_rel14.json >>/var/log/hss.log 2>&1'
+KillMode=process
+Restart=on-failure
+RestartPreventExitStatus=255
+WorkingDirectory=/home/nornetpp/src/{gitDirectory}/build/scripts
+
+[Install]
+WantedBy=multi-user.target
+""".format(gitDirectory = gitDirectory))
+
+      vduHelper.createFileFromString('/home/nornetpp/log',
+"""\
+#!/bin/sh
+tail -f /var/log/hss.log
+""", True)
+
+      vduHelper.createFileFromString('/home/nornetpp/restart',
+"""\
+#!/bin/sh
+DIRECTORY=`dirname $0`
+sudo service hss restart && $DIRECTORY/log
+""", True)
       vduHelper.endBlock()
 
       # ====== Set up sysstat service =======================================
@@ -345,8 +338,7 @@ def restart_hss():
    vduHelper.beginBlock('restart_hss')
    try:
 
-      commands = 'sudo service hss restart'
-      vduHelper.runInShell(commands)
+      vduHelper.runInShell('sudo service hss restart')
 
       message = vduHelper.endBlock()
       function_set( { 'outout': message } )

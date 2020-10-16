@@ -53,15 +53,6 @@ from . import VDUHelper
 vduHelper = VDUHelper.VDUHelper()
 
 
-# ***************************************************************************
-# NOTE:
-# Double escaping is required for \ and " in command string!
-# 1. Python
-# 2. bash -c "<command>"
-# That is: $ => \$ ; \ => \\ ; " => \\\"
-# ***************************************************************************
-
-
 
 # ###########################################################################
 # #### MME Charm functions                                               ####
@@ -191,7 +182,8 @@ def configure_mme():
 export MAKEFLAGS="-j`nproc`" && \\
 cd /home/nornetpp/src/{gitDirectory}/scripts && \\
 mkdir -p logs && \\
-./build_mme --check-installed-software --force >logs/build_mme-1.log 2>&1""".format(gitDirectory = gitDirectory))
+./build_mme --check-installed-software --force >logs/build_mme-1.log 2>&1
+""".format(gitDirectory = gitDirectory))
       vduHelper.endBlock()
 
       # ====== Build MME itself =============================================
@@ -199,7 +191,8 @@ mkdir -p logs && \\
       vduHelper.executeFromString("""\
 export MAKEFLAGS="-j`nproc`" && \\
 cd /home/nornetpp/src/{gitDirectory}/scripts && \\
-./build_mme --clean >logs/build_mme-2.log 2>&1""".format(gitDirectory = gitDirectory))
+./build_mme --clean >logs/build_mme-2.log 2>&1
+""".format(gitDirectory = gitDirectory))
       vduHelper.endBlock()
 
       # ====== Configure MME ================================================
@@ -259,7 +252,8 @@ MME_CONF[@MNC3_MME_1@]={networkMNC:03d} && \\
 MME_CONF[@TAC-LB_MME_1@]={tac_mme_1_lo} && \\
 MME_CONF[@TAC-HB_MME_1@]={tac_mme_1_hi} && \\
 for K in "${{!MME_CONF[@]}}"; do sudo egrep -lRZ "$K" $PREFIX | xargs -0 -l sudo sed -i -e "s|$K|${{MME_CONF[$K]}}|g" ; ret=$?;[[ ret -ne 0 ]] && echo "Tried to replace $K with ${{MME_CONF[$K]}}" || true ; done && \\
-sudo ./check_mme_s6a_certificate $PREFIX/freeDiameter mme.{networkRealm} >logs/check_mme_s6a_certificate.log 2>&1""".format(
+sudo ./check_mme_s6a_certificate $PREFIX/freeDiameter mme.{networkRealm} >logs/check_mme_s6a_certificate.log 2>&1
+""".format(
          gitDirectory           = gitDirectory,
          hssS6a_IPv4Address     = hssS6a_IPv4Address,
          mmeS1C_IfName          = mmeS1C_IfName,

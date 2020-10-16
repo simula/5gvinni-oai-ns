@@ -53,15 +53,6 @@ from . import VDUHelper
 vduHelper = VDUHelper.VDUHelper()
 
 
-# ***************************************************************************
-# NOTE:
-# Double escaping is required for \ and " in command string!
-# 1. Python
-# 2. bash -c "<command>"
-# That is: $ => \$ ; \ => \\ ; " => \\\"
-# ***************************************************************************
-
-
 
 # ###########################################################################
 # #### SPGW-C Charm functions                                            ####
