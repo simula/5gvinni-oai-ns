@@ -34,6 +34,7 @@ import logging
 import logging.config
 import os
 import subprocess
+import shutil
 import sys
 import traceback
 
@@ -128,13 +129,22 @@ class VDUHelper:
 
    # ###### Execute command #################################################
    def execute(self, commands):
+      # ====== Run via SSH ==================================================
       if self.testMode == False:
          print('Shell: ' + commands)
          self.logger.debug('Shell: ' + commands)
          self.sshproxy_module._run(commands)
 
+      # ====== Test Mode ====================================================
       else:
-         sys.stdout.write('# ---------------------------------------------------------------------------\n')
+         label = ''
+         if len(self.blockStack) > 0:
+            label = ' ' + self.blockStack[-1] + ' '
+         width = shutil.get_terminal_size(fallback=(80, 25)).columns
+         n = width - 8 - len(label)
+         if n < 0:
+            n = 0
+         sys.stdout.write('\x1b[34m# ------' + label + ('-' * n) + '\x1b[0m\n')
          sys.stdout.write('time bash -c "' + commands + '"\n')
 
          # commands = 'echo "' + commands + '"'
