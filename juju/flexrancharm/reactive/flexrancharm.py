@@ -53,15 +53,6 @@ from . import VDUHelper
 vduHelper = VDUHelper.VDUHelper()
 
 
-# ***************************************************************************
-# NOTE:
-# Double escaping is required for \ and " in command string!
-# 1. Python
-# 2. bash -c "<command>"
-# That is: $ => \$ ; \ => \\ ; " => \\\"
-# ***************************************************************************
-
-
 
 # ###########################################################################
 # #### FlexRAN Charm functions                                           ####
@@ -118,13 +109,11 @@ def prepare_flexran_build():
       # ====== Prepare sources ==============================================
       vduHelper.beginBlock('Preparing sources')
       vduHelper.fetchGitRepository(gitDirectory, gitRepository, gitCommit)
-      commands = """\
+      vduHelper.executeFromString("""\
 cd /home/nornetpp/src/{gitDirectory} && \\
 git submodule init && \\
-git submodule update flexran""".format(
-         gitDirectory       = gitDirectory
-      )
-      vduHelper.runInShell(commands)
+git submodule update flexran
+""".format(gitDirectory = gitDirectory)
       vduHelper.endBlock()
 
 
@@ -153,30 +142,27 @@ def configure_flexran():
 
       # ====== Build FlexRAN ================================================
       vduHelper.beginBlock('Building FlexRAN itself')
-      commands = """\
-export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
+      vduHelper.executeFromString("""\
+export MAKEFLAGS="-j`nproc`" && \\
 cd /home/nornetpp/src/{gitDirectory} && \\
 mkdir -p logs && \\
-./build_m5g -f >logs/build_flexran.log 2>&1""".format(
-         gitDirectory       = gitDirectory
-      )
-      vduHelper.runInShell(commands)
+./build_m5g -f >logs/build_flexran.log 2>&1
+""".format(gitDirectory = gitDirectory))
       vduHelper.endBlock()
 
       # ====== Configure FlexRAN ================================================
       vduHelper.beginBlock('Configuring FlexRAN')
-      commands = """\
-cd /home/nornetpp/src/{gitDirectory}/flexran""".format(
-         gitDirectory = gitDirectory
-      )
-      vduHelper.runInShell(commands)
+      vduHelper.executeFromString("""\
+cd /home/nornetpp/src/{gitDirectory}/flexran
+""".format(gitDirectory = gitDirectory))
       vduHelper.endBlock()
 
       # ====== Set up FlexRAN service ===========================================
       vduHelper.beginBlock('Setting up FlexRAN service')
       vduHelper.configureSystemInfo('FlexRAN Controller', 'This is the FlexRAN Controller of the SimulaMet FlexRAN VNF!')
       vduHelper.createFileFromString('/lib/systemd/system/flexran.service',
-"""[Unit]
+"""\
+[Unit]
 Description=FlexRAN Controller
 After=ssh.target
 
@@ -188,16 +174,21 @@ RestartPreventExitStatus=255
 WorkingDirectory=/home/nornetpp/src/{gitDirectory}/flexran
 
 [Install]
-WantedBy=multi-user.target""".format(gitDirectory = gitDirectory))
+WantedBy=multi-user.target
+""".format(gitDirectory = gitDirectory))
 
       vduHelper.createFileFromString('/home/nornetpp/log',
-"""#!/bin/sh
-tail -f /var/log/flexran.log""", True)
+"""\
+#!/bin/sh
+tail -f /var/log/flexran.log
+""", True)
 
       vduHelper.createFileFromString('/home/nornetpp/restart',
-"""#!/bin/sh
+"""\
+#!/bin/sh
 DIRECTORY=`dirname $0`
-sudo service flexran restart && $DIRECTORY/log""", True)
+sudo service flexran restart && $DIRECTORY/log
+""", True)
       vduHelper.endBlock()
 
       # ====== Set up sysstat service =======================================
@@ -223,8 +214,7 @@ def restart_flexran():
    vduHelper.beginBlock('restart_flexran')
    try:
 
-      commands = 'sudo service flexran restart'
-      vduHelper.runInShell(commands)
+      vduHelper.runInShell('sudo service flexran restart')
 
       message = vduHelper.endBlock()
       function_set( { 'outout': message } )

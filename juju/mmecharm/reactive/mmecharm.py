@@ -28,6 +28,7 @@
 #
 # Contact: dreibh@simula.no
 
+
 from charmhelpers.core.hookenv import (
     function_get,
     function_fail,
@@ -50,15 +51,6 @@ from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
 from . import VDUHelper
 
 vduHelper = VDUHelper.VDUHelper()
-
-
-# ***************************************************************************
-# NOTE:
-# Double escaping is required for \ and " in command string!
-# 1. Python
-# 2. bash -c "<command>"
-# That is: $ => \$ ; \ => \\ ; " => \\\"
-# ***************************************************************************
 
 
 
@@ -186,46 +178,46 @@ def configure_mme():
 
       # ====== Build MME dependencies =======================================
       vduHelper.beginBlock('Building MME dependencies')
-      commands = """\
-export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
+      vduHelper.executeFromString("""\
+export MAKEFLAGS="-j`nproc`" && \\
 cd /home/nornetpp/src/{gitDirectory}/scripts && \\
 mkdir -p logs && \\
-./build_mme --check-installed-software --force >logs/build_mme-1.log 2>&1""".format(gitDirectory = gitDirectory)
-      vduHelper.runInShell(commands)
+./build_mme --check-installed-software --force >logs/build_mme-1.log 2>&1
+""".format(gitDirectory = gitDirectory))
       vduHelper.endBlock()
 
       # ====== Build MME itself =============================================
       vduHelper.beginBlock('Building MME itself')
-      commands = """\
-export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
+      vduHelper.executeFromString("""\
+export MAKEFLAGS="-j`nproc`" && \\
 cd /home/nornetpp/src/{gitDirectory}/scripts && \\
-./build_mme --clean >logs/build_mme-2.log 2>&1""".format(gitDirectory = gitDirectory)
-      vduHelper.runInShell(commands)
+./build_mme --clean >logs/build_mme-2.log 2>&1
+""".format(gitDirectory = gitDirectory))
       vduHelper.endBlock()
 
       # ====== Configure MME ================================================
       vduHelper.beginBlock('Configuring MME')
-      commands = """\
-export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
+      vduHelper.executeFromString("""\
+export MAKEFLAGS="-j`nproc`" && \\
 cd /home/nornetpp/src/{gitDirectory}/scripts && \\
-echo \\\"127.0.1.1        mme.{networkRealm} mme\\\" | sudo tee -a /etc/hosts && \\
-echo \\\"{hssS6a_IPv4Address}     hss.{networkRealm} hss\\\" | sudo tee -a /etc/hosts && \\
-openssl rand -out \$HOME/.rnd 128 && \\
+echo "127.0.1.1        mme.{networkRealm} mme" | sudo tee -a /etc/hosts && \\
+echo "{hssS6a_IPv4Address}     hss.{networkRealm} hss" | sudo tee -a /etc/hosts && \\
+openssl rand -out $HOME/.rnd 128 && \\
 INSTANCE=1 && \\
 PREFIX='/usr/local/etc/oai' && \\
-sudo mkdir -m 0777 -p \$PREFIX && \\
-sudo mkdir -m 0777 -p \$PREFIX/freeDiameter && \\
-sudo cp ../etc/mme_fd.sprint.conf  \$PREFIX/freeDiameter/mme_fd.conf && \\
-sudo cp ../etc/mme.conf  \$PREFIX && \\
+sudo mkdir -m 0777 -p $PREFIX && \\
+sudo mkdir -m 0777 -p $PREFIX/freeDiameter && \\
+sudo cp ../etc/mme_fd.sprint.conf  $PREFIX/freeDiameter/mme_fd.conf && \\
+sudo cp ../etc/mme.conf  $PREFIX && \\
 declare -A MME_CONF && \\
-MME_CONF[@MME_S6A_IP_ADDR@]=\\\"127.0.0.11\\\" && \\
-MME_CONF[@INSTANCE@]=\$INSTANCE && \\
-MME_CONF[@PREFIX@]=\$PREFIX && \\
+MME_CONF[@MME_S6A_IP_ADDR@]="127.0.0.11" && \\
+MME_CONF[@INSTANCE@]=$INSTANCE && \\
+MME_CONF[@PREFIX@]=$PREFIX && \\
 MME_CONF[@REALM@]='{networkRealm}' && \\
 MME_CONF[@PID_DIRECTORY@]='/var/run' && \\
-MME_CONF[@MME_FQDN@]=\\\"mme.{networkRealm}\\\" && \\
+MME_CONF[@MME_FQDN@]="mme.{networkRealm}" && \\
 MME_CONF[@HSS_HOSTNAME@]='hss' && \\
-MME_CONF[@HSS_FQDN@]=\\\"hss.{networkRealm}\\\" && \\
+MME_CONF[@HSS_FQDN@]="hss.{networkRealm}" && \\
 MME_CONF[@HSS_IP_ADDR@]='{hssS6a_IPv4Address}' && \\
 MME_CONF[@MCC@]='{networkMCC}' && \\
 MME_CONF[@MNC@]='{networkMNC}' && \\
@@ -259,8 +251,9 @@ MME_CONF[@MCC_MME_1@]={networkMCC} && \\
 MME_CONF[@MNC3_MME_1@]={networkMNC:03d} && \\
 MME_CONF[@TAC-LB_MME_1@]={tac_mme_1_lo} && \\
 MME_CONF[@TAC-HB_MME_1@]={tac_mme_1_hi} && \\
-for K in \\\"\${{!MME_CONF[@]}}\\\"; do sudo egrep -lRZ \\\"\$K\\\" \$PREFIX | xargs -0 -l sudo sed -i -e \\\"s|\$K|\${{MME_CONF[\$K]}}|g\\\" ; ret=\$?;[[ ret -ne 0 ]] && echo \\\"Tried to replace \$K with \${{MME_CONF[\$K]}}\\\" || true ; done && \\
-sudo ./check_mme_s6a_certificate \$PREFIX/freeDiameter mme.{networkRealm} >logs/check_mme_s6a_certificate.log 2>&1""".format(
+for K in "${{!MME_CONF[@]}}"; do sudo egrep -lRZ "$K" $PREFIX | xargs -0 -l sudo sed -i -e "s|$K|${{MME_CONF[$K]}}|g" ; ret=$?;[[ ret -ne 0 ]] && echo "Tried to replace $K with ${{MME_CONF[$K]}}" || true ; done && \\
+sudo ./check_mme_s6a_certificate $PREFIX/freeDiameter mme.{networkRealm} >logs/check_mme_s6a_certificate.log 2>&1
+""".format(
          gitDirectory           = gitDirectory,
          hssS6a_IPv4Address     = hssS6a_IPv4Address,
          mmeS1C_IfName          = mmeS1C_IfName,
@@ -288,33 +281,40 @@ sudo ./check_mme_s6a_certificate \$PREFIX/freeDiameter mme.{networkRealm} >logs/
          tac_mme_0_lo           = tac_mme_0[2:4],
          tac_mme_1_hi           = tac_mme_1[0:2],
          tac_mme_1_lo           = tac_mme_1[2:4]
-      )
-      vduHelper.runInShell(commands)
+      ))
       vduHelper.endBlock()
 
       # ====== Set up MME service ===========================================
       vduHelper.beginBlock('Setting up MME service')
       vduHelper.configureSystemInfo('MME', 'This is the MME of the SimulaMet OAI VNF!')
-      commands = """\
-( echo \\\"[Unit]\\\" && \\
-echo \\\"Description=Mobility Management Entity (MME)\\\" && \\
-echo \\\"After=ssh.target\\\" && \\
-echo \\\"\\\" && \\
-echo \\\"[Service]\\\" && \\
-echo \\\"ExecStart=/bin/sh -c \\\'exec /usr/local/bin/mme -c /usr/local/etc/oai/mme.conf >>/var/log/mme.log 2>&1\\\'\\\" && \\
-echo \\\"KillMode=process\\\" && \\
-echo \\\"Restart=on-failure\\\" && \\
-echo \\\"RestartPreventExitStatus=255\\\" && \\
-echo \\\"WorkingDirectory=/home/nornetpp/src/openair-cn/scripts\\\" && \\
-echo \\\"\\\" && \\
-echo \\\"[Install]\\\" && \\
-echo \\\"WantedBy=multi-user.target\\\" ) | sudo tee /lib/systemd/system/mme.service && \\
-sudo systemctl daemon-reload && \\
-( echo -e \\\"#\\x21/bin/sh\\\" && echo \\\"tail -f /var/log/mme.log\\\" ) | tee /home/nornetpp/log && \\
-chmod +x /home/nornetpp/log && \\
-( echo -e \\\"#\\x21/bin/sh\\\" && echo \\\"sudo service mme restart && ./log\\\" ) | tee /home/nornetpp/restart && \\
-chmod +x /home/nornetpp/restart"""
-      vduHelper.runInShell(commands)
+      vduHelper.createFileFromString('/lib/systemd/system/mme.service', """\
+[Unit]
+Description=Mobility Management Entity (MME)
+After=ssh.target
+
+[Service]
+ExecStart=/bin/sh -c 'exec /usr/local/bin/mme -c /usr/local/etc/oai/spgw_u.conf -o >>/var/log/mme.log 2>&1'
+KillMode=process
+Restart=on-failure
+RestartPreventExitStatus=255
+WorkingDirectory=/home/nornetpp/src/{gitDirectory}/build/scripts
+
+[Install]
+WantedBy=multi-user.target
+""".format(gitDirectory = gitDirectory))
+
+      vduHelper.createFileFromString('/home/nornetpp/log',
+"""\
+#!/bin/sh
+tail -f /var/log/mme.log
+""", True)
+
+      vduHelper.createFileFromString('/home/nornetpp/restart',
+"""\
+#!/bin/sh
+DIRECTORY=`dirname $0`
+sudo service mme restart && $DIRECTORY/log
+""", True)
       vduHelper.endBlock()
 
       # ====== Set up sysstat service =======================================
@@ -340,8 +340,7 @@ def restart_mme():
    vduHelper.beginBlock('restart_mme')
    try:
 
-      commands = 'sudo service mme restart'
-      vduHelper.runInShell(commands)
+      vduHelper.runInShell('sudo service mme restart')
 
       message = vduHelper.endBlock()
       function_set( { 'outout': message } )

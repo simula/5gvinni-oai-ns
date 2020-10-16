@@ -53,15 +53,6 @@ from . import VDUHelper
 vduHelper = VDUHelper.VDUHelper()
 
 
-# ***************************************************************************
-# NOTE:
-# Double escaping is required for \ and " in command string!
-# 1. Python
-# 2. bash -c "<command>"
-# That is: $ => \$ ; \ => \\ ; " => \\\"
-# ***************************************************************************
-
-
 
 # ###########################################################################
 # #### SPGW-C Charm functions                                            ####
@@ -155,10 +146,11 @@ def configure_spgwc():
       # ====== Build SPGW-C dependencies ====================================
       vduHelper.beginBlock('Building SPGW-C dependencies')
       vduHelper.executeFromString("""\
-export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
+export MAKEFLAGS="-j`nproc`" && \\
 cd /home/nornetpp/src/{gitDirectory}/build/scripts && \\
 mkdir -p logs && \\
-./build_spgwc -I -f >logs/build_spgwc-1.log 2>&1""".format(gitDirectory = gitDirectory))
+./build_spgwc -I -f >logs/build_spgwc-1.log 2>&1
+""".format(gitDirectory = gitDirectory))
       vduHelper.endBlock()
 
       # ====== Build SPGW-C itself ==========================================
@@ -166,7 +158,8 @@ mkdir -p logs && \\
       vduHelper.executeFromString("""\
 export MAKEFLAGS="-j`nproc`" && \\
 cd /home/nornetpp/src/{gitDirectory}/build/scripts && \\
-./build_spgwc -c -V -b Debug -j >logs/build_spgwc-2.log 2>&1""".format(gitDirectory = gitDirectory))
+./build_spgwc -c -V -b Debug -j >logs/build_spgwc-2.log 2>&1
+""".format(gitDirectory = gitDirectory))
       vduHelper.endBlock()
 
       # ====== Configure SPGW-C =============================================
@@ -189,7 +182,8 @@ SPGWC_CONF[@DEFAULT_DNS_IPV4_ADDRESS@]='{networkDNS1_IPv4}' && \\
 SPGWC_CONF[@DEFAULT_DNS_SEC_IPV4_ADDRESS@]='{networkDNS2_IPv4}' && \\
 for K in "${{!SPGWC_CONF[@]}}"; do sudo egrep -lRZ "$K" $PREFIX | xargs -0 -l sudo sed -i -e "s|$K|${{SPGWC_CONF[$K]}}|g" ; ret=$?;[[ ret -ne 0 ]] && echo "Tried to replace $K with ${{SPGWC_CONF[$K]}}" || true ; done && \\
 sudo sed -e "s/APN_NI = \\"default\\"/APN_NI = \\"default.{networkRealm}\\"/g" -i /usr/local/etc/oai/spgw_c.conf && \\
-sudo sed -e "s/APN_NI = \\"apn1\\"/APN_NI = \\"internet.{networkRealm}\\"/g" -i /usr/local/etc/oai/spgw_c.conf""".format(
+sudo sed -e "s/APN_NI = \\"apn1\\"/APN_NI = \\"internet.{networkRealm}\\"/g" -i /usr/local/etc/oai/spgw_c.conf
+""".format(
          gitDirectory         = gitDirectory,
          networkRealm         = networkRealm,
          networkDNS1_IPv4     = networkDNS1_IPv4,
@@ -206,7 +200,8 @@ sudo sed -e "s/APN_NI = \\"apn1\\"/APN_NI = \\"internet.{networkRealm}\\"/g" -i 
       vduHelper.beginBlock('Setting up SPGW-C service')
       vduHelper.configureSystemInfo('SPGW-C', 'This is the SPGW-C of the SimulaMet OAI VNF!')
       vduHelper.createFileFromString('/lib/systemd/system/spgwc.service',
-"""[Unit]
+"""\
+[Unit]
 Description=Serving and Packet Data Network Gateway -- Control Plane (SPGW-C)
 After=ssh.target
 
@@ -218,16 +213,21 @@ RestartPreventExitStatus=255
 WorkingDirectory=/home/nornetpp/src/{gitDirectory}/build/scripts
 
 [Install]
-WantedBy=multi-user.target""".format(gitDirectory = gitDirectory))
+WantedBy=multi-user.target
+""".format(gitDirectory = gitDirectory))
 
       vduHelper.createFileFromString('/home/nornetpp/log',
-"""#!/bin/sh
-tail -f /var/log/spgwc.log""", True)
+"""\
+#!/bin/sh
+tail -f /var/log/spgwc.log
+""", True)
 
       vduHelper.createFileFromString('/home/nornetpp/restart',
-"""#!/bin/sh
+"""\
+#!/bin/sh
 DIRECTORY=`dirname $0`
-sudo service spgwc restart && $DIRECTORY/log""", True)
+sudo service spgwc restart && $DIRECTORY/log
+""", True)
       vduHelper.endBlock()
 
       # ====== Set up sysstat service =======================================
@@ -253,8 +253,7 @@ def restart_spgwc():
    vduHelper.beginBlock('restart_spgwc')
    try:
 
-      commands = 'sudo service spgwc restart'
-      vduHelper.runInShell(commands)
+      vduHelper.runInShell('sudo service spgwc restart')
 
       message = vduHelper.endBlock()
       function_set( { 'outout': message } )
