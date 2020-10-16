@@ -27,6 +27,7 @@
 #
 # Contact: dreibh@simula.no
 
+rm -f juju.errors
 juju show-action-status |grep -B3 -A1 fail | tee juju.errors
 echo ""
 
@@ -40,13 +41,14 @@ cat juju.errors | tr -d '" \t' | (
       elif [ "$key" == "id" ] ; then
          id="$value"
       elif [ "$key" == "unit" ] ; then
-         unit="$value"
-         echo -e "\x1b[31m###### Action $action in Unit $unit failed, ID $id ######\x1b[0m"
-         echo -e "\x1b[36m===> juju show-action-output $id\x1b[0m"
-         echo -en "\x1b[34m"
-         juju show-action-output $id
-         echo -e "\x1b[0m"
-
+         if [ "$action" != "verify-ssh-credentials" ] ; then
+            unit="$value"
+            echo -e "\x1b[31m###### Action $action in Unit $unit failed, ID $id ######\x1b[0m"
+            echo -e "\x1b[36m===> juju show-action-output $id\x1b[0m"
+            echo -en "\x1b[34m"
+            juju show-action-output $id
+            echo -e "\x1b[0m"
+         fi
          action="???"
          id="???"
       # else
