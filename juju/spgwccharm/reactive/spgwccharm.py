@@ -253,8 +253,7 @@ def restart_spgwc():
    vduHelper.beginBlock('restart_spgwc')
    try:
 
-      commands = 'sudo service spgwc restart'
-      vduHelper.runInShell(commands)
+      vduHelper.runInShell('sudo service spgwc restart')
 
       message = vduHelper.endBlock()
       function_set( { 'outout': message } )
