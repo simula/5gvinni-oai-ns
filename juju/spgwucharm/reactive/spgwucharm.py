@@ -28,6 +28,7 @@
 #
 # Contact: dreibh@simula.no
 
+
 from charmhelpers.core.hookenv import (
     function_get,
     function_fail,
@@ -212,11 +213,13 @@ sudo sed -e "s/{{.*IPV4_ADDRESS=\\"192.168.160.100|\\".*;.*}}\|{{.*IPV4_ADDRESS=
 
       # ====== Configure HENCSAT QoS Setup ==================================
       vduHelper.beginBlock('Configuring QoS Setup')
+      vduHelper.runInShell('sudo mkdir -p /etc/hencsat')
       vduHelper.createFileFromString('/etc/hencsat/hencsat-router.conf',
 """# HENCSAT Router Configuration
 
 ROUTER_INTERFACE_LEFT=ens6
-ROUTER_INTERFACE_RIGHT=pdn""")
+ROUTER_INTERFACE_RIGHT=pdn
+""")
       vduHelper.aptInstallPackages([ 'hencsat-router' ], False)
       vduHelper.endBlock()
 
