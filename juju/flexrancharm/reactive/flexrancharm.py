@@ -113,7 +113,7 @@ def prepare_flexran_build():
 cd /home/nornetpp/src/{gitDirectory} && \\
 git submodule init && \\
 git submodule update flexran
-""".format(gitDirectory = gitDirectory)
+""".format(gitDirectory = gitDirectory))
       vduHelper.endBlock()
 
 
