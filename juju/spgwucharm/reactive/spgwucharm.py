@@ -218,8 +218,7 @@ ROUTER_INTERFACE_RIGHT=pdn
       # ====== Set up SPGW-U service ========================================
       vduHelper.beginBlock('Setting up SPGW-U service')
       vduHelper.configureSystemInfo('SPGW-U', 'This is the SPGW-U of the SimulaMet OAI VNF!')
-      vduHelper.createFileFromString('/lib/systemd/system/spgwu.service',
-"""\
+      vduHelper.createFileFromString('/lib/systemd/system/spgwu.service', """\
 [Unit]
 Description=Serving and Packet Data Network Gateway -- User Plane (SPGW-U)
 After=ssh.target
@@ -245,8 +244,9 @@ tail -f /var/log/spgwu.log
 """\
 #!/bin/sh
 DIRECTORY=`dirname $0`
-sudo service spgwu restart && $DIRECTORY/log
+sudo service spgwu restart && sleep 5 && sudo service hencsat-router restart && $DIRECTORY/log
 """, True)
+      vduHelper.runInShell('sudo chown nornetpp:nornetpp /home/nornetpp/log /home/nornetpp/restart')
       vduHelper.endBlock()
 
       # ====== Set up sysstat service =======================================

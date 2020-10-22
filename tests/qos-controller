@@ -1,3 +1,5 @@
-#!/bin/sh
+#!/bin/sh -e
 
+ssh-copy-id -p 2909 -i ~/.ssh/id_rsa nornetpp@localhost
+ssh -p 2909 -i ~/.ssh/id_rsa nornetpp@localhost hostname
 HENCSAT-QoS-Controller -router "Access to Public Data Network" -sshuser nornetpp -sshhost localhost  -sshport 2909

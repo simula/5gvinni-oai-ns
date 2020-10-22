@@ -315,6 +315,7 @@ tail -f /var/log/mme.log
 DIRECTORY=`dirname $0`
 sudo service mme restart && $DIRECTORY/log
 """, True)
+      vduHelper.runInShell('sudo chown nornetpp:nornetpp /home/nornetpp/log /home/nornetpp/restart')
       vduHelper.endBlock()
 
       # ====== Set up sysstat service =======================================

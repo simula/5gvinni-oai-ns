@@ -160,8 +160,7 @@ cd /home/nornetpp/src/{gitDirectory}/flexran
       # ====== Set up FlexRAN service ===========================================
       vduHelper.beginBlock('Setting up FlexRAN service')
       vduHelper.configureSystemInfo('FlexRAN Controller', 'This is the FlexRAN Controller of the SimulaMet FlexRAN VNF!')
-      vduHelper.createFileFromString('/lib/systemd/system/flexran.service',
-"""\
+      vduHelper.createFileFromString('/lib/systemd/system/flexran.service', """\
 [Unit]
 Description=FlexRAN Controller
 After=ssh.target
@@ -189,6 +188,7 @@ tail -f /var/log/flexran.log
 DIRECTORY=`dirname $0`
 sudo service flexran restart && $DIRECTORY/log
 """, True)
+      vduHelper.runInShell('sudo chown nornetpp:nornetpp /home/nornetpp/log /home/nornetpp/restart')
       vduHelper.endBlock()
 
       # ====== Set up sysstat service =======================================

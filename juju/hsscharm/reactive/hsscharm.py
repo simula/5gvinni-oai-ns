@@ -312,6 +312,7 @@ tail -f /var/log/hss.log
 DIRECTORY=`dirname $0`
 sudo service hss restart && $DIRECTORY/log
 """, True)
+      vduHelper.runInShell('sudo chown nornetpp:nornetpp /home/nornetpp/log /home/nornetpp/restart')
       vduHelper.endBlock()
 
       # ====== Set up sysstat service =======================================

@@ -382,6 +382,7 @@ tail -f /var/log/hss.log
 DIRECTORY=`dirname $0`
 sudo service hss restart && $DIRECTORY/log
 """, True)
+      vduHelper.runInShell('sudo chown nornetpp:nornetpp /home/nornetpp/log /home/nornetpp/restart')
       vduHelper.endBlock()
 
       # ====== Set up sysstat service =======================================
@@ -680,6 +681,7 @@ tail -f /var/log/mme.log
 DIRECTORY=`dirname $0`
 sudo service mme restart && $DIRECTORY/log
 """, True)
+      vduHelper.runInShell('sudo chown nornetpp:nornetpp /home/nornetpp/log /home/nornetpp/restart')
       vduHelper.endBlock()
 
       # ====== Set up sysstat service =======================================
@@ -862,8 +864,7 @@ sudo sed -e "s/APN_NI = \\"apn1\\"/APN_NI = \\"internet.{networkRealm}\\"/g" -i 
       # ====== Set up SPGW-C service ========================================
       vduHelper.beginBlock('Setting up SPGW-C service')
       vduHelper.configureSystemInfo('SPGW-C', 'This is the SPGW-C of the SimulaMet OAI VNF!')
-      vduHelper.createFileFromString('/lib/systemd/system/spgwc.service',
-"""\
+      vduHelper.createFileFromString('/lib/systemd/system/spgwc.service', """\
 [Unit]
 Description=Serving and Packet Data Network Gateway -- Control Plane (SPGW-C)
 After=ssh.target
@@ -891,6 +892,7 @@ tail -f /var/log/spgwc.log
 DIRECTORY=`dirname $0`
 sudo service spgwc restart && $DIRECTORY/log
 """, True)
+      vduHelper.runInShell('sudo chown nornetpp:nornetpp /home/nornetpp/log /home/nornetpp/restart')
       vduHelper.endBlock()
 
       # ====== Set up sysstat service =======================================
@@ -1092,8 +1094,7 @@ ROUTER_INTERFACE_RIGHT=pdn
       # ====== Set up SPGW-U service ========================================
       vduHelper.beginBlock('Setting up SPGW-U service')
       vduHelper.configureSystemInfo('SPGW-U', 'This is the SPGW-U of the SimulaMet OAI VNF!')
-      vduHelper.createFileFromString('/lib/systemd/system/spgwu.service',
-"""\
+      vduHelper.createFileFromString('/lib/systemd/system/spgwu.service', """\
 [Unit]
 Description=Serving and Packet Data Network Gateway -- User Plane (SPGW-U)
 After=ssh.target
@@ -1119,8 +1120,9 @@ tail -f /var/log/spgwu.log
 """\
 #!/bin/sh
 DIRECTORY=`dirname $0`
-sudo service spgwu restart && $DIRECTORY/log
+sudo service spgwu restart && sleep 5 && sudo service hencsat-router restart && $DIRECTORY/log
 """, True)
+      vduHelper.runInShell('sudo chown nornetpp:nornetpp /home/nornetpp/log /home/nornetpp/restart')
       vduHelper.endBlock()
 
       # ====== Set up sysstat service =======================================
@@ -1158,7 +1160,7 @@ def restart_spgwu():
 
 
 
-#####################################
+# ###########################################################################
 # #### FlexRAN Charm functions                                           ####
 # ###########################################################################
 
@@ -1264,8 +1266,7 @@ cd /home/nornetpp/src/{gitDirectory}/flexran
       # ====== Set up FlexRAN service ===========================================
       vduHelper.beginBlock('Setting up FlexRAN service')
       vduHelper.configureSystemInfo('FlexRAN Controller', 'This is the FlexRAN Controller of the SimulaMet FlexRAN VNF!')
-      vduHelper.createFileFromString('/lib/systemd/system/flexran.service',
-"""\
+      vduHelper.createFileFromString('/lib/systemd/system/flexran.service', """\
 [Unit]
 Description=FlexRAN Controller
 After=ssh.target
@@ -1293,6 +1294,7 @@ tail -f /var/log/flexran.log
 DIRECTORY=`dirname $0`
 sudo service flexran restart && $DIRECTORY/log
 """, True)
+      vduHelper.runInShell('sudo chown nornetpp:nornetpp /home/nornetpp/log /home/nornetpp/restart')
       vduHelper.endBlock()
 
       # ====== Set up sysstat service =======================================
