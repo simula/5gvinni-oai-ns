@@ -42,7 +42,7 @@ MyParameters = {
 
    # ====== HSS =============================================================
    'hss-git-repository': 'https://github.com/simula/openairinterface-openair-hss.git',
-   'hss-git-commit': '2019.w45',
+   'hss-git-commit': 'dreibh/cassandra-build-fix-22oct2020',
    'hss-S6a-address': '172.16.6.129',
    'network-realm': 'simula.nornet',
    'network-k': '449C4B91AEACD0ACE182CF3A5A72BFA1',
@@ -54,7 +54,7 @@ MyParameters = {
 
    # ====== MME =============================================================
    'mme-git-repository': 'https://github.com/simula/openairinterface-openair-mme.git',
-   'mme-git-commit': '2019.w45',
+   'mme-git-commit': 'dreibh/asn1c-url-fix-14Oct2020',
    'mme-S1C-ipv4-interface': '192.168.247.102/24',
    'mme-S1C-ipv4-gateway': '0.0.0.0',
    'mme-S11-ipv4-interface': '172.16.1.102/24',
@@ -67,13 +67,13 @@ MyParameters = {
 
    # ====== SPGW-C ==========================================================
    'spgwc-git-repository': 'https://github.com/simula/openairinterface-openair-spgwc.git',
-   'spgwc-git-commit': 'develop',
+   'spgwc-git-commit': '2020.w36',
    'network-ipv4-dns1': '10.1.1.1',
    'network-ipv4-dns2': '10.1.2.1',
 
    # ====== SPGW-U ==========================================================
    'spgwu-git-repository': 'https://github.com/simula/openairinterface-openair-spgwu-tiny.git',
-   'spgwu-git-commit': 'develop',
+   'spgwu-git-commit': 'dreibh/tx-checksum-ip-generic-off',
    'spgwu-S1U-ipv4-interface': '192.168.248.159/24',
    'spgwu-S1U-ipv4-gateway': '0.0.0.0',
    'spgwu-SGi-ipv4-interface': '10.254.1.203/24',
@@ -83,7 +83,7 @@ MyParameters = {
    'spgwu-spgwc-list': '172.55.55.101',
 
    # ====== FlexRAN =========================================================
-   'flexran-git-repository': 'https://gitlab.eurecom.fr/mosaic5g/mosaic5g',
+   'flexran-git-repository': 'https://github.com/simula/mosaic5g-mosaic5g.git',
    'flexran-git-commit': 'master',
    'flexran-service-ipv4-interface': '192.168.246.100/24',
    'flexran-service-ipv4-gateway': '0.0.0.0',
