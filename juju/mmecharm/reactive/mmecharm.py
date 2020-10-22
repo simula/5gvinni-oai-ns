@@ -233,8 +233,8 @@ MME_CONF[@MME_IPV4_ADDRESS_FOR_S11@]='{mmeS11_IPv4Interface}' && \\
 MME_CONF[@MME_INTERFACE_NAME_FOR_S10@]='{mmeS10_IfName}' && \\
 MME_CONF[@MME_IPV4_ADDRESS_FOR_S10@]='{mmeS10_IPv4Interface}' && \\
 MME_CONF[@OUTPUT@]='CONSOLE' && \\
-MME_CONF[@SGW_IPV4_ADDRESS_FOR_S11_TEST_0@]='{spwgcS11_IPv4Interface}' && \\
-MME_CONF[@SGW_IPV4_ADDRESS_FOR_S11_0@]='{spwgcS11_IPv4Interface}' && \\
+MME_CONF[@SGW_IPV4_ADDRESS_FOR_S11_TEST_0@]='{spwgcS11_IPv4Address}' && \\
+MME_CONF[@SGW_IPV4_ADDRESS_FOR_S11_0@]='{spwgcS11_IPv4Address}' && \\
 MME_CONF[@PEER_MME_IPV4_ADDRESS_FOR_S10_0@]='0.0.0.0/24' && \\
 MME_CONF[@PEER_MME_IPV4_ADDRESS_FOR_S10_1@]='0.0.0.0/24' && \\
 MME_CONF[@TAC-LB_SGW_TEST_0@]={tac_sgw_test_lo} && \\
@@ -263,7 +263,7 @@ sudo ./check_mme_s6a_certificate $PREFIX/freeDiameter mme.{networkRealm} >logs/c
          mmeS10_IfName          = mmeS10_IfName,
          mmeS10_IPv4Interface   = mmeS10_IPv4Interface,
 
-         spwgcS11_IPv4Interface = spwgcS11_IPv4Interface,
+         spwgcS11_IPv4Address   = spwgcS11_IPv4Interface.ip,
          networkRealm           = networkRealm,
          networkMCC             = networkMCC,
          networkMNC             = networkMNC,

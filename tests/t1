@@ -599,8 +599,8 @@ MME_CONF[@MME_IPV4_ADDRESS_FOR_S11@]='{mmeS11_IPv4Interface}' && \\
 MME_CONF[@MME_INTERFACE_NAME_FOR_S10@]='{mmeS10_IfName}' && \\
 MME_CONF[@MME_IPV4_ADDRESS_FOR_S10@]='{mmeS10_IPv4Interface}' && \\
 MME_CONF[@OUTPUT@]='CONSOLE' && \\
-MME_CONF[@SGW_IPV4_ADDRESS_FOR_S11_TEST_0@]='{spwgcS11_IPv4Interface}' && \\
-MME_CONF[@SGW_IPV4_ADDRESS_FOR_S11_0@]='{spwgcS11_IPv4Interface}' && \\
+MME_CONF[@SGW_IPV4_ADDRESS_FOR_S11_TEST_0@]='{spwgcS11_IPv4Address}' && \\
+MME_CONF[@SGW_IPV4_ADDRESS_FOR_S11_0@]='{spwgcS11_IPv4Address}' && \\
 MME_CONF[@PEER_MME_IPV4_ADDRESS_FOR_S10_0@]='0.0.0.0/24' && \\
 MME_CONF[@PEER_MME_IPV4_ADDRESS_FOR_S10_1@]='0.0.0.0/24' && \\
 MME_CONF[@TAC-LB_SGW_TEST_0@]={tac_sgw_test_lo} && \\
@@ -629,7 +629,7 @@ sudo ./check_mme_s6a_certificate $PREFIX/freeDiameter mme.{networkRealm} >logs/c
          mmeS10_IfName          = mmeS10_IfName,
          mmeS10_IPv4Interface   = mmeS10_IPv4Interface,
 
-         spwgcS11_IPv4Interface = spwgcS11_IPv4Interface,
+         spwgcS11_IPv4Address   = spwgcS11_IPv4Interface.ip,
          networkRealm           = networkRealm,
          networkMCC             = networkMCC,
          networkMNC             = networkMNC,
@@ -870,7 +870,7 @@ Description=Serving and Packet Data Network Gateway -- Control Plane (SPGW-C)
 After=ssh.target
 
 [Service]
-ExecStart=/bin/sh -c 'exec /usr/local/bin/spgwc -c /usr/local/etc/oai/spgw_u.conf -o >>/var/log/spgwc.log 2>&1'
+ExecStart=/bin/sh -c 'exec /usr/local/bin/spgwc -c /usr/local/etc/oai/spgw_c.conf -o >>/var/log/spgwc.log 2>&1'
 KillMode=process
 Restart=on-failure
 RestartPreventExitStatus=255
@@ -1334,7 +1334,7 @@ def restart_flexran():
 
 # ###########################################################################
 
-testAll     = True
+testAll     = False
 
 testHSS     = False
 testMME     = True
