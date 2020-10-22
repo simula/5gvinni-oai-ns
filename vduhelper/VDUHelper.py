@@ -166,7 +166,7 @@ class VDUHelper:
 
 
    # ###### Store string into file ##########################################
-   def createFileFromString(self, fileName, contentString, makeExecutable = False):
+   def createFileFromString(self, fileName, contentString, makeExecutable = False, setOwnerTo = None):
       self.beginBlock('Creating file ' + fileName)
 
       contentBase64 = self.makeBase64(contentString)
@@ -175,6 +175,8 @@ class VDUHelper:
                        fileName = fileName, contentBase64 = contentBase64)
          if makeExecutable == False:
             commands = commands + ' && \\\nsudo chmod +x {fileName}'.format(fileName = fileName)
+         if setOwnerTo != None:
+            commands = commands + ' && \\\nsudo chown {setOwnerTo} {fileName}'.format(fileName = fileName, setOwnerTo = setOwnerTo)
          self.runInShell(commands)
       except:
          self.endBlock(False)
@@ -434,6 +436,24 @@ class VDUHelper:
          for package in packages:
             commands = commands + ' ' + package
          self.runInShell(commands)
+
+
+   # ###### Write .gitconfig ################################################
+   def configureGit(self, name, email):
+      self.beginBlock('Configuring Git')
+      self.createFileFromString('/home/nornetpp/.gitconfig', """\
+[user]
+        name = {name}
+        email = {email}
+[push]
+        default = simple
+[color]
+        ui = auto
+[credential]
+        helper = store
+""".format(name = name, email = email))
+      self.runInShell('sudo chown nornetpp:nornetpp /home/nornetpp/.gitconfig')
+      self.endBlock()
 
 
    # ###### Configure System-Info banner ####################################
