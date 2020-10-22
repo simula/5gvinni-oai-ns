@@ -31,8 +31,8 @@ additionalParamsForVnf:
   - member-vnf-index: '1'
     additionalParams:
       # ====== HSS ==========================================================
-      hss_git_repository: 'https://github.com/simula/openairinterface-openair-cn.git'
-      hss_git_commit: 'dreibh/cassandra-build-fix-03sep2020'
+      hss_git_repository: 'https://github.com/simula/openairinterface-openair-hss.git'
+      hss_git_commit: 'dreibh/cassandra-build-fix-22oct2020'
       hss_S6a_address: '172.16.6.129'
       network_realm: 'simula.nornet'
       network_k: '449C4B91AEACD0ACE182CF3A5A72BFA1'
