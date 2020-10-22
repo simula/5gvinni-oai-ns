@@ -205,7 +205,7 @@ Description=Serving and Packet Data Network Gateway -- Control Plane (SPGW-C)
 After=ssh.target
 
 [Service]
-ExecStart=/bin/sh -c 'exec /usr/local/bin/spgwc -c /usr/local/etc/oai/spgw_u.conf -o >>/var/log/spgwc.log 2>&1'
+ExecStart=/bin/sh -c 'exec /usr/local/bin/spgwc -c /usr/local/etc/oai/spgw_c.conf -o >>/var/log/spgwc.log 2>&1'
 KillMode=process
 Restart=on-failure
 RestartPreventExitStatus=255
