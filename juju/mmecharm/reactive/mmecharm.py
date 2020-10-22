@@ -293,11 +293,11 @@ Description=Mobility Management Entity (MME)
 After=ssh.target
 
 [Service]
-ExecStart=/bin/sh -c 'exec /usr/local/bin/mme -c /usr/local/etc/oai/spgw_u.conf -o >>/var/log/mme.log 2>&1'
+ExecStart=/bin/sh -c 'exec /usr/local/bin/mme -c /usr/local/etc/oai/mme.conf >>/var/log/mme.log 2>&1'
 KillMode=process
 Restart=on-failure
 RestartPreventExitStatus=255
-WorkingDirectory=/home/nornetpp/src/{gitDirectory}/build/scripts
+WorkingDirectory=/home/nornetpp/src/{gitDirectory}/scripts
 
 [Install]
 WantedBy=multi-user.target

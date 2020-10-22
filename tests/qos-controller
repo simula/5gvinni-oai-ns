@@ -1,0 +1,3 @@
+#!/bin/sh
+
+HENCSAT-QoS-Controller -router "Access to Public Data Network" -sshuser nornetpp -sshhost localhost  -sshport 2909

@@ -284,8 +284,7 @@ oai_hss -j $PREFIX/hss_rel14.json --onlyloadkey >logs/onlyloadkey.log 2>&1
       # ====== Set up HSS service ===========================================
       vduHelper.beginBlock('Setting up HSS service')
       vduHelper.configureSystemInfo('HSS', 'This is the HSS of the SimulaMet OAI VNF!')
-      vduHelper.createFileFromString('/lib/systemd/system/hss.service',
-"""\
+      vduHelper.createFileFromString('/lib/systemd/system/hss.service', """\
 [Unit]
 Description=Home Subscriber Server (HSS)
 After=ssh.target
@@ -295,7 +294,7 @@ ExecStart=/bin/sh -c 'exec /usr/local/bin/oai_hss -j /usr/local/etc/oai/hss_rel1
 KillMode=process
 Restart=on-failure
 RestartPreventExitStatus=255
-WorkingDirectory=/home/nornetpp/src/{gitDirectory}/build/scripts
+WorkingDirectory=/home/nornetpp/src/{gitDirectory}/scripts
 
 [Install]
 WantedBy=multi-user.target
