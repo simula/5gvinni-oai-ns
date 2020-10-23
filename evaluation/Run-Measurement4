@@ -28,7 +28,7 @@
 # Contact: dreibh@simula.no
 
 
-DIRECTORY="Measurement4-0002"
+DIRECTORY="Measurement4-0003"
 DESTINATION="10.1.1.249:9000"
 INTERFACE="any"
 RUNTIME=120
@@ -158,8 +158,8 @@ for qosBandwidth in 100000 1000 ; do
    qosDelay=0
    qosLossRate=0.0
    qosErrorRate=0.0
-   for scenario in Download ; do   #  Download Upload Bidirectional
-      for protocol in tcp ; do   # udp tcp sctp
+   for scenario in Download Upload Bidirectional ; do   #  Download Upload Bidirectional
+      for protocol in tcp sctp ; do   # udp tcp sctp
          flowParameters="INVALID!"
          if [ "${protocol}" == "udp" ] ; then
             flowParameters="${streamingFlow}"
