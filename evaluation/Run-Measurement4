@@ -28,7 +28,7 @@
 # Contact: dreibh@simula.no
 
 
-DIRECTORY="Measurement4-0001"
+DIRECTORY="Measurement4-0002"
 DESTINATION="10.1.1.249:9000"
 INTERFACE="any"
 RUNTIME=120
@@ -57,6 +57,13 @@ sudo -u#${SUDO_UID} -g#${SUDO_GID} ssh-keygen -q -R ${IP_MME}   >/dev/null 2>&1
 sudo -u#${SUDO_UID} -g#${SUDO_GID} ssh-keygen -q -R ${IP_SPGWC} >/dev/null 2>&1
 sudo -u#${SUDO_UID} -g#${SUDO_GID} ssh-keygen -q -R ${IP_SPGWU} >/dev/null 2>&1
 
+
+echo "Checking QoS Setup ..."
+if ! sudo -u#${SUDO_UID} -g#${SUDO_GID} ssh -p 2909 nornetpp@localhost HENCSAT-QoS-Setup change 100000 0 0.0 0.0 ; then
+   echo >&2 "ERROR: Unable to configure QoS settings!"
+   exit 1
+fi
+
 echo "Checking Prometheus connection ..."
 if ! curl -o /dev/null "${PROMETHEUS}?query=osm_cpu_load_5min&start=2020-09-11T06:00:00.000Z&end=2020-09-11T06:00:30.000Z&step=1s" 2>/dev/null ; then
    echo >&2 "ERROR: Unable to get data from Prometheus! Check tunnel!"
@@ -70,7 +77,7 @@ SUMMARY_OLD="${DIRECTORY}/results.summary"
 SUMMARY_NEW="${DIRECTORY}/results.summary.new"
 SUMMARY_UPDATED="${DIRECTORY}/results.summary.updated"
 (
-   echo "--varnames=\"TimeStamp Scenario Protocol Runtime FlowParameters\""
+   echo "--varnames=\"TimeStamp Scenario Protocol Runtime FlowParameters QoSBandwidth QoSDelay QoSLossRate QoSErrorRate\""
    echo "--resultsdirectory=${DIRECTORY}"
 ) >${SUMMARY_NEW}
 
@@ -147,94 +154,109 @@ get-prometheus-metrics ()
 
 
 # ====== Run measurements ===================================================
-for scenario in Download ; do   #  Download Upload Bidirectional
-   for protocol in tcp ; do   # udp tcp sctp
-      flowParameters="INVALID!"
-      if [ "${protocol}" == "udp" ] ; then
-         flowParameters="${streamingFlow}"
-      else
-         flowParameters="${saturatedFlow}"
-      fi
-      if [ "${scenario}" == "Bidirectional" ] ; then
-          flowParameters="${flowParameters}:${flowParameters}:maxmsgsize=${maxMsgSize},sndbuf=0,rcvbuf=0"
-       elif [ "${scenario}" == "Upload" ] ; then
-          flowParameters="${flowParameters}:const0:const0:maxmsgsize=${maxMsgSize},sndbuf=0,rcvbuf=0"
-       elif [ "${scenario}" == "Download" ] ; then
-          flowParameters="const0:const0:${flowParameters}:maxmsgsize=${maxMsgSize},sndbuf=0,rcvbuf=0"
-       else
-          echo >&2 "ERROR: Bad scenario ${scenario}!"
-          exit 1
-       fi
+for qosBandwidth in 100000 1000 ; do
+   qosDelay=0
+   qosLossRate=0.0
+   qosErrorRate=0.0
+   for scenario in Download ; do   #  Download Upload Bidirectional
+      for protocol in tcp ; do   # udp tcp sctp
+         flowParameters="INVALID!"
+         if [ "${protocol}" == "udp" ] ; then
+            flowParameters="${streamingFlow}"
+         else
+            flowParameters="${saturatedFlow}"
+         fi
+         if [ "${scenario}" == "Bidirectional" ] ; then
+             flowParameters="${flowParameters}:${flowParameters}:maxmsgsize=${maxMsgSize},sndbuf=0,rcvbuf=0"
+          elif [ "${scenario}" == "Upload" ] ; then
+             flowParameters="${flowParameters}:const0:const0:maxmsgsize=${maxMsgSize},sndbuf=0,rcvbuf=0"
+          elif [ "${scenario}" == "Download" ] ; then
+             flowParameters="const0:const0:${flowParameters}:maxmsgsize=${maxMsgSize},sndbuf=0,rcvbuf=0"
+          else
+             echo >&2 "ERROR: Bad scenario ${scenario}!"
+             exit 1
+          fi
 
-      now=`date +%FT%H:%M:%S.%N`
-      echo ""
-      echo "====== ${now}: ${protocol^^}, ${flowParameters} ======"
+         now=`date +%FT%H:%M:%S.%N`
+         echo ""
+         echo "====== ${now}: ${protocol^^}, ${flowParameters} ======"
 
-      values="${now} ${scenario} ${protocol^^} ${RUNTIME} ${flowParameters}"
-      id=`echo "${now}: ${values}" | sha256 -x`
-      prefix="${DIRECTORY}/${id}"
-      scalarFile="${prefix}.sca"
-      scalarFileA="${prefix}-active.sca"
-      scalarFileP="${prefix}-passive.sca"
-      vectorFile="${prefix}.vec"
-      mmeStatsFile="${prefix}-mme.data"
+         values="${now} ${scenario} ${protocol^^} ${RUNTIME} ${flowParameters} ${qosBandwidth} ${qosDelay} ${qosLossRate} ${qosErrorRate}"
+         id=`echo "${now}: ${values}" | sha256 -x`
+         prefix="${DIRECTORY}/${id}"
+         scalarFile="${prefix}.sca"
+         scalarFileA="${prefix}-active.sca"
+         scalarFileP="${prefix}-passive.sca"
+         vectorFile="${prefix}.vec"
+         mmeStatsFile="${prefix}-mme.data"
 
-      (
-         echo "--values=${values}"
-         echo "--input=${scalarFileA}"
-         echo "--values=${values}"
-         echo "--input=${scalarFileP}"
-      ) >>${SUMMARY_NEW}
+         (
+            echo "--values=${values}"
+            echo "--input=${scalarFileA}"
+            echo "--values=${values}"
+            echo "--input=${scalarFileP}"
+         ) >>${SUMMARY_NEW}
 
-      # ====== Start sysstat in EPC =========================================
-      sysstatParameters="-bqr -n DEV,EDEV,IP,EIP,ICMP,EICMP,IP6,EIP6,ICMP6,EICMP6,TCP,ETCP,UDP,UDP6 1 600"
-      start-monitoring ${id} hss   ${IP_HSS}   "${sysstatParameters}" &
-      start-monitoring ${id} mme   ${IP_MME}   "${sysstatParameters}" &
-      start-monitoring ${id} spgwc ${IP_SPGWC} "${sysstatParameters}" &
-      start-monitoring ${id} spgwu ${IP_SPGWU} "${sysstatParameters}" &
-      wait
-
-
-      # ====== Start tcpdump ================================================
-      echo "Starting tcpdump ..."
-      for tcpdumpSnaplen in ${tcpdumpSnaplens} ; do
-         tcpdump -i ${INTERFACE} -w "${prefix}-${tcpdumpSnaplen}.pcap" -s ${tcpdumpSnaplen} -n ${protocol} or sctp or icmp or icmp6 &
-      done
-      sleep 3
+         # ====== Start sysstat in EPC ======================================
+         sysstatParameters="-bqr -n DEV,EDEV,IP,EIP,ICMP,EICMP,IP6,EIP6,ICMP6,EICMP6,TCP,ETCP,UDP,UDP6 1 600"
+         start-monitoring ${id} hss   ${IP_HSS}   "${sysstatParameters}" &
+         start-monitoring ${id} mme   ${IP_MME}   "${sysstatParameters}" &
+         start-monitoring ${id} spgwc ${IP_SPGWC} "${sysstatParameters}" &
+         start-monitoring ${id} spgwu ${IP_SPGWU} "${sysstatParameters}" &
+         wait
 
 
-      # ====== Run NetPerfMeter =============================================
-      echo "Running NetPerfMeter ..."
-      startTime=`date +"%s"`
-      sudo -u#${SUDO_UID} -g#${SUDO_GID} netperfmeter ${DESTINATION} \
-         -quiet -runtime=${RUNTIME} \
-         -vector="${vectorFile}" -scalar="${scalarFile}" \
-         -${protocol} ${flowParameters} || \
-        sudo -u#${SUDO_UID} -g#${SUDO_GID} netperfmeter ${DESTINATION} \
+         # ====== Start tcpdump =============================================
+         echo "Starting tcpdump ..."
+         for tcpdumpSnaplen in ${tcpdumpSnaplens} ; do
+            tcpdump -i ${INTERFACE} -w "${prefix}-${tcpdumpSnaplen}.pcap" -s ${tcpdumpSnaplen} -n ${protocol} or sctp or icmp or icmp6 &
+         done
+         sleep 3
+
+
+         # ====== Apply QoS Settings ========================================
+         sudo -u#${SUDO_UID} -g#${SUDO_GID} ssh -p 2909 nornetpp@localhost HENCSAT-QoS-Setup change \
+            ${qosBandwidth} ${qosDelay} ${qosLossRate} ${qosErrorRate}
+
+
+         # ====== Run NetPerfMeter ==========================================
+         echo "Running NetPerfMeter ..."
+         startTime=`date +"%s"`
+         sudo -u#${SUDO_UID} -g#${SUDO_GID} netperfmeter ${DESTINATION} \
             -quiet -runtime=${RUNTIME} \
             -vector="${vectorFile}" -scalar="${scalarFile}" \
-            -${protocol} ${flowParameters}
-      endTime=`date +"%s"`
+            -${protocol} ${flowParameters} || \
+           sudo -u#${SUDO_UID} -g#${SUDO_GID} netperfmeter ${DESTINATION} \
+               -quiet -runtime=${RUNTIME} \
+               -vector="${vectorFile}" -scalar="${scalarFile}" \
+               -${protocol} ${flowParameters}
+         endTime=`date +"%s"`
 
-      echo "Stopping tcpdump ..."
-      killall tcpdump || true
-      wait
+         echo "Stopping tcpdump ..."
+         killall tcpdump || true
+         wait
 
 
-      # ====== Stop sysstat in EPC and collect statistics ===================
-      echo "Stopping sar and and collecting statistics ..."
-      stop-monitoring ${id} hss   ${IP_HSS}   &
-      stop-monitoring ${id} mme   ${IP_MME}   &
-      stop-monitoring ${id} spgwc ${IP_SPGWC} &
-      stop-monitoring ${id} spgwu ${IP_SPGWU} &
-      wait
+         # ====== Unset QoS Settings ========================================
+         sudo -u#${SUDO_UID} -g#${SUDO_GID} ssh -p 2909 nornetpp@localhost HENCSAT-QoS-Setup change \
+            100000 0 0.0 0.0
 
-      # ====== Get metrics from Prometheus ==================================
-      get-prometheus-metrics "${id}" "${startTime}" "${endTime}"
 
-      # ====== Set ownership and compress pcap files ========================
-      chown ${SUDO_UID}:${SUDO_GID} ${prefix}*
-      find ${DIRECTORY} -name "${id}*.pcap" | xargs -r xz -T0
+         # ====== Stop sysstat in EPC and collect statistics ================
+         echo "Stopping sar and and collecting statistics ..."
+         stop-monitoring ${id} hss   ${IP_HSS}   &
+         stop-monitoring ${id} mme   ${IP_MME}   &
+         stop-monitoring ${id} spgwc ${IP_SPGWC} &
+         stop-monitoring ${id} spgwu ${IP_SPGWU} &
+         wait
+
+         # ====== Get metrics from Prometheus ===============================
+         get-prometheus-metrics "${id}" "${startTime}" "${endTime}"
+
+         # ====== Set ownership and compress pcap files =====================
+         chown ${SUDO_UID}:${SUDO_GID} ${prefix}*
+         find ${DIRECTORY} -name "${id}*.pcap" | xargs -r xz -T0
+      done
    done
 done
 

@@ -35,7 +35,7 @@ library(Hmisc)
 source("/usr/share/netperfmeter/plotter.R")
 
 
-name <- "Measurement4"
+name <- "Measurement4-0002"
 
 
 
@@ -81,10 +81,13 @@ makePlot <- function(node)
    zSet   <- allResults$Scenario
    zTitle <- "Scenario"
 
-   hset<-data.frame(PathMgrCC=pSet, ReceivedBitRate=ySet, Path=zSet)
+   ScenarioBandwdith <- paste(sep="", allResults$Scenario, allResults$QoSBandwidth)
+
+
+   hset<-data.frame(TransportProtocol=pSet, ReceivedBitRate=ySet, ScenarioBandwdith=ScenarioBandwdith)
 
    p <- ggplot(hset,
-           aes(x=PathMgrCC,y=ReceivedBitRate,fill=PathMgrCC)) +
+           aes(x=TransportProtocol,y=ReceivedBitRate,fill=TransportProtocol)) +
            scale_fill_manual(values = plotColours)
    p <- p + labs(title=title,
                  fill=zTitle,
@@ -101,8 +104,8 @@ makePlot <- function(node)
                   #legend.justification = c(1,1),
                   legend.background    = element_rect(colour = "blue",  fill = "#ffffff", size=1)
                   )
-   p <- p + facet_grid(~Path) +
-            stat_summary(fun.y=mean, geom='bar', size=3)
+   p <- p + facet_grid(~ScenarioBandwdith) +
+            stat_summary(fun=mean, geom='bar', size=3)
 
    # Add confidence intervals:
    # NOTE: Needs at least 2 (*two*) runs to work!
@@ -114,7 +117,7 @@ makePlot <- function(node)
    # p <- p + geom_text(aes(label=sprintf("%1.1f", ReceivedBitRate)),
    #                    vjust=1.5,colour='blue',position=position_dodge(.9),size=6)
    # Only mean value as text:
-   p <- p + stat_summary(aes(label=round(..y..,1)), fun.y=mean, geom="text",
+   p <- p + stat_summary(aes(label=round(..y..,1)), fun=mean, geom="text",
                          colour='blue', size=5, vjust = -0.5)
 
    print(p)
