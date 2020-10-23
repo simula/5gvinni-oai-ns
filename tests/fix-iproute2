@@ -1,0 +1,8 @@
+#!/bin/bash -e
+
+cd ~/src
+git clone https://salsa.debian.org/debian/iproute2.git
+cd iproute2
+./configure
+make -j4
+sudo cp tc/tc /sbin

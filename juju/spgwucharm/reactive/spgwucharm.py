@@ -101,11 +101,11 @@ def prepare_spgwu_build():
       spgwuS1U_IfName        = 'ens5'
       spgwuSGi_IfName        = 'ens6'
 
-      configurationSXab = vduHelper.makeInterfaceConfiguration(spgwuSXab_IfName, IPv4Interface('0.0.0.0/0'), metric=61)
-      configurationS1U  = vduHelper.makeInterfaceConfiguration(spgwuS1U_IfName, spgwuS1U_IPv4Interface, spgwuS1U_IPv4Gateway, metric=62)
+      configurationSXab = vduHelper.makeInterfaceConfiguration(spgwuSXab_IfName, IPv4Interface('0.0.0.0/0'), metric=261)
+      configurationS1U  = vduHelper.makeInterfaceConfiguration(spgwuS1U_IfName, spgwuS1U_IPv4Interface, spgwuS1U_IPv4Gateway, metric=262)
       configurationSGi  = vduHelper.makeInterfaceConfiguration(spgwuSGi_IfName, spgwuSGi_IPv4Interface, spgwuSGi_IPv4Gateway,
                                                                spgwuSGi_IPv6Interface, spgwuSGi_IPv6Gateway,
-                                                               metric=1, pdnInterface = 'pdn')
+                                                               metric=200, pdnInterface = 'pdn')
 
 
       # ====== Prepare system ===============================================
