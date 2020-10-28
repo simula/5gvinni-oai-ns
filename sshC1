@@ -1,0 +1,7 @@
+#!/bin/sh
+
+HOST="10.208.0.220"
+
+ssh-keygen -q -R ${HOST}
+echo "SSH to HSS in CloudRAN Core ..."
+ssh -CX -oStrictHostKeyChecking=no nornetpp@${HOST}

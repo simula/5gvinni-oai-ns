@@ -1,0 +1,7 @@
+#!/bin/sh
+
+HOST="10.208.0.223"
+
+ssh-keygen -q -R ${HOST}
+echo "SSH to SPGW-U in CloudRAN Core ..."
+ssh -CX -oStrictHostKeyChecking=no nornetpp@${HOST}
