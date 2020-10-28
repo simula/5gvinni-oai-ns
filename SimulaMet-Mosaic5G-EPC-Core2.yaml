@@ -89,16 +89,16 @@ vld:
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '1'
         vnfd-connection-point-ref: hss-mgmt-cp
-        ip-address: 10.208.0.210
+        ip-address: 10.208.0.214
       - member-vnf-index-ref: '1'
         vnfd-connection-point-ref: mme-mgmt-cp
-        ip-address: 10.208.0.211
+        ip-address: 10.208.0.215
       - member-vnf-index-ref: '1'
         vnfd-connection-point-ref: spgwc-mgmt-cp
-        ip-address: 10.208.0.212
+        ip-address: 10.208.0.216
       - member-vnf-index-ref: '1'
         vnfd-connection-point-ref: spgwu-mgmt-cp
-        ip-address: 10.208.0.213
+        ip-address: 10.208.0.217
 
   # ====== S1-C =============================================================
   - name: SimulaMet-OAI-EPC_nsd-S1C
@@ -119,7 +119,7 @@ vld:
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '1'
         vnfd-connection-point-ref: spgwu-sgi-cp
-        ip-address: 10.254.1.204
+        ip-address: 10.254.1.214
 
 
 # ###### VNF-Internal Addresses #############################################
