@@ -30,4 +30,4 @@ nsd:nsd-catalog:
             - vnfd-id-ref: hackfest_proxycharm_vnfd
               member-vnf-index-ref: '1'
               vnfd-connection-point-ref: vnf-data
-              ip-address: 10.254.1.120
+              # ip-address: 10.254.1.120
