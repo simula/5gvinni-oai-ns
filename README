@@ -15,12 +15,41 @@ OSM Information Model (IM) packages:
  sudo apt-get install -y python-osm-im osm-devops
 
 
-==== Create test instance ====
+
+==== Create instances ====
+
+------ 1 Core setup, as in the OpenAirInterface example ------
 
 ./create-instance SimulaMet-OAI-EPC.yaml
 
+Helper scripts: sshA1 ... sshA4 for SSH to HSS, MME, SPGW-C and SPGW-U
+
+
+------ 2 Cores Mosaic5G setup ------
+
+./create-instance SimulaMet-Mosaic5G-EPC-Core1.yaml
+./create-instance SimulaMet-Mosaic5G-EPC-Core2.yaml
+./create-instance SimulaMet-FlexRAN.yaml
+
+Helper scripts:
+* sshB1a ... sshB4a for SSH to HSS, MME, SPGW-C and SPGW-U of Core #1
+* sshB1b ... sshB4b for SSH to HSS, MME, SPGW-C and SPGW-U of Core #2
+* sshF for SSH to FlexRAN Controller
+
+
+------ 1 Core setup for CloudRAN demo scenario ------
+
+./create-instance SimulaMet-CloudRAN.yaml
+
+Helper scripts: sshC1 ... sshC4 for SSH to HSS, MME, SPGW-C and SPGW-U
+
+
 
 ==== If something goes wrong: debugging commands ====
+
+* Simple check for failed Juju actions:
+
+ ./show-failed-juju-actions
 
 * Get Juju status:
 
