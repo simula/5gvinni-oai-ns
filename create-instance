@@ -34,7 +34,7 @@ function usage()
    echo >&2 "Usage: ${PROGRAM} parameter-file [parameter-file ...]"
    echo >&2 ""
    echo >&2 "Available parameter files in this directory:"
-   parameterFiles=`git ls-files | cut -d/ -f1 | sort -u | grep -- "-params.yaml"`
+   parameterFiles=`git ls-files | cut -d/ -f1 | sort -u | grep -- ".yaml"`
    for parameterFile in ${parameterFiles} ; do
       echo >&2 " * ${parameterFile}"
    done
@@ -62,7 +62,7 @@ while [ $# -gt 0 ] ; do
       echo >&2 "ERROR: The parameter file does not mention the NSD name! (#! NSD <name>)"
       exit 1
    fi
-   NS=`echo "${PARAMS}" | sed -e "s/-params.yaml$//g"`
+   NS=`echo "${PARAMS}" | sed -e "s/.yaml$//g"`
    if [ ! -d "${NSD}" ] ; then
       NSD=`echo "${NS}" | sed -e "s/-[a-zA-Z0-9]*$/_nsd/g"`
       if [ ! -d "${NSD}" ] ; then
@@ -74,7 +74,7 @@ while [ $# -gt 0 ] ; do
    VNFD=`echo "${NSD}" | sed -e "s/_nsd$/_vnfd/g"`
 
    echo "NS=$NS NSD=$NSD VNFD=$VNFD PARAMS=$PARAMS"
-exit 1
+
 
    # ====== Build ===========================================================
    if [ $n -eq 0 ] ; then

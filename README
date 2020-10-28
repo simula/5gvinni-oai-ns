@@ -17,7 +17,7 @@ OSM Information Model (IM) packages:
 
 ==== Create test instance ====
 
-./run-test SimulaMet-OAI-EPC
+./create-instance SimulaMet-OAI-EPC.yaml
 
 
 ==== If something goes wrong: debugging commands ====
