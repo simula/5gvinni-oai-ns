@@ -9,7 +9,7 @@
 # =====================================================================
 #
 # SimulaMet OpenAirInterface Evolved Packet Core VNF and NS
-# Copyright (C) 2019-2020 by Thomas Dreibholz
+# Copyright (C) 2019 by Thomas Dreibholz
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -34,45 +34,41 @@ additionalParamsForVnf:
   - member-vnf-index: '1'
     additionalParams:
       # ====== HSS ==========================================================
-      hss_git_repository: 'https://github.com/simula/openairinterface-openair-cn.git'
-      hss_git_commit: 'dreibh/cassandra-build-fix-03sep2020'
+      hss_git_repository: 'https://github.com/simula/openairinterface-openair-hss.git'
+      hss_git_commit: 'dreibh/cassandra-build-fix-22oct2020'
       hss_S6a_address: '172.16.6.129'
-      network_realm: 'oslomet.nornet'
+      network_realm: 'simula.nornet'
       network_k: '449C4B91AEACD0ACE182CF3A5A72BFA1'
       network_op: '1006020F0A478BF6B699F15C062E42B3'
-      network_imsi_first: '242891234500000'
-      network_msisdn_first: '24289880000000'
+      network_imsi_first: '242881234500000'
+      network_msisdn_first: '24288880000000'
       network_users: '1024'
 
       # ====== MME ==========================================================
-      # !!! Mosaic5G branch seems to be required !!!
-      # mme_git_repository: 'https://github.com/simula/openairinterface-openair-cn.git'
-      # mme_git_commit: '2020.w13'
-      mme_git_repository: 'https://github.com/simula/mosaic5g-openair-cn.git'
-      mme_git_commit: 'dreibh/mosaic5g'
-      # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      mme_S1C_ipv4_interface: '192.168.249.102/24'
+      mme_git_repository: 'https://github.com/simula/openairinterface-openair-mme.git'
+      mme_git_commit: 'dreibh/asn1c-url-fix-14Oct2020'
+      mme_S1C_ipv4_interface: '192.168.247.112/24'
       mme_S1C_ipv4_gateway: '0.0.0.0'
       mme_S1C_ipv6_interface: ''
       mme_S1C_ipv6_gateway: ''
       mme_S11_ipv4_interface: '172.16.1.102/24'
       mme_S6a_address: '172.16.6.2'
       network_mcc: '242'
-      network_mnc: '89'
+      network_mnc: '88'
 
       # ====== SPGW_C =======================================================
-      spgwc_git_repository: 'https://github.com/simula/openairinterface-openair-cn-cups.git'
-      spgwc_git_commit: '2019.w47'
+      spgwc_git_repository: 'https://github.com/simula/openairinterface-openair-spgwc.git'
+      spgwc_git_commit: '2020.w36'
       spgwc_S11_ipv4_interface: '172.16.1.104/24'
       network_ipv4_dns1: '10.1.1.1'
       network_ipv4_dns2: '10.1.2.1'
 
       # ====== SPGW_U =======================================================
-      spgwu_git_repository: 'https://github.com/simula/openairinterface-openair-cn-cups.git'
+      spgwu_git_repository: 'https://github.com/simula/openairinterface-openair-spgwu-tiny.git'
       spgwu_git_commit: 'dreibh/tx-checksum-ip-generic-off'
-      spgwu_S1U_ipv4_interface: '192.168.250.159/24'
+      spgwu_S1U_ipv4_interface: '192.168.248.169/24'
       spgwu_S1U_ipv4_gateway: '0.0.0.0'
-      spgwu_SGi_ipv4_interface: '10.254.1.204/24'
+      spgwu_SGi_ipv4_interface: '10.254.1.203/24'
       spgwu_SGi_ipv4_gateway: '10.254.1.1'
       spgwu_SGi_ipv6_interface: ''
       spgwu_SGi_ipv6_gateway: ''
@@ -89,37 +85,37 @@ vld:
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '1'
         vnfd-connection-point-ref: hss-mgmt-cp
-        ip-address: 10.208.0.210
+        ip-address: 10.208.0.200
       - member-vnf-index-ref: '1'
         vnfd-connection-point-ref: mme-mgmt-cp
-        ip-address: 10.208.0.211
+        ip-address: 10.208.0.201
       - member-vnf-index-ref: '1'
         vnfd-connection-point-ref: spgwc-mgmt-cp
-        ip-address: 10.208.0.212
+        ip-address: 10.208.0.202
       - member-vnf-index-ref: '1'
         vnfd-connection-point-ref: spgwu-mgmt-cp
-        ip-address: 10.208.0.213
+        ip-address: 10.208.0.203
 
   # ====== S1-C =============================================================
   - name: SimulaMet-OAI-EPC_nsd-S1C
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '1'
         vnfd-connection-point-ref: mme-s1c-cp
-        ip-address: 192.168.249.102
+        ip-address: 192.168.247.112
 
   # ====== S1-U =============================================================
   - name: SimulaMet-OAI-EPC_nsd-S1U
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '1'
         vnfd-connection-point-ref: spgwu-s1u-cp
-        ip-address: 192.168.250.159
+        ip-address: 192.168.248.169
 
   # ====== SGi ==============================================================
   - name: SimulaMet-OAI-EPC_nsd-SGi
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '1'
         vnfd-connection-point-ref: spgwu-sgi-cp
-        ip-address: 10.254.1.204
+        ip-address: 10.254.1.203
 
 
 # ###### VNF-Internal Addresses #############################################

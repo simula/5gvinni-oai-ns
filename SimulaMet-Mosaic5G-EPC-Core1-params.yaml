@@ -26,6 +26,9 @@
 #
 # Contact: dreibh@simula.no
 
+# The following line tells "create-instance" the name of the NSD:
+#! NSD SimulaMet-OAI-EPC_nsd
+
 # ###### VNF Parameters #####################################################
 additionalParamsForVnf:
   - member-vnf-index: '1'
