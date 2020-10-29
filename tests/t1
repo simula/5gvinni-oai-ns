@@ -1344,9 +1344,9 @@ def restart_flexran():
 
 testAll     = False
 
-testHSS     = False
+testHSS     = True
 testMME     = False
-testSPGWC   = True
+testSPGWC   = False
 testSPGWU   = False
 testFlexRAN = False
 
@@ -1358,34 +1358,34 @@ if testAll or testHSS:
    configure_hss()
    restart_hss()
 
-# ------ MME ----------------------------------------------------------------
-if testAll or testMME:
-   install_mmecharm_proxy_charm()
-   prepare_mme_build()
-   configure_mme()
-   restart_mme()
+## ------ MME ----------------------------------------------------------------
+#if testAll or testMME:
+   #install_mmecharm_proxy_charm()
+   #prepare_mme_build()
+   #configure_mme()
+   #restart_mme()
 
-#------ SPGW-C -------------------------------------------------------------
-if testAll or testSPGWC:
-   install_spgwccharm_proxy_charm()
-   prepare_spgwc_build()
-   configure_spgwc()
-   restart_spgwc()
+##------ SPGW-C -------------------------------------------------------------
+#if testAll or testSPGWC:
+   #install_spgwccharm_proxy_charm()
+   #prepare_spgwc_build()
+   #configure_spgwc()
+   #restart_spgwc()
 
-# ------ SPGW-U -------------------------------------------------------------
-if testAll or testSPGWU:
-   install_spgwucharm_proxy_charm()
-   prepare_spgwu_build()
-   configure_spgwu()
-   restart_spgwu()
+## ------ SPGW-U -------------------------------------------------------------
+#if testAll or testSPGWU:
+   #install_spgwucharm_proxy_charm()
+   #prepare_spgwu_build()
+   #configure_spgwu()
+   #restart_spgwu()
 
 
-# ------ FlexRAN Controller -------------------------------------------------
-if testAll or testFlexRAN:
-   install_flexrancharm_proxy_charm()
-   prepare_flexran_build()
-   configure_flexran()
-   restart_flexran()
+## ------ FlexRAN Controller -------------------------------------------------
+#if testAll or testFlexRAN:
+   #install_flexrancharm_proxy_charm()
+   #prepare_flexran_build()
+   #configure_flexran()
+   #restart_flexran()
 
 
 # ------ Interface configuration tests --------------------------------------

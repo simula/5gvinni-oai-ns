@@ -72,7 +72,7 @@ additionalParamsForVnf:
       spgwu_git_commit: 'dreibh/tx-checksum-ip-generic-off'
       spgwu_S1U_ipv4_interface: '192.168.248.169/24'
       spgwu_S1U_ipv4_gateway: '0.0.0.0'
-      spgwu_SGi_ipv4_interface: '10.254.1.203/24'
+      spgwu_SGi_ipv4_interface: '10.254.1.213/24'
       spgwu_SGi_ipv4_gateway: '10.254.1.1'
       spgwu_SGi_ipv6_interface: ''
       spgwu_SGi_ipv6_gateway: ''
