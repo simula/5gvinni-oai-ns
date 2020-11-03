@@ -60,14 +60,14 @@ additionalParamsForVnf:
       network_mcc: '242'
       network_mnc: '88'
 
-      # ====== SPGW_C =======================================================
+      # ====== SPGW-C =======================================================
       spgwc_git_repository: 'https://github.com/simula/openairinterface-openair-cn-cups.git'
       spgwc_git_commit: '2019.w47'
       spgwc_S11_ipv4_interface: '172.16.1.104/24'
       network_ipv4_dns1: '10.1.1.1'
       network_ipv4_dns2: '10.1.2.1'
 
-      # ====== SPGW_U =======================================================
+      # ====== SPGW-U =======================================================
       spgwu_git_repository: 'https://github.com/simula/openairinterface-openair-cn-cups.git'
       spgwu_git_commit: 'dreibh/tx-checksum-ip-generic-off'
       spgwu_S1U_ipv4_interface: '192.168.248.169/24'
