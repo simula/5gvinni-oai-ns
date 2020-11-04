@@ -1,2 +1,23 @@
-SPGW-C:
-Build ./build_spgwc -I -f fails if repository is not cleaned.
+Netplan:
+
+network:
+  version: 2
+  renderer: networkd
+  bridges:
+    dummy0:
+      dhcp4: no
+      dhcp6: no
+      accept-ra: no
+      interfaces: [ ]
+      addresses:
+        - 169.254.1.1/32
+
+
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    ens4:
+      addresses:
+        - 10.10.10.2/24
+      gateway4: 10.10.10.1

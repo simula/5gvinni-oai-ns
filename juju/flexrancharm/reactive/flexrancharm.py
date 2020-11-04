@@ -53,15 +53,6 @@ from . import VDUHelper
 vduHelper = VDUHelper.VDUHelper()
 
 
-# ***************************************************************************
-# NOTE:
-# Double escaping is required for \ and " in command string!
-# 1. Python
-# 2. bash -c "<command>"
-# That is: $ => \$ ; \ => \\ ; " => \\\"
-# ***************************************************************************
-
-
 
 # ###########################################################################
 # #### FlexRAN Charm functions                                           ####
@@ -111,20 +102,18 @@ def prepare_flexran_build():
       # ====== Prepare system ===============================================
       vduHelper.beginBlock('Preparing system')
       vduHelper.configureInterface(flexranService_IfName, configurationService, 61)
-      vduHelper.testNetworking('8.8.8.8')
+      vduHelper.testNetworking()
       vduHelper.waitForPackageUpdatesToComplete()
       vduHelper.endBlock()
 
       # ====== Prepare sources ==============================================
       vduHelper.beginBlock('Preparing sources')
       vduHelper.fetchGitRepository(gitDirectory, gitRepository, gitCommit)
-      commands = """\
+      vduHelper.executeFromString("""\
 cd /home/nornetpp/src/{gitDirectory} && \\
 git submodule init && \\
-git submodule update flexran""".format(
-         gitDirectory       = gitDirectory
-      )
-      vduHelper.runInShell(commands)
+git submodule update flexran
+""".format(gitDirectory = gitDirectory))
       vduHelper.endBlock()
 
 
@@ -150,51 +139,56 @@ def configure_flexran():
       # https://gitlab.eurecom.fr/mosaic5g/mosaic5g/-/wikis/tutorials/slicing
 
       gitDirectory = 'mosaic5g'
-      #networkUsers       = int(function_get('network-users'))
 
       # ====== Build FlexRAN ================================================
       vduHelper.beginBlock('Building FlexRAN itself')
-      commands = """\
-export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
+      vduHelper.executeFromString("""\
+export MAKEFLAGS="-j`nproc`" && \\
 cd /home/nornetpp/src/{gitDirectory} && \\
 mkdir -p logs && \\
-./build_m5g -f >logs/build_flexran.log 2>&1""".format(
-         gitDirectory       = gitDirectory
-      )
-      vduHelper.runInShell(commands)
+./build_m5g -f >logs/build_flexran.log 2>&1
+""".format(gitDirectory = gitDirectory))
       vduHelper.endBlock()
 
       # ====== Configure FlexRAN ================================================
       vduHelper.beginBlock('Configuring FlexRAN')
-      commands = """\
-cd /home/nornetpp/src/{gitDirectory}/flexran""".format(
-         gitDirectory = gitDirectory
-      )
-      vduHelper.runInShell(commands)
+      vduHelper.executeFromString("""\
+cd /home/nornetpp/src/{gitDirectory}/flexran
+""".format(gitDirectory = gitDirectory))
       vduHelper.endBlock()
 
       # ====== Set up FlexRAN service ===========================================
       vduHelper.beginBlock('Setting up FlexRAN service')
-      commands = """\
-( echo \\\"[Unit]\\\" && \\
-echo \\\"Description=FlexRAN Controller\\\" && \\
-echo \\\"After=ssh.target\\\" && \\
-echo \\\"\\\" && \\
-echo \\\"[Service]\\\" && \\
-echo \\\"ExecStart=/bin/sh -c \\\'exec /usr/bin/env FLEXRAN_RTC_HOME=/home/nornetpp/src/mosaic5g/flexran FLEXRAN_RTC_EXEC=/home/nornetpp/src/mosaic5g/flexran/build ./build/rt_controller -c log_config/basic_log >>/var/log/flexran.log 2>&1\\\'\\\" && \\
-echo \\\"KillMode=process\\\" && \\
-echo \\\"Restart=on-failure\\\" && \\
-echo \\\"RestartPreventExitStatus=255\\\" && \\
-echo \\\"WorkingDirectory=/home/nornetpp/src/mosaic5g/flexran\\\" && \\
-echo \\\"\\\" && \\
-echo \\\"[Install]\\\" && \\
-echo \\\"WantedBy=multi-user.target\\\" ) | sudo tee /lib/systemd/system/flexran.service && \\
-sudo systemctl daemon-reload && \\
-( echo -e \\\"#\\x21/bin/sh\\\" && echo \\\"tail -f /var/log/flexran.log\\\" ) | tee /home/nornetpp/log && \\
-chmod +x /home/nornetpp/log && \\
-( echo -e \\\"#\\x21/bin/sh\\\" && echo \\\"sudo service flexran restart && ./log\\\" ) | tee /home/nornetpp/restart && \\
-chmod +x /home/nornetpp/restart"""
-      vduHelper.runInShell(commands)
+      vduHelper.configureSystemInfo('FlexRAN Controller', 'This is the FlexRAN Controller of the SimulaMet FlexRAN VNF!')
+      vduHelper.createFileFromString('/lib/systemd/system/flexran.service', """\
+[Unit]
+Description=FlexRAN Controller
+After=ssh.target
+
+[Service]
+ExecStart=/bin/sh -c 'exec /usr/bin/env FLEXRAN_RTC_HOME=/home/nornetpp/src/{gitDirectory}/flexran FLEXRAN_RTC_EXEC=/home/nornetpp/src/{gitDirectory}/flexran/build ./build/rt_controller -c log_config/basic_log >>/var/log/flexran.log 2>&1'
+KillMode=process
+Restart=on-failure
+RestartPreventExitStatus=255
+WorkingDirectory=/home/nornetpp/src/{gitDirectory}/flexran
+
+[Install]
+WantedBy=multi-user.target
+""".format(gitDirectory = gitDirectory))
+
+      vduHelper.createFileFromString('/home/nornetpp/log',
+"""\
+#!/bin/sh
+tail -f /var/log/flexran.log
+""", True)
+
+      vduHelper.createFileFromString('/home/nornetpp/restart',
+"""\
+#!/bin/sh
+DIRECTORY=`dirname $0`
+sudo service flexran restart && $DIRECTORY/log
+""", True)
+      vduHelper.runInShell('sudo chown nornetpp:nornetpp /home/nornetpp/log /home/nornetpp/restart')
       vduHelper.endBlock()
 
       # ====== Set up sysstat service =======================================
@@ -220,8 +214,7 @@ def restart_flexran():
    vduHelper.beginBlock('restart_flexran')
    try:
 
-      commands = 'sudo service flexran restart'
-      vduHelper.runInShell(commands)
+      vduHelper.runInShell('sudo service flexran restart')
 
       message = vduHelper.endBlock()
       function_set( { 'outout': message } )

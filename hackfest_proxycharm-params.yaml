@@ -1,5 +1,0 @@
-# ###### VNF External Addresses #############################################
-vld:
-  # ====== Management =======================================================
-  - name: mgmtnet
-    vim-network-name: mgmt

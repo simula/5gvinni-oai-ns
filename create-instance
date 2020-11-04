@@ -31,16 +31,12 @@
 PROGRAM="$0"
 function usage()
 {
-   echo >&2 "Usage: ${PROGRAM} NS[-parameter] [NS[-parameter] ...]"
+   echo >&2 "Usage: ${PROGRAM} parameter-file [parameter-file ...]"
    echo >&2 ""
-   echo >&2 "Available NSs/parameter files in this directory:"
-   allNSs=`git ls-files | cut -d/ -f1 | sort -u | grep "_nsd$" | sed -e "s/_nsd$//g"`
-   for ns in ${allNSs} ; do
-      echo >&2 "* NS ${ns}:"
-      parameterFiles=`ls ${ns}*-params.yaml | xargs -n1 | sed -e "s/-params.yaml$//g"`
-      for parameterFile in ${parameterFiles} ; do
-         echo >&2 "  - ${parameterFile}"
-      done
+   echo >&2 "Available parameter files in this directory:"
+   parameterFiles=`git ls-files | cut -d/ -f1 | sort -u | grep -- ".yaml"`
+   for parameterFile in ${parameterFiles} ; do
+      echo >&2 " * ${parameterFile}"
    done
 }
 
@@ -52,14 +48,21 @@ if [ $# -lt 1 ] ; then
 fi
 n=0
 while [ $# -gt 0 ] ; do
-   PARAMS="$1-params.yaml"
+   # ====== Get parameter file ==============================================
+   PARAMS="$1"
    if [ ! -e "${PARAMS}" ] ; then
       echo >&2 "ERROR: Parameter file ${PARAMS} not found!"
       usage
       exit 1
    fi
-   NS=`echo "${PARAMS}" | sed -e "s/-params.yaml$//g"`
-   NSD="${NS}_nsd"
+
+   # ====== Extract NSD name from parameter file ============================
+   NSD=`grep -E '#! NSD ' ${PARAMS} | cut -d' ' -f3`
+   if [ "${NSD}" == "" ] ; then
+      echo >&2 "ERROR: The parameter file does not mention the NSD name! (#! NSD <name>)"
+      exit 1
+   fi
+   NS=`echo "${PARAMS}" | sed -e "s/.yaml$//g"`
    if [ ! -d "${NSD}" ] ; then
       NSD=`echo "${NS}" | sed -e "s/-[a-zA-Z0-9]*$/_nsd/g"`
       if [ ! -d "${NSD}" ] ; then

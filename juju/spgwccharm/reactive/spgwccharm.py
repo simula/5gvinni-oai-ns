@@ -28,6 +28,7 @@
 #
 # Contact: dreibh@simula.no
 
+
 from charmhelpers.core.hookenv import (
     function_get,
     function_fail,
@@ -50,15 +51,6 @@ from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
 from . import VDUHelper
 
 vduHelper = VDUHelper.VDUHelper()
-
-
-# ***************************************************************************
-# NOTE:
-# Double escaping is required for \ and " in command string!
-# 1. Python
-# 2. bash -c "<command>"
-# That is: $ => \$ ; \ => \\ ; " => \\\"
-# ***************************************************************************
 
 
 
@@ -88,7 +80,7 @@ def prepare_spgwc_build():
 
       gitRepository     = function_get('spgwc-git-repository')
       gitCommit         = function_get('spgwc-git-commit')
-      gitDirectory      = 'openair-cn-cups'
+      gitDirectory      = 'openair-spgwc'
 
       # Prepare network configurations:
       spgwcS11_IfName   = 'ens5'
@@ -97,9 +89,9 @@ def prepare_spgwc_build():
       configurationSXab = vduHelper.makeInterfaceConfiguration(spgwcSXab_IfName, IPv4Interface('0.0.0.0/0'))
 
       # S5S8 dummy interfaces:
-      spgwcS5S8_SGW_IfName  = 'dummy0:s5c'
+      spgwcS5S8_SGW_IfName  = 'dummy0'
       configurationS5S8_SGW = vduHelper.makeInterfaceConfiguration(spgwcS5S8_SGW_IfName, IPv4Interface('172.58.58.102/24'), createDummy = True)
-      spgwcS5S8_PGW_IfName  = 'dummy0:p5c'
+      spgwcS5S8_PGW_IfName  = 'dummy1'
       configurationS5S8_PGW = vduHelper.makeInterfaceConfiguration(spgwcS5S8_PGW_IfName, IPv4Interface('172.58.58.101/24'), createDummy = True)
 
       # ====== Prepare system ===============================================
@@ -108,7 +100,7 @@ def prepare_spgwc_build():
       vduHelper.configureInterface(spgwcSXab_IfName,      configurationSXab,      62)
       vduHelper.configureInterface(spgwcS5S8_SGW_IfName,  configurationS5S8_SGW,  63)
       vduHelper.configureInterface(spgwcS5S8_PGW_IfName,  configurationS5S8_PGW,  64)
-      vduHelper.testNetworking('8.8.8.8')
+      vduHelper.testNetworking()
       vduHelper.waitForPackageUpdatesToComplete()
       vduHelper.endBlock()
 
@@ -139,7 +131,7 @@ def configure_spgwc():
       # For a documentation of the installation procedure, see:
       # https://github.com/OPENAIRINTERFACE/openair-cn-cups/wiki/OpenAirSoftwareSupport#install-spgw-c
 
-      gitDirectory         = 'openair-cn-cups'
+      gitDirectory         = 'openair-spgwc'
 
       networkRealm         = function_get('network-realm')
       networkDNS1_IPv4     = IPv4Address(function_get('network-ipv4-dns1'))
@@ -148,39 +140,39 @@ def configure_spgwc():
       # Prepare network configurations:
       spgwcSXab_IfName     = 'ens4'
       spgwcS11_IfName      = 'ens5'
-      spgwcS5S8_SGW_IfName = 'dummy0:s5c'
-      spgwcS5S8_PGW_IfName = 'dummy0:p5c'
+      spgwcS5S8_SGW_IfName = 'dummy0'
+      spgwcS5S8_PGW_IfName = 'dummy1'
 
       # ====== Build SPGW-C dependencies ====================================
       vduHelper.beginBlock('Building SPGW-C dependencies')
-      commands = """\
-export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
+      vduHelper.executeFromString("""\
+export MAKEFLAGS="-j`nproc`" && \\
 cd /home/nornetpp/src/{gitDirectory}/build/scripts && \\
 mkdir -p logs && \\
-./build_spgwc -I -f >logs/build_spgwc-1.log 2>&1""".format(gitDirectory = gitDirectory)
-      vduHelper.runInShell(commands)
+./build_spgwc -I -f >logs/build_spgwc-1.log 2>&1
+""".format(gitDirectory = gitDirectory))
       vduHelper.endBlock()
 
       # ====== Build SPGW-C itself ==========================================
       vduHelper.beginBlock('Building SPGW-C itself')
-      commands = """\
-export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
+      vduHelper.executeFromString("""\
+export MAKEFLAGS="-j`nproc`" && \\
 cd /home/nornetpp/src/{gitDirectory}/build/scripts && \\
-./build_spgwc -c -V -b Debug -j >logs/build_spgwc-2.log 2>&1""".format(gitDirectory = gitDirectory)
-      vduHelper.runInShell(commands)
+./build_spgwc -c -V -b Debug -j >logs/build_spgwc-2.log 2>&1
+""".format(gitDirectory = gitDirectory))
       vduHelper.endBlock()
 
       # ====== Configure SPGW-C =============================================
       vduHelper.beginBlock('Configuring SPGW-C')
-      commands = """\
+      vduHelper.executeFromString("""\
 cd /home/nornetpp/src/{gitDirectory}/build/scripts && \\
 INSTANCE=1 && \\
 PREFIX='/usr/local/etc/oai' && \\
-sudo mkdir -m 0777 -p \$PREFIX && \\
-sudo cp ../../etc/spgw_c.conf  \$PREFIX && \\
+sudo mkdir -m 0777 -p $PREFIX && \\
+sudo cp ../../etc/spgw_c.conf  $PREFIX && \\
 declare -A SPGWC_CONF && \\
-SPGWC_CONF[@INSTANCE@]=\$INSTANCE && \\
-SPGWC_CONF[@PREFIX@]=\$PREFIX && \\
+SPGWC_CONF[@INSTANCE@]=$INSTANCE && \\
+SPGWC_CONF[@PREFIX@]=$PREFIX && \\
 SPGWC_CONF[@PID_DIRECTORY@]='/var/run' && \\
 SPGWC_CONF[@SGW_INTERFACE_NAME_FOR_S11@]='{spgwcS11_IfName}' && \\
 SPGWC_CONF[@SGW_INTERFACE_NAME_FOR_S5_S8_CP@]='{spgwcS5S8_SGW_IfName}' && \\
@@ -188,9 +180,11 @@ SPGWC_CONF[@PGW_INTERFACE_NAME_FOR_S5_S8_CP@]='{spgwcS5S8_PGW_IfName}' && \\
 SPGWC_CONF[@PGW_INTERFACE_NAME_FOR_SX@]='{spgwcSXab_IfName}' && \\
 SPGWC_CONF[@DEFAULT_DNS_IPV4_ADDRESS@]='{networkDNS1_IPv4}' && \\
 SPGWC_CONF[@DEFAULT_DNS_SEC_IPV4_ADDRESS@]='{networkDNS2_IPv4}' && \\
-for K in \\\"\${{!SPGWC_CONF[@]}}\\\"; do sudo egrep -lRZ \\\"\$K\\\" \$PREFIX | xargs -0 -l sudo sed -i -e \\\"s|\$K|\${{SPGWC_CONF[\$K]}}|g\\\" ; ret=\$?;[[ ret -ne 0 ]] && echo \\\"Tried to replace \$K with \${{SPGWC_CONF[\$K]}}\\\" || true ; done && \\
-sudo sed -e \\\"s/APN_NI = \\\\\\"default\\\\\\"/APN_NI = \\\\\\"default.{networkRealm}\\\\\\"/g\\\" -i /usr/local/etc/oai/spgw_c.conf && \\
-sudo sed -e \\\"s/APN_NI = \\\\\\"apn1\\\\\\"/APN_NI = \\\\\\"internet.{networkRealm}\\\\\\"/g\\\" -i /usr/local/etc/oai/spgw_c.conf""".format(
+SPGWC_CONF[@DEFAULT_APN@]='default.{networkRealm}' && \\
+for K in "${{!SPGWC_CONF[@]}}"; do sudo egrep -lRZ "$K" $PREFIX | xargs -0 -l sudo sed -i -e "s|$K|${{SPGWC_CONF[$K]}}|g" ; ret=$?;[[ ret -ne 0 ]] && echo "Tried to replace $K with ${{SPGWC_CONF[$K]}}" || true ; done && \\
+sudo sed -e "s/APN_NI = \\"default\\"/APN_NI = \\"default.{networkRealm}\\"/g" -i /usr/local/etc/oai/spgw_c.conf && \\
+sudo sed -e "s/APN_NI = \\"apn1\\"/APN_NI = \\"internet.{networkRealm}\\"/g" -i /usr/local/etc/oai/spgw_c.conf
+""".format(
          gitDirectory         = gitDirectory,
          networkRealm         = networkRealm,
          networkDNS1_IPv4     = networkDNS1_IPv4,
@@ -199,34 +193,42 @@ sudo sed -e \\\"s/APN_NI = \\\\\\"apn1\\\\\\"/APN_NI = \\\\\\"internet.{networkR
          spgwcS11_IfName      = spgwcS11_IfName,
          spgwcS5S8_SGW_IfName = spgwcS5S8_SGW_IfName,
          spgwcS5S8_PGW_IfName = spgwcS5S8_PGW_IfName
-      )
-      vduHelper.runInShell(commands)
+      ))
       vduHelper.endBlock()
 
 
       # ====== Set up SPGW-C service ========================================
       vduHelper.beginBlock('Setting up SPGW-C service')
-      commands = """\
-( echo \\\"[Unit]\\\" && \\
-echo \\\"Description=Serving and Packet Data Network Gateway -- Control Plane (SPGW-C)\\\" && \\
-echo \\\"After=ssh.target\\\" && \\
-echo \\\"\\\" && \\
-echo \\\"[Service]\\\" && \\
-echo \\\"ExecStart=/bin/sh -c \\\'exec /usr/local/bin/spgwc -c /usr/local/etc/oai/spgw_c.conf -o >>/var/log/spgwc.log 2>&1\\\'\\\" && \\
-echo \\\"KillMode=process\\\" && \\
-echo \\\"Restart=on-failure\\\" && \\
-echo \\\"RestartPreventExitStatus=255\\\" && \\
-echo \\\"WorkingDirectory=/home/nornetpp/src/openair-cn-cups/build/scripts\\\" && \\
-echo \\\"\\\" && \\
-echo \\\"[Install]\\\" && \\
-echo \\\"WantedBy=multi-user.target\\\" ) | sudo tee /lib/systemd/system/spgwc.service && \\
-sudo systemctl daemon-reload && \\
-( echo -e \\\"#\\x21/bin/sh\\\" && echo \\\"tail -f /var/log/spgwc.log\\\" ) | tee /home/nornetpp/log && \\
-chmod +x /home/nornetpp/log && \\
-( echo -e \\\"#\\x21/bin/sh\\\" && echo \\\"sudo service spgwc restart && ./log\\\" ) | tee /home/nornetpp/restart && \\
-chmod +x /home/nornetpp/restart"""
+      vduHelper.configureSystemInfo('SPGW-C', 'This is the SPGW-C of the SimulaMet OAI VNF!')
+      vduHelper.createFileFromString('/lib/systemd/system/spgwc.service', """\
+[Unit]
+Description=Serving and Packet Data Network Gateway -- Control Plane (SPGW-C)
+After=ssh.target
 
-      vduHelper.runInShell(commands)
+[Service]
+ExecStart=/bin/sh -c 'exec /usr/local/bin/spgwc -c /usr/local/etc/oai/spgw_c.conf -o >>/var/log/spgwc.log 2>&1'
+KillMode=process
+Restart=on-failure
+RestartPreventExitStatus=255
+WorkingDirectory=/home/nornetpp/src/{gitDirectory}/build/scripts
+
+[Install]
+WantedBy=multi-user.target
+""".format(gitDirectory = gitDirectory))
+
+      vduHelper.createFileFromString('/home/nornetpp/log',
+"""\
+#!/bin/sh
+tail -f /var/log/spgwc.log
+""", True)
+
+      vduHelper.createFileFromString('/home/nornetpp/restart',
+"""\
+#!/bin/sh
+DIRECTORY=`dirname $0`
+sudo service spgwc restart && $DIRECTORY/log
+""", True)
+      vduHelper.runInShell('sudo chown nornetpp:nornetpp /home/nornetpp/log /home/nornetpp/restart')
       vduHelper.endBlock()
 
       # ====== Set up sysstat service =======================================
@@ -252,8 +254,7 @@ def restart_spgwc():
    vduHelper.beginBlock('restart_spgwc')
    try:
 
-      commands = 'sudo service spgwc restart'
-      vduHelper.runInShell(commands)
+      vduHelper.runInShell('sudo service spgwc restart')
 
       message = vduHelper.endBlock()
       function_set( { 'outout': message } )

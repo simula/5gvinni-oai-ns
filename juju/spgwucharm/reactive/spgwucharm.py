@@ -28,6 +28,7 @@
 #
 # Contact: dreibh@simula.no
 
+
 from charmhelpers.core.hookenv import (
     function_get,
     function_fail,
@@ -50,15 +51,6 @@ from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
 from . import VDUHelper
 
 vduHelper = VDUHelper.VDUHelper()
-
-
-# ***************************************************************************
-# NOTE:
-# Double escaping is required for \ and " in command string!
-# 1. Python
-# 2. bash -c "<command>"
-# That is: $ => \$ ; \ => \\ ; " => \\\"
-# ***************************************************************************
 
 
 
@@ -88,7 +80,7 @@ def prepare_spgwu_build():
 
       gitRepository          = function_get('spgwu-git-repository')
       gitCommit              = function_get('spgwu-git-commit')
-      gitDirectory           = 'openair-cn-cups'
+      gitDirectory           = 'openair-spgwu-tiny'
 
       spgwuS1U_IPv4Interface = IPv4Interface(function_get('spgwu-S1U-ipv4-interface'))
       spgwuS1U_IPv4Gateway   = IPv4Address(function_get('spgwu-S1U-ipv4-gateway'))
@@ -109,11 +101,11 @@ def prepare_spgwu_build():
       spgwuS1U_IfName        = 'ens5'
       spgwuSGi_IfName        = 'ens6'
 
-      configurationSXab = vduHelper.makeInterfaceConfiguration(spgwuSXab_IfName, IPv4Interface('0.0.0.0/0'), metric=61)
-      configurationS1U  = vduHelper.makeInterfaceConfiguration(spgwuS1U_IfName, spgwuS1U_IPv4Interface, spgwuS1U_IPv4Gateway, metric=62)
+      configurationSXab = vduHelper.makeInterfaceConfiguration(spgwuSXab_IfName, IPv4Interface('0.0.0.0/0'), metric=261)
+      configurationS1U  = vduHelper.makeInterfaceConfiguration(spgwuS1U_IfName, spgwuS1U_IPv4Interface, spgwuS1U_IPv4Gateway, metric=262)
       configurationSGi  = vduHelper.makeInterfaceConfiguration(spgwuSGi_IfName, spgwuSGi_IPv4Interface, spgwuSGi_IPv4Gateway,
                                                                spgwuSGi_IPv6Interface, spgwuSGi_IPv6Gateway,
-                                                               metric=1, pdnInterface = 'pdn')
+                                                               metric=200, pdnInterface = 'pdn')
 
 
       # ====== Prepare system ===============================================
@@ -121,7 +113,7 @@ def prepare_spgwu_build():
       vduHelper.configureInterface(spgwuSXab_IfName, configurationSXab, 61)
       vduHelper.configureInterface(spgwuS1U_IfName,  configurationS1U,  62)
       vduHelper.configureInterface(spgwuSGi_IfName,  configurationSGi,  63)
-      vduHelper.testNetworking('8.8.8.8')
+      vduHelper.testNetworking()
       vduHelper.waitForPackageUpdatesToComplete()
       vduHelper.endBlock()
 
@@ -152,9 +144,7 @@ def configure_spgwu():
       # For a documentation of the installation procedure, see:
       # https://github.com/OPENAIRINTERFACE/openair-cn-cups/wiki/OpenAirSoftwareSupport#install-spgw-u
 
-      gitRepository    = 'https://github.com/OPENAIRINTERFACE/openair-cn-cups.git'
-      gitDirectory     = 'openair-cn-cups'
-      gitCommit        = 'develop'
+      gitDirectory     = 'openair-spgwu-tiny'
 
       spgwuSXab_IfName = 'ens4'
       spgwuS1U_IfName  = 'ens5'
@@ -168,82 +158,95 @@ def configure_spgwu():
             spgwcList = spgwcList + ', '
          spgwcList = spgwcList + '{{ IPV4_ADDRESS=\\\\\\"{spgwcAddress}\\\\\\"; }}'.format(spgwcAddress = str(spgwcAddress))
 
-#       # NOTE:
-#       # Double escaping is required for \ and " in "command" string!
-#       # 1. Python
-#       # 2. bash -c "<command>"
-#       # That is: $ => \$ ; \ => \\ ; " => \\\"
 
       # ====== Build SPGW-U dependencies ====================================
       vduHelper.beginBlock('Building SPGW-U dependencies')
-      commands = """\
-export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
+      vduHelper.executeFromString("""\
+export MAKEFLAGS="-j`nproc`" && \\
 cd /home/nornetpp/src/{gitDirectory}/build/scripts && \\
 mkdir -p logs && \\
-./build_spgwu -I -f >logs/build_spgwu-1.log 2>&1""".format(gitDirectory = gitDirectory)
-      vduHelper.runInShell(commands)
+./build_spgwu -I -f >logs/build_spgwu-1.log 2>&1""".format(gitDirectory = gitDirectory))
       vduHelper.endBlock()
 
       # ====== Build SPGW-U itself ==========================================
       vduHelper.beginBlock('Building SPGW-U itself')
-      commands = """\
-export MAKEFLAGS=\\\"-j`nproc`\\\" && \\
+      vduHelper.executeFromString("""\
+export MAKEFLAGS="-j`nproc`" && \\
 cd /home/nornetpp/src/{gitDirectory}/build/scripts && \\
-./build_spgwu -c -V -b Debug -j >logs/build_spgwu-2.log 2>&1""".format(gitDirectory = gitDirectory)
-      vduHelper.runInShell(commands)
+./build_spgwu -c -V -b Debug -j >logs/build_spgwu-2.log 2>&1""".format(gitDirectory = gitDirectory))
       vduHelper.endBlock()
 
       # ====== Configure SPGW-U =============================================
       vduHelper.beginBlock('Configuring SPGW-U')
-      commands = """\
+      vduHelper.executeFromString("""\
 cd /home/nornetpp/src/{gitDirectory}/build/scripts && \\
 INSTANCE=1 && \\
 PREFIX='/usr/local/etc/oai' && \\
-sudo mkdir -m 0777 -p \$PREFIX && \\
-sudo cp ../../etc/spgw_u.conf  \$PREFIX && \\
+sudo mkdir -m 0777 -p $PREFIX && \\
+sudo cp ../../etc/spgw_u.conf  $PREFIX && \\
 declare -A SPGWU_CONF && \\
-SPGWU_CONF[@INSTANCE@]=\$INSTANCE && \\
-SPGWU_CONF[@PREFIX@]=\$PREFIX && \\
+SPGWU_CONF[@INSTANCE@]=$INSTANCE && \\
+SPGWU_CONF[@PREFIX@]=$PREFIX && \\
 SPGWU_CONF[@PID_DIRECTORY@]='/var/run' && \\
 SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_S1U_S12_S4_UP@]='{spgwuS1U_IfName}' && \\
 SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_SX@]='{spgwuSXab_IfName}' && \\
 SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_SGI@]='{spgwuSGi_IfName}' && \\
-for K in \\\"\${{!SPGWU_CONF[@]}}\\\"; do sudo egrep -lRZ \\\"\$K\\\" \$PREFIX | xargs -0 -l sudo sed -i -e \\\"s|\$K|\${{SPGWU_CONF[\$K]}}|g\\\" ; ret=\$?;[[ ret -ne 0 ]] && echo \\\"Tried to replace \$K with \${{SPGWU_CONF[\$K]}}\\\" || true ; done && \\
-sudo sed -e \\\"s/{{.*IPV4_ADDRESS=\\\\\\"192.168.160.100\\\\\\".*;.*}}/{spgwcList}/g\\\" -i /usr/local/etc/oai/spgw_u.conf""".format(
-         gitRepository     = gitRepository,
+for K in "${{!SPGWU_CONF[@]}}"; do sudo egrep -lRZ "$K" $PREFIX | xargs -0 -l sudo sed -i -e "s|$K|${{SPGWU_CONF[$K]}}|g" ; ret=$?;[[ ret -ne 0 ]] && echo "Tried to replace $K with ${{SPGWU_CONF[$K]}}" || true ; done && \\
+sudo sed -e "s/{{.*IPV4_ADDRESS=\\"192.168.160.100|\\".*;.*}}\|{{.*IPV4_ADDRESS=\\"@SPGWC0_IP_ADDRESS@\\".*;.*}}/{spgwcList}/g" -i /usr/local/etc/oai/spgw_u.conf""".format(
          gitDirectory      = gitDirectory,
-         gitCommit         = gitCommit,
          spgwuSXab_IfName  = spgwuSXab_IfName,
          spgwuS1U_IfName   = spgwuS1U_IfName,
          spgwuSGi_IfName   = spgwuSGi_IfName,
          spgwcList         = spgwcList
-      )
-      vduHelper.runInShell(commands)
+      ))
+      vduHelper.endBlock()
+
+
+      # ====== Configure HENCSAT QoS Setup ==================================
+      vduHelper.beginBlock('Configuring QoS Setup')
+      vduHelper.runInShell('sudo mkdir -p /etc/hencsat')
+      vduHelper.createFileFromString('/etc/hencsat/hencsat-router.conf',
+"""# HENCSAT Router Configuration
+
+ROUTER_INTERFACE_LEFT=ens6
+ROUTER_INTERFACE_RIGHT=pdn
+""")
+      vduHelper.aptInstallPackages([ 'hencsat-router' ], False)
       vduHelper.endBlock()
 
 
       # ====== Set up SPGW-U service ========================================
       vduHelper.beginBlock('Setting up SPGW-U service')
-      commands = """\
-( echo \\\"[Unit]\\\" && \\
-echo \\\"Description=Serving and Packet Data Network Gateway -- User Plane (SPGW-U)\\\" && \\
-echo \\\"After=ssh.target\\\" && \\
-echo \\\"\\\" && \\
-echo \\\"[Service]\\\" && \\
-echo \\\"ExecStart=/bin/sh -c \\\'exec /usr/local/bin/spgwu -c /usr/local/etc/oai/spgw_u.conf -o >>/var/log/spgwu.log 2>&1\\\'\\\" && \\
-echo \\\"KillMode=process\\\" && \\
-echo \\\"Restart=on-failure\\\" && \\
-echo \\\"RestartPreventExitStatus=255\\\" && \\
-echo \\\"WorkingDirectory=/home/nornetpp/src/openair-cn-cups/build/scripts\\\" && \\
-echo \\\"\\\" && \\
-echo \\\"[Install]\\\" && \\
-echo \\\"WantedBy=multi-user.target\\\" ) | sudo tee /lib/systemd/system/spgwu.service && \\
-sudo systemctl daemon-reload && \\
-( echo -e \\\"#\\x21/bin/sh\\\" && echo \\\"tail -f /var/log/spgwu.log\\\" ) | tee /home/nornetpp/log && \\
-chmod +x /home/nornetpp/log && \\
-( echo -e \\\"#\\x21/bin/sh\\\" && echo \\\"sudo service spgwu restart && ./log\\\" ) | tee /home/nornetpp/restart && \\
-chmod +x /home/nornetpp/restart"""
-      vduHelper.runInShell(commands)
+      vduHelper.configureSystemInfo('SPGW-U', 'This is the SPGW-U of the SimulaMet OAI VNF!')
+      vduHelper.createFileFromString('/lib/systemd/system/spgwu.service', """\
+[Unit]
+Description=Serving and Packet Data Network Gateway -- User Plane (SPGW-U)
+After=ssh.target
+
+[Service]
+ExecStart=/bin/sh -c 'exec /usr/local/bin/spgwu -c /usr/local/etc/oai/spgw_u.conf -o >>/var/log/spgwu.log 2>&1'
+KillMode=process
+Restart=on-failure
+RestartPreventExitStatus=255
+WorkingDirectory=/home/nornetpp/src/{gitDirectory}/build/scripts
+
+[Install]
+WantedBy=multi-user.target
+""".format(gitDirectory = gitDirectory))
+
+      vduHelper.createFileFromString('/home/nornetpp/log',
+"""\
+#!/bin/sh
+tail -f /var/log/spgwu.log
+""", True)
+
+      vduHelper.createFileFromString('/home/nornetpp/restart',
+"""\
+#!/bin/sh
+DIRECTORY=`dirname $0`
+sudo service spgwu restart && sleep 5 && sudo service hencsat-router restart && $DIRECTORY/log
+""", True)
+      vduHelper.runInShell('sudo chown nornetpp:nornetpp /home/nornetpp/log /home/nornetpp/restart')
       vduHelper.endBlock()
 
       # ====== Set up sysstat service =======================================
@@ -269,8 +272,7 @@ def restart_spgwu():
    vduHelper.beginBlock('restart_spgwu')
    try:
 
-      commands = 'sudo service spgwu restart'
-      vduHelper.runInShell(commands)
+      vduHelper.runInShell('sudo service spgwu restart')
 
       message = vduHelper.endBlock()
       function_set( { 'outout': message } )

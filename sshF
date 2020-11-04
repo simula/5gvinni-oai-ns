@@ -1,6 +1,6 @@
 #!/bin/sh
 
-HOST="10.208.0.204"
+HOST="10.208.0.218"
 
 ssh-keygen -q -R ${HOST}
 echo "SSH to FlexRAN Controller ..."

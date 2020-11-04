@@ -28,11 +28,13 @@
 #
 # Contact: dreibh@simula.no
 
+import base64
 import ipaddress
 import logging
 import logging.config
 import os
 import subprocess
+import shutil
 import sys
 import traceback
 
@@ -116,7 +118,7 @@ class VDUHelper:
       self.beginBlock('Touch ' + fileName)
 
       try:
-         commands = """touch {}""".format(fileName)
+         commands = 'touch {}'.format(fileName)
          self.runInShell(commands)
       except:
          self.endBlock(False)
@@ -127,13 +129,22 @@ class VDUHelper:
 
    # ###### Execute command #################################################
    def execute(self, commands):
+      # ====== Run via SSH ==================================================
       if self.testMode == False:
          print('Shell: ' + commands)
          self.logger.debug('Shell: ' + commands)
          self.sshproxy_module._run(commands)
 
+      # ====== Test Mode ====================================================
       else:
-         sys.stdout.write('-----------------------------------------------------------------------------\n')
+         label = ''
+         if len(self.blockStack) > 0:
+            label = ' ' + self.blockStack[-1] + ' '
+         width = shutil.get_terminal_size(fallback=(80, 25)).columns
+         n = width - 8 - len(label)
+         if n < 0:
+            n = 0
+         sys.stdout.write('\x1b[34m# ------' + label + ('-' * n) + '\x1b[0m\n')
          sys.stdout.write('time bash -c "' + commands + '"\n')
 
          # commands = 'echo "' + commands + '"'
@@ -154,7 +165,51 @@ class VDUHelper:
          return True
 
 
-   # ######  Get /etc/network/interfaces setup for interface ###################
+   # ###### Store string into file ##########################################
+   def createFileFromString(self, fileName, contentString, makeExecutable = False, setOwnerTo = None):
+      self.beginBlock('Creating file ' + fileName)
+
+      contentBase64 = self.makeBase64(contentString)
+      try:
+         commands = 'echo \\\"{contentBase64}\\\" | base64 -d | sudo tee {fileName}'.format(
+                       fileName = fileName, contentBase64 = contentBase64)
+         if makeExecutable == False:
+            commands = commands + ' && \\\nsudo chmod +x {fileName}'.format(fileName = fileName)
+         if setOwnerTo != None:
+            commands = commands + ' && \\\nsudo chown {setOwnerTo} {fileName}'.format(fileName = fileName, setOwnerTo = setOwnerTo)
+         self.runInShell(commands)
+      except:
+         self.endBlock(False)
+         raise
+
+      self.endBlock()
+
+
+   # ###### Execute command-line from string ################################
+   def executeFromString(self, commandLineString):
+      commandLineBase64 = self.makeBase64(commandLineString)
+      try:
+         commands = 'echo \\\"{commandLineBase64}\\\" | base64 -d | /bin/bash -x'.format(
+                       commandLineBase64 = commandLineBase64)
+         self.runInShell(commands)
+      except:
+         self.endBlock(False)
+         raise
+
+
+   # ###### Encode string to base64 ##########################################
+   def makeBase64(self, string):
+      # NOTE: Handling multiple levels of string encapsulation with Python, bash,
+      # etc. is just a total mess! Therefore, using a straightforward approach here:
+      # Create the command string as is, apply base64 encoding, and decode it at the
+      # VDU's shell by using "base64 -d".
+
+      if string != None:
+         return base64.b64encode(string.encode('utf-8')).decode('ascii')
+      return None
+
+
+   # ######  Get /etc/network/interfaces setup for interface #################
    def makeInterfaceConfiguration(self,
                                   interfaceName,
                                   ipv4Interface = ipaddress.IPv4Interface('0.0.0.0/0'),
@@ -165,91 +220,158 @@ class VDUHelper:
                                   pdnInterface  = None,
                                   createDummy   = False):
 
-      # NOTE:
-      # Double escaping is required for \ and " in "interfaceConfiguration" string!
-      # 1. Python
-      # 2. bash -c "<command>"
-      # That is: $ => \$ ; \ => \\ ; " => \\\"
-
-
-      # ====== Dummy interface configuration ================================
-      dummyInterfaceConfiguration = ''
-      if createDummy == True:
-         dummyInterfaceName = interfaceName.split(':')
-         if len(dummyInterfaceName) > 0:
-            dummyInterfaceName = dummyInterfaceName[0]
-            dummyInterfaceConfiguration = \
-               '\\\\tpre-up ip link add ' + dummyInterfaceName + ' type dummy || true\\\\n'
-
-
-      interfaceConfiguration = 'auto ' + interfaceName + '\\\\n'
-
-      # ====== Helper function =================================================
-      def makePDNRules(pdnInterface, interface, gateway):
-         rules = \
-            '\\\\tpost-up /bin/ip rule add from ' + str(interface.network) + ' lookup 1000 pref 100\\\\n' + \
-            '\\\\tpost-up /bin/ip rule add iif pdn lookup 1000 pref 100\\\\n' + \
-            '\\\\tpost-up /bin/ip route add ' + str(interface.network) + ' scope link dev ' + interfaceName + ' table 1000\\\\n' + \
-            '\\\\tpost-up /bin/ip route add default via ' + str(gateway) + ' dev ' + interfaceName + ' table 1000\\\\n' + \
-            '\\\\tpre-down /bin/ip route del default via ' + str(gateway) + ' dev ' + interfaceName + ' table 1000 || true\\\\n' + \
-            '\\\\tpre-down /bin/ip route del ' + str(interface.network) + ' scope link dev ' + interfaceName + ' table 1000 || true\\\\n' + \
-            '\\\\tpre-down /bin/ip rule del iif pdn lookup 1000 pref 100 || true\\\\n' + \
-            '\\\\tpre-down /bin/ip rule del from ' + str(interface.network) + ' lookup 1000 pref 100 || true\\\\n'
-         return rules
-
-      # ====== IPv4 ============================================================
-      if ipv4Interface == ipaddress.IPv4Interface('0.0.0.0/0'):
-         interfaceConfiguration = interfaceConfiguration + 'iface ' + interfaceName + ' inet dhcp'
+      # ====== Create header ================================================
+      interfaceConfiguration = \
+         'network:\n' + \
+         '  version: 2\n' + \
+         '  renderer: networkd\n'
+      if createDummy == False:
+        interfaceConfiguration = interfaceConfiguration + \
+           '  ethernets:\n' + \
+           '    ' + interfaceName + ':\n'
       else:
-         interfaceConfiguration = interfaceConfiguration + \
-            'iface ' + interfaceName + ' inet static\\\\n' + \
-            '\\\\taddress ' + str(ipv4Interface.ip)      + '\\\\n' + \
-            '\\\\tnetmask ' + str(ipv4Interface.netmask) + '\\\\n'
+        interfaceConfiguration = interfaceConfiguration + \
+           '  bridges:\n' + \
+           '    ' + interfaceName + ':\n' + \
+           '      interfaces: [ ]\n'
+
+
+      # ====== Addressing ===================================================
+      networks = []
+      if ipv4Interface == ipaddress.IPv4Interface('0.0.0.0/0'):
+         interfaceConfiguration = interfaceConfiguration + '      dhcp4: true\n'
+      else:
+         interfaceConfiguration = interfaceConfiguration + '      dhcp4: false\n'
+
+      if ((ipv6Interface == None) and (ipv6Interface == ipaddress.IPv6Interface('::/0'))):
+         interfaceConfiguration = interfaceConfiguration + '      dhcp6: true\n'
+      else:
+         interfaceConfiguration = interfaceConfiguration + '      dhcp6: false\n'
+         interfaceConfiguration = interfaceConfiguration + '      accept-ra: no\n'
+
+      if ( (ipv4Interface != ipaddress.IPv4Interface('0.0.0.0/0')) or
+           ((ipv6Interface == None) and (ipv6Interface == ipaddress.IPv6Interface('::/0'))) ):
+
+         interfaceConfiguration = interfaceConfiguration + '      addresses:\n'
+
+         if ipv4Interface != ipaddress.IPv4Interface('0.0.0.0/0'):
+            interfaceConfiguration = interfaceConfiguration + '        - ' + \
+               str(ipv4Interface.ip) + '/' + \
+               str(ipv4Interface.network.prefixlen) + \
+               '\n'
+            networks.append(ipv4Interface.network)
+
+         if ((ipv6Interface == None) and (ipv6Interface == ipaddress.IPv6Interface('::/0'))):
+            interfaceConfiguration = interfaceConfiguration + '        - ' + \
+               str(ipv6Interface.ip) + '/' + \
+               str(ipv6Interface.network.prefixlen) + \
+               '\n'
+            networks.append(ipv6Interface,network)
+
+      # ====== Routing ======================================================
+      postUpRules, preDownRules = None, None
+      if ( ((ipv4Gateway != None) and (ipv4Gateway != ipaddress.IPv4Address('0.0.0.0'))) or
+           ((ipv6Gateway != None) and (ipv6Gateway != ipaddress.IPv6Address('::'))) ):
+
+         interfaceConfiguration = interfaceConfiguration + '      routes:\n'
+
+         gateways = []
          if ((ipv4Gateway != None) and (ipv4Gateway != ipaddress.IPv4Address('0.0.0.0'))):
             interfaceConfiguration = interfaceConfiguration + \
-               '\\\\tgateway ' + str(ipv4Gateway) + '\\\\n' + \
-               '\\\\tmetric '  + str(metric)      + '\\\\n'
-         if pdnInterface != None:
-            interfaceConfiguration = interfaceConfiguration + makePDNRules(pdnInterface, ipv4Interface, ipv4Gateway)
-      interfaceConfiguration = interfaceConfiguration + dummyInterfaceConfiguration + '\\\\n'
+                '       - to: 0.0.0.0/0\n' + \
+                '         via: ' + str(ipv4Gateway) + '\n' + \
+                '         metric: ' + str(metric) + '\n'
+            gateways.append(ipv4Gateway)
 
-      # ====== IPv6 ============================================================
-      if ipv6Interface == None:
-         interfaceConfiguration = interfaceConfiguration + \
-            '\\\\niface ' + interfaceName + ' inet6 manual\\\\n' + \
-            '\\\\tautoconf 0\\\\n'
-      elif ipv6Interface == IPv6Interface('::/0'):
-         interfaceConfiguration = interfaceConfiguration + \
-            '\\\\niface ' + interfaceName + ' inet6 dhcp\\\\n' + \
-            '\\\\tautoconf 0\\\\n'
-      else:
-         interfaceConfiguration = interfaceConfiguration + \
-            '\\\\niface ' + interfaceName + ' inet6 static\\\\n' + \
-            '\\\\tautoconf 0\\\\n' + \
-            '\\\\taddress ' + str(ipv6Interface.ip)                + '\\\\n' + \
-            '\\\\tnetmask ' + str(ipv6Interface.network.prefixlen) + '\\\\n'
          if ((ipv6Gateway != None) and (ipv6Gateway != ipaddress.IPv6Address('::'))):
             interfaceConfiguration = interfaceConfiguration + \
-               '\\\\tgateway ' + str(ipv6Gateway) + '\\\\n' + \
-               '\\\\tmetric '  + str(metric)      + '\\\\n'
-         if pdnInterface != None:
-            interfaceConfiguration = interfaceConfiguration + makePDNRules(pdnInterface, ipv6Interface, ipv6Gateway)
-      interfaceConfiguration = interfaceConfiguration + dummyInterfaceConfiguration
+                '       - to: ::/0\n' + \
+                '         via: ' + str(ipv6Gateway) + '\n' + \
+                '         metric: ' + str(metric) + '\n'
+            gateways.append(ipv6Gateway)
 
-      return interfaceConfiguration
+         if ((pdnInterface != None) and (len(networks) > 0) and (len(gateways) > 0)):
+            postUpRules, preDownRules = self.makeRoutingRules(pdnInterface, interfaceName, networks, gateways)
+
+      return [ interfaceConfiguration, postUpRules, preDownRules ]
+
+
+   # ###### Get IP routing rules for PDN interface ##########################
+   def makeRoutingRules(self, pdnInterface, interfaceName, networks, gateways):
+      # ------ Create post-up rules -----------------------------------------
+      postUp = \
+         '#!/bin/sh\n' + \
+         'if [ "$IFACE" = "' + interfaceName + '" ] ; then\n'
+      for network in networks:
+         postUp = postUp + \
+            '   /bin/ip rule add from ' + str(network) + ' lookup 1000 pref 100\n'
+      postUp = postUp + \
+         '   /bin/ip rule add iif ' + pdnInterface + ' lookup 1000 pref 100\n'
+      for network in networks:
+         postUp = postUp + \
+            '   /bin/ip route add ' + str(network) + ' scope link dev ' + interfaceName + ' table 1000\n'
+      for gateway in gateways:
+         postUp = postUp + \
+         '   /bin/ip route add default via ' + str(gateway) + ' dev ' + interfaceName + ' table 1000\n'
+      postUp = postUp + \
+         'fi\n'
+
+      # ------ Create pre-down rules ----------------------------------------
+      preDown = \
+         '#\\x21/bin/sh\n' + \
+         'if [ "$IFACE" = "' + interfaceName + '" ] ; then\n'
+      for gateway in gateways:
+         preDown = preDown + \
+         '   /bin/ip route del default via ' + str(gateway) + ' dev ' + interfaceName + ' table 1000\n'
+      for network in networks:
+         preDown = preDown + \
+            '   /bin/ip route del ' + str(network) + ' scope link dev ' + interfaceName + ' table 1000\n'
+      preDown = preDown + \
+         '   /bin/ip rule del iif ' + pdnInterface + ' lookup 1000 pref 100\n'
+      for network in networks:
+         preDown = preDown + \
+            '   /bin/ip rule del from ' + str(network) + ' lookup 1000 pref 100\n'
+      preDown = preDown + \
+         'fi\n'
+
+      return postUp, preDown
 
 
    # ###### Configuration and activate network interface ####################
-   def configureInterface(self, interfaceName, interfaceConfiguration, priority = 61):
+   def configureInterface(self, interfaceName, interfaceConfiguration, priority = 60):
       self.beginBlock('Configuring and activating ' + interfaceName)
 
       try:
-         commands = """\
-echo -e \\\"{interfaceConfiguration}\\\" | sudo tee /etc/network/interfaces.d/{priority}-{interfaceName} && sudo ifup {interfaceName} || true""".format(
-            interfaceName          = interfaceName,
-            interfaceConfiguration = interfaceConfiguration,
-            priority               = priority
-         )
+         if interfaceConfiguration[1] != None:
+            self.createFileFromString('/etc/networkd-dispatcher/routable.d/{priority}-{interfaceName}'.format(
+                                         interfaceName = interfaceName, priority = priority),
+                                      interfaceConfiguration[1], True)
+
+         if interfaceConfiguration[2] != None:
+            self.createFileFromString('/etc/networkd-dispatcher/off.d/{priority}-{interfaceName}'.format(
+                                         interfaceName = interfaceName, priority = priority),
+                                      interfaceConfiguration[2], True)
+
+         self.createFileFromString('/etc/netplan/{interfaceName}.yaml'.format(interfaceName = interfaceName),
+                                   interfaceConfiguration[0])
+         self.runInShell('sudo netplan apply')
+      except:
+         self.endBlock(False)
+         raise
+
+      self.endBlock()
+
+
+   # ###### Store string into file ##########################################
+   def createFileFromString(self, fileName, contentString, makeExecutable = False):
+      self.beginBlock('Creating file ' + fileName)
+
+      contentBase64 = self.makeBase64(contentString)
+      try:
+         commands = 'echo \\\"{contentBase64}\\\" | base64 -d | sudo tee {fileName}'.format(
+                       fileName = fileName, contentBase64 = contentBase64)
+         if makeExecutable == True:
+            commands = commands + ' && \\\nsudo chmod +x {fileName}'.format(fileName = fileName)
          self.runInShell(commands)
       except:
          self.endBlock(False)
@@ -258,12 +380,24 @@ echo -e \\\"{interfaceConfiguration}\\\" | sudo tee /etc/network/interfaces.d/{p
       self.endBlock()
 
 
+   # ###### Execute command-line from string ################################
+   def executeFromString(self, commandLineString):
+      commandLineBase64 = self.makeBase64(commandLineString)
+      try:
+         commands = 'echo \\\"{commandLineBase64}\\\" | base64 -d | /bin/bash -x'.format(
+                       commandLineBase64 = commandLineBase64)
+         self.runInShell(commands)
+      except:
+         self.endBlock(False)
+         raise
+
+
    # ###### Test networking #################################################
    def testNetworking(self, destination = ipaddress.IPv4Address('8.8.8.8'), timeout = 60, interval = 0.333):
       self.beginBlock('Testing networking')
 
       try:
-         commands = """ping -W{timeout}  -i{interval} -c3 {destination}""".format(
+         commands = 'ping -W{timeout}  -i{interval} -c3 {destination}'.format(
             destination = str(destination),
             timeout     = timeout,
             interval    = interval
@@ -280,15 +414,10 @@ echo -e \\\"{interfaceConfiguration}\\\" | sudo tee /etc/network/interfaces.d/{p
    def waitForPackageUpdatesToComplete(self):
       self.beginBlock('Waiting for package management to complete all running tasks ...')
 
-      # Based on https://gist.github.com/tedivm/e11ebfdc25dc1d7935a3d5640a1f1c90
-      commands = """\
-while sudo fuser /var/lib/dpkg/lock >/dev/null 2>&1 ; do sleep 1 ; done ; \\
-while sudo fuser /var/lib/apt/lists/lock >/dev/null 2>&1 ; do sleep 1 ; done ; \\
-if [ -f /var/log/unattended-upgrades/unattended-upgrades.log ]; then \\
-   while sudo fuser /var/log/unattended-upgrades/unattended-upgrades.log >/dev/null 2>&1 ; do sleep 1 ; done ; \\
-fi"""
       try:
-         self.runInShell(commands)
+         # Trying the most straightforward solution: explicitly calling the
+         # updater script, to make sure it finishes!
+         self.runInShell('sudo /usr/lib/apt/apt.systemd.daily')
       except:
          self.endBlock(False)
          raise
@@ -303,21 +432,102 @@ fi"""
             commands = 'sudo apt update && \\\n'
          else:
             commands = ''
-         commands = commands + 'DEBIAN_FRONTEND=noninteractive sudo apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends '
+         commands = commands + 'DEBIAN_FRONTEND=noninteractive sudo apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends'
          for package in packages:
-            commands = commands + package
+            commands = commands + ' ' + package
          self.runInShell(commands)
+
+
+   # ###### Write .gitconfig ################################################
+   def configureGit(self, name, email):
+      self.beginBlock('Configuring Git')
+      self.createFileFromString('/home/nornetpp/.gitconfig', """\
+[user]
+        name = {name}
+        email = {email}
+[push]
+        default = simple
+[color]
+        ui = auto
+[credential]
+        helper = store
+""".format(name = name, email = email))
+      self.runInShell('sudo chown nornetpp:nornetpp /home/nornetpp/.gitconfig')
+      self.endBlock()
+
+
+   # ###### Configure System-Info banner ####################################
+   def configureSystemInfo(self, banner, information):
+      self.beginBlock('Configuring System-Info')
+      self.aptInstallPackages([ 'td-system-info', 'figlet' ], False)
+      self.createFileFromString('/etc/system-info.d/90-vduhelper',
+"""
+#!/bin/bash -e
+
+# ###### Center text in console #############################################
+center ()
+{{
+   local text="$1"
+   local length=${{#text}}
+   local width=`tput cols`   # Console width
+
+   let indent=(${{width}} - ${{length}})/2
+   if [ ${{indent}} -lt 0 ] ; then
+      indent=0
+   fi
+   printf "%${{indent}}s%s\n" "" "${{text}}"
+}}
+
+
+# ###### Print centered separator in console ################################
+separator ()
+{{
+   local separatorCharacter="="
+   local separator=""
+   local width=`tput cols`   # Console width
+   local separatorWidth
+
+   let separatorWidth=${{width}}-4
+   local i=0
+   while [ $i -lt ${{separatorWidth}} ] ; do
+      separator="${{separator}}${{separatorCharacter}}"
+      let i=$i+1
+   done
+   center "<${{separator}}>"
+}}
+
+
+# ====== Print banner =======================================================
+
+# NOTE:
+# You can produce ASCII text banners with "sysvbanner".
+# More advanced, UTF-8-capable tools are e.g. figlet and toilet.
+
+echo -en "\x1b[1;34m"
+separator
+echo -en "\x1b[1;31m"
+figlet -w`tput cols` -c "{banner}"
+echo -en "\x1b[1;34m"
+# echo ""
+center "{information}"
+separator
+echo -e "\x1b[0m"
+
+exit 1   # With exit code 1, no further files in /etc/system-info.d are processed!
+
+# Use exit code 0 to process further files!
+""".format(banner = banner, information = information), True)
+      self.endBlock()
 
 
    # ###### Install SysStat #################################################
    def installSysStat(self):
       self.beginBlock('Setting up sysstat service')
-      commands = """\
-DEBIAN_FRONTEND=noninteractive sudo apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends sysstat && \\
-sudo sed -e \\\"s/^ENABLED=.*$/ENABLED=\\\\\\"true\\\\\\"/g\\\" -i /etc/default/sysstat && \\
-sudo sed -e \\\"s/^SADC_OPTIONS=.*$/SADC_OPTIONS=\\\\\\"-S ALL\\\\\\"/g\\\" -i /etc/sysstat/sysstat && \\
-sudo service sysstat restart"""
-      self.runInShell(commands)
+      self.aptInstallPackages([ 'sysstat' ], False)
+      self.executeFromString("""\
+sudo sed -e "s/^ENABLED=.*$/ENABLED=\\"true\\"/g" -i /etc/default/sysstat && \\
+sudo sed -e "s/^SADC_OPTIONS=.*$/SADC_OPTIONS=\\"-S ALL\\"/g" -i /etc/sysstat/sysstat && \\
+sudo service sysstat restart""")
       self.endBlock()
 
 
@@ -345,7 +555,6 @@ git checkout {gitCommit}""".format(
    # ###### Clean up ########################################################
    def cleanUp(self):
       self.beginBlock('Cleaning up')
-      commands = """\
-sudo updatedb"""
+      commands = """sudo updatedb"""
       self.runInShell(commands)
       self.endBlock()

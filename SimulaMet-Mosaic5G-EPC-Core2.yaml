@@ -1,0 +1,146 @@
+# =====================================================================
+#     #######  #####          #     #   ###   #     # #     #   ###
+#     #       #     #         #     #    #    ##    # ##    #    #
+#     #       #               #     #    #    # #   # # #   #    #
+#      #####  #  ####  #####  #     #    #    #  #  # #  #  #    #
+#           # #     #          #   #     #    #   # # #   # #    #
+#     #     # #     #           # #      #    #    ## #    ##    #
+#      #####   #####             #      ###   #     # #     #   ###
+# =====================================================================
+#
+# SimulaMet OpenAirInterface Evolved Packet Core VNF and NS
+# Copyright (C) 2019-2020 by Thomas Dreibholz
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Contact: dreibh@simula.no
+
+# The following line tells "create-instance" the name of the NSD:
+#! NSD SimulaMet-OAI-EPC_nsd
+
+# ###### VNF Parameters #####################################################
+additionalParamsForVnf:
+  - member-vnf-index: '1'
+    additionalParams:
+      # ====== HSS ==========================================================
+      hss_git_repository: 'https://github.com/simula/openairinterface-openair-hss.git'
+      hss_git_commit: 'dreibh/cassandra-build-fix-22oct2020'
+      hss_S6a_address: '172.16.6.129'
+      network_realm: 'oslomet.nornet'
+      network_k: '449C4B91AEACD0ACE182CF3A5A72BFA1'
+      network_op: '1006020F0A478BF6B699F15C062E42B3'
+      network_imsi_first: '242891234500000'
+      network_msisdn_first: '24289880000000'
+      network_users: '1024'
+
+      # ====== MME ==========================================================
+      # !!! Mosaic5G branch seems to be required !!!
+      # mme_git_repository: 'https://github.com/simula/openairinterface-openair-cn.git'
+      # mme_git_commit: '2020.w13'
+      mme_git_repository: 'https://github.com/simula/mosaic5g-openair-cn.git'
+      mme_git_commit: 'dreibh/mosaic5g'
+      # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      mme_S1C_ipv4_interface: '192.168.249.102/24'
+      mme_S1C_ipv4_gateway: '0.0.0.0'
+      mme_S1C_ipv6_interface: ''
+      mme_S1C_ipv6_gateway: ''
+      mme_S11_ipv4_interface: '172.16.1.102/24'
+      mme_S6a_address: '172.16.6.2'
+      network_mcc: '242'
+      network_mnc: '89'
+
+      # ====== SPGW-C =======================================================
+      spgwc_git_repository: 'https://github.com/simula/openairinterface-openair-spgwc.git'
+      spgwc_git_commit: '2020.w36'
+      spgwc_S11_ipv4_interface: '172.16.1.104/24'
+      network_ipv4_dns1: '10.1.1.1'
+      network_ipv4_dns2: '10.1.2.1'
+
+      # ====== SPGW-U =======================================================
+      spgwu_git_repository: 'https://github.com/simula/openairinterface-openair-spgwu-tiny.git'
+      spgwu_git_commit: 'dreibh/tx-checksum-ip-generic-off'
+      spgwu_S1U_ipv4_interface: '192.168.250.159/24'
+      spgwu_S1U_ipv4_gateway: '0.0.0.0'
+      spgwu_SGi_ipv4_interface: '10.254.1.214/24'
+      spgwu_SGi_ipv4_gateway: '10.254.1.1'
+      spgwu_SGi_ipv6_interface: ''
+      spgwu_SGi_ipv6_gateway: ''
+      spgwu_spgwc_list: '172.55.55.101'
+
+      # ====== Other ========================================================
+      password: 'osm4us'
+
+
+# ###### VNF External Addresses #############################################
+vld:
+  # ====== Management =======================================================
+  - name: SimulaMet-OAI-EPC_nsd-Management
+    vnfd-connection-point-ref:
+      - member-vnf-index-ref: '1'
+        vnfd-connection-point-ref: hss-mgmt-cp
+        ip-address: 10.208.0.214
+      - member-vnf-index-ref: '1'
+        vnfd-connection-point-ref: mme-mgmt-cp
+        ip-address: 10.208.0.215
+      - member-vnf-index-ref: '1'
+        vnfd-connection-point-ref: spgwc-mgmt-cp
+        ip-address: 10.208.0.216
+      - member-vnf-index-ref: '1'
+        vnfd-connection-point-ref: spgwu-mgmt-cp
+        ip-address: 10.208.0.217
+
+  # ====== S1-C =============================================================
+  - name: SimulaMet-OAI-EPC_nsd-S1C
+    vnfd-connection-point-ref:
+      - member-vnf-index-ref: '1'
+        vnfd-connection-point-ref: mme-s1c-cp
+        ip-address: 192.168.249.102
+
+  # ====== S1-U =============================================================
+  - name: SimulaMet-OAI-EPC_nsd-S1U
+    vnfd-connection-point-ref:
+      - member-vnf-index-ref: '1'
+        vnfd-connection-point-ref: spgwu-s1u-cp
+        ip-address: 192.168.250.159
+
+  # ====== SGi ==============================================================
+  - name: SimulaMet-OAI-EPC_nsd-SGi
+    vnfd-connection-point-ref:
+      - member-vnf-index-ref: '1'
+        vnfd-connection-point-ref: spgwu-sgi-cp
+        ip-address: 10.254.1.214
+
+
+# ###### VNF-Internal Addresses #############################################
+vnf:
+  - member-vnf-index: '1'
+    internal-vld:
+      - name: S6a
+        internal-connection-point:
+          - id-ref: mme-s6a-cp
+            ip-address: 172.16.6.2
+          - id-ref: hss-s6a-cp
+            ip-address: 172.16.6.129
+      - name: S11
+        internal-connection-point:
+          - id-ref: mme-s11-cp
+            ip-address: 172.16.1.102
+          - id-ref: spgwc-s11-cp
+            ip-address: 172.16.1.104
+      - name: SXab
+        internal-connection-point:
+          - id-ref: spgwu-sxab-cp
+            ip-address: 172.55.55.102
+          - id-ref: spgwc-sxab-cp
+            ip-address: 172.55.55.101
