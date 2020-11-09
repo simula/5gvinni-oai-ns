@@ -1,8 +1,8 @@
 library("ggplot2")
 
-data <- read.table("test1.data", col.names = c("Uptime","Count"))
+data <- read.table("osm-mon-collectors.data", col.names = c("Uptime","Count"))
 
-cairo_pdf("test1.pdf", width=15, height=10, family="Helvetica", pointsize=22)
+cairo_pdf("osm-mon-collectors.pdf", width=15, height=10, family="Helvetica", pointsize=22)
 
 p <- ggplot(data,
             aes(x = Uptime,
