@@ -1,0 +1,8 @@
+#!/bin/bash
+
+while [ true ] ; do
+   uptime=`cat /proc/uptime | cut -d' ' -f1`
+   procs=`ps ax | grep osm-mon-collector | wc --lines`
+   echo -e "${uptime}\t${procs}" | tee --append osm-mon-collectors.data
+   sleep 10
+done
