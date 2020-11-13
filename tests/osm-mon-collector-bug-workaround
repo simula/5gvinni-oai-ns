@@ -1,0 +1,9 @@
+#!/bin/bash
+
+procs=`ps ax | grep osm-mon-collector | grep -v grep | grep -v workaround | wc --lines`
+if [ $procs -gt 200 ] ; then
+   echo "$procs osm-mon-collector processes -> terminating them!"
+   ps ax | grep "/usr/bin/python3 /usr/bin/osm-mon-collector" | grep -v "grep" | awk '{ print $1 }' | xargs -r sudo kill
+else
+   echo "$procs osm-mon-collector processes -> okay."
+fi
