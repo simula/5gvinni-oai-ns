@@ -35,7 +35,7 @@ additionalParamsForVnf:
     additionalParams:
       # ====== HSS ==========================================================
       hss_git_repository: 'https://github.com/simula/openairinterface-openair-hss.git'
-      hss_git_commit: 'dreibh/cassandra-build-fix-2020.w44'
+      hss_git_commit: 'dreibh/cassandra-build-fix-22oct2020'
       hss_S6a_address: '172.16.6.129'
       network_realm: 'simula.nornet'
       network_k: '449C4B91AEACD0ACE182CF3A5A72BFA1'
@@ -46,7 +46,7 @@ additionalParamsForVnf:
 
       # ====== MME ==========================================================
       mme_git_repository: 'https://github.com/simula/openairinterface-openair-mme.git'
-      mme_git_commit: '2020.w44'
+      mme_git_commit: 'dreibh/asn1c-url-fix-14Oct2020'
       mme_S1C_ipv4_interface: '192.168.247.102/24'
       mme_S1C_ipv4_gateway: '0.0.0.0'
       mme_S1C_ipv6_interface: ''
@@ -58,14 +58,14 @@ additionalParamsForVnf:
 
       # ====== SPGW-C =======================================================
       spgwc_git_repository: 'https://github.com/simula/openairinterface-openair-spgwc.git'
-      spgwc_git_commit: '2020.w44'
+      spgwc_git_commit: '2020.w36'
       spgwc_S11_ipv4_interface: '172.16.1.104/24'
       network_ipv4_dns1: '10.1.1.1'
       network_ipv4_dns2: '10.1.2.1'
 
       # ====== SPGW-U =======================================================
       spgwu_git_repository: 'https://github.com/simula/openairinterface-openair-spgwu-tiny.git'
-      spgwu_git_commit: 'dreibh/tx-checksum-ip-generic-off-2020.w44'
+      spgwu_git_commit: 'dreibh/tx-checksum-ip-generic-off'
       spgwu_S1U_ipv4_interface: '192.168.248.159/24'
       spgwu_S1U_ipv4_gateway: '0.0.0.0'
       spgwu_SGi_ipv4_interface: '10.254.1.203/24'
