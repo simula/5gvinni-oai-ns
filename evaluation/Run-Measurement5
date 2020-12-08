@@ -1,0 +1,280 @@
+#!/bin/bash -e
+# =====================================================================
+#     #######  #####          #     #   ###   #     # #     #   ###
+#     #       #     #         #     #    #    ##    # ##    #    #
+#     #       #               #     #    #    # #   # # #   #    #
+#      #####  #  ####  #####  #     #    #    #  #  # #  #  #    #
+#           # #     #          #   #     #    #   # # #   # #    #
+#     #     # #     #           # #      #    #    ## #    ##    #
+#      #####   #####             #      ###   #     # #     #   ###
+# =====================================================================
+#
+# SimulaMet OpenAirInterface Evolved Packet Core VNF and NS
+# Copyright (C) 2019-2020 by Thomas Dreibholz
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Contact: dreibh@simula.no
+
+
+DIRECTORY="Measurement5"
+DESTINATION="10.1.1.249:9000"
+INTERFACE="any"
+RUNTIME=1800
+
+IP_HSS="10.208.0.200"
+IP_MME="10.208.0.201"
+IP_SPGWC="10.208.0.202"
+IP_SPGWU="10.208.0.203"
+SSH_EPC="sudo -u dreibh sshpass -p osm4us ssh -4C -oStrictHostKeyChecking=no -J nornetpp@10.1.1.85 nornetpp@"
+
+# curl 'http://localhost:9091/api/v1/query_range?query=osm_cpu_load_5min&start=2020-09-11T06:00:00.000Z&end=2020-09-11T06:00:30.000Z&step=1s'
+PROMETHEUS='http://localhost:9091/api/v1/query_range'
+PROMETHEUS_METRICS="osm_cpu_load_current osm_cpu_load_15min osm_cpu_load_1min osm_cpu_load_5min osm_cpu_processes osm_disk_usage osm_memory_ram_usage osm_memory_swap_usage osm_network_mgmt_bytes_in osm_network_mgmt_bytes_out osm_network_mgmt_packets_in osm_network_mgmt_packets_out osm_network_S11_bytes_in osm_network_S11_bytes_out osm_network_S11_packets_in osm_network_S11_packets_out osm_network_S1C_bytes_in osm_network_S1C_bytes_out osm_network_S1C_packets_in osm_network_S1C_packets_out osm_network_S6a_bytes_in osm_network_S6a_bytes_out osm_network_S6a_packets_in osm_network_S6a_packets_out osm_system_random osm_system_uptime osm_system_users up"
+
+# ====== Initialise =========================================================
+if [ "${SUDO_UID}:${SUDO_GID}" == ":" ] ; then
+   echo >&2 "ERROR: Run this script with sudo, since it has to enable ECN and start tcpdump!"
+   exit 1
+fi
+
+# sudo ifconfig wwan0 mtu 1440     # !!! Set MTU here!
+sudo sysctl net.ipv4.tcp_ecn=1   # !!! Enable ECN here!
+
+sudo -u#${SUDO_UID} -g#${SUDO_GID} ssh-keygen -q -R ${IP_HSS}   >/dev/null 2>&1
+sudo -u#${SUDO_UID} -g#${SUDO_GID} ssh-keygen -q -R ${IP_MME}   >/dev/null 2>&1
+sudo -u#${SUDO_UID} -g#${SUDO_GID} ssh-keygen -q -R ${IP_SPGWC} >/dev/null 2>&1
+sudo -u#${SUDO_UID} -g#${SUDO_GID} ssh-keygen -q -R ${IP_SPGWU} >/dev/null 2>&1
+
+
+echo "Checking QoS Setup ..."
+if ! sudo -u#${SUDO_UID} -g#${SUDO_GID} ssh -p 2909 nornetpp@localhost HENCSAT-QoS-Setup change 100000 0 0.0 0.0 ; then
+   echo >&2 "ERROR: Unable to configure QoS settings!"
+   exit 1
+fi
+
+echo "Checking Prometheus connection ..."
+if ! curl -o /dev/null "${PROMETHEUS}?query=osm_cpu_load_5min&start=2020-09-11T06:00:00.000Z&end=2020-09-11T06:00:30.000Z&step=1s" 2>/dev/null ; then
+   echo >&2 "ERROR: Unable to get data from Prometheus! Check tunnel!"
+   exit 1
+fi
+
+
+sudo -u#${SUDO_UID} -g#${SUDO_GID} mkdir -p ${DIRECTORY}
+
+SUMMARY_OLD="${DIRECTORY}/results.summary"
+SUMMARY_NEW="${DIRECTORY}/results.summary.new"
+SUMMARY_UPDATED="${DIRECTORY}/results.summary.updated"
+(
+   echo "--varnames=\"TimeStamp Scenario Protocol Runtime FlowParameters BackgroundFlowParameters QoSBandwidth QoSDelay QoSLossRate QoSErrorRate\""
+   echo "--resultsdirectory=${DIRECTORY}"
+) >${SUMMARY_NEW}
+
+
+# ====== Flow parameters ====================================================
+saturatedFlow="const0:const1400"
+streamingFlow="const60:const20000"   # 9.6 Mbit/s payload
+maxMsgSize=1400                      # Max. 1440 bytes per SCTP message/UDP packet
+tcpdumpSnaplens="64"   # "64 65536"
+
+
+# ###### Start monitoring EPC component #####################################
+start-monitoring ()
+{
+   local id="$1"
+   local component="$2"
+   local Component="${component^^}"
+   local ip="$3"
+   local sysstatParameters="$4"
+   ${SSH_EPC}${ip} /bin/bash -c "\"\\
+killall -q -sKILL sar ; \\
+sudo killall -q -sKILL tcpdump ; \\
+sudo rm -f /tmp/*.pcap /tmp/*.data /tmp/*.out /tmp/*.xz ; \\
+echo \\\"${Component}: starting tcpdump ...\\\" ; \\
+{ nohup sudo tcpdump -i any -n -s 128 -w /tmp/${id}-${component}.pcap >/tmp/${id}-${component}-tcpdump.out 2>&1 & } ; \\
+echo \\\"${Component}: starting sar ...\\\" ; \\
+{ nohup sar -o /tmp/${id}-${component}.data ${sysstatParameters} >/tmp/${id}-${component}-sar.out 2>&1 & } ;\\
+echo \\\"${Component}: monitoring ready!\\\" ; \\
+sleep 3 ; \\
+sudo chattr +c /tmp/${id}-${component}.pcap || true ; \\
+\""
+}
+
+
+# ###### Stop monitoring EPC component ######################################
+stop-monitoring ()
+{
+   local id="$1"
+   local component="$2"
+   local Component="${component^^}"
+   local ip="$3"
+
+   ${SSH_EPC}${ip} /bin/bash -c "\"\\
+killall -q -sKILL sar ; \\
+sudo killall -q -sINT tcpdump ; \\
+sleep 5 ; \\
+find /tmp -maxdepth 1 -name ${id}-${component}.pcap | xargs -r sudo chown nornetpp:nornetpp ; \\
+find /tmp -maxdepth 1 -name ${id}-${component}.pcap | xargs -r xz -T0 ; \\
+find /tmp -maxdepth 1 -name ${id}-${component}.out  | xargs -r xz -T0 ; \\
+echo \\\"${Component}: monitoring stopped!\\\" ; \\
+\""
+
+sudo -u dreibh rsync -Pavz -e "sshpass -p osm4us ssh -4C -oStrictHostKeyChecking=no -J nornetpp@10.1.1.85" nornetpp@${ip}:/tmp/${id}-${component}.* ${DIRECTORY}/
+}
+
+
+# ###### Get Prometheus metrics #############################################
+get-prometheus-metrics ()
+{
+   local id="$1"
+   local startTime="$2"
+   local endTime="$3"
+
+   echo "${startTime}" > ${DIRECTORY}/${id}-Prometheus-StartTime.txt
+   echo "${endTime}" > ${DIRECTORY}/${id}-Prometheus-EndTime.txt
+
+   # TEST: Start to query from 5 min earlier!
+   # let startTime=${startTime}-300
+
+   for metric in ${PROMETHEUS_METRICS} ; do
+      query="${PROMETHEUS}?query=${metric}&start=${startTime}&end=${endTime}&step=1s"
+      echo "Prometheus Query: ${query}"
+      curl -o ${DIRECTORY}/${id}-Prometheus-${metric}.json "${query}" || true
+   done
+}
+
+
+# ====== Run measurements ===================================================
+for qosBandwidth in 10000 ; do   # 100000
+   qosDelay=0
+   qosLossRate=0.0
+   qosErrorRate=0.0
+   backgroundFlowParameters="-udp const50:exp2500:const50:exp2500"   # 1 Mbit/s!
+   for scenario in Download ; do   #  Download Upload Bidirectional
+      for protocol in tcp ; do   # udp tcp sctp
+         flowParameters="INVALID!"
+         if [ "${protocol}" == "udp" ] ; then
+            flowParameters="${streamingFlow}"
+         else
+            flowParameters="${saturatedFlow}"
+         fi
+         if [ "${scenario}" == "Bidirectional" ] ; then
+             flowParameters="${flowParameters}:${flowParameters}:maxmsgsize=${maxMsgSize},sndbuf=0,rcvbuf=0"
+          elif [ "${scenario}" == "Upload" ] ; then
+             flowParameters="${flowParameters}:const0:const0:maxmsgsize=${maxMsgSize},sndbuf=0,rcvbuf=0"
+          elif [ "${scenario}" == "Download" ] ; then
+             flowParameters="const0:const0:${flowParameters}:maxmsgsize=${maxMsgSize},sndbuf=0,rcvbuf=0"
+          else
+             echo >&2 "ERROR: Bad scenario ${scenario}!"
+             exit 1
+          fi
+
+         now=`date +%FT%H:%M:%S.%N`
+         echo ""
+         echo "====== ${now}: ${protocol^^}, ${flowParameters} ======"
+
+         values="${now} ${scenario} ${protocol^^} ${RUNTIME} \"${flowParameters}\" \"${backgroundFlowParameters}\" ${qosBandwidth} ${qosDelay} ${qosLossRate} ${qosErrorRate}"
+         id=`echo "${now}: ${values}" | sha256 -x`
+         prefix="${DIRECTORY}/${id}"
+         scalarFile="${prefix}.sca"
+         scalarFileA="${prefix}-active.sca"
+         scalarFileP="${prefix}-passive.sca"
+         vectorFile="${prefix}.vec"
+         mmeStatsFile="${prefix}-mme.data"
+
+         (
+            echo "--values=${values}"
+            echo "--input=${scalarFileA}"
+            echo "--values=${values}"
+            echo "--input=${scalarFileP}"
+         ) >>${SUMMARY_NEW}
+
+         # ====== Start sysstat in EPC ======================================
+         sysstatParameters="-bqr -n DEV,EDEV,IP,EIP,ICMP,EICMP,IP6,EIP6,ICMP6,EICMP6,TCP,ETCP,UDP,UDP6 1 600"
+         start-monitoring ${id} hss   ${IP_HSS}   "${sysstatParameters}" &
+         start-monitoring ${id} mme   ${IP_MME}   "${sysstatParameters}" &
+         start-monitoring ${id} spgwc ${IP_SPGWC} "${sysstatParameters}" &
+         start-monitoring ${id} spgwu ${IP_SPGWU} "${sysstatParameters}" &
+         wait
+
+
+         # ====== Start tcpdump =============================================
+         echo "Starting tcpdump ..."
+         for tcpdumpSnaplen in ${tcpdumpSnaplens} ; do
+            tcpdump -i ${INTERFACE} -w "${prefix}-${tcpdumpSnaplen}.pcap" -s ${tcpdumpSnaplen} -n ${protocol} or udp or sctp or icmp or icmp6 &
+         done
+         sleep 3
+         for tcpdumpSnaplen in ${tcpdumpSnaplens} ; do
+            chattr +c "${prefix}-${tcpdumpSnaplen}.pcap" || true
+         done
+
+
+         # ====== Apply QoS Settings ========================================
+         sudo -u#${SUDO_UID} -g#${SUDO_GID} ssh -p 2909 nornetpp@localhost HENCSAT-QoS-Setup change \
+            ${qosBandwidth} ${qosDelay} ${qosLossRate} ${qosErrorRate}
+
+
+         # ====== Run NetPerfMeter ==========================================
+         echo "Running NetPerfMeter ..."
+         startTime=`date +"%s"`
+         sudo -u#${SUDO_UID} -g#${SUDO_GID} netperfmeter ${DESTINATION} \
+            -quiet -runtime=${RUNTIME} \
+            -vector="${vectorFile}" -scalar="${scalarFile}" \
+            -${protocol} ${flowParameters} \
+            ${backgroundFlowParameters} || \
+           sudo -u#${SUDO_UID} -g#${SUDO_GID} netperfmeter ${DESTINATION} \
+               -quiet -runtime=${RUNTIME} \
+               -vector="${vectorFile}" -scalar="${scalarFile}" \
+               -${protocol} ${flowParameters} \
+               ${backgroundFlowParameters}
+         endTime=`date +"%s"`
+
+         echo "Stopping tcpdump ..."
+         killall tcpdump || true
+         wait
+
+
+         # ====== Unset QoS Settings ========================================
+         sudo -u#${SUDO_UID} -g#${SUDO_GID} ssh -p 2909 nornetpp@localhost HENCSAT-QoS-Setup change \
+            100000 0 0.0 0.0
+
+
+         # ====== Stop sysstat in EPC and collect statistics ================
+         echo "Stopping sar and and collecting statistics ..."
+         stop-monitoring ${id} hss   ${IP_HSS}   &
+         stop-monitoring ${id} mme   ${IP_MME}   &
+         stop-monitoring ${id} spgwc ${IP_SPGWC} &
+         stop-monitoring ${id} spgwu ${IP_SPGWU} &
+         wait
+
+         # ====== Get metrics from Prometheus ===============================
+         get-prometheus-metrics "${id}" "${startTime}" "${endTime}"
+
+         # ====== Set ownership and compress pcap files =====================
+         chown ${SUDO_UID}:${SUDO_GID} ${prefix}*
+         find ${DIRECTORY} -name "${id}*.pcap" | xargs -r xz -T0
+      done
+   done
+done
+
+
+# ====== Prepare results ====================================================
+cat ${SUMMARY_NEW} >${SUMMARY_UPDATED}
+if [ -e "${SUMMARY_OLD}" ] ; then
+   grep -v ^--varnames= ${SUMMARY_OLD} | grep -v ^--resultsdirectory= >>${SUMMARY_UPDATED}
+fi
+mv ${SUMMARY_UPDATED} ${SUMMARY_OLD}
+chown ${SUDO_UID}:${SUDO_GID} ${SUMMARY_OLD} ${SUMMARY_NEW}
+
+sudo -u#${SUDO_UID} -g#${SUDO_GID} createsummary xy -ignore-scalar-file-errors <${SUMMARY_OLD}
