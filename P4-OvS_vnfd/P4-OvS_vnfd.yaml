@@ -1,0 +1,277 @@
+# =====================================================================
+#     #######  #####          #     #   ###   #     # #     #   ###
+#     #       #     #         #     #    #    ##    # ##    #    #
+#     #       #               #     #    #    # #   # # #   #    #
+#      #####  #  ####  #####  #     #    #    #  #  # #  #  #    #
+#           # #     #          #   #     #    #   # # #   # #    #
+#     #     # #     #           # #      #    #    ## #    ##    #
+#      #####   #####             #      ###   #     # #     #   ###
+# =====================================================================
+#
+# SimulaMet P4-OvS VNF
+# Copyright (C) 2019-2021 by Thomas Dreibholz
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Contact: dreibh@simula.no
+
+vnfd:vnfd-catalog:
+  vnfd:
+    - id: P4-OvS_vnfd
+      name: P4-OvS_vnfd
+      short-name: P4-OvS_vnfd
+      description: SimulaMet P4-OvS VNF
+      vendor: Thomas Dreibholz
+      version: '1.0'
+      logo: NorNet.png
+
+      # ###### Management Interface #########################################
+      mgmt-interface:
+        cp: ovs-mgmt-cp
+
+      vdu:
+
+        # ###### VDU: P4-OvS ###############################################
+        - id: P4-OvS
+          name: P4-OvS
+          description: P4-OvS
+          count: 1
+
+          # ====== VDU VM Configuration =====================================
+          vm-flavor:
+            vcpu-count: 4
+            memory-mb: 2048
+            storage-gb: 16
+          image: 5gVINNI-OpenStack-Ubuntu-20.10-LTS
+          cloud-init-file: ovs-init
+
+          # ====== Interfaces ===============================================
+          interface:
+            - name: eth0
+              type: EXTERNAL
+              mgmt-interface: true
+              virtual-interface:
+                type: PARAVIRT
+              external-connection-point-ref: ovs-mgmt-cp
+            - name: eth1
+              type: EXTERNAL
+              virtual-interface:
+                type: PARAVIRT
+              external-connection-point-ref: ovs-service-port1-cp
+            - name: eth2
+              type: EXTERNAL
+              virtual-interface:
+                type: PARAVIRT
+              external-connection-point-ref: ovs-service-port2-cp
+
+          # ====== Juju Charm ===============================================
+          vdu-configuration:
+            juju:
+              charm: p4ovscharm
+            metrics:
+              - name: system_random
+              - name: system_uptime
+              - name: system_users
+              - name: cpu_processes
+              - name: cpu_load_1min
+              - name: cpu_load_5min
+              - name: cpu_load_15min
+              - name: memory_ram_usage
+              - name: memory_swap_usage
+              - name: disk_usage
+              - name: network_mgmt_bytes_in
+              - name: network_mgmt_packets_in
+              - name: network_mgmt_bytes_out
+              - name: network_mgmt_packets_out
+              - name: network_service_port1_bytes_in
+              - name: network_service_port1_packets_in
+              - name: network_service_port1_bytes_out
+              - name: network_service_port1_packets_out
+              - name: network_service_port2_bytes_in
+              - name: network_service_port2_packets_in
+              - name: network_service_port2_bytes_out
+              - name: network_service_port2_packets_out
+            initial-config-primitive:
+              - seq: '1'
+                name: config
+                parameter:
+                  - name: ssh-hostname
+                    value: <rw_mgmt_ip>
+                  - name: ssh-username
+                    value: nornetpp
+                  - name: ssh-password
+                    value: <password>
+              - seq: '2'
+                name: prepare-ovs-build
+                parameter:
+                  - name: ovs-git-repository
+                    value: <p4ovs_git_repository>
+                  - name: ovs-git-commit
+                    value: <p4ovs_git_commit>
+              - seq: '3'
+                name: configure-p4ovs
+                #parameter:
+                  #- name: network-users
+                    #value: <network_users>
+              - seq: '4'
+                name: restart-p4ovs
+
+
+      # ###### External Connection Points ###################################
+      connection-point:
+        - name: ovs-mgmt-cp
+        - name: ovs-service-port1-cp
+        - name: ovs-service-port2-cp
+
+
+      # ###### Monitoring ###################################################
+      monitoring-param:
+        # ###### VDU: P4-OvS ###############################################
+        # ====== System metrics =============================================
+        - id: metric_P4-OvS_system_random
+          name: metric_P4-OvS_system_random
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: P4-OvS
+            vdu-metric-name-ref: system_random
+        - id: metric_P4-OvS_system_uptime
+          name: metric_P4-OvS_system_uptime
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: P4-OvS
+            vdu-metric-name-ref: system_uptime
+        - id: metric_P4-OvS_system_users
+          name: metric_P4-OvS_system_users
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: P4-OvS
+            vdu-metric-name-ref: system_users
+
+        # ====== CPU metrics ================================================
+        - id: metric_P4-OvS_cpu_load_1min
+          name: metric_P4-OvS_cpu_load_1min
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: P4-OvS
+            vdu-metric-name-ref: cpu_load_1min
+        - id: metric_P4-OvS_cpu_load_5min
+          name: metric_P4-OvS_cpu_load_5min
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: P4-OvS
+            vdu-metric-name-ref: cpu_load_5min
+        - id: metric_P4-OvS_cpu_load_15min
+          name: metric_P4-OvS_cpu_load_15min
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: P4-OvS
+            vdu-metric-name-ref: cpu_load_15min
+
+        # ====== Memory metrics =============================================
+        - id: metric_P4-OvS_memory_ram_usage
+          name: metric_P4-OvS_memory_ram_usage
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: P4-OvS
+            vdu-metric-name-ref: memory_ram_usage
+        - id: metric_P4-OvS_memory_swap_usage
+          name: metric_P4-OvS_memory_swap_usage
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: P4-OvS
+            vdu-metric-name-ref: memory_swap_usage
+
+        # ====== Disk metrics ===============================================
+        - id: metric_P4-OvS_disk_usage
+          name: metric_P4-OvS_disk_usage
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: P4-OvS
+            vdu-metric-name-ref: disk_usage
+
+        # ====== Network metrics ============================================
+        - id: metric_P4-OvS_network_mgmt_bytes_in
+          name: metric_P4-OvS_network_mgmt_bytes_in
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: P4-OvS
+            vdu-metric-name-ref: network_mgmt_bytes_in
+        - id: metric_P4-OvS_network_mgmt_packets_in
+          name: metric_P4-OvS_network_mgmt_packets_in
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: P4-OvS
+            vdu-metric-name-ref: network_mgmt_packets_in
+        - id: metric_P4-OvS_network_mgmt_bytes_out
+          name: metric_P4-OvS_network_mgmt_bytes_out
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: P4-OvS
+            vdu-metric-name-ref: network_mgmt_bytes_out
+        - id: metric_P4-OvS_network_mgmt_packets_out
+          name: metric_P4-OvS_network_mgmt_packets_out
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: P4-OvS
+            vdu-metric-name-ref: network_mgmt_packets_out
+
+        - id: metric_P4-OvS_network_service_port1_bytes_in
+          name: metric_P4-OvS_network_service_port1_bytes_in
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: P4-OvS
+            vdu-metric-name-ref: network_service_port1_bytes_in
+        - id: metric_P4-OvS_network_service_port1_packets_in
+          name: metric_P4-OvS_network_service_port1_packets_in
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: P4-OvS
+            vdu-metric-name-ref: network_service_port1_packets_in
+        - id: metric_P4-OvS_network_service_port1_bytes_out
+          name: metric_P4-OvS_network_service_port1_bytes_out
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: P4-OvS
+            vdu-metric-name-ref: network_service_port1_bytes_out
+        - id: metric_P4-OvS_network_service_port1_packets_out
+          name: metric_P4-OvS_network_service_port1_packets_out
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: P4-OvS
+            vdu-metric-name-ref: network_service_port1_packets_out
+
+        - id: metric_P4-OvS_network_service_port2_bytes_in
+          name: metric_P4-OvS_network_service_port2_bytes_in
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: P4-OvS
+            vdu-metric-name-ref: network_service_port2_bytes_in
+        - id: metric_P4-OvS_network_service_port2_packets_in
+          name: metric_P4-OvS_network_service_port2_packets_in
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: P4-OvS
+            vdu-metric-name-ref: network_service_port2_packets_in
+        - id: metric_P4-OvS_network_service_port2_bytes_out
+          name: metric_P4-OvS_network_service_port2_bytes_out
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: P4-OvS
+            vdu-metric-name-ref: network_service_port2_bytes_out
+        - id: metric_P4-OvS_network_service_port2_packets_out
+          name: metric_P4-OvS_network_service_port2_packets_out
+          aggregation-type: AVERAGE
+          vdu-metric:
+            vdu-ref: P4-OvS
+            vdu-metric-name-ref: network_service_port2_packets_out

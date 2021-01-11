@@ -1,0 +1,76 @@
+# =====================================================================
+#     #######  #####          #     #   ###   #     # #     #   ###
+#     #       #     #         #     #    #    ##    # ##    #    #
+#     #       #               #     #    #    # #   # # #   #    #
+#      #####  #  ####  #####  #     #    #    #  #  # #  #  #    #
+#           # #     #          #   #     #    #   # # #   # #    #
+#     #     # #     #           # #      #    #    ## #    ##    #
+#      #####   #####             #      ###   #     # #     #   ###
+# =====================================================================
+#
+# SimulaMet P4-OvS NS
+# Copyright (C) 2019-2021 by Thomas Dreibholz
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Contact: dreibh@simula.no
+
+nsd:nsd-catalog:
+  nsd:
+    - id: SimulaMet-P4-OvS_nsd
+      name: SimulaMet-P4-OvS_nsd
+      short-name: SimulaMet-P4-OvS_nsd
+      description: SimulaMet P4-capable Open vSwitch NS
+      vendor: Thomas Dreibholz
+      version: '1.0'
+      logo: NorNet.png
+
+      # ###### VNFDs that are part of this NSD ##############################
+      constituent-vnfd:
+        - member-vnf-index: 1
+          vnfd-id-ref: SimulaMet-P4-OvS_vnfd
+
+      # ###### VLDs #########################################################
+      vld:
+        # ====== Management =================================================
+        - id: SimulaMet-P4-OvS_nsd-Management
+          name: SimulaMet-P4-OvS_nsd-Management
+          short-name: SimulaMet-P4-OvS_nsd-Management
+          mgmt-network: 'true'
+          type: ELAN
+          vim-network-name: mgmt
+          vnfd-connection-point-ref:
+            - member-vnf-index-ref: 1
+              vnfd-id-ref: SimulaMet-P4-OvS_vnfd
+              vnfd-connection-point-ref: p4ovs-mgmt-cp
+
+        # ====== Service ====================================================
+        - id: SimulaMet-P4-OvS_nsd-Service-Port1
+          name: SimulaMet-P4-OvS_nsd-Service-Port1
+          short-name: SimulaMet-P4-OvS_nsd-Service-Port1
+          type: ELAN
+          vim-network-name: nornet-simula
+          vnfd-connection-point-ref:
+            - member-vnf-index-ref: 1
+              vnfd-id-ref: SimulaMet-P4-OvS_vnfd
+              vnfd-connection-point-ref: p4ovs-service-port1-cp
+        - id: SimulaMet-P4-OvS_nsd-Service-Port2
+          name: SimulaMet-P4-OvS_nsd-Service-Port2
+          short-name: SimulaMet-P4-OvS_nsd-Service-Port2
+          type: ELAN
+          vim-network-name: nornet-simula
+          vnfd-connection-point-ref:
+            - member-vnf-index-ref: 1
+              vnfd-id-ref: SimulaMet-P4-OvS_vnfd
+              vnfd-connection-point-ref: p4ovs-service-port2-cp
