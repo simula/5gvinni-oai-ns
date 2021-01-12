@@ -88,7 +88,11 @@ MyParameters = {
    'flexran-service-ipv4-interface': '192.168.246.100/24',
    'flexran-service-ipv4-gateway': '0.0.0.0',
    'flexran-service-ipv6-interface': '',
-   'flexran-service-ipv6-gateway': ''
+   'flexran-service-ipv6-gateway': '',
+
+   # ====== P4-OvS ==========================================================
+   'p4ovs-git-repository': 'https://github.com/osinstom/P4-OvS.git',
+   'p4ovs-git-commit': 'dreibh/build-fix-16Dec2020'
 }
 
 def function_get(flag):

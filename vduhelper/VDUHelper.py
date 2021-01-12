@@ -440,11 +440,11 @@ class VDUHelper:
 
    # ###### Install packages with PIP #######################################
    def pipInstallPackages(self, packages, pipVersion = 3):
-      commands='sudo '
+      commands = 'sudo '
       if pipVersion == None:
-         commands = command + 'pip '
+         commands = commands + 'pip '
       else:
-         commands = command + 'pip' + str(pipVersion) + ' '
+         commands = commands + 'pip' + str(pipVersion) + ' '
          for package in packages:
             commands = commands + ' ' + package
          self.runInShell(commands)
