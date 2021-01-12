@@ -445,9 +445,10 @@ class VDUHelper:
          commands = commands + 'pip '
       else:
          commands = commands + 'pip' + str(pipVersion) + ' '
-         for package in packages:
-            commands = commands + ' ' + package
-         self.runInShell(commands)
+      commands = commands + 'install'
+      for package in packages:
+         commands = commands + ' ' + package
+      self.runInShell(commands)
 
 
    # ###### Write .gitconfig ################################################

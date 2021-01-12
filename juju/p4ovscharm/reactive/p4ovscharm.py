@@ -142,6 +142,7 @@ def configure_thrift():
       # ====== Build Thrift =================================================
       vduHelper.beginBlock('Building Thrift')
       vduHelper.executeFromString("""\
+export MAKEFLAGS="-j`nproc`" && \\
 cd /home/nornetpp/src && \\
 git clone https://github.com/apache/thrift && \\
 cd thrift && \\
@@ -172,6 +173,7 @@ def configure_pi():
       # ====== Build PI =====================================================
       vduHelper.beginBlock('Building PI')
       vduHelper.executeFromString("""\
+export MAKEFLAGS="-j`nproc`" && \\
 cd /home/nornetpp/src && \\
 git clone https://github.com/osinstom/PI && \\
 cd PI && \\
@@ -225,10 +227,10 @@ cd /home/nornetpp/src/{gitDirectory}/p4ovs
 
       # ====== Set up P4-OvS service ===========================================
       vduHelper.beginBlock('Setting up P4-OvS service')
-      vduHelper.configureSystemInfo('P4-OvS Controller', 'This is the P4-OvS Controller of the SimulaMet P4-OvS VNF!')
+      vduHelper.configureSystemInfo('P4-OvS', 'This is the SimulaMet P4-OvS VNF!')
       vduHelper.createFileFromString('/lib/systemd/system/p4ovs.service', """\
 [Unit]
-Description=P4-OvS Controller
+Description=P4-OvS
 After=ssh.target
 
 [Service]
