@@ -53,7 +53,7 @@ vnfd:vnfd-catalog:
             vcpu-count: 4
             memory-mb: 2048
             storage-gb: 16
-          image: 5gVINNI-OpenStack-Ubuntu-20.10-LTS
+          image: 5gVINNI-OpenStack-Ubuntu-20.10
           cloud-init-file: p4ovs-init
 
           # ====== Interfaces ===============================================

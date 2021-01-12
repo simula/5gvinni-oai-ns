@@ -56,3 +56,4 @@ vld:
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '1'
         vnfd-connection-point-ref: p4ovs-service-port1-cp
+        ip-address: 192.168.246.111
