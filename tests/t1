@@ -1509,28 +1509,27 @@ make""".format(gitDirectory = gitDirectory))
       # ====== Configure P4-OvS ================================================
       vduHelper.beginBlock('Configuring P4-OvS')
       vduHelper.executeFromString("""\
-cd /home/nornetpp/src/{gitDirectory}/p4ovs
-""".format(gitDirectory = gitDirectory))
+cd /home/nornetpp/src/{gitDirectory}""".format(gitDirectory = gitDirectory))
       vduHelper.endBlock()
 
       # ====== Set up P4-OvS service ===========================================
       vduHelper.beginBlock('Setting up P4-OvS service')
       vduHelper.configureSystemInfo('P4-OvS', 'This is the SimulaMet P4-OvS VNF!')
-      vduHelper.createFileFromString('/lib/systemd/system/p4ovs.service', """\
-[Unit]
-Description=P4-OvS
-After=ssh.target
+      #vduHelper.createFileFromString('/lib/systemd/system/p4ovs.service', """\
+#[Unit]
+#Description=P4-OvS
+#After=ssh.target
 
-[Service]
-ExecStart=/bin/sh -c 'exec /usr/bin/env FLEXRAN_RTC_HOME=/home/nornetpp/src/{gitDirectory}/p4ovs FLEXRAN_RTC_EXEC=/home/nornetpp/src/{gitDirectory}/p4ovs/build ./build/rt_controller -c log_config/basic_log >>/var/log/p4ovs.log 2>&1'
-KillMode=process
-Restart=on-failure
-RestartPreventExitStatus=255
-WorkingDirectory=/home/nornetpp/src/{gitDirectory}/p4ovs
+#[Service]
+#ExecStart=/bin/sh -c 'exec /usr/bin/env FLEXRAN_RTC_HOME=/home/nornetpp/src/{gitDirectory}/p4ovs FLEXRAN_RTC_EXEC=/home/nornetpp/src/{gitDirectory}/p4ovs/build ./build/rt_controller -c log_config/basic_log >>/var/log/p4ovs.log 2>&1'
+#KillMode=process
+#Restart=on-failure
+#RestartPreventExitStatus=255
+#WorkingDirectory=/home/nornetpp/src/{gitDirectory}/p4ovs
 
-[Install]
-WantedBy=multi-user.target
-""".format(gitDirectory = gitDirectory))
+#[Install]
+#WantedBy=multi-user.target
+#""".format(gitDirectory = gitDirectory))
 
       vduHelper.createFileFromString('/home/nornetpp/log',
 """\
@@ -1570,7 +1569,8 @@ def restart_p4ovs():
    vduHelper.beginBlock('restart_p4ovs')
    try:
 
-      vduHelper.runInShell('sudo service p4ovs restart')
+      # !!! FIXME! !!!
+      # vduHelper.runInShell('sudo service p4ovs restart')
 
       message = vduHelper.endBlock()
       function_set( { 'outout': message } )
