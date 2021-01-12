@@ -38,7 +38,7 @@ vnfd:vnfd-catalog:
 
       # ###### Management Interface #########################################
       mgmt-interface:
-        cp: ovs-mgmt-cp
+        cp: p4ovs-mgmt-cp
 
       vdu:
 
@@ -54,7 +54,7 @@ vnfd:vnfd-catalog:
             memory-mb: 2048
             storage-gb: 16
           image: 5gVINNI-OpenStack-Ubuntu-20.10-LTS
-          cloud-init-file: ovs-init
+          cloud-init-file: p4ovs-init
 
           # ====== Interfaces ===============================================
           interface:
@@ -63,17 +63,17 @@ vnfd:vnfd-catalog:
               mgmt-interface: true
               virtual-interface:
                 type: PARAVIRT
-              external-connection-point-ref: ovs-mgmt-cp
+              external-connection-point-ref: p4ovs-mgmt-cp
             - name: eth1
               type: EXTERNAL
               virtual-interface:
                 type: PARAVIRT
-              external-connection-point-ref: ovs-service-port1-cp
+              external-connection-point-ref: p4ovs-service-port1-cp
             - name: eth2
               type: EXTERNAL
               virtual-interface:
                 type: PARAVIRT
-              external-connection-point-ref: ovs-service-port2-cp
+              external-connection-point-ref: p4ovs-service-port2-cp
 
           # ====== Juju Charm ===============================================
           vdu-configuration:
@@ -115,9 +115,9 @@ vnfd:vnfd-catalog:
               - seq: '2'
                 name: prepare-ovs-build
                 parameter:
-                  - name: ovs-git-repository
+                  - name: p4ovs-git-repository
                     value: <p4ovs_git_repository>
-                  - name: ovs-git-commit
+                  - name: p4ovs-git-commit
                     value: <p4ovs_git_commit>
               - seq: '3'
                 name: configure-thrift
@@ -134,9 +134,9 @@ vnfd:vnfd-catalog:
 
       # ###### External Connection Points ###################################
       connection-point:
-        - name: ovs-mgmt-cp
-        - name: ovs-service-port1-cp
-        - name: ovs-service-port2-cp
+        - name: p4ovs-mgmt-cp
+        - name: p4ovs-service-port1-cp
+        - name: p4ovs-service-port2-cp
 
 
       # ###### Monitoring ###################################################
