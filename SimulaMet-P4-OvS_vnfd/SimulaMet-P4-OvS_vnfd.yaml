@@ -113,7 +113,7 @@ vnfd:vnfd-catalog:
                   - name: ssh-password
                     value: <password>
               - seq: '2'
-                name: prepare-ovs-build
+                name: prepare-p4ovs-build
                 parameter:
                   - name: p4ovs-git-repository
                     value: <p4ovs_git_repository>
