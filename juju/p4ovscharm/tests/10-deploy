@@ -9,13 +9,13 @@ class TestCharm(unittest.TestCase):
     def setUp(self):
         self.d = amulet.Deployment()
 
-        self.d.add('p4ovsrancharm')
-        self.d.expose('p4ovsrancharm')
+        self.d.add('p4ovscharm')
+        self.d.expose('p4ovscharm')
 
         self.d.setup(timeout=900)
         self.d.sentry.wait()
 
-        self.unit = self.d.sentry['p4ovsrancharm'][0]
+        self.unit = self.d.sentry['p4ovscharm'][0]
 
     def test_service(self):
         # test we can access over http
@@ -30,6 +30,6 @@ class TestCharm(unittest.TestCase):
         # - .directory_contents(PATH) - List files and folders in PATH on that unit
         # - .relation(relation, service:rel) - Get relation data from return service
 
-        
+
 if __name__ == '__main__':
     unittest.main()
