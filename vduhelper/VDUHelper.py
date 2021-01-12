@@ -425,7 +425,7 @@ class VDUHelper:
       self.endBlock()
 
 
-   # ###### Test networking #################################################
+   # ###### Install packages with APT #######################################
    def aptInstallPackages(self, packages, update = True):
       if len(packages) > 0:
          if update == True:
@@ -433,6 +433,18 @@ class VDUHelper:
          else:
             commands = ''
          commands = commands + 'DEBIAN_FRONTEND=noninteractive sudo apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends'
+         for package in packages:
+            commands = commands + ' ' + package
+         self.runInShell(commands)
+
+
+   # ###### Install packages with PIP #######################################
+   def pipInstallPackages(self, packages, pipVersion = 3):
+      commands='sudo '
+      if pipVersion == None:
+         commands = command + 'pip '
+      else:
+         commands = command + 'pip' + str(pipVersion) + ' '
          for package in packages:
             commands = commands + ' ' + package
          self.runInShell(commands)
