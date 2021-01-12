@@ -28,9 +28,9 @@
 
 vnfd:vnfd-catalog:
   vnfd:
-    - id: P4-OvS_vnfd
-      name: P4-OvS_vnfd
-      short-name: P4-OvS_vnfd
+    - id: SimulaMet-P4-OvS_vnfd
+      name: SimulaMet-P4-OvS_vnfd
+      short-name: SimulaMet-P4-OvS_vnfd
       description: SimulaMet P4-OvS VNF
       vendor: Thomas Dreibholz
       version: '1.0'
