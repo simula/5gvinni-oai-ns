@@ -1345,7 +1345,7 @@ def restart_flexran():
 
 
 # ###########################################################################
-# #### P4-OvS Charm functions                                           ####
+# #### P4-OvS Charm functions                                            ####
 # ###########################################################################
 
 # ###### Installation #######################################################
@@ -1356,7 +1356,7 @@ def install_p4ovscharm_proxy_charm():
    vduHelper.setStatus('install_p4ovscharm_proxy_charm: SSH proxy charm is READY')
 
 
-# ###### prepare-p4ovs-build function #####################################
+# ###### prepare-p4ovs-build function #######################################
 @when('actions.prepare-p4ovs-build')
 @when('p4ovscharm.installed')
 @when_not('p4ovscharm.prepared-p4ovs-build')
@@ -1364,10 +1364,7 @@ def prepare_p4ovs_build():
    vduHelper.beginBlock('prepare_p4ovs_build')
    try:
 
-      # ====== Get P4-OvS parameters ===========================================
-      # For a documentation of the installation procedure, see:
-      # https://gitlab.eurecom.fr/mosaic5g/mosaic5g/-/wikis/tutorials/slicing
-
+      # ====== Get P4-OvS parameters ========================================
       gitRepository = function_get('p4ovs-git-repository')
       gitCommit     = function_get('p4ovs-git-commit')
       gitDirectory  = 'P4-OvS'
@@ -1483,20 +1480,17 @@ sudo make install""")
       clear_flag('actions.configure-pi')
 
 
-# ###### configure-p4ovs function #########################################
+# ###### configure-p4ovs function ###########################################
 @when('actions.configure-p4ovs')
 @when('p4ovscharm.configured-pi')
 def configure_p4ovs():
    vduHelper.beginBlock('configure_p4ovs')
    try:
 
-      # ====== Get P4-OvS parameters =======================================
-      # For a documentation of the installation procedure, see:
-      # https://gitlab.eurecom.fr/mosaic5g/mosaic5g/-/wikis/tutorials/slicing
-
+      # ====== Get P4-OvS parameters ========================================
       gitDirectory = 'P4-OvS'
 
-      # ====== Build P4-OvS ================================================
+      # ====== Build P4-OvS =================================================
       vduHelper.beginBlock('Building P4-OvS itself')
       vduHelper.executeFromString("""\
 export MAKEFLAGS="-j`nproc`" && \\
@@ -1506,13 +1500,13 @@ cd /home/nornetpp/src/{gitDirectory} && \\
 make""".format(gitDirectory = gitDirectory))
       vduHelper.endBlock()
 
-      # ====== Configure P4-OvS ================================================
+      # ====== Configure P4-OvS =============================================
       vduHelper.beginBlock('Configuring P4-OvS')
       vduHelper.executeFromString("""\
 cd /home/nornetpp/src/{gitDirectory}""".format(gitDirectory = gitDirectory))
       vduHelper.endBlock()
 
-      # ====== Set up P4-OvS service ===========================================
+      # ====== Set up P4-OvS service ========================================
       vduHelper.beginBlock('Setting up P4-OvS service')
       vduHelper.configureSystemInfo('P4-OvS', 'This is the SimulaMet P4-OvS VNF!')
       #vduHelper.createFileFromString('/lib/systemd/system/p4ovs.service', """\
@@ -1562,7 +1556,7 @@ sudo service p4ovs restart && $DIRECTORY/log
       clear_flag('actions.configure-p4ovs')
 
 
-# ###### restart-p4ovs function ###############################################
+# ###### restart-p4ovs function #############################################
 @when('actions.restart-p4ovs')
 @when('p4ovscharm.configured-p4ovs')
 def restart_p4ovs():
