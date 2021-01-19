@@ -432,7 +432,7 @@ class VDUHelper:
             commands = 'sudo apt update && \\\n'
          else:
             commands = ''
-         commands = commands + 'DEBIAN_FRONTEND=noninteractive sudo apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends'
+         commands = commands + 'sudo env DEBIAN_FRONTEND=noninteractive apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends'
          for package in packages:
             commands = commands + ' ' + package
          self.runInShell(commands)

@@ -105,7 +105,8 @@ def prepare_p4ovs_build():
          'protobuf-compiler',
          'protobuf-compiler-grpc',
          'python3-dev',
-         'python3-pip'
+         'python3-pip',
+         'python3-setuptools'
       ])
       vduHelper.pipInstallPackages([ 'nnpy' ])
       vduHelper.endBlock()
