@@ -223,11 +223,12 @@ for qosBandwidth in 10000 ; do   # 100000
          # §§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
          # ====== Run NetPerfMeter for background flow from SPGW-U ==========
          echo "Running NetPerfMeter background flow from SPGW-U ..."
+         ${SSH_EPC}${IP_SPGWU} sudo -u nornetpp killall netperfmeter || true
          ${SSH_EPC}${IP_SPGWU} sudo -u nornetpp netperfmeter ${DESTINATION} \
-            -quiet -onoff=10,60 \
+            -quiet -runtime=${RUNTIME} \
             -vector=/tmp/background.vec \
             -scalar=/tmp/background.sca \
-            -udp const80:const1400:const0:const0 &
+            -udp const80:const14000:const0:const0,onoff=300,+300 &
          netPerfMeterPID=$!
          echo "PID=${netPerfMeterPID}"
          # §§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
