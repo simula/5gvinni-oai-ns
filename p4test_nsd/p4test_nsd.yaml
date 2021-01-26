@@ -1,0 +1,49 @@
+nsd:nsd-catalog:
+  nsd:
+    - id: p4test_nsd
+      name: p4test_nsd
+      short-name: p4test_nsd
+      description: |
+        P4-OvS Test
+      version: '1.0'
+      logo: NorNet.png
+      constituent-vnfd:
+        - vnfd-id-ref: p4test_vnfd
+          member-vnf-index: '1'
+        - vnfd-id-ref: SimulaMet-P4-OvS_vnfd
+          member-vnf-index: 1
+      vld:
+        - id: mgmtnet
+          name: mgmtnet
+          short-name: mgmt
+          type: ELAN
+          mgmt-network: 'true'
+          vim-network-name: mgmt
+          vnfd-connection-point-ref:
+            - vnfd-id-ref: p4test_vnfd
+              member-vnf-index-ref: '1'
+              vnfd-connection-point-ref: vnf-mgmt
+            - member-vnf-index-ref: 1
+              vnfd-id-ref: SimulaMet-P4-OvS_vnfd
+              vnfd-connection-point-ref: p4ovs-mgmt-cp
+        - id: datanet
+          name: datanet
+          short-name: datanet
+          type: ELAN
+          vim-network-name: nornet-simula
+          vnfd-connection-point-ref:
+            - vnfd-id-ref: SimulaMet-P4-OvS_vnfd
+              member-vnf-index-ref: '1'
+              vnfd-connection-point-ref: p4ovs-service-port2-cp
+
+      internal-vld:
+        - id: datalink
+          ip-profile-ref: datalink
+          name: datalink
+          vnfd-connection-point-ref:
+            - vnfd-id-ref: SimulaMet-P4-OvS_vnfd
+              member-vnf-index-ref: '1'
+              vnfd-connection-point-ref: p4ovs-service-port1-cp
+           - vnfd-id-ref: p4test_vnfd
+              member-vnf-index-ref: '1'
+              vnfd-connection-point-ref: vnf-data
