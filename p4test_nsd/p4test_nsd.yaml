@@ -8,7 +8,7 @@ nsd:nsd-catalog:
       version: '1.0'
       logo: NorNet.png
       constituent-vnfd:
-        - vnfd-id-ref: p4test_vnfd
+        - vnfd-id-ref: hackfest_proxycharm_vnfd
           member-vnf-index: '1'
         - vnfd-id-ref: SimulaMet-P4-OvS_vnfd
           member-vnf-index: 1
@@ -20,7 +20,7 @@ nsd:nsd-catalog:
           mgmt-network: 'true'
           vim-network-name: mgmt
           vnfd-connection-point-ref:
-            - vnfd-id-ref: p4test_vnfd
+            - vnfd-id-ref: hackfest_proxycharm_vnfd
               member-vnf-index-ref: '1'
               vnfd-connection-point-ref: vnf-mgmt
             - member-vnf-index-ref: 1
@@ -44,6 +44,6 @@ nsd:nsd-catalog:
             - vnfd-id-ref: SimulaMet-P4-OvS_vnfd
               member-vnf-index-ref: '1'
               vnfd-connection-point-ref: p4ovs-service-port1-cp
-           - vnfd-id-ref: p4test_vnfd
+            - vnfd-id-ref: hackfest_proxycharm_vnfd
               member-vnf-index-ref: '1'
               vnfd-connection-point-ref: vnf-data
