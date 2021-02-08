@@ -35,7 +35,7 @@ library(Hmisc)
 source("/usr/share/netperfmeter/plotter.R")
 
 
-name <- "Measurement7"
+name <- "Measurement7b"
 
 
 

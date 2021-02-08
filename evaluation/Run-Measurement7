@@ -28,7 +28,7 @@
 # Contact: dreibh@simula.no
 
 
-DIRECTORY="Measurement7"
+DIRECTORY="Measurement7b"
 DESTINATION="10.1.1.247:9000"
 INTERFACE="any"
 RUNTIME=900
@@ -161,7 +161,7 @@ for qosBandwidth in 10000 ; do   # 100000
    qosLossRate=0.0
    qosErrorRate=0.0
    backgroundFlowParameters="-udp const50:exp2500:const50:exp2500"   # 1 Mbit/s!
-   for scenario in Download ; do   #  Download Upload Bidirectional
+   for scenario in Upload ; do   #  Download Upload Bidirectional
       for protocol in tcp ; do   # udp tcp sctp
          flowParameters="INVALID!"
          if [ "${protocol}" == "udp" ] ; then
@@ -225,6 +225,7 @@ for qosBandwidth in 10000 ; do   # 100000
          echo "Running NetPerfMeter background flow from SPGW-U ..."
          ${SSH_EPC}${IP_SPGWU} sudo -u nornetpp killall netperfmeter || true
          ${SSH_EPC}${IP_SPGWU} sudo -u nornetpp netperfmeter ${DESTINATION} \
+            -local=10.254.1.203 \
             -quiet -runtime=${RUNTIME} \
             -vector=/tmp/background.vec \
             -scalar=/tmp/background.sca \
