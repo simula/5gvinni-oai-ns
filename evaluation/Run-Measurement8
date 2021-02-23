@@ -29,7 +29,7 @@
 
 
 # NOTE:
-# * Manually start NetPerfMeter on port 9000 on ${SERVER}!
+# * Manually start NetPerfMeter on port 9000 on ${IP_SERVER}!
 # * Make sure to allow password-less sudo on server and eNodeB!
 
 
@@ -45,6 +45,7 @@ IP_SPGWU="10.208.0.203"
 IP_SERVER="10.1.1.247"
 DESTINATION="${IP_SERVER}:9000"   # NetPerfMeter destination
 SSH_EPC="sudo -u dreibh sshpass -p osm4us ssh -4C -oStrictHostKeyChecking=no -J nornetpp@10.1.1.85 nornetpp@"
+SSH_OTHER="sudo -u#${SUDO_UID} -g#${SUDO_GID} ssh -4C nornetpp@"
 
 # curl 'http://localhost:9091/api/v1/query_range?query=osm_cpu_load_5min&start=2020-09-11T06:00:00.000Z&end=2020-09-11T06:00:30.000Z&step=1s'
 PROMETHEUS='http://localhost:9091/api/v1/query_range'
@@ -75,13 +76,13 @@ echo "Checking server connection ..."
 # NOTE: Add this to /etc/sudoers on the server:
 # # User rules for nornetpp
 # nornetpp ALL=(ALL) NOPASSWD:ALL
-ssh nornetpp@${SERVER} sudo hostname
+sudo -u#${SUDO_UID} -g#${SUDO_GID} ssh nornetpp@${IP_SERVER} sudo hostname
 
 echo "Checking eNodeB connection ..."
 # NOTE: Add this to /etc/sudoers on the eNodeB
 # # User rules for nornetpp
 # nornetpp ALL=(ALL) NOPASSWD:ALL
-ssh nornetpp@${IP_ENODEB} sudo hostname
+sudo -u#${SUDO_UID} -g#${SUDO_GID} ssh nornetpp@${IP_ENODEB} sudo hostname
 
 echo "Checking Prometheus connection ..."
 if ! curl -o /dev/null "${PROMETHEUS}?query=osm_cpu_load_5min&start=2020-09-11T06:00:00.000Z&end=2020-09-11T06:00:30.000Z&step=1s" 2>/dev/null ; then
@@ -118,11 +119,11 @@ start-monitoring ()
    local sysstatParameters="$4"
    local inEPC="$5"
 
-   local ssh="ssh -4C"
+   local ssh="${SSH_OTHER}"
    if [ "$inEPC" == "in-epc" ] ; then
       ssh="${SSH_EPC}"
    fi
-   
+
    ${ssh}${ip} /bin/bash -c "\"\\
 killall -q -sKILL sar ; \\
 sudo killall -q -sKILL tcpdump ; \\
@@ -147,7 +148,7 @@ stop-monitoring ()
    local ip="$3"
    local inEPC="$4"
 
-   local ssh="ssh -4C"
+   local ssh="${SSH_OTHER}"
    if [ "$inEPC" == "in-epc" ] ; then
       ssh="${SSH_EPC}"
    fi
@@ -272,15 +273,7 @@ for qosBandwidth in 10000 ; do   # 100000
 
 
          # §§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
-         # ====== QoS changes ===============================================
 
-         sleep 300
-         # 10% Packet Loss
-         sudo -u#${SUDO_UID} -g#${SUDO_GID} ssh -p 2909 nornetpp@localhost HENCSAT-QoS-Setup change \
-            ${qosBandwidth} ${qosDelay} 0.10 ${qosErrorRate}
-         sleep 300
-         sudo -u#${SUDO_UID} -g#${SUDO_GID} ssh -p 2909 nornetpp@localhost HENCSAT-QoS-Setup change \
-            ${qosBandwidth} ${qosDelay} ${qosLossRate} ${qosErrorRate}
 
          # §§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
 
