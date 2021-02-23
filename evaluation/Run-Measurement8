@@ -28,16 +28,22 @@
 # Contact: dreibh@simula.no
 
 
-DIRECTORY="Measurement8"
-DESTINATION="10.1.1.249:9000"
-DESTINATION_HIPERCONTRACER="10.1.1.249"
-INTERFACE="any"
-RUNTIME=120
+# NOTE:
+# * Manually start NetPerfMeter on port 9000 on ${SERVER}!
+# * Make sure to allow password-less sudo on server and eNodeB!
 
+
+DIRECTORY="Measurement8"
+INTERFACE="any"
+RUNTIME=10
+
+IP_ENODEB="10.1.1.87"
 IP_HSS="10.208.0.200"
 IP_MME="10.208.0.201"
 IP_SPGWC="10.208.0.202"
 IP_SPGWU="10.208.0.203"
+IP_SERVER="10.1.1.247"
+DESTINATION="${IP_SERVER}:9000"   # NetPerfMeter destination
 SSH_EPC="sudo -u dreibh sshpass -p osm4us ssh -4C -oStrictHostKeyChecking=no -J nornetpp@10.1.1.85 nornetpp@"
 
 # curl 'http://localhost:9091/api/v1/query_range?query=osm_cpu_load_5min&start=2020-09-11T06:00:00.000Z&end=2020-09-11T06:00:30.000Z&step=1s'
@@ -65,6 +71,18 @@ if ! sudo -u#${SUDO_UID} -g#${SUDO_GID} ssh -p 2909 nornetpp@localhost HENCSAT-Q
    exit 1
 fi
 
+echo "Checking server connection ..."
+# NOTE: Add this to /etc/sudoers on the server:
+# # User rules for nornetpp
+# nornetpp ALL=(ALL) NOPASSWD:ALL
+ssh nornetpp@${SERVER} sudo hostname
+
+echo "Checking eNodeB connection ..."
+# NOTE: Add this to /etc/sudoers on the eNodeB
+# # User rules for nornetpp
+# nornetpp ALL=(ALL) NOPASSWD:ALL
+ssh nornetpp@${IP_ENODEB} sudo hostname
+
 echo "Checking Prometheus connection ..."
 if ! curl -o /dev/null "${PROMETHEUS}?query=osm_cpu_load_5min&start=2020-09-11T06:00:00.000Z&end=2020-09-11T06:00:30.000Z&step=1s" 2>/dev/null ; then
    echo >&2 "ERROR: Unable to get data from Prometheus! Check tunnel!"
@@ -85,8 +103,8 @@ SUMMARY_UPDATED="${DIRECTORY}/results.summary.updated"
 
 # ====== Flow parameters ====================================================
 saturatedFlow="const0:const1400"
-streamingFlow="const20:const1000"   # 20*1000 B/s
-maxMsgSize=1400                     # Max. 1440 bytes per SCTP message/UDP packet
+streamingFlow="const60:const20000"   # 9.6 Mbit/s payload
+maxMsgSize=1400                      # Max. 1440 bytes per SCTP message/UDP packet
 tcpdumpSnaplens="128"   # "64 65536"
 
 
@@ -98,12 +116,19 @@ start-monitoring ()
    local Component="${component^^}"
    local ip="$3"
    local sysstatParameters="$4"
-   ${SSH_EPC}${ip} /bin/bash -c "\"\\
+   local inEPC="$5"
+
+   local ssh="ssh -4C"
+   if [ "$inEPC" == "in-epc" ] ; then
+      ssh="${SSH_EPC}"
+   fi
+   
+   ${ssh}${ip} /bin/bash -c "\"\\
 killall -q -sKILL sar ; \\
 sudo killall -q -sKILL tcpdump ; \\
 sudo rm -f /tmp/*.pcap /tmp/*.data /tmp/*.out /tmp/*.xz ; \\
 echo \\\"${Component}: starting tcpdump ...\\\" ; \\
-{ nohup sudo tcpdump -i any -n -s 128 -w /tmp/${id}-${component}.pcap >/tmp/${id}-${component}-tcpdump.out 2>&1 & } ; \\
+{ nohup sudo tcpdump -i any -n -s 128 -w /tmp/${id}-${component}.pcap '!(tcp port 22)' >/tmp/${id}-${component}-tcpdump.out 2>&1 & } ; \\
 echo \\\"${Component}: starting sar ...\\\" ; \\
 { nohup sar -o /tmp/${id}-${component}.data ${sysstatParameters} >/tmp/${id}-${component}-sar.out 2>&1 & } ;\\
 echo \\\"${Component}: monitoring ready!\\\" ; \\
@@ -120,8 +145,14 @@ stop-monitoring ()
    local component="$2"
    local Component="${component^^}"
    local ip="$3"
+   local inEPC="$4"
 
-   ${SSH_EPC}${ip} /bin/bash -c "\"\\
+   local ssh="ssh -4C"
+   if [ "$inEPC" == "in-epc" ] ; then
+      ssh="${SSH_EPC}"
+   fi
+
+   ${ssh}${ip} /bin/bash -c "\"\\
 killall -q -sKILL sar ; \\
 sudo killall -q -sINT tcpdump ; \\
 sleep 5 ; \\
@@ -157,13 +188,13 @@ get-prometheus-metrics ()
 
 
 # ====== Run measurements ===================================================
-for qosBandwidth in 100000 ; do   # 100000
+for qosBandwidth in 10000 ; do   # 100000
    qosDelay=0
    qosLossRate=0.0
    qosErrorRate=0.0
-   backgroundFlowParameters=""   # None!   "-udp const50:exp2500:const50:exp2500"   # 1 Mbit/s!
-   for scenario in Bidirectional ; do   #  Download Upload Bidirectional
-      for protocol in udp ; do   # udp tcp sctp
+   backgroundFlowParameters="-udp const50:exp2500:const50:exp2500"   # 1 Mbit/s!
+   for scenario in Download ; do   #  Download Upload Bidirectional
+      for protocol in tcp ; do   # udp tcp sctp
          flowParameters="INVALID!"
          if [ "${protocol}" == "udp" ] ; then
             flowParameters="${streamingFlow}"
@@ -203,17 +234,19 @@ for qosBandwidth in 100000 ; do   # 100000
 
          # ====== Start sysstat in EPC ======================================
          sysstatParameters="-bqr -n DEV,EDEV,IP,EIP,ICMP,EICMP,IP6,EIP6,ICMP6,EICMP6,TCP,ETCP,UDP,UDP6 1 600"
-         start-monitoring ${id} hss   ${IP_HSS}   "${sysstatParameters}" &
-         start-monitoring ${id} mme   ${IP_MME}   "${sysstatParameters}" &
-         start-monitoring ${id} spgwc ${IP_SPGWC} "${sysstatParameters}" &
-         start-monitoring ${id} spgwu ${IP_SPGWU} "${sysstatParameters}" &
+         start-monitoring ${id} hss    ${IP_HSS}    "${sysstatParameters}" in-epc &
+         start-monitoring ${id} mme    ${IP_MME}    "${sysstatParameters}" in-epc &
+         start-monitoring ${id} spgwc  ${IP_SPGWC}  "${sysstatParameters}" in-epc &
+         start-monitoring ${id} spgwu  ${IP_SPGWU}  "${sysstatParameters}" in-epc &
+         start-monitoring ${id} server ${IP_SERVER} "${sysstatParameters}" &
+         start-monitoring ${id} eNodeB ${IP_ENODEB} "${sysstatParameters}" &
          wait
 
 
          # ====== Start tcpdump =============================================
          echo "Starting tcpdump ..."
          for tcpdumpSnaplen in ${tcpdumpSnaplens} ; do
-            tcpdump -i ${INTERFACE} -w "${prefix}-${tcpdumpSnaplen}.pcap" -s ${tcpdumpSnaplen} -n ${protocol} or udp or sctp or icmp or icmp6 &
+            tcpdump -i ${INTERFACE} -w "${prefix}-${tcpdumpSnaplen}.pcap" -s ${tcpdumpSnaplen} -n '!(tcp port 22)' &
          done
          sleep 3
          for tcpdumpSnaplen in ${tcpdumpSnaplens} ; do
@@ -227,17 +260,6 @@ for qosBandwidth in 100000 ; do   # 100000
 
 
          # ====== Run NetPerfMeter ==========================================
-         echo "Running HiPerConTracer ..."
-         sudo killall hipercontracer 2>/dev/null || true
-         mkdir -p ${DIRECTORY}/tmp
-         sudo hipercontracer -source=0.0.0.0 -destination=${DESTINATION_HIPERCONTRACER} \
-            -ping -quiet \
-            --resultstransactionlength=3600 \
-            --resultsdirectory ${DIRECTORY} &
-         hiPerConTracerPID=$!
-         echo "PID=${hiPerConTracerPID}"
-
-         # ====== Run NetPerfMeter ==========================================
          echo "Running NetPerfMeter ..."
          startTime=`date +"%s"`
          sudo -u#${SUDO_UID} -g#${SUDO_GID} netperfmeter ${DESTINATION} \
@@ -248,17 +270,25 @@ for qosBandwidth in 100000 ; do   # 100000
          netPerfMeterPID=$!
          echo "PID=${netPerfMeterPID}"
 
+
+         # §§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
+         # ====== QoS changes ===============================================
+
+         sleep 300
+         # 10% Packet Loss
+         sudo -u#${SUDO_UID} -g#${SUDO_GID} ssh -p 2909 nornetpp@localhost HENCSAT-QoS-Setup change \
+            ${qosBandwidth} ${qosDelay} 0.10 ${qosErrorRate}
+         sleep 300
+         sudo -u#${SUDO_UID} -g#${SUDO_GID} ssh -p 2909 nornetpp@localhost HENCSAT-QoS-Setup change \
+            ${qosBandwidth} ${qosDelay} ${qosLossRate} ${qosErrorRate}
+
+         # §§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
+
+
          # ====== End of measurement ========================================
          echo "Waiting for ${netPerfMeterPID} to finish ..."
          wait ${netPerfMeterPID}
          echo "OK!"
-
-         echo "Waiting for ${hiPerConTracerPID} to finish ..."
-         sudo kill ${hiPerConTracerPID}
-         sudo kill ${hiPerConTracerPID}
-         wait ${hiPerConTracerPID}
-         echo "OK!"
-
          endTime=`date +"%s"`
          echo "Stopping tcpdump ..."
          killall tcpdump || true
@@ -272,10 +302,12 @@ for qosBandwidth in 100000 ; do   # 100000
 
          # ====== Stop sysstat in EPC and collect statistics ================
          echo "Stopping sar and and collecting statistics ..."
-         stop-monitoring ${id} hss   ${IP_HSS}   &
-         stop-monitoring ${id} mme   ${IP_MME}   &
-         stop-monitoring ${id} spgwc ${IP_SPGWC} &
-         stop-monitoring ${id} spgwu ${IP_SPGWU} &
+         stop-monitoring ${id} eNodeB ${IP_ENODEB} &
+         stop-monitoring ${id} server ${IP_SERVER} &
+         stop-monitoring ${id} hss    ${IP_HSS}    in-epc &
+         stop-monitoring ${id} mme    ${IP_MME}    in-epc &
+         stop-monitoring ${id} spgwc  ${IP_SPGWC}  in-epc &
+         stop-monitoring ${id} spgwu  ${IP_SPGWU}  in-epc &
          wait
 
          # ====== Get metrics from Prometheus ===============================
