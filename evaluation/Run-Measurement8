@@ -35,7 +35,7 @@
 
 DIRECTORY="Measurement8"
 INTERFACE="any"
-RUNTIME=60
+RUNTIME=10
 
 IP_ENODEB="10.1.1.87"
 IP_HSS="10.208.0.200"
@@ -125,19 +125,24 @@ start-monitoring ()
       ssh="${SSH_EPC}"
    fi
 
+   # Copy T-Shark helper script
+   cat tshark-xz | ${ssh}${ip} 'cat >~/tshark-xz && chmod +x ~/tshark-xz'
+
    ${ssh}${ip} /bin/bash -c "\"\\
 killall -q -sKILL sar ; \\
 sudo killall -q -sKILL tshark ; \\
 sudo rm -f /tmp/*.pcap* /tmp/*.data /tmp/*.out /tmp/*.xz ; \\
-echo \\\"${Component}: starting tshark ...\\\" ; \\
-{ nohup sudo tshark -i any -n -s ${remoteSnaplen} -w /tmp/${id}-${component}.pcap \'!(tcp port 22 or udp port 1194)\' >/tmp/${id}-${component}-tshark.out 2>&1 & } ; \\
+echo \\\"${Component}: starting tshark-xz script ...\\\" ; \\
+sudo apt install inotify-tools -y ; \\
+{ nohup sudo ~/tshark-xz /tmp/${id}-${component}.pcap.xz -i any -n -s ${remoteSnaplen} '!(tcp port 22 or udp port 1194)' >/tmp/${id}-${component}-tshark.out 2>&1 & } ; \\
 echo \\\"${Component}: starting sar ...\\\" ; \\
 { nohup sar -o /tmp/${id}-${component}.data ${sysstatParameters} >/tmp/${id}-${component}-sar.out 2>&1 & } ;\\
-echo \\\"${Component}: monitoring ready!\\\" ; \\
-sleep 3 ; \\
-sudo chattr +c /tmp/${id}-${component}.pcap || true ; \\
+echo \\\"${Component}: monitoring ready!\\\"
 \""
 }
+
+# sleep 3 ; \\
+# sudo chattr +c /tmp/${id}-${component}.pcap || true ; \\
 
 
 # ###### Stop monitoring EPC component ######################################
@@ -156,16 +161,20 @@ stop-monitoring ()
 
    ${ssh}${ip} /bin/bash -c "\"\\
 killall -q -sKILL sar ; \\
+{ inotifywait -q --timeout 300 --event close_write /tmp/${id}-${component}.pcap.xz & } ; \\
+ps ax | grep tshark >>/tmp/q0 ; \\
 sudo killall -q -sINT tshark ; \\
-sleep 5 ; \\
-find /tmp -maxdepth 1 -name ${id}-${component}.pcap | xargs -r sudo chown nornetpp:nornetpp ; \\
-find /tmp -maxdepth 1 -name ${id}-${component}.pcap | xargs -r xz -T0 ; \\
-find /tmp -maxdepth 1 -name ${id}-${component}.out  | xargs -r xz -T0 ; \\
+wait ; \\
+ps ax | grep tshark >>/tmp/q1 ; \\
+find /tmp -maxdepth 1 -name ${id}-${component}.pcap* | xargs -r sudo chown nornetpp:nornetpp ; \\
+find /tmp -maxdepth 1 -name ${id}-${component}.out   | xargs -r xz -T0 ; \\
 echo \\\"${Component}: monitoring stopped!\\\" ; \\
 \""
 
 sudo -u dreibh rsync -Pavz -e "sshpass -p osm4us ssh -4C -oStrictHostKeyChecking=no -J nornetpp@10.1.1.85" nornetpp@${ip}:/tmp/${id}-${component}.* ${DIRECTORY}/
 }
+
+# find /tmp -maxdepth 1 -name ${id}-${component}.pcap  | xargs -r xz -T0 ; \\
 
 
 # ###### Get Prometheus metrics #############################################
@@ -248,12 +257,12 @@ for qosBandwidth in 100000 ; do   # 100000
          # ====== Start tshark =============================================
          echo "Starting tshark ..."
          for tcpdumpSnaplen in ${tcpdumpSnaplens} ; do
-            tshark -i ${INTERFACE} -w "${prefix}-${tcpdumpSnaplen}.pcap" -s ${tcpdumpSnaplen} -n '!(tcp port 22 or udp port 1194)' &
+            ./tshark-xz "${prefix}-${tcpdumpSnaplen}.pcap.xz" -i ${INTERFACE} -s ${tcpdumpSnaplen} -n '!(tcp port 22 or udp port 1194)' &
          done
-         sleep 3
-         for tcpdumpSnaplen in ${tcpdumpSnaplens} ; do
-            chattr +c "${prefix}-${tcpdumpSnaplen}.pcap" || true
-         done
+         #sleep 3
+         #for tcpdumpSnaplen in ${tcpdumpSnaplens} ; do
+         #   chattr +c "${prefix}-${tcpdumpSnaplen}.pcap" || true
+         #done
 
 
          # ====== Apply QoS Settings ========================================
@@ -309,7 +318,7 @@ for qosBandwidth in 100000 ; do   # 100000
 
          # ====== Set ownership and compress pcap files =====================
          chown ${SUDO_UID}:${SUDO_GID} ${prefix}*
-         find ${DIRECTORY} -name "${id}*.pcap" | xargs -r xz -T0
+         # find ${DIRECTORY} -name "${id}*.pcap" | xargs -r xz -T0
       done
    done
 done

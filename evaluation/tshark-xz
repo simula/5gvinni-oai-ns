@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+#
+# Launch T-Shark with on-the-fly XZ compression via FIFO pipe
+# Copyright (C) 2021 by Thomas Dreibholz
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Contact: dreibh@simula.no
+
+# Initial idea based on:
+# https://stackoverflow.com/questions/50489159/write-tcpdump-output-to-compressed-gziped-file
+
+
+set -e
+
+# ====== Handle arguments ===================================================
+if [ $# -lt 1 ] ; then
+   echo >&2 "Usage: $0 output.pcapng.xz [TShark_argument ...]"
+   exit 1
+fi
+PCAP="$1"
+FIFO="${PCAP}.fifo"
+shift
+
+tcpdump_pid=
+pid_xz=
+
+
+# ====== Clean-up trap on SIGINT ============================================
+trap '[ -n "${tcpdump_pid}" ] && kill "${tcpdump_pid}"' INT
+trap 'rm -f -- "${FIFO}"' EXIT
+
+
+# ====== Start xz for writing a compressed pcap file from FIFO input ========
+rm -f -- "${FIFO}"
+mkfifo "${FIFO}"
+nice xz -T0 -c >"${PCAP}" <"${FIFO}" & pid_xz=$!
+
+# Make sure that xz has been started successfully before starting T-Shark
+if [ "${pid_xz}" == "" -o ! "${pid_xz}" -gt 0 ] ; then
+   kill -0 "${pid_xz}"
+   echo >&2 "ERROR: xz failed to start -> exiting!"
+   exit 1
+fi
+
+
+# ====== Run T-Shark ========================================================
+tshark -w - "$@" >"${FIFO}" & tcpdump_pid=$!  || true
+
+# Return T-Shark status on failure, or xz status if T-Shark finished successfully:
+wait "${tcpdump_pid}" || wait "${pid_xz}"
