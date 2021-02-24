@@ -35,7 +35,7 @@
 
 DIRECTORY="Measurement8"
 INTERFACE="any"
-RUNTIME=10
+RUNTIME=300
 
 IP_ENODEB="10.1.1.87"
 IP_HSS="10.208.0.200"
@@ -254,8 +254,19 @@ for qosBandwidth in 100000 ; do   # 100000
          wait
 
 
+         # ====== Start HiPerConTracer ======================================
+         echo "Starting HiPerConTracer ..."
+         sudo killall hipercontracer 2>/dev/null || true
+         sudo hipercontracer -source=0.0.0.0 -destination=${IP_SERVER} \
+            --ping --pinginterval=250 \
+            --resultstransactionlength=86400 \
+            --resultsdirectory=${prefix}-ping &
+         hiPerConTracerPID=$!
+
+
          # ====== Start tshark =============================================
-         echo "Starting tshark ..."
+         echo "Starting TShark ..."
+         sudo killall tshark 2>/dev/null || true
          for tcpdumpSnaplen in ${tcpdumpSnaplens} ; do
             ./tshark-xz "${prefix}-${tcpdumpSnaplen}.pcap.xz" -i ${INTERFACE} -s ${tcpdumpSnaplen} -n '!(tcp port 22 or udp port 1194)' &
          done
@@ -293,8 +304,10 @@ for qosBandwidth in 100000 ; do   # 100000
          wait ${netPerfMeterPID}
          echo "OK!"
          endTime=`date +"%s"`
-         echo "Stopping tshark ..."
-         killall tshark || true
+         echo "Stopping TShark ..."
+         sudo killall tshark || true
+         echo "Stopping HiPerConTracer ..."
+         sudo killall hipercontracer || true
          wait
 
 
@@ -319,6 +332,9 @@ for qosBandwidth in 100000 ; do   # 100000
          # ====== Set ownership and compress pcap files =====================
          chown ${SUDO_UID}:${SUDO_GID} ${prefix}*
          # find ${DIRECTORY} -name "${id}*.pcap" | xargs -r xz -T0
+         mv ${prefix}-ping/*.bz2 ${prefix}-ping.bz2
+         rmdir ${prefix}-ping/tmp
+         rmdir ${prefix}-ping
       done
    done
 done
