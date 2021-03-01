@@ -35,7 +35,7 @@
 
 DIRECTORY="Measurement8"
 INTERFACE="any"
-RUNTIME=60
+RUNTIME=7200
 
 IP_ENODEB="10.1.1.87"
 IP_HSS="10.208.0.200"
@@ -141,7 +141,7 @@ start-monitoring ()
    ${ssh}${ip} /bin/bash -c "\"\\
 killall -q -sKILL sar ; \\
 sudo killall -q -sKILL tshark ; \\
-sudo rm -f /tmp/*.pcap* /tmp/*.data /tmp/*.out /tmp/*.xz ; \\
+find /tmp -maxdepth 1 -name "*.pcap*" -or -name "*.json*" -or -name "*.data" -or -name "*.out" -or -name "*.xz" | xargs sudo rm ; \\
 echo \\\"${Component}: starting tshark-xz script ...\\\" ; \\
 sudo apt install inotify-tools -y ; \\
 { nohup sudo ~/tshark-xz /tmp/${id}-${component}.pcap.xz -i any -n -s ${remoteSnaplen} '!(tcp port 22 or udp port 1194)' >/tmp/${id}-${component}-tshark.out 2>&1 & } ; \\
@@ -257,7 +257,6 @@ for qosBandwidth in 100000 ; do   # 100000
          # ====== Start RAN information collection on FlexRAN Controller ====
          echo "Starting FlexRAN Controller statistics collection ..."
          cat get-flexran-info | ${SSH_EPC}${IP_FLEXRAN} 'cat >~/get-flexran-info && chmod +x ~/get-flexran-info'
-         echo "XXXX ${SSH_EPC}${IP_FLEXRAN} /bin/bash -c"
          ${SSH_EPC}${IP_FLEXRAN} /bin/bash -c "\"\\
 killall -q get-flexran-info ; \\
 { nohup ./get-flexran-info /tmp/${id}-flexran >${id}-flexran-get-flexran-info.log 2>&1 & } ; \\
@@ -309,12 +308,12 @@ echo "OK!"
          startTime=`date +"%s"`
          sudo -u#${SUDO_UID} -g#${SUDO_GID} netperfmeter ${DESTINATION} \
             -quiet -runtime=${RUNTIME} \
-            -vector="${vectorFile}" -scalar="${scalarFile}" \
+            -scalar="${scalarFile}" \
             -${protocol} ${flowParameters} \
             ${backgroundFlowParameters} &
          netPerfMeterPID=$!
          echo "PID=${netPerfMeterPID}"
-
+# -vector="${vectorFile}" !!!
 
          # §§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
 
@@ -359,11 +358,11 @@ killall -q get-flexran-info
          get-prometheus-metrics "${id}" "${startTime}" "${endTime}"
 
          # ====== Set ownership and compress pcap files =====================
+         find ${DIRECTORY} -name "${id}-flexran-*.json.xz" | xargs -r xzcat | jq -s 'sort_by(.date_time)' | xz -T0 -c >${DIRECTORY}/${id}-flexran.json.xz && find ${DIRECTORY} -name "${id}-flexran-*.json.xz" | xargs -r rm  || true
          chown ${SUDO_UID}:${SUDO_GID} ${prefix}*
-         # find ${DIRECTORY} -name "${id}*.pcap" | xargs -r xz -T0
-         mv ${prefix}-ping/*.bz2 ${prefix}-ping.bz2
-         rmdir ${prefix}-ping/tmp
-         rmdir ${prefix}-ping
+         mv ${prefix}-ping/*.bz2 ${prefix}-ping.bz2  || true
+         rmdir ${prefix}-ping/tmp  || true
+         rmdir ${prefix}-ping  || true
       done
    done
 done
