@@ -29,7 +29,10 @@
 
 # ===========================================================================
 # Description:
-# Bandwidth limitations
+# Packet loss
+# - 300s no packet loss
+# - 300s 10% packet loss
+# - 300s no packet loss
 # ===========================================================================
 
 
@@ -40,7 +43,7 @@
 
 DIRECTORY="MeasurementB2"
 INTERFACE="any"
-RUNTIME=90
+RUNTIME=900
 
 IP_ENODEB="10.1.1.87"
 IP_HSS="10.208.0.200"
@@ -324,11 +327,11 @@ echo "OK!"
 
          # ====== QoS changes ===============================================
 
-         sleep 30
+         sleep 300
          # 10% Packet Loss
          sudo -u#${SUDO_UID} -g#${SUDO_GID} ssh -p 2909 nornetpp@localhost HENCSAT-QoS-Setup change \
             ${qosBandwidth} ${qosDelay} 0.10 ${qosErrorRate}
-         sleep 30
+         sleep 300
          sudo -u#${SUDO_UID} -g#${SUDO_GID} ssh -p 2909 nornetpp@localhost HENCSAT-QoS-Setup change \
             ${qosBandwidth} ${qosDelay} ${qosLossRate} ${qosErrorRate}
 
