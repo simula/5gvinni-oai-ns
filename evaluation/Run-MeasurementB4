@@ -29,10 +29,8 @@
 
 # ===========================================================================
 # Description:
-# Packet loss
-# - 300s no packet loss
-# - 300s 2 Mbit/s, 250ms delay
-# - 300s no packet loss
+# Bandwidth limitation: 2 Mbit/s, 10 Mbit/s, 100 Mbit/s (no limit by network)
+# Download, Upload, Bidirectional
 # ===========================================================================
 
 
