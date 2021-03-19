@@ -52,7 +52,7 @@ vnfd:vnfd-catalog:
           vm-flavor:
             vcpu-count: 4
             memory-mb: 2048
-            storage-gb: 16
+            storage-gb: 32
           image: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
           cloud-init-file: flexran-init
 

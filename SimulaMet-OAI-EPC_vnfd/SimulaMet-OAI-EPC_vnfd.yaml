@@ -52,7 +52,7 @@ vnfd:vnfd-catalog:
           vm-flavor:
             vcpu-count: 4
             memory-mb: 3072
-            storage-gb: 16
+            storage-gb: 64
           image: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
           cloud-init-file: hss-init
 
@@ -157,7 +157,7 @@ vnfd:vnfd-catalog:
           vm-flavor:
             vcpu-count: 4
             memory-mb: 2048
-            storage-gb: 16
+            storage-gb: 64
           image: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
           cloud-init-file: mme-init
 
@@ -293,7 +293,7 @@ vnfd:vnfd-catalog:
           vm-flavor:
             vcpu-count: 4
             memory-mb: 3072
-            storage-gb: 16
+            storage-gb: 64
           image: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
           cloud-init-file: spgwc-init
 
@@ -394,7 +394,7 @@ vnfd:vnfd-catalog:
           vm-flavor:
             vcpu-count: 4
             memory-mb: 3072
-            storage-gb: 16
+            storage-gb: 64
           image: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
           cloud-init-file: spgwu-init
           # guest-epa:
