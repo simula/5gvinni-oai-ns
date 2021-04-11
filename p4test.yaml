@@ -6,8 +6,6 @@ additionalParamsForVnf:
   - member-vnf-index: '2'
     additionalParams:
       # ====== P4-OvS =======================================================
-      p4ovs_git_repository: 'https://github.com/simula/P4-OvS.git'
-      p4ovs_git_commit: 'dreibh/build-fix-16Dec2020'
 
       # ====== Other ========================================================
       password: 'osm4us'
