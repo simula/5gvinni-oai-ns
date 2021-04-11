@@ -34,8 +34,6 @@ additionalParamsForVnf:
   - member-vnf-index: '1'
     additionalParams:
       # ====== P4-OvS =======================================================
-      p4ovs_git_repository: 'https://github.com/simula/P4-OvS.git'
-      p4ovs_git_commit: 'dreibh/build-fix-16Dec2020'
       #network_users: '1024'
 
       # ====== Other ========================================================

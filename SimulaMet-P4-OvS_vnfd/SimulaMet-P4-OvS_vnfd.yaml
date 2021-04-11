@@ -113,22 +113,11 @@ vnfd:vnfd-catalog:
                   - name: ssh-password
                     value: <password>
               - seq: '2'
-                name: prepare-p4ovs-build
-                parameter:
-                  - name: p4ovs-git-repository
-                    value: <p4ovs_git_repository>
-                  - name: p4ovs-git-commit
-                    value: <p4ovs_git_commit>
-              - seq: '3'
-                name: configure-thrift
-              - seq: '4'
-                name: configure-pi
-              - seq: '5'
                 name: configure-p4ovs
                 #parameter:
                   #- name: network-users
                     #value: <network_users>
-              - seq: '6'
+              - seq: '3'
                 name: restart-p4ovs
 
 

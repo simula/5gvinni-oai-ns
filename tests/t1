@@ -88,11 +88,9 @@ MyParameters = {
    'flexran-service-ipv4-interface': '192.168.246.100/24',
    'flexran-service-ipv4-gateway': '0.0.0.0',
    'flexran-service-ipv6-interface': '',
-   'flexran-service-ipv6-gateway': '',
+   'flexran-service-ipv6-gateway': ''
 
    # ====== P4-OvS ==========================================================
-   'p4ovs-git-repository': 'https://github.com/simula/P4-OvS.git',
-   'p4ovs-git-commit': 'dreibh/build-fix-16Dec2020'
 }
 
 def function_get(flag):
@@ -1356,159 +1354,34 @@ def install_p4ovscharm_proxy_charm():
    vduHelper.setStatus('install_p4ovscharm_proxy_charm: SSH proxy charm is READY')
 
 
-# ###### prepare-p4ovs-build function #######################################
-@when('actions.prepare-p4ovs-build')
+# ###### configure-p4ovs function ###########################################
+@when('actions.configure-p4ovs')
 @when('p4ovscharm.installed')
-@when_not('p4ovscharm.prepared-p4ovs-build')
-def prepare_p4ovs_build():
-   vduHelper.beginBlock('prepare_p4ovs_build')
+def configure_p4ovs():
+   vduHelper.beginBlock('configure_p4ovs')
    try:
-
-      # ====== Get P4-OvS parameters ========================================
-      gitRepository = function_get('p4ovs-git-repository')
-      gitCommit     = function_get('p4ovs-git-commit')
-      gitDirectory  = 'P4-OvS'
 
       # ====== Prepare system ===============================================
       vduHelper.beginBlock('Preparing system')
       vduHelper.testNetworking()
       vduHelper.waitForPackageUpdatesToComplete()
       vduHelper.aptInstallPackages([
-         'automake',
-         'bison',
-         'cmake',
-         'flex',
-         'g++',
-         'libboost-all-dev',
-         'libevent-dev',
-         'libgc-dev',
-         'libgmp-dev',
-         'libgrpc++-dev',
-         'libgrpc-dev',
-         'libjudy-dev',
-         'libnanomsg-dev',
-         'libpcap-dev',
-         'libprotobuf-dev',
-         'libssl-dev',
-         'libtool',
-         'pkg-config',
-         'protobuf-compiler',
-         'protobuf-compiler-grpc',
-         'python3-dev',
-         'python3-pip'
+         'openvswitch-p4-switch',
+         'openvswitch-p4-switch-dpdk',
+         'p4lang-p4c'
       ])
-      vduHelper.pipInstallPackages([ 'nnpy' ])
-      vduHelper.endBlock()
-
-      # ====== Prepare sources ==============================================
-      vduHelper.beginBlock('Preparing sources')
-      vduHelper.fetchGitRepository(gitDirectory, gitRepository, gitCommit)
-      vduHelper.executeFromString("""\
-cd /home/nornetpp/src/{gitDirectory} && \\
-git remote add upstream https://github.com/osinstom/P4-OvS.git""".format(gitDirectory = gitDirectory))
-      vduHelper.endBlock()
-
-
-      message = vduHelper.endBlock()
-      function_set( { 'outout': message } )
-      set_flag('p4ovscharm.prepared-p4ovs-build')
-   except:
-      message = vduHelper.endBlockInException()
-      function_fail(message)
-   finally:
-      clear_flag('actions.prepare-p4ovs-build')
-
-
-# ###### configure-thrift function ##########################################
-@when('actions.configure-thrift')
-@when('p4ovscharm.prepared-p4ovs-build')
-def configure_thrift():
-   vduHelper.beginBlock('configure_thrift')
-   try:
-
-      # ====== Build Thrift =================================================
-      vduHelper.beginBlock('Building Thrift')
-      vduHelper.executeFromString("""\
-cd /home/nornetpp/src && \\
-git clone https://github.com/apache/thrift && \\
-cd thrift && \\
-git checkout v0.13.0 && \\
-./bootstrap.sh && \\
-./configure --prefix=/usr && \\
-make && \\
-sudo make install""")
-      vduHelper.endBlock()
-
-      message = vduHelper.endBlock()
-      function_set( { 'outout': message } )
-      set_flag('p4ovscharm.configured-thrift')
-   except:
-      message = vduHelper.endBlockInException()
-      function_fail(message)
-   finally:
-      clear_flag('actions.configure-thrift')
-
-
-# ###### configure-pi function ##############################################
-@when('actions.configure-pi')
-@when('p4ovscharm.configured-thrift')
-def configure_pi():
-   vduHelper.beginBlock('configure_pi')
-   try:
-
-      # ====== Build PI =====================================================
-      vduHelper.beginBlock('Building PI')
-      vduHelper.executeFromString("""\
-cd /home/nornetpp/src && \\
-git clone https://github.com/osinstom/PI && \\
-cd PI && \\
-git checkout p4-ovs && \\
-git submodule update --init && \\
-./autogen.sh && \\
-./configure --prefix=/usr --with-proto --with-fe-cpp --with-cli --with-internal-rpc --with-gnu-ld && \\
-make && \\
-sudo make install""")
-      vduHelper.endBlock()
-
-      message = vduHelper.endBlock()
-      function_set( { 'outout': message } )
-      set_flag('p4ovscharm.configured-pi')
-   except:
-      message = vduHelper.endBlockInException()
-      function_fail(message)
-   finally:
-      clear_flag('actions.configure-pi')
-
-
-# ###### configure-p4ovs function ###########################################
-@when('actions.configure-p4ovs')
-@when('p4ovscharm.configured-pi')
-def configure_p4ovs():
-   vduHelper.beginBlock('configure_p4ovs')
-   try:
-
-      # ====== Get P4-OvS parameters ========================================
-      gitDirectory = 'P4-OvS'
-
-      # ====== Build P4-OvS =================================================
-      vduHelper.beginBlock('Building P4-OvS itself')
-      vduHelper.executeFromString("""\
-export MAKEFLAGS="-j`nproc`" && \\
-cd /home/nornetpp/src/{gitDirectory} && \\
-./boot.sh && \\
-./configure && \\
-make""".format(gitDirectory = gitDirectory))
+      # vduHelper.pipInstallPackages([ 'nnpy' ])
       vduHelper.endBlock()
 
       # ====== Configure P4-OvS =============================================
       vduHelper.beginBlock('Configuring P4-OvS')
-      vduHelper.executeFromString("""\
-cd /home/nornetpp/src/{gitDirectory}""".format(gitDirectory = gitDirectory))
+      # vduHelper.executeFromString("""ls""".format(gitDirectory = gitDirectory))
       vduHelper.endBlock()
 
       # ====== Set up P4-OvS service ========================================
       vduHelper.beginBlock('Setting up P4-OvS service')
       vduHelper.configureSystemInfo('P4-OvS', 'This is the SimulaMet P4-OvS VNF!')
+
       #vduHelper.createFileFromString('/lib/systemd/system/p4ovs.service', """\
 #[Unit]
 #Description=P4-OvS
@@ -1525,19 +1398,20 @@ cd /home/nornetpp/src/{gitDirectory}""".format(gitDirectory = gitDirectory))
 #WantedBy=multi-user.target
 #""".format(gitDirectory = gitDirectory))
 
-      vduHelper.createFileFromString('/home/nornetpp/log',
-"""\
-#!/bin/sh
-tail -f /var/log/p4ovs.log
-""", True)
+      #vduHelper.createFileFromString('/home/nornetpp/log',
+#"""\
+##!/bin/sh
+#tail -f /var/log/p4ovs.log
+#""", True)
 
-      vduHelper.createFileFromString('/home/nornetpp/restart',
-"""\
-#!/bin/sh
-DIRECTORY=`dirname $0`
-sudo service p4ovs restart && $DIRECTORY/log
-""", True)
-      vduHelper.runInShell('sudo chown nornetpp:nornetpp /home/nornetpp/log /home/nornetpp/restart')
+      #vduHelper.createFileFromString('/home/nornetpp/restart',
+#"""\
+##!/bin/sh
+#DIRECTORY=`dirname $0`
+#sudo service p4ovs restart && $DIRECTORY/log
+#""", True)
+      #vduHelper.runInShell('sudo chown nornetpp:nornetpp /home/nornetpp/log /home/nornetpp/restart')
+
       vduHelper.endBlock()
 
       # ====== Set up sysstat service =======================================
@@ -1628,9 +1502,6 @@ if testAll or testFlexRAN:
 # ------ P4OvS Controller ---------------------------------------------------
 if testAll or testP4OvS:
    install_p4ovscharm_proxy_charm()
-   prepare_p4ovs_build()
-   configure_thrift()
-   configure_pi()
    configure_p4ovs()
    restart_p4ovs()
 

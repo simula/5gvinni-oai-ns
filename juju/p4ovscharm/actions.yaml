@@ -26,27 +26,6 @@
 #
 # Contact: dreibh@simula.no
 
-prepare-p4ovs-build:
-  description: Prepares P4-OvS sources
-  params:
-    p4ovs-git-repository:
-      description: P4-OvS Git repository
-      type: string
-      default: https://github.com/osinstom/P4-OvS.git
-    p4ovs-git-commit:
-      description: P4-OvS Git commit
-      type: string
-      default: p4
-  required:
-    - p4ovs-git-repository
-    - p4ovs-git-commit
-
-configure-thrift:
-  description: Configures Thrift
-
-configure-pi:
-  description: Configures PI
-
 configure-p4ovs:
   description: Configures P4-OvS
   #params:
