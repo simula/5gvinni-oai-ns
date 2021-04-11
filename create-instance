@@ -71,9 +71,9 @@ while [ $# -gt 0 ] ; do
         exit 1
      fi
    fi
-   VNFD=`echo "${NSD}" | sed -e "s/_nsd$/_vnfd/g"`
+   VNFDs=`grep "vnfd-id-ref:" ${NSD}/${NSD}.yaml | sed -e "s/^.*://g" | sort -u | xargs`
 
-   echo "NS=$NS NSD=$NSD VNFD=$VNFD PARAMS=$PARAMS"
+   echo "NS=$NS NSD=$NSD VNFDs=$VNFDs PARAMS=$PARAMS"
 
 
    # ====== Build ===========================================================
@@ -88,12 +88,15 @@ while [ $# -gt 0 ] ; do
    echo -e "\x1b[34m`date +%FT%H:%M:%S`: Deleting existing setup ${NS} ...\x1b[0m"
    osm ns-delete --wait ${NS} || true
    osm nsd-delete ${NSD} || true
-   osm vnfd-delete ${VNFD} || true
-
+   for vnfd in ${VNFDs} ; do
+      osm vnfd-delete ${vnfd} || true
+   done
 
    # ====== Create ==========================================================
    echo -e "\x1b[34m`date +%FT%H:%M:%S`: Creating ${NS} ...\x1b[0m"
-   osm vnfd-create ${VNFD}.tar.gz || true
+   for vnfd in ${VNFDs} ; do
+      osm vnfd-create ${vnfd}.tar.gz || true
+   done
    osm nsd-create ${NSD}.tar.gz || true
 
 
