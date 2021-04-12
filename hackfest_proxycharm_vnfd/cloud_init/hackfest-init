@@ -2,7 +2,7 @@
 
 hostname: test
 manage_etc_hosts: localhost
-password: {{password}}
+password: osm4us
 chpasswd: {expire: False}
 ssh_pwauth: True
 system_info:

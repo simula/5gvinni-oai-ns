@@ -22,12 +22,15 @@ vnfd:vnfd-catalog:
       vdu:
         - id: mgmtVM
           name: mgmtVM
-          image: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
           count: '1'
+
           vm-flavor:
             vcpu-count: '1'
             memory-mb: '1024'
             storage-gb: '16'
+          image: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
+          cloud-init-file: hackfest-init
+
           interface:
             - name: mgmtVM-eth0
               position: '1'
@@ -41,7 +44,6 @@ vnfd:vnfd-catalog:
               virtual-interface:
                 type: VIRTIO
               external-connection-point-ref: vnf-data
-          cloud-init-file: cloud-config.txt
 
           vdu-configuration:
             juju:
