@@ -362,6 +362,55 @@ class VDUHelper:
       self.endBlock()
 
 
+   # ###### Configuration OpenVSwitch #######################################
+   def configureSwitch(self, switchName, interfaceNames):
+      self.beginBlock('Configuring and activating ' + switchName)
+
+      switchConfiguration = """\
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+"""
+
+      for interfaceName in interfaceNames:
+         switchConfiguration = switchConfiguration + """\
+    {interfaceName}:
+       dhcp4: no
+       accept-ra: no
+""".format(interfaceName = interfaceName)
+
+      switchConfiguration = switchConfiguration + """\
+  openvswitch:
+    protocols: [OpenFlow13, OpenFlow14, OpenFlow15]
+  bridges:
+    {switchName}:
+      dhcp4: no
+      accept-ra: no
+      interfaces:
+""".format(switchName = switchName)
+
+      for interfaceName in interfaceNames:
+         switchConfiguration = switchConfiguration + """\
+        - {interfaceName}
+""".format(interfaceName = interfaceName)
+
+      switchConfiguration = switchConfiguration + """\
+      openvswitch:
+        protocols: [OpenFlow13, OpenFlow14, OpenFlow15]
+"""
+
+      try:
+         self.createFileFromString('/etc/netplan/{switchName}.yaml'.format(switchName = switchName),
+                                   switchConfiguration)
+         self.runInShell('sudo netplan apply')
+      except:
+         self.endBlock(False)
+         raise
+
+      self.endBlock()
+
+
    # ###### Store string into file ##########################################
    def createFileFromString(self, fileName, contentString, makeExecutable = False):
       self.beginBlock('Creating file ' + fileName)
