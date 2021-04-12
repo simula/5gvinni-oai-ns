@@ -1,12 +1,11 @@
 #cloud-config
-password: osm4us
-chpasswd: { expire: False }
+
+hostname: test
+manage_etc_hosts: localhost
+password: {{password}}
+chpasswd: {expire: False}
 ssh_pwauth: True
-
-write_files:
--   content: |
-        # My new helloworld file
-
-    owner: root:root
-    permissions: '0644'
-    path: /root/helloworld.txt
+system_info:
+  default_user:
+    name: nornetpp
+    sudo: ALL=(ALL) NOPASSWD:ALL
