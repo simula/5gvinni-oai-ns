@@ -1363,6 +1363,11 @@ def configure_p4ovs():
 
       # ====== Prepare system ===============================================
       vduHelper.beginBlock('Preparing system')
+      n = 0
+      for interfaceName in [ 'ens4', 'ens5' ]:
+         interfaceConfiguration = vduHelper.makeInterfaceConfiguration(interfaceName, None)
+         vduHelper.configureInterface(interfaceName, interfaceConfiguration, 61 + n)
+         n = n + 1
       vduHelper.testNetworking()
       vduHelper.waitForPackageUpdatesToComplete()
       vduHelper.aptInstallPackages([

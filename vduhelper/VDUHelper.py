@@ -252,16 +252,18 @@ class VDUHelper:
       if ( (ipv4Interface != ipaddress.IPv4Interface('0.0.0.0/0')) or
            ((ipv6Interface == None) and (ipv6Interface == ipaddress.IPv6Interface('::/0'))) ):
 
-         interfaceConfiguration = interfaceConfiguration + '      addresses:\n'
+         if ( ((ipv4Interface != None) and (ipv4Interface != ipaddress.IPv4Interface('0.0.0.0/0'))) or
+              ((ipv6Interface != None) and (ipv6Interface == ipaddress.IPv6Interface('::/0'))) ):
+            interfaceConfiguration = interfaceConfiguration + '      addresses:\n'
 
-         if ipv4Interface != ipaddress.IPv4Interface('0.0.0.0/0'):
+         if ((ipv4Interface != None) and (ipv4Interface != ipaddress.IPv4Interface('0.0.0.0/0'))):
             interfaceConfiguration = interfaceConfiguration + '        - ' + \
                str(ipv4Interface.ip) + '/' + \
                str(ipv4Interface.network.prefixlen) + \
                '\n'
             networks.append(ipv4Interface.network)
 
-         if ((ipv6Interface == None) and (ipv6Interface == ipaddress.IPv6Interface('::/0'))):
+         if ((ipv6Interface != None) and (ipv6Interface == ipaddress.IPv6Interface('::/0'))):
             interfaceConfiguration = interfaceConfiguration + '        - ' + \
                str(ipv6Interface.ip) + '/' + \
                str(ipv6Interface.network.prefixlen) + \
