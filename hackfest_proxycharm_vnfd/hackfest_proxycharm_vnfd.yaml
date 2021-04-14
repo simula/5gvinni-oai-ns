@@ -17,6 +17,7 @@ vnfd:vnfd-catalog:
           name: vnf-data
           short-name: vnf-data
           type: VPORT
+          port-security-enabled: false
       mgmt-interface:
         cp: vnf-mgmt
       vdu:

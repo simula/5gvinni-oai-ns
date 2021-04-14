@@ -125,7 +125,9 @@ vnfd:vnfd-catalog:
       connection-point:
         - name: p4ovs-mgmt-cp
         - name: p4ovs-service-port1-cp
+          port-security-enabled: false
         - name: p4ovs-service-port2-cp
+          port-security-enabled: false
 
 
       # ###### Monitoring ###################################################
