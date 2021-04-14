@@ -125,8 +125,10 @@ vnfd:vnfd-catalog:
       connection-point:
         - name: p4ovs-mgmt-cp
         - name: p4ovs-service-port1-cp
+          # Port Security must to be disabled here, to allow switching!
           port-security-enabled: false
         - name: p4ovs-service-port2-cp
+          # Port Security must to be disabled here, to allow switching!
           port-security-enabled: false
 
 
