@@ -8,6 +8,7 @@ additionalParamsForVnf:
       # ====== P4-OvS =======================================================
 
       # ====== Other ========================================================
+      hostname: 'fjellrev'
       password: 'osm4us'
 
 
@@ -29,3 +30,8 @@ vld:
       - member-vnf-index-ref: '2'
         vnfd-connection-point-ref: p4ovs-service-port1-cp
         ip-address: 10.254.1.183
+  - name: datalink
+    vnfd-connection-point-ref:
+      - member-vnf-index-ref: '1'
+        vnfd-connection-point-ref: vnf-data
+        ip-address: 10.254.1.184

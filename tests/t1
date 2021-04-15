@@ -1363,6 +1363,14 @@ def configure_p4ovs():
 
       # ====== Prepare system ===============================================
       vduHelper.beginBlock('Preparing system')
+
+      # Cloud-Init configures all 3 interfaces in Ubuntu 20.04+
+      # => unwanted configuration on ens3 and ens4
+      # Get rid of the Cloud-Init configuration, then configure the
+      # interfaces manually with the correct configuration.
+      vduHelper.runInShell('sudo rm -f /etc/netplan/50-cloud-init.yaml')
+      interfaceConfiguration = vduHelper.makeInterfaceConfiguration('ens3')
+      vduHelper.configureInterface('ens3', interfaceConfiguration, 50)
       n = 0
       for interfaceName in [ 'ens4', 'ens5' ]:
          interfaceConfiguration = vduHelper.makeInterfaceConfiguration(interfaceName, None)

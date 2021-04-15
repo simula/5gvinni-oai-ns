@@ -37,6 +37,7 @@ additionalParamsForVnf:
       #network_users: '1024'
 
       # ====== Other ========================================================
+      hostname: 'p4'
       password: 'osm4us'
 
 
