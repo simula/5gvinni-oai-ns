@@ -558,6 +558,8 @@ vnfd:vnfd-catalog:
         - name: spgwu-mgmt-cp
         - name: spgwu-s1u-cp
         - name: spgwu-sgi-cp
+          # Port Security must to be disabled here, to allow switching!
+          port-security-enabled: false
 
 
       # ###### Monitoring ###################################################
