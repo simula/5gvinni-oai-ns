@@ -78,8 +78,12 @@ additionalParamsForVnf:
       # ====== Other ========================================================
       password: 'osm4us'
 
-  # ====== Switch ===========================================================
+  # ====== Switches =========================================================
   - member-vnf-index: '2'
+    additionalParams:
+      hostname: 'switch-s1u'
+      password: 'osm4us'
+  - member-vnf-index: '3'
     additionalParams:
       hostname: 'switch-sgi'
       password: 'osm4us'
@@ -105,6 +109,9 @@ vld:
       - member-vnf-index-ref: '2'
         vnfd-connection-point-ref: p4ovs-mgmt-cp
         ip-address: 10.208.0.214
+      - member-vnf-index-ref: '3'
+        vnfd-connection-point-ref: p4ovs-mgmt-cp
+        ip-address: 10.208.0.215
 
   # ====== S1-C =============================================================
   - name: SimulaMet-OAI-TelemetryEPC_nsd-S1C
@@ -114,11 +121,11 @@ vld:
         ip-address: 192.168.247.112
 
   # ====== S1-U =============================================================
-  - name: SimulaMet-OAI-TelemetryEPC_nsd-S1U
-    vnfd-connection-point-ref:
-      - member-vnf-index-ref: '1'
-        vnfd-connection-point-ref: spgwu-s1u-cp
-        ip-address: 192.168.248.169
+  # - name: SimulaMet-OAI-TelemetryEPC_nsd-S1U
+  #    vnfd-connection-point-ref:
+  #     - member-vnf-index-ref: '1'
+  #       vnfd-connection-point-ref: spgwu-s1u-cp
+  #       ip-address: 192.168.248.169
 
   # ====== SGi ==============================================================
   # - name: SimulaMet-OAI-TelemetryEPC_nsd-SGi
