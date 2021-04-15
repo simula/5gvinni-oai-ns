@@ -34,7 +34,7 @@ vnfd:vnfd-catalog:
           cloud-init-file: hackfest-init
 
           interface:
-            - name: mgmtVM-eth0
+            - name: mgmtVM-ens3
               position: '1'
               type: EXTERNAL
               virtual-interface:

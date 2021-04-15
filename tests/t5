@@ -286,8 +286,8 @@ vduHelper.beginBlock('Preparing sources')
 try:
 
    hssS6a_IfName    = 'ens4'
-   configurationS6a = vduHelper.makeInterfaceConfiguration('eth0', ipaddress.IPv4Interface('0.0.0.0/0'))
-   #vduHelper.configureInterface('eth0', configurationS6a)
+   configurationS6a = vduHelper.makeInterfaceConfiguration('ens3', ipaddress.IPv4Interface('0.0.0.0/0'))
+   #vduHelper.configureInterface('ens3', configurationS6a)
    vduHelper.touchFile('/tmp/touch-test1')
    vduHelper.testNetworking('8.8.8.9', 2)
    vduHelper.endBlock()

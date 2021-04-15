@@ -58,18 +58,18 @@ vnfd:vnfd-catalog:
 
           # ====== Interfaces ===============================================
           interface:
-            - name: eth0
+            - name: ens3
               type: EXTERNAL
               mgmt-interface: true
               virtual-interface:
                 type: PARAVIRT
               external-connection-point-ref: p4ovs-mgmt-cp
-            - name: eth1
+            - name: ens4
               type: EXTERNAL
               virtual-interface:
                 type: PARAVIRT
               external-connection-point-ref: p4ovs-service-port1-cp
-            - name: eth2
+            - name: ens5
               type: EXTERNAL
               virtual-interface:
                 type: PARAVIRT
