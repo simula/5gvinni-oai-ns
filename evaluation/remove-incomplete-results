@@ -1,0 +1,7 @@
+#!/bin/bash
+
+INCOMPLETE=`find . -name "*-ping" -type d -printf "%p\n" | sed -e "s/-ping$//g"`
+for incomplete in ${INCOMPLETE} ; do
+   echo "Cleaning up ${incomplete}* ..."
+   rm -rf ${incomplete}*
+done

@@ -1,8 +1,12 @@
 #!/bin/sh
 
-if [ ! $# -eq 1 ] ; then
-   echo >&2 "Usage: $0 measurement_name"
+if [ $# -lt 1 ] ; then
+   echo >&2 "Usage: $0 measurement_name ..."
    exit 1
 fi
 
-tar cvf - Run-$1 plot-$1.R Results-$1-active.pdf Results-$1-passive.pdf $1 | xz -T0 - >$1.tar.xz
+while [ $# -gt 0 ] ; do
+   echo "Archiving $1 ..."
+   tar cvf - Run-$1 plot-$1.R Results-$1-active.pdf Results-$1-passive.pdf $1 | xz -T0 - >$1.tar.xz
+   shift
+done

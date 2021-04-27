@@ -270,7 +270,7 @@ echo \\\"flexran: FlexRAN statistics collection running!\\\"
 echo "OK!"
 
          # ====== Start sysstat in EPC ======================================
-         sysstatParameters="-bqr -n DEV,EDEV,IP,EIP,ICMP,EICMP,IP6,EIP6,ICMP6,EICMP6,TCP,ETCP,UDP,UDP6 1 600"
+         sysstatParameters="-bqr -n DEV,EDEV,IP,EIP,ICMP,EICMP,IP6,EIP6,ICMP6,EICMP6,TCP,ETCP,UDP,UDP6 1"
          start-monitoring ${id} flexran ${IP_FLEXRAN} "${sysstatParameters}" in-epc &
          start-monitoring ${id} hss     ${IP_HSS}     "${sysstatParameters}" in-epc &
          start-monitoring ${id} mme     ${IP_MME}     "${sysstatParameters}" in-epc &
@@ -311,7 +311,7 @@ echo "OK!"
          # ====== Run NetPerfMeter ==========================================
          echo "Running NetPerfMeter ..."
          startTime=`date +"%s"`
-         sudo -u#${SUDO_UID} -g#${SUDO_GID} netperfmeter ${DESTINATION} \
+         sudo -u#${SUDO_UID} -g#${SUDO_GID} netperfmeter ${DESTINATION} -control-over-tcp \
             -quiet -runtime=${RUNTIME} \
             -scalar="${scalarFile}" \
             -${protocol} ${flowParameters} \
