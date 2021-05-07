@@ -1,27 +1,15 @@
 #!/bin/bash -e
 
-export RELEASE=ReleaseEIGHT
+export RELEASE=ReleaseNINE
 export REPOSITORY=stable
-export DOCKER_TAG=8
+export DOCKER_TAG=9
 
 
 cd ~
 rm -f install_osm.sh
-wget https://osm-download.etsi.org/ftp/osm-8.0-eight/install_osm.sh
+wget https://osm-download.etsi.org/ftp/osm-9.0-nine/install_osm.sh
 chmod +x install_osm.sh
-./install_osm.sh -y -c k8s --k8s_monitor   2>&1 | tee osm_install_log.txt
-# --k8s_monitor
-
-
-#cd ..
-#git submodule init
-#git submodule update --remote --merge
-#cd devops
-#DEVOPS_PATH=`realpath .`
-#cd installers
-#echo "###### Running installer: ./full_install_osm.sh -R${RELEASE} -r${REPOSITORY} -t${DOCKER_TAG} -c k8s -D ${DEVOPS_PATH} -y"
-#./full_install_osm.sh -R${RELEASE} -r${REPOSITORY} -t${DOCKER_TAG} -c k8s --k8s_monitor -D ${DEVOPS_PATH} -y   2>&1 | tee install_osm.log
-## --k8s_monitor
+./install_osm.sh -y --k8s_monitor   2>&1 | tee osm_install_log.txt
 
 
 echo "###### Installing \"charm\" snap"
