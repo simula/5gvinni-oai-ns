@@ -94,6 +94,14 @@ def prepare_flexran_build():
          flexranService_IPv6Gateway = None
 
       # Prepare network configuration:
+      # Cloud-Init configures all 3 interfaces in Ubuntu 20.04+
+      # => unwanted configuration on ens3 and ens4
+      # Get rid of the Cloud-Init configuration, then configure the
+      # interfaces manually with the correct configuration.
+      vduHelper.runInShell('sudo rm -f /etc/netplan/50-cloud-init.yaml')
+      interfaceConfiguration = vduHelper.makeInterfaceConfiguration('ens3')
+      vduHelper.configureInterface('ens3', interfaceConfiguration, 50)
+      
       flexranService_IfName = 'ens4'
       configurationService = vduHelper.makeInterfaceConfiguration(flexranService_IfName,
                                                                   flexranService_IPv4Interface, flexranService_IPv4Gateway,
