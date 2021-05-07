@@ -4,6 +4,7 @@ export RELEASE=ReleaseNINE
 export REPOSITORY=stable
 export DOCKER_TAG=9
 
+sudo apt install -y colordiff git snapd curl
 
 cd ~
 rm -f install_osm.sh
