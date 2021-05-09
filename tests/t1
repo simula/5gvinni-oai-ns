@@ -208,7 +208,7 @@ export MAKEFLAGS="-j`nproc`" && \\
 cd /home/nornetpp/src/{gitDirectory}/scripts && \\
 mkdir -p logs && \\
 sudo rm -f /etc/apt/sources.list.d/cassandra.sources.list && \\
-./build_cassandra --check-installed-software --force >logs/build_cassandra.log 2>&1
+./build_cassandra --cassandra-server-ip {cassandraServerIP} --check-installed-software --force >logs/build_cassandra.log 2>&1
 """.format(
          gitDirectory      = gitDirectory,
          cassandraServerIP = cassandraServerIP
@@ -232,8 +232,10 @@ sudo yq w -i /etc/cassandra/cassandra.yaml "listen_address" "{cassandraServerIP}
 sudo yq w -i /etc/cassandra/cassandra.yaml "rpc_address" "{cassandraServerIP}" && \\
 sudo yq w -i /etc/cassandra/cassandra.yaml "endpoint_snitch" "GossipingPropertyFileSnitch" && \\
 sudo service cassandra start && \\
-sleep 10 && \\
-sudo service cassandra status | cat
+sleep 60 && \\
+sudo service cassandra status | cat && \\
+cqlsh --file ../src/hss_rel14/db/oai_db.cql {cassandraServerIP} >logs/oai_db.log 2>&1 && \\
+cqlsh -e "SELECT COUNT(*) FROM vhss.users_imsi;" {cassandraServerIP} >/dev/null && echo "Cassandra is okay!" || echo "Cassandra seems to be unavailable!"
 """.format(
          gitDirectory      = gitDirectory,
          cassandraServerIP = cassandraServerIP
@@ -289,14 +291,12 @@ mkdir -p logs && \\
       vduHelper.executeFromString("""\
 export MAKEFLAGS="-j`nproc`" && \\
 cd /home/nornetpp/src/{gitDirectory}/scripts && \\
-./build_hss_rel14 --clean >logs/build_hss_rel14-2.log 2>&1 && \\
-cqlsh --file ../src/hss_rel14/db/oai_db.cql {cassandraServerIP} >logs/oai_db.log 2>&1
+./build_hss_rel14 --clean >logs/build_hss_rel14-2.log 2>&1
 """.format(
          gitDirectory       = gitDirectory,
          cassandraServerIP  = cassandraServerIP
       ))
       vduHelper.endBlock()
-
 
       # ====== Provision users and MME ======================================
       vduHelper.beginBlock('Provisioning users and MME')
@@ -1209,6 +1209,14 @@ def prepare_flexran_build():
          flexranService_IPv6Gateway = None
 
       # Prepare network configuration:
+      # Cloud-Init configures all 3 interfaces in Ubuntu 20.04+
+      # => unwanted configuration on ens3 and ens4
+      # Get rid of the Cloud-Init configuration, then configure the
+      # interfaces manually with the correct configuration.
+      vduHelper.runInShell('sudo rm -f /etc/netplan/50-cloud-init.yaml')
+      interfaceConfiguration = vduHelper.makeInterfaceConfiguration('ens3')
+      vduHelper.configureInterface('ens3', interfaceConfiguration, 50)
+
       flexranService_IfName = 'ens4'
       configurationService = vduHelper.makeInterfaceConfiguration(flexranService_IfName,
                                                                   flexranService_IPv4Interface, flexranService_IPv4Gateway,
@@ -1436,12 +1444,12 @@ def restart_p4ovs():
 
 testAll     = False
 
-testHSS     = False
+testHSS     = True
 testMME     = False
 testSPGWC   = False
 testSPGWU   = False
 testFlexRAN = False
-testP4OvS   = True
+testP4OvS   = False
 
 # ------ HSS ----------------------------------------------------------------
 if testAll or testHSS:
