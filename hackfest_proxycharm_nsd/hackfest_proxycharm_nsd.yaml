@@ -1,33 +1,31 @@
-nsd:nsd-catalog:
-  nsd:
-    - id: hackfest_proxycharm_nsd
-      name: hackfest_proxycharm_nsd
-      short-name: hackfest_proxycharm_nsd
-      description: |
-        NS with 2 VNFs with cloudinit connected by datanet and mgmtnet VLs
-      version: '1.0'
-      logo: osm.png
-      constituent-vnfd:
-        - vnfd-id-ref: hackfest_proxycharm_vnfd
-          member-vnf-index: '1'
-      vld:
-        - id: mgmtnet
-          name: mgmtnet
-          short-name: mgmt
-          type: ELAN
-          mgmt-network: 'true'
-          vim-network-name: mgmt
-          vnfd-connection-point-ref:
-            - vnfd-id-ref: hackfest_proxycharm_vnfd
-              member-vnf-index-ref: '1'
-              vnfd-connection-point-ref: vnf-mgmt
-        - id: datanet
-          name: datanet
-          short-name: datanet
-          type: ELAN
-          vim-network-name: nornet-simula
-          vnfd-connection-point-ref:
-            - vnfd-id-ref: hackfest_proxycharm_vnfd
-              member-vnf-index-ref: '1'
-              vnfd-connection-point-ref: vnf-data
-              # ip-address: 10.254.1.120
+nsd:
+    nsd:
+    -   description: 'NS with 2 VNFs with cloudinit connected by datanet and mgmtnet
+            VLs
+
+            '
+        df:
+        -   id: default-df
+            vnf-profile:
+            -   id: '1'
+                virtual-link-connectivity:
+                -   constituent-cpd-id:
+                    -   constituent-base-element-id: '1'
+                        constituent-cpd-id: vnf-mgmt-ext
+                    virtual-link-profile-id: mgmtnet
+                -   constituent-cpd-id:
+                    -   constituent-base-element-id: '1'
+                        constituent-cpd-id: vnf-data-ext
+                    virtual-link-profile-id: datanet
+                vnfd-id: hackfest_proxycharm_vnfd
+        id: hackfest_proxycharm_nsd
+        name: hackfest_proxycharm_nsd
+        version: '1.0'
+        virtual-link-desc:
+        -   id: mgmtnet
+            mgmt-network: 'true'
+            vim-network-name: mgmt
+        -   id: datanet
+            vim-network-name: nornet-simula
+        vnfd-id:
+        - hackfest_proxycharm_vnfd

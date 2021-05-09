@@ -26,225 +26,116 @@
 #
 # Contact: dreibh@simula.no
 
-vnfd:vnfd-catalog:
-  vnfd:
-    - id: SimulaMet-FlexRAN_vnfd
-      name: SimulaMet-FlexRAN_vnfd
-      short-name: SimulaMet-FlexRAN_vnfd
-      description: SimulaMet FlexRAN VNF
-      vendor: Thomas Dreibholz
-      version: '1.0'
-      logo: NorNet.png
-
-      # ###### Management Interface #########################################
-      mgmt-interface:
-        cp: flexran-mgmt-cp
-
-      vdu:
-
-        # ###### VDU: FlexRAN ###############################################
-        - id: FlexRAN
-          name: FlexRAN
-          description: FlexRAN
-          count: 1
-
-          # ====== VDU VM Configuration =====================================
-          vm-flavor:
-            vcpu-count: 4
-            memory-mb: 2048
-            storage-gb: 32
-          image: 5gVINNI-OpenStack-Ubuntu-20.04-LTS
-          cloud-init-file: flexran-init
-
-          # ====== Interfaces ===============================================
-          interface:
-            - name: ens3
-              type: EXTERNAL
-              mgmt-interface: true
-              virtual-interface:
-                type: PARAVIRT
-              external-connection-point-ref: flexran-mgmt-cp
-            - name: ens4
-              type: EXTERNAL
-              virtual-interface:
-                type: PARAVIRT
-              external-connection-point-ref: flexran-service-cp
-
-          # ====== Juju Charm ===============================================
-          vdu-configuration:
-            juju:
-              charm: flexrancharm
-            metrics:
-              - name: system_random
-              - name: system_uptime
-              - name: system_users
-              - name: cpu_processes
-              - name: cpu_load_1min
-              - name: cpu_load_5min
-              - name: cpu_load_15min
-              - name: memory_ram_usage
-              - name: memory_swap_usage
-              - name: disk_usage
-              - name: network_mgmt_bytes_in
-              - name: network_mgmt_packets_in
-              - name: network_mgmt_bytes_out
-              - name: network_mgmt_packets_out
-              - name: network_service_bytes_in
-              - name: network_service_packets_in
-              - name: network_service_bytes_out
-              - name: network_service_packets_out
-            initial-config-primitive:
-              - seq: '1'
-                name: config
-                parameter:
-                  - name: ssh-hostname
-                    value: <rw_mgmt_ip>
-                  - name: ssh-username
-                    value: nornetpp
-                  - name: ssh-password
-                    value: <password>
-              - seq: '2'
-                name: prepare-flexran-build
-                parameter:
-                  - name: flexran-git-repository
-                    value: <flexran_git_repository>
-                  - name: flexran-git-commit
-                    value: <flexran_git_commit>
-                  - name: flexran-service-ipv4-interface
-                    value: <flexran_service_ipv4_interface>
-                  - name: flexran-service-ipv4-gateway
-                    value: <flexran_service_ipv4_gateway>
-                  - name: flexran-service-ipv6-interface
-                    value: <flexran_service_ipv6_interface>
-                  - name: flexran-service-ipv6-gateway
-                    value: <flexran_service_ipv6_gateway>
-              - seq: '3'
-                name: configure-flexran
-                #parameter:
-                  #- name: network-users
-                    #value: <network_users>
-              - seq: '4'
-                name: restart-flexran
-
-
-      # ###### External Connection Points ###################################
-      connection-point:
-        - name: flexran-mgmt-cp
-        - name: flexran-service-cp
-
-
-      # ###### Monitoring ###################################################
-      monitoring-param:
-        # ###### VDU: FlexRAN ###############################################
-        # ====== System metrics =============================================
-        - id: metric_FlexRAN_system_random
-          name: metric_FlexRAN_system_random
-          aggregation-type: AVERAGE
-          vdu-metric:
-            vdu-ref: FlexRAN
-            vdu-metric-name-ref: system_random
-        - id: metric_FlexRAN_system_uptime
-          name: metric_FlexRAN_system_uptime
-          aggregation-type: AVERAGE
-          vdu-metric:
-            vdu-ref: FlexRAN
-            vdu-metric-name-ref: system_uptime
-        - id: metric_FlexRAN_system_users
-          name: metric_FlexRAN_system_users
-          aggregation-type: AVERAGE
-          vdu-metric:
-            vdu-ref: FlexRAN
-            vdu-metric-name-ref: system_users
-
-        # ====== CPU metrics ================================================
-        - id: metric_FlexRAN_cpu_load_1min
-          name: metric_FlexRAN_cpu_load_1min
-          aggregation-type: AVERAGE
-          vdu-metric:
-            vdu-ref: FlexRAN
-            vdu-metric-name-ref: cpu_load_1min
-        - id: metric_FlexRAN_cpu_load_5min
-          name: metric_FlexRAN_cpu_load_5min
-          aggregation-type: AVERAGE
-          vdu-metric:
-            vdu-ref: FlexRAN
-            vdu-metric-name-ref: cpu_load_5min
-        - id: metric_FlexRAN_cpu_load_15min
-          name: metric_FlexRAN_cpu_load_15min
-          aggregation-type: AVERAGE
-          vdu-metric:
-            vdu-ref: FlexRAN
-            vdu-metric-name-ref: cpu_load_15min
-
-        # ====== Memory metrics =============================================
-        - id: metric_FlexRAN_memory_ram_usage
-          name: metric_FlexRAN_memory_ram_usage
-          aggregation-type: AVERAGE
-          vdu-metric:
-            vdu-ref: FlexRAN
-            vdu-metric-name-ref: memory_ram_usage
-        - id: metric_FlexRAN_memory_swap_usage
-          name: metric_FlexRAN_memory_swap_usage
-          aggregation-type: AVERAGE
-          vdu-metric:
-            vdu-ref: FlexRAN
-            vdu-metric-name-ref: memory_swap_usage
-
-        # ====== Disk metrics ===============================================
-        - id: metric_FlexRAN_disk_usage
-          name: metric_FlexRAN_disk_usage
-          aggregation-type: AVERAGE
-          vdu-metric:
-            vdu-ref: FlexRAN
-            vdu-metric-name-ref: disk_usage
-
-        # ====== Network metrics ============================================
-        - id: metric_FlexRAN_network_mgmt_bytes_in
-          name: metric_FlexRAN_network_mgmt_bytes_in
-          aggregation-type: AVERAGE
-          vdu-metric:
-            vdu-ref: FlexRAN
-            vdu-metric-name-ref: network_mgmt_bytes_in
-        - id: metric_FlexRAN_network_mgmt_packets_in
-          name: metric_FlexRAN_network_mgmt_packets_in
-          aggregation-type: AVERAGE
-          vdu-metric:
-            vdu-ref: FlexRAN
-            vdu-metric-name-ref: network_mgmt_packets_in
-        - id: metric_FlexRAN_network_mgmt_bytes_out
-          name: metric_FlexRAN_network_mgmt_bytes_out
-          aggregation-type: AVERAGE
-          vdu-metric:
-            vdu-ref: FlexRAN
-            vdu-metric-name-ref: network_mgmt_bytes_out
-        - id: metric_FlexRAN_network_mgmt_packets_out
-          name: metric_FlexRAN_network_mgmt_packets_out
-          aggregation-type: AVERAGE
-          vdu-metric:
-            vdu-ref: FlexRAN
-            vdu-metric-name-ref: network_mgmt_packets_out
-
-        - id: metric_FlexRAN_network_service_bytes_in
-          name: metric_FlexRAN_network_service_bytes_in
-          aggregation-type: AVERAGE
-          vdu-metric:
-            vdu-ref: FlexRAN
-            vdu-metric-name-ref: network_service_bytes_in
-        - id: metric_FlexRAN_network_service_packets_in
-          name: metric_FlexRAN_network_service_packets_in
-          aggregation-type: AVERAGE
-          vdu-metric:
-            vdu-ref: FlexRAN
-            vdu-metric-name-ref: network_service_packets_in
-        - id: metric_FlexRAN_network_service_bytes_out
-          name: metric_FlexRAN_network_service_bytes_out
-          aggregation-type: AVERAGE
-          vdu-metric:
-            vdu-ref: FlexRAN
-            vdu-metric-name-ref: network_service_bytes_out
-        - id: metric_FlexRAN_network_service_packets_out
-          name: metric_FlexRAN_network_service_packets_out
-          aggregation-type: AVERAGE
-          vdu-metric:
-            vdu-ref: FlexRAN
-            vdu-metric-name-ref: network_service_packets_out
+vnfd:
+    description: SimulaMet FlexRAN VNF
+    df:
+    -   id: default-df
+        instantiation-level:
+        -   id: default-instantiation-level
+            vdu-level:
+            -   number-of-instances: 1
+                vdu-id: FlexRAN
+        lcm-operations-configuration:
+            operate-vnf-op-config:
+                day1-2:
+                -   id: FlexRAN
+                    initial-config-primitive:
+                    -   name: config
+                        parameter:
+                        -   name: ssh-hostname
+                            value: <rw_mgmt_ip>
+                        -   name: ssh-username
+                            value: nornetpp
+                        -   name: ssh-password
+                            value: <password>
+                        seq: '1'
+                    -   name: prepare-flexran-build
+                        parameter:
+                        -   name: flexran-git-repository
+                            value: <flexran_git_repository>
+                        -   name: flexran-git-commit
+                            value: <flexran_git_commit>
+                        -   name: flexran-service-ipv4-interface
+                            value: <flexran_service_ipv4_interface>
+                        -   name: flexran-service-ipv4-gateway
+                            value: <flexran_service_ipv4_gateway>
+                        -   name: flexran-service-ipv6-interface
+                            value: <flexran_service_ipv6_interface>
+                        -   name: flexran-service-ipv6-gateway
+                            value: <flexran_service_ipv6_gateway>
+                        seq: '2'
+                    -   name: configure-flexran
+                        seq: '3'
+                    -   name: restart-flexran
+                        seq: '4'
+                    juju:
+                        charm: flexrancharm
+                    metrics:
+                    -   name: system_random
+                    -   name: system_uptime
+                    -   name: system_users
+                    -   name: cpu_processes
+                    -   name: cpu_load_1min
+                    -   name: cpu_load_5min
+                    -   name: cpu_load_15min
+                    -   name: memory_ram_usage
+                    -   name: memory_swap_usage
+                    -   name: disk_usage
+                    -   name: network_mgmt_bytes_in
+                    -   name: network_mgmt_packets_in
+                    -   name: network_mgmt_bytes_out
+                    -   name: network_mgmt_packets_out
+                    -   name: network_service_bytes_in
+                    -   name: network_service_packets_in
+                    -   name: network_service_bytes_out
+                    -   name: network_service_packets_out
+        vdu-profile:
+        -   id: FlexRAN
+            min-number-of-instances: 1
+    ext-cpd:
+    -   id: flexran-mgmt-cp-ext
+        int-cpd:
+            cpd: ens3-int
+            vdu-id: FlexRAN
+    -   id: flexran-service-cp-ext
+        int-cpd:
+            cpd: ens4-int
+            vdu-id: FlexRAN
+    id: SimulaMet-FlexRAN_vnfd
+    mgmt-cp: flexran-mgmt-cp-ext
+    product-name: SimulaMet-FlexRAN_vnfd
+    provider: Thomas Dreibholz
+    sw-image-desc:
+    -   id: 5gVINNI-OpenStack-Ubuntu-20.04-LTS
+        image: 5gVINNI-OpenStack-Ubuntu-20.04-LTS
+        name: 5gVINNI-OpenStack-Ubuntu-20.04-LTS
+    vdu:
+    -   cloud-init-file: flexran-init
+        description: FlexRAN
+        id: FlexRAN
+        int-cpd:
+        -   id: ens3-int
+            virtual-network-interface-requirement:
+            -   name: ens3
+                virtual-interface:
+                    type: PARAVIRT
+        -   id: ens4-int
+            virtual-network-interface-requirement:
+            -   name: ens4
+                virtual-interface:
+                    type: PARAVIRT
+        name: FlexRAN
+        sw-image-desc: 5gVINNI-OpenStack-Ubuntu-20.04-LTS
+        virtual-compute-desc: FlexRAN-compute
+        virtual-storage-desc:
+        - FlexRAN-storage
+    version: '1.0'
+    virtual-compute-desc:
+    -   id: FlexRAN-compute
+        virtual-cpu:
+            num-virtual-cpu: 4
+        virtual-memory:
+            size: 2.0
+    virtual-storage-desc:
+    -   id: FlexRAN-storage
+        size-of-storage: 32

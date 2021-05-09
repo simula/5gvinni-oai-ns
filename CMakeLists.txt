@@ -35,20 +35,6 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.0.2)
 PROJECT(SimulaMet-OAI-EPC C)
 
 
-
-#############################################################################
-# OPTIONS
-#############################################################################
-
-# ====== OSM scripts ========================================================
-SET(VALIDATE_DESCRIPTOR_SCRIPT "/usr/share/osm-devops/descriptor-packages/tools/validate_descriptor.py")
-SET(GENERATE_DESCRIPTOR_SCRIPT "/usr/share/osm-devops/descriptor-packages/tools/generate_descriptor_pkg.sh")
-# Local scripts (NOTE: make sure to use scripts compatible with the current OSM setup!):
-# SET(VALIDATE_DESCRIPTOR_SCRIPT "devops/descriptor-packages/tools/validate_descriptor.py")
-# SET(GENERATE_DESCRIPTOR_SCRIPT "devops/descriptor-packages/tools/generate_descriptor_pkg.sh")
-
-
-
 #############################################################################
 # DEPENDENCIES
 #############################################################################
@@ -137,16 +123,6 @@ IF(NOT YAMLLINT)
    MESSAGE(FATAL_ERROR "yamllint (Ubuntu: sudo apt install -y yamllint) not found!")
 ENDIF()
 
-FIND_PROGRAM(VALIDATE_DESCRIPTOR ${VALIDATE_DESCRIPTOR_SCRIPT})
-IF(NOT VALIDATE_DESCRIPTOR)
-   MESSAGE(FATAL_ERROR "validate_descriptor.py (Ubuntu: sudo apt install -y osm-devops python-osm-im) not found!")
-ENDIF()
-
-FIND_PROGRAM(GENERATE_DESCRIPTOR ${GENERATE_DESCRIPTOR_SCRIPT})
-IF(NOT GENERATE_DESCRIPTOR)
-   MESSAGE(FATAL_ERROR "validate_descriptor.py (Ubuntu: sudo apt install -y osm-devops python-osm-im) not found!")
-ENDIF()
-
 
 #############################################################################
 # Validate all YAML files
@@ -191,8 +167,8 @@ FOREACH(yamlFile IN LISTS yamlFiles)
    SET(yamlCheckedTimestampFile ".${generate_yamlCheckedTimestampFile}.stamp")
 
    ADD_CUSTOM_COMMAND(OUTPUT ${yamlCheckedTimestampFile}
-                      # COMMAND ${YAMLLINT} -d '{extends: default, rules: {document-start: {present: no}, line-length: {max: 80, allow-non-breakable-words: true, allow-non-breakable-inline-mappings: true}}}' ${yamlFile}
-                      COMMAND ${YAMLLINT} -d '{extends: default, rules: {document-start: {present: no}, line-length: {max: 4096}, comments-indentation: disable}}' ${yamlFile}
+                      # COMMAND ${YAMLLINT} -d '{extends: default, spaces: 4, rules: {document-start: {present: no}, line-length: {max: 80, allow-non-breakable-words: true, allow-non-breakable-inline-mappings: true}}}' ${yamlFile}
+                      # !!! COMMAND ${YAMLLINT} -d '{extends: default, spaces: 4, rules: {document-start: {present: no}, line-length: {max: 4096}, comments-indentation: disable}}' ${yamlFile}
                       COMMAND touch ${yamlCheckedTimestampFile}
                       DEPENDS ${yamlFile})
    ADD_CUSTOM_TARGET(${generate_yamlCheckedTimestampFile} DEPENDS ${yamlCheckedTimestampFile})
@@ -302,8 +278,8 @@ FOREACH(vnfd IN LISTS VNFD_LIST)
    makeUniqueTarget(generate_vnfdPackage "generate_vnfd_${vnfdPackage}")
 
    ADD_CUSTOM_COMMAND(OUTPUT  ${vnfdPackage}
-                      COMMAND ${VALIDATE_DESCRIPTOR} ${vnfdDefinition}
-                      COMMAND ${GENERATE_DESCRIPTOR} -t vnfd -N ${vnfd}/
+                      COMMAND osm package-validate ${vnfd}
+                      COMMAND osm package-build ${vnfd}
                       COMMAND du -k ${vnfdPackage}
                       DEPENDS ${vnfdFiles} ${allYAMLsChecked} ${allCloudInitFilesChecked} ${allCharmsCopyedIntoVNFD})
    ADD_CUSTOM_TARGET(${generate_vnfdPackage} DEPENDS ${vnfdPackage})
@@ -334,8 +310,8 @@ FOREACH(nsd IN LISTS NSD_LIST)
    makeUniqueTarget(generate_nsdPackage "generate_nsd_${nsdPackage}")
 
    ADD_CUSTOM_COMMAND(OUTPUT  ${nsdPackage}
-                      COMMAND ${VALIDATE_DESCRIPTOR} ${nsdDefinition}
-                      COMMAND ${GENERATE_DESCRIPTOR} -t nsd -N ${nsd}/
+                      COMMAND osm package-validate ${nsd}
+                      COMMAND osm package-build ${nsd}
                       COMMAND du -k ${nsdPackage}
                       DEPENDS ${nsdFiles} ${allYAMLsChecked} ${allRequiredVNFDPackages})
    ADD_CUSTOM_TARGET(${generate_nsdPackage} ALL DEPENDS ${nsdPackage})

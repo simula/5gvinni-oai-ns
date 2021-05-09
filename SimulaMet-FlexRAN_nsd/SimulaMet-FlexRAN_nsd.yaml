@@ -26,43 +26,32 @@
 #
 # Contact: dreibh@simula.no
 
-nsd:nsd-catalog:
-  nsd:
-    - id: SimulaMet-FlexRAN_nsd
-      name: SimulaMet-FlexRAN_nsd
-      short-name: SimulaMet-FlexRAN_nsd
-      description: SimulaMet OpenAirInterface Evolved Packet Core NS
-      vendor: Thomas Dreibholz
-      version: '1.0'
-      logo: NorNet.png
-
-      # ###### VNFDs that are part of this NSD ##############################
-      constituent-vnfd:
-        - member-vnf-index: 1
-          vnfd-id-ref: SimulaMet-FlexRAN_vnfd
-
-      # ###### VLDs #########################################################
-      vld:
-        # ====== Management =================================================
-        - id: SimulaMet-FlexRAN_nsd-Management
-          name: SimulaMet-FlexRAN_nsd-Management
-          short-name: SimulaMet-FlexRAN_nsd-Management
-          mgmt-network: 'true'
-          type: ELAN
-          vim-network-name: mgmt
-          vnfd-connection-point-ref:
-            - member-vnf-index-ref: 1
-              vnfd-id-ref: SimulaMet-FlexRAN_vnfd
-              vnfd-connection-point-ref: flexran-mgmt-cp
-
-        # ====== Service ====================================================
-        - id: SimulaMet-FlexRAN_nsd-Service
-          name: SimulaMet-FlexRAN_nsd-Service
-          short-name: SimulaMet-FlexRAN_nsd-Service
-          type: ELAN
-          vim-network-name: nornet-simula
-          vnfd-connection-point-ref:
-            - member-vnf-index-ref: 1
-              vnfd-id-ref: SimulaMet-FlexRAN_vnfd
-              vnfd-connection-point-ref: flexran-service-cp
-              #ip-address: 192.168.246.100
+nsd:
+    nsd:
+    -   description: SimulaMet OpenAirInterface Evolved Packet Core NS
+        designer: Thomas Dreibholz
+        df:
+        -   id: default-df
+            vnf-profile:
+            -   id: '1'
+                virtual-link-connectivity:
+                -   constituent-cpd-id:
+                    -   constituent-base-element-id: '1'
+                        constituent-cpd-id: flexran-mgmt-cp-ext
+                    virtual-link-profile-id: SimulaMet-FlexRAN_nsd-Management
+                -   constituent-cpd-id:
+                    -   constituent-base-element-id: '1'
+                        constituent-cpd-id: flexran-service-cp-ext
+                    virtual-link-profile-id: SimulaMet-FlexRAN_nsd-Service
+                vnfd-id: SimulaMet-FlexRAN_vnfd
+        id: SimulaMet-FlexRAN_nsd
+        name: SimulaMet-FlexRAN_nsd
+        version: '1.0'
+        virtual-link-desc:
+        -   id: SimulaMet-FlexRAN_nsd-Management
+            mgmt-network: 'true'
+            vim-network-name: mgmt
+        -   id: SimulaMet-FlexRAN_nsd-Service
+            vim-network-name: nornet-simula
+        vnfd-id:
+        - SimulaMet-FlexRAN_vnfd
