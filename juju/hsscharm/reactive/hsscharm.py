@@ -76,7 +76,7 @@ def prepare_cassandra_hss_build():
 
       # ====== Get HSS parameters ===========================================
       # For a documentation of the installation procedure, see:
-      # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
+      # https://github.com/simula/openairinterface-openair-cn/wiki/OpenAirSoftwareSupport#install-hss
 
       gitRepository = function_get('hss-git-repository')
       gitCommit     = function_get('hss-git-commit')
@@ -120,7 +120,7 @@ def configure_cassandra():
 
       # ====== Get HSS parameters ===========================================
       # For a documentation of the installation procedure, see:
-      # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
+      # https://github.com/simula/openairinterface-openair-cn/wiki/OpenAirSoftwareSupport#install-hss
 
       gitDirectory      = 'openair-hss'
       cassandraServerIP = function_get('cassandra-server-ip')
@@ -132,7 +132,7 @@ export MAKEFLAGS="-j`nproc`" && \\
 cd /home/nornetpp/src/{gitDirectory}/scripts && \\
 mkdir -p logs && \\
 sudo rm -f /etc/apt/sources.list.d/cassandra.sources.list && \\
-./build_cassandra --check-installed-software --force >logs/build_cassandra.log 2>&1
+./build_cassandra --cassandra-server-ip {cassandraServerIP} --check-installed-software --force >logs/build_cassandra.log 2>&1
 """.format(
          gitDirectory      = gitDirectory,
          cassandraServerIP = cassandraServerIP
@@ -156,8 +156,10 @@ sudo yq w -i /etc/cassandra/cassandra.yaml "listen_address" "{cassandraServerIP}
 sudo yq w -i /etc/cassandra/cassandra.yaml "rpc_address" "{cassandraServerIP}" && \\
 sudo yq w -i /etc/cassandra/cassandra.yaml "endpoint_snitch" "GossipingPropertyFileSnitch" && \\
 sudo service cassandra start && \\
-sleep 10 && \\
-sudo service cassandra status | cat
+sleep 60 && \\
+sudo service cassandra status | cat && \\
+cqlsh --file ../src/hss_rel14/db/oai_db.cql {cassandraServerIP} >logs/oai_db.log 2>&1 && \\
+cqlsh -e "SELECT COUNT(*) FROM vhss.users_imsi;" {cassandraServerIP} >/dev/null && echo "Cassandra is okay!" || echo "Cassandra seems to be unavailable!"
 """.format(
          gitDirectory      = gitDirectory,
          cassandraServerIP = cassandraServerIP
@@ -184,7 +186,7 @@ def configure_hss():
 
       # ====== Get HSS parameters ===========================================
       # For a documentation of the installation procedure, see:
-      # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-hss
+      # https://github.com/simula/openairinterface-openair-cn/wiki/OpenAirSoftwareSupport#install-hss
 
       gitDirectory       = 'openair-hss'
       cassandraServerIP  = function_get('cassandra-server-ip')
@@ -213,14 +215,12 @@ mkdir -p logs && \\
       vduHelper.executeFromString("""\
 export MAKEFLAGS="-j`nproc`" && \\
 cd /home/nornetpp/src/{gitDirectory}/scripts && \\
-./build_hss_rel14 --clean >logs/build_hss_rel14-2.log 2>&1 && \\
-cqlsh --file ../src/hss_rel14/db/oai_db.cql {cassandraServerIP} >logs/oai_db.log 2>&1
+./build_hss_rel14 --clean >logs/build_hss_rel14-2.log 2>&1
 """.format(
          gitDirectory       = gitDirectory,
          cassandraServerIP  = cassandraServerIP
       ))
       vduHelper.endBlock()
-
 
       # ====== Provision users and MME ======================================
       vduHelper.beginBlock('Provisioning users and MME')
