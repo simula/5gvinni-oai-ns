@@ -335,6 +335,7 @@ declare -A HSS_CONF && \\
 HSS_CONF[@PREFIX@]=$PREFIX && \\
 HSS_CONF[@REALM@]='{networkRealm}' && \\
 HSS_CONF[@HSS_FQDN@]='hss.{networkRealm}' && \\
+HSS_CONF[@HSS_HOSTNAME@]='hss' && \\
 HSS_CONF[@cassandra_Server_IP@]='{cassandraServerIP}' && \\
 HSS_CONF[@cassandra_IP@]='{cassandraServerIP}' && \\
 HSS_CONF[@OP_KEY@]='{networkOP}' && \\
