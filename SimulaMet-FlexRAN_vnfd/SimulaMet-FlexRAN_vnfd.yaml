@@ -39,8 +39,13 @@ vnfd:
             operate-vnf-op-config:
                 day1-2:
                 -   id: FlexRAN
+                    execution-environment-list:
+                    -   id: flexrancharm-ee
+                        juju:
+                            charm: flexrancharm
                     initial-config-primitive:
                     -   name: config
+                        execution-environment-ref: flexrancharm-ee
                         parameter:
                         -   name: ssh-hostname
                             value: <rw_mgmt_ip>
@@ -50,6 +55,7 @@ vnfd:
                             value: <password>
                         seq: '1'
                     -   name: prepare-flexran-build
+                        execution-environment-ref: flexrancharm-ee
                         parameter:
                         -   name: flexran-git-repository
                             value: <flexran_git_repository>
@@ -65,11 +71,11 @@ vnfd:
                             value: <flexran_service_ipv6_gateway>
                         seq: '2'
                     -   name: configure-flexran
+                        execution-environment-ref: flexrancharm-ee
                         seq: '3'
                     -   name: restart-flexran
+                        execution-environment-ref: flexrancharm-ee
                         seq: '4'
-                    juju:
-                        charm: flexrancharm
                     metrics:
                     -   name: system_random
                     -   name: system_uptime
