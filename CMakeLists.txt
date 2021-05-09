@@ -89,8 +89,8 @@ ENDFOREACH()
 
 # ====== Obtain VNFD dependencies of each NSD ===============================
 FOREACH(nsd IN LISTS NSD_LIST)
-   EXECUTE_PROCESS(COMMAND grep "^[ -]*vnfd-id-ref:" ${nsd}/${nsd}.yaml
-                   COMMAND sed -e "s/^[ -]*vnfd-id-ref://g" -e "s/[ \t]*//g"
+   EXECUTE_PROCESS(COMMAND grep "^[ -]*vnfd-id:" ${nsd}/${nsd}.yaml
+                   COMMAND sed -e "s/^[ -]*vnfd-id://g" -e "s/[ \t]*//g" -e "/^$/d"
                    COMMAND sort -u
                    COMMAND tr "\n" ";"
                    COMMAND sed -e "s/;$//g"

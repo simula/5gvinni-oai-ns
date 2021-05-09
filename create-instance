@@ -71,7 +71,7 @@ while [ $# -gt 0 ] ; do
         exit 1
      fi
    fi
-   VNFDs=`grep "vnfd-id-ref:" ${NSD}/${NSD}.yaml | sed -e "s/^.*://g" | sort -u | xargs`
+   VNFDs=`grep "vnfd-id:" ${NSD}/${NSD}.yaml | sed -e "s/^.*://g" | sort -u | xargs`
 
    echo "NS=$NS NSD=$NSD VNFDs=$VNFDs PARAMS=$PARAMS"
 
@@ -93,7 +93,7 @@ while [ $# -gt 0 ] ; do
    done
 
    # ====== Create ==========================================================
-   echo -e "\x1b[34m`date +%FT%H:%M:%S`: Creating ${NS} ...\x1b[0m"
+   echo -e "\x1b[34m`date +%FT%H:%M:%S`: Creating ${VNFDs} and ${NSD} ...\x1b[0m"
    for vnfd in ${VNFDs} ; do
       osm vnfd-create ${vnfd}.tar.gz || true
    done
