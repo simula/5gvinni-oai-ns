@@ -101,7 +101,7 @@ def prepare_flexran_build():
       vduHelper.runInShell('sudo rm -f /etc/netplan/50-cloud-init.yaml')
       interfaceConfiguration = vduHelper.makeInterfaceConfiguration('ens3')
       vduHelper.configureInterface('ens3', interfaceConfiguration, 50)
-      
+
       flexranService_IfName = 'ens4'
       configurationService = vduHelper.makeInterfaceConfiguration(flexranService_IfName,
                                                                   flexranService_IPv4Interface, flexranService_IPv4Gateway,
@@ -112,6 +112,8 @@ def prepare_flexran_build():
       vduHelper.configureInterface(flexranService_IfName, configurationService, 61)
       vduHelper.testNetworking()
       vduHelper.waitForPackageUpdatesToComplete()
+      vduHelper.executeFromString("""if [ "`find /etc/apt/sources.list.d -name 'pistache_team-ubuntu-unstable-*.list'`" == "" ] ; then sudo add-apt-repository -y ppa:pistache+team/unstable ; fi""")
+      vduHelper.aptInstallPackages([ 'libpistache-dev' ])
       vduHelper.endBlock()
 
       # ====== Prepare sources ==============================================
