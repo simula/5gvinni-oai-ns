@@ -1229,6 +1229,8 @@ def prepare_flexran_build():
       vduHelper.configureInterface(flexranService_IfName, configurationService, 61)
       vduHelper.testNetworking()
       vduHelper.waitForPackageUpdatesToComplete()
+      # vduHelper.executeFromString("""if [ "`find /etc/apt/sources.list.d -name 'pistache_team-ubuntu-unstable-*.list'`" == "" ] ; then sudo add-apt-repository -y ppa:pistache+team/unstable ; fi""")
+      # vduHelper.aptInstallPackages([ 'libpistache-dev' ])
       vduHelper.endBlock()
 
       # ====== Prepare sources ==============================================
@@ -1267,10 +1269,15 @@ def configure_flexran():
 
       # ====== Build FlexRAN ================================================
       vduHelper.beginBlock('Building FlexRAN itself')
+      # NOTE:
+      # Use commit 9a65f40975fafca5bb5370ba6d0d00f42cbc4356 of Pistache as
+      # work-around for issue:
+      # https://gitlab.eurecom.fr/flexran/flexran-rtc/-/issues/7)
       vduHelper.executeFromString("""\
 export MAKEFLAGS="-j`nproc`" && \\
 cd /home/nornetpp/src/{gitDirectory} && \\
 mkdir -p logs && \\
+sed -e 's#^    cd pistache .. exit$#    cd pistache \&\& git checkout 9a65f40975fafca5bb5370ba6d0d00f42cbc4356 || exit 1#' -i flexran/tools/install_dependencies && \\
 ./build_m5g -f >logs/build_flexran.log 2>&1
 """.format(gitDirectory = gitDirectory))
       vduHelper.endBlock()
@@ -1445,11 +1452,11 @@ def restart_p4ovs():
 
 testAll     = False
 
-testHSS     = True
+testHSS     = False
 testMME     = False
 testSPGWC   = False
 testSPGWU   = False
-testFlexRAN = False
+testFlexRAN = True
 testP4OvS   = False
 
 # ------ HSS ----------------------------------------------------------------
