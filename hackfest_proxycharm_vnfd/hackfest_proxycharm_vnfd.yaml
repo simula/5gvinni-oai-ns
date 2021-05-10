@@ -17,13 +17,19 @@ vnfd:
                 day1-2:
                 -   config-primitive:
                     -   name: touch
+                        execution-environment-ref: simple-ee
                         parameter:
                         -   data-type: STRING
                             default-value: /home/nornetpp/touched
                             name: filename
                     id: mgmtVM
+                    execution-environment-list:
+                    - id: simple-ee
+                      juju:
+                          charm: simple
                     initial-config-primitive:
                     -   name: config
+                        execution-environment-ref: simple-ee
                         parameter:
                         -   name: ssh-hostname
                             value: <rw_mgmt_ip>
@@ -33,6 +39,7 @@ vnfd:
                             value: osm4us
                         seq: '1'
                     -   name: touch
+                        execution-environment-ref: simple-ee
                         parameter:
                         -   data-type: STRING
                             name: filename
