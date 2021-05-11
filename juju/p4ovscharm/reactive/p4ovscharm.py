@@ -101,6 +101,16 @@ def configure_p4ovs():
       # ====== Configure P4-OvS =============================================
       vduHelper.beginBlock('Configuring P4-OvS')
       vduHelper.configureSwitch('ovs0', [ 'ens4', 'ens5' ])
+      vduHelper.createFileFromString('/etc/rc.local',
+"""\
+#!/bin/sh
+
+# IMPORTANT: Ignore VXLAN traffic, to prevent that the switch generates a
+#            packet flooding with VXLAN packets when it is attached to the
+#            network also transporting traffic of the VLs!
+ovs-ofctl -O OpenFlow15 add-flow ovs0 "priority=8000 udp,nw_dst=224.0.0.1,tp_dst=8472 actions=drop"
+""", True)
+      vduHelper.runInShell('sudo /etc/rc.local')
       vduHelper.endBlock()
 
       # ====== Set up P4-OvS service ========================================
