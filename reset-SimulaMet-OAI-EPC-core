@@ -29,6 +29,8 @@ sleep 10
 echo "SPGW-U ..."
 ssh nornetpp@${IP_SPGWU}   sudo service spgwu   start
 sleep 10
+ssh nornetpp@${IP_SPGWU}   sudo HENCSAT-QoS-Setup stop
+ssh nornetpp@${IP_SPGWU}   sudo HENCSAT-QoS-Setup start 100000 0 0 0
 echo "FlexRAN ..."
 ssh nornetpp@${IP_FLEXRAN} sudo service flexran start
 
