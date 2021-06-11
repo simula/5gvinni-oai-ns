@@ -26,7 +26,7 @@
 #
 # Contact: dreibh@simula.no
 
-configure-p4ovs:
+configure-p4ss:
   description: Configures P4-SS
   #params:
     #network-users:
@@ -36,5 +36,5 @@ configure-p4ovs:
   #required:
     #- network-users
 
-restart-p4ovs:
+restart-p4ss:
   description: Restarts P4-SS

@@ -26,8 +26,8 @@
 #
 # Contact: dreibh@simula.no
 
-name: p4ovscharm
-display-name: p4ovscharm
+name: p4sscharm
+display-name: p4sscharm
 summary: SimulaMet P4-SS Charm
 maintainer: Thomas Dreibholz <dreibh@simula.no>
 description: |
