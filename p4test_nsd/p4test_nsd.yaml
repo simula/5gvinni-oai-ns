@@ -3,13 +3,13 @@ nsd-catalog:
     - id: p4test_nsd
       name: p4test_nsd
       short-name: p4test_nsd
-      description: P4-OvS Test
+      description: P4-SS Test
       version: '1.0'
       logo: NorNet.png
       constituent-vnfd:
         - vnfd-id-ref: hackfest_proxycharm_vnfd
           member-vnf-index: '1'
-        - vnfd-id-ref: SimulaMet-P4-OvS_vnfd
+        - vnfd-id-ref: SimulaMet-P4-SS_vnfd
           member-vnf-index: '2'
       vld:
         - id: mgmtnet
@@ -22,7 +22,7 @@ nsd-catalog:
             - vnfd-id-ref: hackfest_proxycharm_vnfd
               member-vnf-index-ref: '1'
               vnfd-connection-point-ref: vnf-mgmt
-            - vnfd-id-ref: SimulaMet-P4-OvS_vnfd
+            - vnfd-id-ref: SimulaMet-P4-SS_vnfd
               member-vnf-index-ref: '2'
               vnfd-connection-point-ref: p4ovs-mgmt-cp
         - id: datanet
@@ -31,7 +31,7 @@ nsd-catalog:
           type: ELAN
           vim-network-name: nornet-simula
           vnfd-connection-point-ref:
-            - vnfd-id-ref: SimulaMet-P4-OvS_vnfd
+            - vnfd-id-ref: SimulaMet-P4-SS_vnfd
               member-vnf-index-ref: '2'
               vnfd-connection-point-ref: p4ovs-service-port1-cp
         - id: datalink
@@ -41,6 +41,6 @@ nsd-catalog:
             - vnfd-id-ref: hackfest_proxycharm_vnfd
               member-vnf-index-ref: '1'
               vnfd-connection-point-ref: vnf-data
-            - vnfd-id-ref: SimulaMet-P4-OvS_vnfd
+            - vnfd-id-ref: SimulaMet-P4-SS_vnfd
               member-vnf-index-ref: '2'
               vnfd-connection-point-ref: p4ovs-service-port2-cp
