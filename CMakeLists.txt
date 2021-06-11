@@ -230,6 +230,7 @@ FOREACH(charmName IN LISTS CHARM_SOURCE_LIST)
                       COMMAND echo env CHARM_LAYERS_DIR=${CHARMS_BASELAYERS_DIRECTORY} ${CHARM} build --build-dir ${charmsOutputDirectory}
                       COMMAND env CHARM_LAYERS_DIR=${CHARMS_BASELAYERS_DIRECTORY} ${CHARM} build --build-dir ${charmsOutputDirectory}
                       # FIXME!
+                      # COMMAND sed -e "/trusty/d" -e "/xenial/d" -i ${charmsOutputDirectory}/${charmName}/metadata.yaml
                       # COMMAND sed -e "s#^import shlex#import shlex\\\\nimport traceback#g" -i ${charmBuildDirectory}/lib/charms/sshproxy.py
                       COMMAND touch ${charmBuildTimestampFile}
                       WORKING_DIRECTORY ${charmSourceDirectory}

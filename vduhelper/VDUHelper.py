@@ -252,16 +252,18 @@ class VDUHelper:
       if ( (ipv4Interface != ipaddress.IPv4Interface('0.0.0.0/0')) or
            ((ipv6Interface == None) and (ipv6Interface == ipaddress.IPv6Interface('::/0'))) ):
 
-         interfaceConfiguration = interfaceConfiguration + '      addresses:\n'
+         if ( ((ipv4Interface != None) and (ipv4Interface != ipaddress.IPv4Interface('0.0.0.0/0'))) or
+              ((ipv6Interface != None) and (ipv6Interface == ipaddress.IPv6Interface('::/0'))) ):
+            interfaceConfiguration = interfaceConfiguration + '      addresses:\n'
 
-         if ipv4Interface != ipaddress.IPv4Interface('0.0.0.0/0'):
+         if ((ipv4Interface != None) and (ipv4Interface != ipaddress.IPv4Interface('0.0.0.0/0'))):
             interfaceConfiguration = interfaceConfiguration + '        - ' + \
                str(ipv4Interface.ip) + '/' + \
                str(ipv4Interface.network.prefixlen) + \
                '\n'
             networks.append(ipv4Interface.network)
 
-         if ((ipv6Interface == None) and (ipv6Interface == ipaddress.IPv6Interface('::/0'))):
+         if ((ipv6Interface != None) and (ipv6Interface == ipaddress.IPv6Interface('::/0'))):
             interfaceConfiguration = interfaceConfiguration + '        - ' + \
                str(ipv6Interface.ip) + '/' + \
                str(ipv6Interface.network.prefixlen) + \
@@ -362,6 +364,55 @@ class VDUHelper:
       self.endBlock()
 
 
+   # ###### Configuration OpenVSwitch #######################################
+   def configureSwitch(self, switchName, interfaceNames):
+      self.beginBlock('Configuring and activating ' + switchName)
+
+      switchConfiguration = """\
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+"""
+
+      for interfaceName in interfaceNames:
+         switchConfiguration = switchConfiguration + """\
+    {interfaceName}:
+       dhcp4: no
+       accept-ra: no
+""".format(interfaceName = interfaceName)
+
+      switchConfiguration = switchConfiguration + """\
+  openvswitch:
+    protocols: [OpenFlow13, OpenFlow14, OpenFlow15]
+  bridges:
+    {switchName}:
+      dhcp4: no
+      accept-ra: no
+      interfaces:
+""".format(switchName = switchName)
+
+      for interfaceName in interfaceNames:
+         switchConfiguration = switchConfiguration + """\
+        - {interfaceName}
+""".format(interfaceName = interfaceName)
+
+      switchConfiguration = switchConfiguration + """\
+      openvswitch:
+        protocols: [OpenFlow13, OpenFlow14, OpenFlow15]
+"""
+
+      try:
+         self.createFileFromString('/etc/netplan/{switchName}.yaml'.format(switchName = switchName),
+                                   switchConfiguration)
+         self.runInShell('sudo netplan apply')
+      except:
+         self.endBlock(False)
+         raise
+
+      self.endBlock()
+
+
    # ###### Store string into file ##########################################
    def createFileFromString(self, fileName, contentString, makeExecutable = False):
       self.beginBlock('Creating file ' + fileName)
@@ -425,17 +476,30 @@ class VDUHelper:
       self.endBlock()
 
 
-   # ###### Test networking #################################################
+   # ###### Install packages with APT #######################################
    def aptInstallPackages(self, packages, update = True):
       if len(packages) > 0:
          if update == True:
             commands = 'sudo apt update && \\\n'
          else:
             commands = ''
-         commands = commands + 'DEBIAN_FRONTEND=noninteractive sudo apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends'
+         commands = commands + 'sudo env DEBIAN_FRONTEND=noninteractive apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends'
          for package in packages:
             commands = commands + ' ' + package
          self.runInShell(commands)
+
+
+   # ###### Install packages with PIP #######################################
+   def pipInstallPackages(self, packages, pipVersion = 3):
+      commands = 'sudo '
+      if pipVersion == None:
+         commands = commands + 'pip '
+      else:
+         commands = commands + 'pip' + str(pipVersion) + ' '
+      commands = commands + 'install'
+      for package in packages:
+         commands = commands + ' ' + package
+      self.runInShell(commands)
 
 
    # ###### Write .gitconfig ################################################

@@ -17,19 +17,24 @@ vnfd:vnfd-catalog:
           name: vnf-data
           short-name: vnf-data
           type: VPORT
+          # Port Security must to be disabled here, to allow switching!
+          port-security-enabled: false
       mgmt-interface:
         cp: vnf-mgmt
       vdu:
         - id: mgmtVM
           name: mgmtVM
-          image: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
           count: '1'
+
           vm-flavor:
             vcpu-count: '1'
             memory-mb: '1024'
             storage-gb: '16'
+          image: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
+          cloud-init-file: hackfest-init
+
           interface:
-            - name: mgmtVM-eth0
+            - name: mgmtVM-ens3
               position: '1'
               type: EXTERNAL
               virtual-interface:
@@ -41,7 +46,6 @@ vnfd:vnfd-catalog:
               virtual-interface:
                 type: VIRTIO
               external-connection-point-ref: vnf-data
-          cloud-init-file: cloud-config.txt
 
           vdu-configuration:
             juju:

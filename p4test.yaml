@@ -1,0 +1,32 @@
+# The following line tells "create-instance" the name of the NSD:
+#! NSD p4test_nsd
+
+# ###### VNF Parameters #####################################################
+additionalParamsForVnf:
+  - member-vnf-index: '2'
+    additionalParams:
+      # ====== P4-OvS =======================================================
+
+      # ====== Other ========================================================
+      hostname: 'fjellrev'
+      password: 'osm4us'
+
+
+# ###### VNF External Addresses #############################################
+vld:
+  # ====== Management =======================================================
+  - name: mgmtnet
+    vim-network-name: mgmt
+    vnfd-connection-point-ref:
+      - member-vnf-index-ref: '1'
+        vnfd-connection-point-ref: vnf-mgmt
+        ip-address: 10.208.0.181
+      - member-vnf-index-ref: '2'
+        vnfd-connection-point-ref: p4ovs-mgmt-cp
+        ip-address: 10.208.0.182
+  - name: datanet
+    vim-network-name: nornet-simula
+    vnfd-connection-point-ref:
+      - member-vnf-index-ref: '2'
+        vnfd-connection-point-ref: p4ovs-service-port1-cp
+        ip-address: 10.254.1.183

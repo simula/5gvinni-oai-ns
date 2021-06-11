@@ -1,0 +1,128 @@
+# =====================================================================
+#     #######  #####          #     #   ###   #     # #     #   ###
+#     #       #     #         #     #    #    ##    # ##    #    #
+#     #       #               #     #    #    # #   # # #   #    #
+#      #####  #  ####  #####  #     #    #    #  #  # #  #  #    #
+#           # #     #          #   #     #    #   # # #   # #    #
+#     #     # #     #           # #      #    #    ## #    ##    #
+#      #####   #####             #      ###   #     # #     #   ###
+# =====================================================================
+#
+# SimulaMet OpenAirInterface Evolved Packet Core NS
+# Copyright (C) 2019-2020 by Thomas Dreibholz
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Contact: dreibh@simula.no
+
+nsd:nsd-catalog:
+  nsd:
+    - id: SimulaMet-OAI-TelemetryEPC_nsd
+      name: SimulaMet-OAI-TelemetryEPC_nsd
+      short-name: SimulaMet-OAI-TelemetryEPC_nsd
+      description: SimulaMet OpenAirInterface Evolved Packet Core NS with P4 Telemetry
+      vendor: Thomas Dreibholz
+      version: '1.0'
+      logo: NorNet.png
+
+      # ###### VNFDs that are part of this NSD ##############################
+      constituent-vnfd:
+        - member-vnf-index: 1
+          vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
+        - vnfd-id-ref: SimulaMet-P4-OvS_vnfd
+          member-vnf-index: '2'
+        - vnfd-id-ref: SimulaMet-P4-OvS_vnfd
+          member-vnf-index: '3'
+
+      # ###### VLDs #########################################################
+      vld:
+        # ====== Management =================================================
+        - id: SimulaMet-OAI-TelemetryEPC_nsd-Management
+          name: SimulaMet-OAI-TelemetryEPC_nsd-Management
+          short-name: SimulaMet-OAI-TelemetryEPC_nsd-Management
+          mgmt-network: 'true'
+          type: ELAN
+          vim-network-name: mgmt
+          vnfd-connection-point-ref:
+            - member-vnf-index-ref: 1
+              vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
+              vnfd-connection-point-ref: mme-mgmt-cp
+            - member-vnf-index-ref: 1
+              vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
+              vnfd-connection-point-ref: hss-mgmt-cp
+            - member-vnf-index-ref: 1
+              vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
+              vnfd-connection-point-ref: spgwc-mgmt-cp
+            - member-vnf-index-ref: 1
+              vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
+              vnfd-connection-point-ref: spgwu-mgmt-cp
+            - vnfd-id-ref: SimulaMet-P4-OvS_vnfd
+              member-vnf-index-ref: '2'
+              vnfd-connection-point-ref: p4ovs-mgmt-cp
+            - vnfd-id-ref: SimulaMet-P4-OvS_vnfd
+              member-vnf-index-ref: '3'
+              vnfd-connection-point-ref: p4ovs-mgmt-cp
+
+        # ====== S1-C =======================================================
+        - id: SimulaMet-OAI-TelemetryEPC_nsd-S1C
+          name: SimulaMet-OAI-TelemetryEPC_nsd-S1C
+          short-name: SimulaMet-OAI-TelemetryEPC_nsd-S1C
+          type: ELAN
+          vim-network-name: nornet-simula
+          vnfd-connection-point-ref:
+            - member-vnf-index-ref: 1
+              vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
+              vnfd-connection-point-ref: mme-s1c-cp
+
+        # ====== S1-U =======================================================
+        - id: SimulaMet-OAI-TelemetryEPC_nsd-S1U
+          name: SimulaMet-OAI-TelemetryEPC_nsd-S1U
+          short-name: SimulaMet-OAI-TelemetryEPC_nsd-S1U
+          type: ELAN
+          vim-network-name: nornet-simula
+          vnfd-connection-point-ref:
+            - vnfd-id-ref: SimulaMet-P4-OvS_vnfd
+              member-vnf-index-ref: '2'
+              vnfd-connection-point-ref: p4ovs-service-port1-cp
+        - id: s1u-switch-link
+          name: s1u-switch-link
+          short-name: s1u-switch-link
+          vnfd-connection-point-ref:
+            - member-vnf-index-ref: 1
+              vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
+              vnfd-connection-point-ref: spgwu-s1u-cp
+            - vnfd-id-ref: SimulaMet-P4-OvS_vnfd
+              member-vnf-index-ref: '2'
+              vnfd-connection-point-ref: p4ovs-service-port2-cp
+
+        # ====== SGi ========================================================
+        - id: SimulaMet-OAI-TelemetryEPC_nsd-SGi
+          name: SimulaMet-OAI-TelemetryEPC_nsd-SGi
+          short-name: SimulaMet-OAI-TelemetryEPC_nsd-SGi
+          type: ELAN
+          vim-network-name: nornet-simula
+          vnfd-connection-point-ref:
+            - vnfd-id-ref: SimulaMet-P4-OvS_vnfd
+              member-vnf-index-ref: '3'
+              vnfd-connection-point-ref: p4ovs-service-port1-cp
+        - id: sgi-switch-link
+          name: sgi-switch-link
+          short-name: sgi-switch-link
+          vnfd-connection-point-ref:
+            - member-vnf-index-ref: 1
+              vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
+              vnfd-connection-point-ref: spgwu-sgi-cp
+            - vnfd-id-ref: SimulaMet-P4-OvS_vnfd
+              member-vnf-index-ref: '3'
+              vnfd-connection-point-ref: p4ovs-service-port2-cp

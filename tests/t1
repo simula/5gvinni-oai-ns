@@ -89,6 +89,8 @@ MyParameters = {
    'flexran-service-ipv4-gateway': '0.0.0.0',
    'flexran-service-ipv6-interface': '',
    'flexran-service-ipv6-gateway': ''
+
+   # ====== P4-OvS ==========================================================
 }
 
 def function_get(flag):
@@ -206,7 +208,7 @@ export MAKEFLAGS="-j`nproc`" && \\
 cd /home/nornetpp/src/{gitDirectory}/scripts && \\
 mkdir -p logs && \\
 sudo rm -f /etc/apt/sources.list.d/cassandra.sources.list && \\
-./build_cassandra --check-installed-software --force >logs/build_cassandra.log 2>&1
+./build_cassandra --cassandra-server-ip {cassandraServerIP} --check-installed-software --force >logs/build_cassandra.log 2>&1
 """.format(
          gitDirectory      = gitDirectory,
          cassandraServerIP = cassandraServerIP
@@ -230,8 +232,10 @@ sudo yq w -i /etc/cassandra/cassandra.yaml "listen_address" "{cassandraServerIP}
 sudo yq w -i /etc/cassandra/cassandra.yaml "rpc_address" "{cassandraServerIP}" && \\
 sudo yq w -i /etc/cassandra/cassandra.yaml "endpoint_snitch" "GossipingPropertyFileSnitch" && \\
 sudo service cassandra start && \\
-sleep 10 && \\
-sudo service cassandra status | cat
+sleep 60 && \\
+sudo service cassandra status | cat && \\
+cqlsh --file ../src/hss_rel14/db/oai_db.cql {cassandraServerIP} >logs/oai_db.log 2>&1 && \\
+cqlsh -e "SELECT COUNT(*) FROM vhss.users_imsi;" {cassandraServerIP} >/dev/null && echo "Cassandra is okay!" || echo "Cassandra seems to be unavailable!"
 """.format(
          gitDirectory      = gitDirectory,
          cassandraServerIP = cassandraServerIP
@@ -287,14 +291,12 @@ mkdir -p logs && \\
       vduHelper.executeFromString("""\
 export MAKEFLAGS="-j`nproc`" && \\
 cd /home/nornetpp/src/{gitDirectory}/scripts && \\
-./build_hss_rel14 --clean >logs/build_hss_rel14-2.log 2>&1 && \\
-cqlsh --file ../src/hss_rel14/db/oai_db.cql {cassandraServerIP} >logs/oai_db.log 2>&1
+./build_hss_rel14 --clean >logs/build_hss_rel14-2.log 2>&1
 """.format(
          gitDirectory       = gitDirectory,
          cassandraServerIP  = cassandraServerIP
       ))
       vduHelper.endBlock()
-
 
       # ====== Provision users and MME ======================================
       vduHelper.beginBlock('Provisioning users and MME')
@@ -333,6 +335,7 @@ declare -A HSS_CONF && \\
 HSS_CONF[@PREFIX@]=$PREFIX && \\
 HSS_CONF[@REALM@]='{networkRealm}' && \\
 HSS_CONF[@HSS_FQDN@]='hss.{networkRealm}' && \\
+HSS_CONF[@HSS_HOSTNAME@]='hss' && \\
 HSS_CONF[@cassandra_Server_IP@]='{cassandraServerIP}' && \\
 HSS_CONF[@cassandra_IP@]='{cassandraServerIP}' && \\
 HSS_CONF[@OP_KEY@]='{networkOP}' && \\
@@ -1207,6 +1210,14 @@ def prepare_flexran_build():
          flexranService_IPv6Gateway = None
 
       # Prepare network configuration:
+      # Cloud-Init configures all 3 interfaces in Ubuntu 20.04+
+      # => unwanted configuration on ens3 and ens4
+      # Get rid of the Cloud-Init configuration, then configure the
+      # interfaces manually with the correct configuration.
+      vduHelper.runInShell('sudo rm -f /etc/netplan/50-cloud-init.yaml')
+      interfaceConfiguration = vduHelper.makeInterfaceConfiguration('ens3')
+      vduHelper.configureInterface('ens3', interfaceConfiguration, 50)
+
       flexranService_IfName = 'ens4'
       configurationService = vduHelper.makeInterfaceConfiguration(flexranService_IfName,
                                                                   flexranService_IPv4Interface, flexranService_IPv4Gateway,
@@ -1218,6 +1229,8 @@ def prepare_flexran_build():
       vduHelper.configureInterface(flexranService_IfName, configurationService, 61)
       vduHelper.testNetworking()
       vduHelper.waitForPackageUpdatesToComplete()
+      # vduHelper.executeFromString("""if [ "`find /etc/apt/sources.list.d -name 'pistache_team-ubuntu-unstable-*.list'`" == "" ] ; then sudo add-apt-repository -y ppa:pistache+team/unstable ; fi""")
+      # vduHelper.aptInstallPackages([ 'libpistache-dev' ])
       vduHelper.endBlock()
 
       # ====== Prepare sources ==============================================
@@ -1256,10 +1269,15 @@ def configure_flexran():
 
       # ====== Build FlexRAN ================================================
       vduHelper.beginBlock('Building FlexRAN itself')
+      # NOTE:
+      # Use commit 9a65f40975fafca5bb5370ba6d0d00f42cbc4356 of Pistache as
+      # work-around for issue:
+      # https://gitlab.eurecom.fr/flexran/flexran-rtc/-/issues/7)
       vduHelper.executeFromString("""\
 export MAKEFLAGS="-j`nproc`" && \\
 cd /home/nornetpp/src/{gitDirectory} && \\
 mkdir -p logs && \\
+sed -e 's#^    cd pistache .. exit$#    cd pistache \&\& git checkout 9a65f40975fafca5bb5370ba6d0d00f42cbc4356 || exit 1#' -i flexran/tools/install_dependencies && \\
 ./build_m5g -f >logs/build_flexran.log 2>&1
 """.format(gitDirectory = gitDirectory))
       vduHelper.endBlock()
@@ -1341,14 +1359,115 @@ def restart_flexran():
 
 
 # ###########################################################################
+# #### P4-OvS Charm functions                                            ####
+# ###########################################################################
+
+# ###### Installation #######################################################
+@when('sshproxy.configured')
+@when_not('p4ovscharm.installed')
+def install_p4ovscharm_proxy_charm():
+   set_flag('p4ovscharm.installed')
+   vduHelper.setStatus('install_p4ovscharm_proxy_charm: SSH proxy charm is READY')
+
+
+# ###### configure-p4ovs function ###########################################
+@when('actions.configure-p4ovs')
+@when('p4ovscharm.installed')
+def configure_p4ovs():
+   vduHelper.beginBlock('configure_p4ovs')
+   try:
+
+      # ====== Prepare system ===============================================
+      vduHelper.beginBlock('Preparing system')
+
+      # Cloud-Init configures all 3 interfaces in Ubuntu 20.04+
+      # => unwanted configuration on ens3 and ens4
+      # Get rid of the Cloud-Init configuration, then configure the
+      # interfaces manually with the correct configuration.
+      vduHelper.runInShell('sudo rm -f /etc/netplan/50-cloud-init.yaml')
+      interfaceConfiguration = vduHelper.makeInterfaceConfiguration('ens3')
+      vduHelper.configureInterface('ens3', interfaceConfiguration, 50)
+      n = 0
+      for interfaceName in [ 'ens4', 'ens5' ]:
+         interfaceConfiguration = vduHelper.makeInterfaceConfiguration(interfaceName, None)
+         vduHelper.configureInterface(interfaceName, interfaceConfiguration, 61 + n)
+         n = n + 1
+      vduHelper.testNetworking()
+      vduHelper.waitForPackageUpdatesToComplete()
+      vduHelper.aptInstallPackages([
+         'openvswitch-p4-switch',
+         'openvswitch-p4-switch-dpdk',
+         'p4lang-p4c'
+      ])
+      # vduHelper.pipInstallPackages([ 'nnpy' ])
+      vduHelper.endBlock()
+
+      # ====== Configure P4-OvS =============================================
+      vduHelper.beginBlock('Configuring P4-OvS')
+      vduHelper.configureSwitch('ovs0', [ 'ens4', 'ens5' ])
+      vduHelper.createFileFromString('/etc/rc.local',
+"""\
+#!/bin/sh
+
+# IMPORTANT: Ignore VXLAN traffic, to prevent that the switch generates a
+#            packet flooding with VXLAN packets when it is attached to the
+#            network also transporting traffic of the VLs!
+ovs-ofctl -O OpenFlow15 add-flow ovs0 "priority=8000 udp,nw_dst=224.0.0.1,tp_dst=8472 actions=drop"
+""", True)
+      vduHelper.runInShell('sudo /etc/rc.local')
+      vduHelper.endBlock()
+
+      # ====== Set up P4-OvS service ========================================
+      vduHelper.beginBlock('Setting up P4-OvS service')
+      vduHelper.configureSystemInfo('P4-OvS', 'This is the SimulaMet P4-OvS VNF!')
+      vduHelper.endBlock()
+
+      # ====== Set up sysstat service =======================================
+      vduHelper.installSysStat()
+
+      # ====== Clean up =====================================================
+      vduHelper.cleanUp()
+
+      message = vduHelper.endBlock()
+      function_set( { 'outout': message } )
+      set_flag('p4ovscharm.configured-p4ovs')
+   except:
+      message = vduHelper.endBlockInException()
+      function_fail(message)
+   finally:
+      clear_flag('actions.configure-p4ovs')
+
+
+# ###### restart-p4ovs function #############################################
+@when('actions.restart-p4ovs')
+@when('p4ovscharm.configured-p4ovs')
+def restart_p4ovs():
+   vduHelper.beginBlock('restart_p4ovs')
+   try:
+
+      # !!! FIXME! !!!
+      # vduHelper.runInShell('sudo service p4ovs restart')
+
+      message = vduHelper.endBlock()
+      function_set( { 'outout': message } )
+   except:
+      message = vduHelper.endBlockInException()
+      function_fail(message)
+   finally:
+      clear_flag('actions.restart-p4ovs')
+
+
+
+# ###########################################################################
 
 testAll     = False
 
-testHSS     = True
+testHSS     = False
 testMME     = False
 testSPGWC   = False
 testSPGWU   = False
 testFlexRAN = False
+testP4OvS   = True
 
 # ------ HSS ----------------------------------------------------------------
 if testAll or testHSS:
@@ -1358,34 +1477,41 @@ if testAll or testHSS:
    configure_hss()
    restart_hss()
 
-## ------ MME ----------------------------------------------------------------
-#if testAll or testMME:
-   #install_mmecharm_proxy_charm()
-   #prepare_mme_build()
-   #configure_mme()
-   #restart_mme()
+# ------ MME ----------------------------------------------------------------
+if testAll or testMME:
+   install_mmecharm_proxy_charm()
+   prepare_mme_build()
+   configure_mme()
+   restart_mme()
 
-##------ SPGW-C -------------------------------------------------------------
-#if testAll or testSPGWC:
-   #install_spgwccharm_proxy_charm()
-   #prepare_spgwc_build()
-   #configure_spgwc()
-   #restart_spgwc()
+#------ SPGW-C -------------------------------------------------------------
+if testAll or testSPGWC:
+   install_spgwccharm_proxy_charm()
+   prepare_spgwc_build()
+   configure_spgwc()
+   restart_spgwc()
 
-## ------ SPGW-U -------------------------------------------------------------
-#if testAll or testSPGWU:
-   #install_spgwucharm_proxy_charm()
-   #prepare_spgwu_build()
-   #configure_spgwu()
-   #restart_spgwu()
+# ------ SPGW-U -------------------------------------------------------------
+if testAll or testSPGWU:
+   install_spgwucharm_proxy_charm()
+   prepare_spgwu_build()
+   configure_spgwu()
+   restart_spgwu()
 
 
-## ------ FlexRAN Controller -------------------------------------------------
-#if testAll or testFlexRAN:
-   #install_flexrancharm_proxy_charm()
-   #prepare_flexran_build()
-   #configure_flexran()
-   #restart_flexran()
+# ------ FlexRAN Controller -------------------------------------------------
+if testAll or testFlexRAN:
+   install_flexrancharm_proxy_charm()
+   prepare_flexran_build()
+   configure_flexran()
+   restart_flexran()
+
+
+# ------ P4OvS Controller ---------------------------------------------------
+if testAll or testP4OvS:
+   install_p4ovscharm_proxy_charm()
+   configure_p4ovs()
+   restart_p4ovs()
 
 
 # ------ Interface configuration tests --------------------------------------

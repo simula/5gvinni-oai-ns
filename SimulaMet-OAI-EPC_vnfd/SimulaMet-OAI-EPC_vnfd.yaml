@@ -58,13 +58,13 @@ vnfd:vnfd-catalog:
 
           # ====== Interfaces ===============================================
           interface:
-            - name: eth0
+            - name: ens3
               type: EXTERNAL
               mgmt-interface: true
               virtual-interface:
                 type: PARAVIRT
               external-connection-point-ref: hss-mgmt-cp
-            - name: eth1
+            - name: ens4
               type: INTERNAL
               virtual-interface:
                 type: PARAVIRT
@@ -163,23 +163,23 @@ vnfd:vnfd-catalog:
 
           # ====== Interfaces ===============================================
           interface:
-            - name: eth0
+            - name: ens3
               type: EXTERNAL
               mgmt-interface: true
               virtual-interface:
                 type: PARAVIRT
               external-connection-point-ref: mme-mgmt-cp
-            - name: eth1
+            - name: ens4
               type: INTERNAL
               virtual-interface:
                 type: PARAVIRT
               internal-connection-point-ref: mme-s6a-cp
-            - name: eth2
+            - name: ens5
               type: INTERNAL
               virtual-interface:
                 type: PARAVIRT
               internal-connection-point-ref: mme-s11-cp
-            - name: eth3
+            - name: ens6
               type: EXTERNAL
               virtual-interface:
                 type: PARAVIRT
@@ -299,18 +299,18 @@ vnfd:vnfd-catalog:
 
           # ====== Interfaces ===============================================
           interface:
-            - name: eth0
+            - name: ens3
               type: EXTERNAL
               mgmt-interface: true
               virtual-interface:
                 type: PARAVIRT
               external-connection-point-ref: spgwc-mgmt-cp
-            - name: eth1
+            - name: ens4
               type: INTERNAL
               virtual-interface:
                 type: PARAVIRT
               internal-connection-point-ref: spgwc-sxab-cp
-            - name: eth2
+            - name: ens5
               type: INTERNAL
               virtual-interface:
                 type: PARAVIRT
@@ -403,23 +403,23 @@ vnfd:vnfd-catalog:
 
           # ====== Interfaces ===============================================
           interface:
-            - name: eth0
+            - name: ens3
               type: EXTERNAL
               mgmt-interface: true
               virtual-interface:
                 type: PARAVIRT
               external-connection-point-ref: spgwu-mgmt-cp
-            - name: eth1
+            - name: ens4
               type: INTERNAL
               virtual-interface:
                 type: PARAVIRT
               internal-connection-point-ref: spgwu-sxab-cp
-            - name: eth2
+            - name: ens5
               type: EXTERNAL
               virtual-interface:
                 type: PARAVIRT
               external-connection-point-ref: spgwu-s1u-cp
-            - name: eth3
+            - name: ens6
               type: EXTERNAL
               virtual-interface:
                 type: PARAVIRT
@@ -557,7 +557,11 @@ vnfd:vnfd-catalog:
         - name: spgwc-mgmt-cp
         - name: spgwu-mgmt-cp
         - name: spgwu-s1u-cp
+          # Port Security must to be disabled here, to allow switching!
+          port-security-enabled: false
         - name: spgwu-sgi-cp
+          # Port Security must to be disabled here, to allow switching!
+          port-security-enabled: false
 
 
       # ###### Monitoring ###################################################

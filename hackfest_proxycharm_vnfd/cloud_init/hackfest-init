@@ -1,0 +1,11 @@
+#cloud-config
+
+hostname: test
+manage_etc_hosts: localhost
+password: osm4us
+chpasswd: {expire: False}
+ssh_pwauth: True
+system_info:
+  default_user:
+    name: nornetpp
+    sudo: ALL=(ALL) NOPASSWD:ALL

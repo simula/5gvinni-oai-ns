@@ -78,6 +78,8 @@ def prepare_flexran_build():
       # For a documentation of the installation procedure, see:
       # https://gitlab.eurecom.fr/mosaic5g/mosaic5g/-/wikis/tutorials/slicing
 
+      gitName       = function_get('git-name')
+      gitEmail      = function_get('git-email')
       gitRepository = function_get('flexran-git-repository')
       gitCommit     = function_get('flexran-git-commit')
       gitDirectory  = 'mosaic5g'
@@ -94,6 +96,14 @@ def prepare_flexran_build():
          flexranService_IPv6Gateway = None
 
       # Prepare network configuration:
+      # Cloud-Init configures all 3 interfaces in Ubuntu 20.04+
+      # => unwanted configuration on ens3 and ens4
+      # Get rid of the Cloud-Init configuration, then configure the
+      # interfaces manually with the correct configuration.
+      vduHelper.runInShell('sudo rm -f /etc/netplan/50-cloud-init.yaml')
+      interfaceConfiguration = vduHelper.makeInterfaceConfiguration('ens3')
+      vduHelper.configureInterface('ens3', interfaceConfiguration, 50)
+
       flexranService_IfName = 'ens4'
       configurationService = vduHelper.makeInterfaceConfiguration(flexranService_IfName,
                                                                   flexranService_IPv4Interface, flexranService_IPv4Gateway,
@@ -101,9 +111,12 @@ def prepare_flexran_build():
 
       # ====== Prepare system ===============================================
       vduHelper.beginBlock('Preparing system')
+      vduHelper.configureGit(gitName, gitEmail)
       vduHelper.configureInterface(flexranService_IfName, configurationService, 61)
       vduHelper.testNetworking()
       vduHelper.waitForPackageUpdatesToComplete()
+      # vduHelper.executeFromString("""if [ "`find /etc/apt/sources.list.d -name 'pistache_team-ubuntu-unstable-*.list'`" == "" ] ; then sudo add-apt-repository -y ppa:pistache+team/unstable ; fi""")
+      # vduHelper.aptInstallPackages([ 'libpistache-dev' ])
       vduHelper.endBlock()
 
       # ====== Prepare sources ==============================================
@@ -142,10 +155,15 @@ def configure_flexran():
 
       # ====== Build FlexRAN ================================================
       vduHelper.beginBlock('Building FlexRAN itself')
+      # NOTE:
+      # Use commit 9a65f40975fafca5bb5370ba6d0d00f42cbc4356 of Pistache as
+      # work-around for issue:
+      # https://gitlab.eurecom.fr/flexran/flexran-rtc/-/issues/7)
       vduHelper.executeFromString("""\
 export MAKEFLAGS="-j`nproc`" && \\
 cd /home/nornetpp/src/{gitDirectory} && \\
 mkdir -p logs && \\
+sed -e 's#^    cd pistache .. exit$#    cd pistache \&\& git checkout 9a65f40975fafca5bb5370ba6d0d00f42cbc4356 || exit 1#' -i flexran/tools/install_dependencies && \\
 ./build_m5g -f >logs/build_flexran.log 2>&1
 """.format(gitDirectory = gitDirectory))
       vduHelper.endBlock()
