@@ -91,31 +91,57 @@ def configure_p4ss():
       vduHelper.testNetworking()
       vduHelper.waitForPackageUpdatesToComplete()
       vduHelper.aptInstallPackages([
-         'openvswitch-p4-switch',
-         'openvswitch-p4-switch-dpdk',
          'p4lang-p4c'
       ])
-      # vduHelper.pipInstallPackages([ 'nnpy' ])
       vduHelper.endBlock()
 
       # ====== Configure P4-SS =============================================
       vduHelper.beginBlock('Configuring P4-SS')
       vduHelper.configureSwitch('ss0', [ 'ens4', 'ens5' ])
-      vduHelper.createFileFromString('/etc/rc.local',
-"""\
-#!/bin/sh
+      #vduHelper.createFileFromString('/etc/rc.local',
+#"""\
+##!/bin/sh
 
-# IMPORTANT: Ignore VXLAN traffic, to prevent that the switch generates a
-#            packet flooding with VXLAN packets when it is attached to the
-#            network also transporting traffic of the VLs!
-ss-ofctl -O OpenFlow15 add-flow ss0 "priority=8000 udp,nw_dst=224.0.0.1,tp_dst=8472 actions=drop"
-""", True)
-      vduHelper.runInShell('sudo /etc/rc.local')
+## IMPORTANT: Ignore VXLAN traffic, to prevent that the switch generates a
+##            packet flooding with VXLAN packets when it is attached to the
+##            network also transporting traffic of the VLs!
+#ovs-ofctl -O OpenFlow15 add-flow ss0 "priority=8000 udp,nw_dst=224.0.0.1,tp_dst=8472 actions=drop"
+#""", True)
+      #vduHelper.runInShell('sudo /etc/rc.local')
       vduHelper.endBlock()
 
       # ====== Set up P4-SS service ========================================
       vduHelper.beginBlock('Setting up P4-SS service')
       vduHelper.configureSystemInfo('P4-SS', 'This is the SimulaMet P4-SS VNF!')
+      vduHelper.createFileFromString('/lib/systemd/system/p4ss.service', """\
+[Unit]
+Description=FlexRAN Controller
+After=ssh.target
+
+[Service]
+ExecStart=/bin/sh -c 'exec simple_switch --log-console --interface 0@ens4 --interface 1@ens5 >>/var/log/p4ss.log 2>&1'
+KillMode=process
+Restart=on-failure
+RestartPreventExitStatus=255
+WorkingDirectory=/home/nornetpp
+
+[Install]
+WantedBy=multi-user.target
+""".format(gitDirectory = gitDirectory))
+
+      vduHelper.createFileFromString('/home/nornetpp/log',
+"""\
+#!/bin/sh
+tail -f /var/log/p4ss.log
+""", True)
+
+      vduHelper.createFileFromString('/home/nornetpp/restart',
+"""\
+#!/bin/sh
+DIRECTORY=`dirname $0`
+sudo service p4ss restart && $DIRECTORY/log
+""", True)
+      vduHelper.runInShell('sudo chown nornetpp:nornetpp /home/nornetpp/log /home/nornetpp/restart')
       vduHelper.endBlock()
 
       # ====== Set up sysstat service =======================================
