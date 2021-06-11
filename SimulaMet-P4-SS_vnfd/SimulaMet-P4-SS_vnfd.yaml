@@ -51,8 +51,8 @@ vnfd:vnfd-catalog:
           # ====== VDU VM Configuration =====================================
           vm-flavor:
             vcpu-count: 4
-            memory-mb: 2048
-            storage-gb: 16
+            memory-mb: 4096
+            storage-gb: 64
           image: 5gVINNI-OpenStack-Ubuntu-20.04-LTS
           cloud-init-file: p4ss-init
 
