@@ -97,7 +97,7 @@ def configure_p4ss():
 
       # ====== Configure P4-SS =============================================
       vduHelper.beginBlock('Configuring P4-SS')
-      vduHelper.configureSwitch('ss0', [ 'ens4', 'ens5' ])
+      #vduHelper.configureSwitch('ss0', [ 'ens4', 'ens5' ])
       #vduHelper.createFileFromString('/etc/rc.local',
 #"""\
 ##!/bin/sh
