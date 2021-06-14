@@ -107,10 +107,10 @@ vld:
         vnfd-connection-point-ref: spgwu-mgmt-cp
         ip-address: 10.208.0.213
       - member-vnf-index-ref: '2'
-        vnfd-connection-point-ref: p4ovs-mgmt-cp
+        vnfd-connection-point-ref: p4switch-mgmt-cp
         ip-address: 10.208.0.214
       - member-vnf-index-ref: '3'
-        vnfd-connection-point-ref: p4ovs-mgmt-cp
+        vnfd-connection-point-ref: p4switch-mgmt-cp
         ip-address: 10.208.0.215
 
   # ====== S1-C =============================================================

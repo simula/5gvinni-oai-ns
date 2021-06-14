@@ -22,11 +22,11 @@ vld:
         vnfd-connection-point-ref: vnf-mgmt
         ip-address: 10.208.0.181
       - member-vnf-index-ref: '2'
-        vnfd-connection-point-ref: p4ss-mgmt-cp
+        vnfd-connection-point-ref: p4switch-mgmt-cp
         ip-address: 10.208.0.182
   - name: datanet
     vim-network-name: nornet-simula
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '2'
-        vnfd-connection-point-ref: p4ss-service-port1-cp
+        vnfd-connection-point-ref: p4switch-service-port1-cp
         ip-address: 10.254.1.183

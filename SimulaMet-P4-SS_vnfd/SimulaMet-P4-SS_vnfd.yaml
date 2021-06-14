@@ -38,7 +38,7 @@ vnfd:vnfd-catalog:
 
       # ###### Management Interface #########################################
       mgmt-interface:
-        cp: p4ss-mgmt-cp
+        cp: p4switch-mgmt-cp
 
       vdu:
 
@@ -54,7 +54,7 @@ vnfd:vnfd-catalog:
             memory-mb: 4096
             storage-gb: 64
           image: 5gVINNI-OpenStack-Ubuntu-20.04-LTS
-          cloud-init-file: p4ss-init
+          cloud-init-file: p4switch-init
 
           # ====== Interfaces ===============================================
           interface:
@@ -63,17 +63,17 @@ vnfd:vnfd-catalog:
               mgmt-interface: true
               virtual-interface:
                 type: PARAVIRT
-              external-connection-point-ref: p4ss-mgmt-cp
+              external-connection-point-ref: p4switch-mgmt-cp
             - name: ens4
               type: EXTERNAL
               virtual-interface:
                 type: PARAVIRT
-              external-connection-point-ref: p4ss-service-port1-cp
+              external-connection-point-ref: p4switch-service-port1-cp
             - name: ens5
               type: EXTERNAL
               virtual-interface:
                 type: PARAVIRT
-              external-connection-point-ref: p4ss-service-port2-cp
+              external-connection-point-ref: p4switch-service-port2-cp
 
           # ====== Juju Charm ===============================================
           vdu-configuration:
@@ -123,11 +123,11 @@ vnfd:vnfd-catalog:
 
       # ###### External Connection Points ###################################
       connection-point:
-        - name: p4ss-mgmt-cp
-        - name: p4ss-service-port1-cp
+        - name: p4switch-mgmt-cp
+        - name: p4switch-service-port1-cp
           # Port Security must to be disabled here, to allow switching!
           port-security-enabled: false
-        - name: p4ss-service-port2-cp
+        - name: p4switch-service-port2-cp
           # Port Security must to be disabled here, to allow switching!
           port-security-enabled: false
 

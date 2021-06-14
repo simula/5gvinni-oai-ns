@@ -53,7 +53,7 @@ nsd:nsd-catalog:
           vnfd-connection-point-ref:
             - member-vnf-index-ref: 1
               vnfd-id-ref: SimulaMet-P4-SS_vnfd
-              vnfd-connection-point-ref: p4ss-mgmt-cp
+              vnfd-connection-point-ref: p4switch-mgmt-cp
 
         # ====== Service ====================================================
         - id: SimulaMet-P4-SS_nsd-Service-Port1
@@ -64,7 +64,7 @@ nsd:nsd-catalog:
           vnfd-connection-point-ref:
             - member-vnf-index-ref: 1
               vnfd-id-ref: SimulaMet-P4-SS_vnfd
-              vnfd-connection-point-ref: p4ss-service-port1-cp
+              vnfd-connection-point-ref: p4switch-service-port1-cp
         - id: SimulaMet-P4-SS_nsd-Service-Port2
           name: SimulaMet-P4-SS_nsd-Service-Port2
           short-name: SimulaMet-P4-SS_nsd-Service-Port2
@@ -73,4 +73,4 @@ nsd:nsd-catalog:
           vnfd-connection-point-ref:
             - member-vnf-index-ref: 1
               vnfd-id-ref: SimulaMet-P4-SS_vnfd
-              vnfd-connection-point-ref: p4ss-service-port2-cp
+              vnfd-connection-point-ref: p4switch-service-port2-cp

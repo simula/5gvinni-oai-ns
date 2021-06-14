@@ -47,12 +47,12 @@ vld:
   - name: SimulaMet-P4-OvS_nsd-Management
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '1'
-        vnfd-connection-point-ref: p4ovs-mgmt-cp
+        vnfd-connection-point-ref: p4switch-mgmt-cp
         ip-address: 10.208.0.219
 
   # ====== Service ==========================================================
   - name: SimulaMet-P4-OvS_nsd-Service-Port1
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '1'
-        vnfd-connection-point-ref: p4ovs-service-port1-cp
+        vnfd-connection-point-ref: p4switch-service-port1-cp
         ip-address: 192.168.246.111
