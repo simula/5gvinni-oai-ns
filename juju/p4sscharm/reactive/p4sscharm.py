@@ -112,14 +112,14 @@ def configure_p4ss():
 
       # ====== Set up P4-SS service ========================================
       vduHelper.beginBlock('Setting up P4-SS service')
-      vduHelper.configureSystemInfo('P4-SS', 'This is the SimulaMet P4-SS VNF!')
+      vduHelper.configureSystemInfo('P4-SS', 'This is the SimulaMet P4-SimpleSwitch VNF!')
       vduHelper.createFileFromString('/lib/systemd/system/p4ss.service', """\
 [Unit]
 Description=FlexRAN Controller
 After=ssh.target
 
 [Service]
-ExecStart=/bin/sh -c 'exec simple_switch --log-console --interface 0@ens4 --interface 1@ens5 >>/var/log/p4ss.log 2>&1'
+ExecStart=/bin/sh -c 'exec simple_switch --log-console --interface 0@ens4 --interface 1@ens5 PROVIDE_PROGRAM_HERE >>/var/log/p4ss.log 2>&1'
 KillMode=process
 Restart=on-failure
 RestartPreventExitStatus=255
@@ -127,7 +127,7 @@ WorkingDirectory=/home/nornetpp
 
 [Install]
 WantedBy=multi-user.target
-""".format(gitDirectory = gitDirectory))
+""")
 
       vduHelper.createFileFromString('/home/nornetpp/log',
 """\
