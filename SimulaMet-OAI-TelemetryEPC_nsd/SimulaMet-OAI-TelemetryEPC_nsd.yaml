@@ -40,9 +40,9 @@ nsd:nsd-catalog:
       constituent-vnfd:
         - member-vnf-index: 1
           vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
-        - vnfd-id-ref: SimulaMet-P4-OvS_vnfd
+        - vnfd-id-ref: SimulaMet-P4-SS_vnfd
           member-vnf-index: '2'
-        - vnfd-id-ref: SimulaMet-P4-OvS_vnfd
+        - vnfd-id-ref: SimulaMet-P4-SS_vnfd
           member-vnf-index: '3'
 
       # ###### VLDs #########################################################
@@ -67,10 +67,10 @@ nsd:nsd-catalog:
             - member-vnf-index-ref: 1
               vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
               vnfd-connection-point-ref: spgwu-mgmt-cp
-            - vnfd-id-ref: SimulaMet-P4-OvS_vnfd
+            - vnfd-id-ref: SimulaMet-P4-SS_vnfd
               member-vnf-index-ref: '2'
               vnfd-connection-point-ref: p4switch-mgmt-cp
-            - vnfd-id-ref: SimulaMet-P4-OvS_vnfd
+            - vnfd-id-ref: SimulaMet-P4-SS_vnfd
               member-vnf-index-ref: '3'
               vnfd-connection-point-ref: p4switch-mgmt-cp
 
@@ -92,7 +92,7 @@ nsd:nsd-catalog:
           type: ELAN
           vim-network-name: nornet-simula
           vnfd-connection-point-ref:
-            - vnfd-id-ref: SimulaMet-P4-OvS_vnfd
+            - vnfd-id-ref: SimulaMet-P4-SS_vnfd
               member-vnf-index-ref: '2'
               vnfd-connection-point-ref: p4switch-service-port1-cp
         - id: s1u-switch-link
@@ -102,7 +102,7 @@ nsd:nsd-catalog:
             - member-vnf-index-ref: 1
               vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
               vnfd-connection-point-ref: spgwu-s1u-cp
-            - vnfd-id-ref: SimulaMet-P4-OvS_vnfd
+            - vnfd-id-ref: SimulaMet-P4-SS_vnfd
               member-vnf-index-ref: '2'
               vnfd-connection-point-ref: p4switch-service-port2-cp
 
@@ -113,7 +113,7 @@ nsd:nsd-catalog:
           type: ELAN
           vim-network-name: nornet-simula
           vnfd-connection-point-ref:
-            - vnfd-id-ref: SimulaMet-P4-OvS_vnfd
+            - vnfd-id-ref: SimulaMet-P4-SS_vnfd
               member-vnf-index-ref: '3'
               vnfd-connection-point-ref: p4switch-service-port1-cp
         - id: sgi-switch-link
@@ -123,6 +123,6 @@ nsd:nsd-catalog:
             - member-vnf-index-ref: 1
               vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
               vnfd-connection-point-ref: spgwu-sgi-cp
-            - vnfd-id-ref: SimulaMet-P4-OvS_vnfd
+            - vnfd-id-ref: SimulaMet-P4-SS_vnfd
               member-vnf-index-ref: '3'
               vnfd-connection-point-ref: p4switch-service-port2-cp
