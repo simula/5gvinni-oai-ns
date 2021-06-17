@@ -1,0 +1,9 @@
+#!/bin/bash
+
+for interface in ens5 ens6 pdn ; do
+   tshark -i $interface -w /tmp/$interface.pcap icmp &
+done
+
+sleep 60
+
+killall tshark
