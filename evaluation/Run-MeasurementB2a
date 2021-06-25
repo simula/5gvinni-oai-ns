@@ -31,7 +31,7 @@
 # Description:
 # Packet loss
 # - 300s no packet loss
-# - 300s 2 Mbit/s, 250ms delay
+# - 300s 0.1% packet loss
 # - 300s no packet loss
 # ===========================================================================
 
@@ -41,7 +41,7 @@
 # * Make sure to allow password-less sudo on server and eNodeB!
 
 
-DIRECTORY="MeasurementB3"
+DIRECTORY="MeasurementB2"
 INTERFACE="any"
 RUNTIME=900
 
@@ -329,11 +329,12 @@ echo "OK!"
          # ====== QoS changes ===============================================
 
          sleep 300
+         # 0.1% Packet Loss
          sudo -u#${SUDO_UID} -g#${SUDO_GID} ssh -p 2909 nornetpp@localhost HENCSAT-QoS-Setup change \
-            2000 250 ${qosLossRate} ${qosErrorRate} || true
+            ${qosBandwidth} ${qosDelay} 0.10 ${qosErrorRate}
          sleep 300
          sudo -u#${SUDO_UID} -g#${SUDO_GID} ssh -p 2909 nornetpp@localhost HENCSAT-QoS-Setup change \
-            ${qosBandwidth} ${qosDelay} ${qosLossRate} ${qosErrorRate} || true
+            ${qosBandwidth} ${qosDelay} ${qosLossRate} ${qosErrorRate}
 
 
          # §§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§

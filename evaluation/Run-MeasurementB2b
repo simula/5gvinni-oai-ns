@@ -41,7 +41,7 @@
 # * Make sure to allow password-less sudo on server and eNodeB!
 
 
-DIRECTORY="MeasurementB2"
+DIRECTORY="MeasurementB2b"
 INTERFACE="any"
 RUNTIME=900
 
@@ -331,7 +331,7 @@ echo "OK!"
          sleep 300
          # 10% Packet Loss
          sudo -u#${SUDO_UID} -g#${SUDO_GID} ssh -p 2909 nornetpp@localhost HENCSAT-QoS-Setup change \
-            ${qosBandwidth} ${qosDelay} 0.10 ${qosErrorRate}
+            ${qosBandwidth} ${qosDelay} 10 ${qosErrorRate}
          sleep 300
          sudo -u#${SUDO_UID} -g#${SUDO_GID} ssh -p 2909 nornetpp@localhost HENCSAT-QoS-Setup change \
             ${qosBandwidth} ${qosDelay} ${qosLossRate} ${qosErrorRate}
