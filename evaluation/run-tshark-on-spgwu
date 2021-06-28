@@ -1,9 +1,29 @@
 #!/bin/bash
 
-for interface in ens5 ens6 pdn ; do
-   tshark -i $interface -w /tmp/$interface.pcap icmp &
+INTERFACES="ens5 ens6 pdn any"
+DURATION=60
+
+for interface in $INTERFACES ; do
+   rm -f /tmp/$interface.pcap /tmp/$interface.pcap.gz
+   tshark -q -i $interface -w /tmp/$interface.pcap --autostop duration:$DURATION -f 'icmp or udp' &
 done
+multiInterfaces=""
+args=""
+for interface in $INTERFACES ; do
+   if [ "$interface" != "any" ] ; then
+      multiInterfaces="$multiInterfaces $interface"
+      args="$args -i $interface"
+   fi
+done
+rm -f /tmp/multi.pcap /tmp/multi.pcap.gz
+tshark -q $args -w /tmp/multi.pcap --autostop duration:$DURATION -f 'icmp or udp' & 
 
-sleep 60
+echo "Sleeping ..."
+wait
+echo "Done!"
 
-killall tshark
+for interface in $INTERFACES multi ; do
+   gzip -9 /tmp/$interface.pcap
+   chown nornetpp:nornetpp /tmp/$interface.pcap.gz
+   ls -l /tmp/$interface.pcap.gz
+done
