@@ -146,7 +146,7 @@ vld:
 
   # ====== S1-U =============================================================
   - name: SimulaMet-OAI-TelemetryEPC_nsd-S1U
-     vnfd-connection-point-ref:
+    vnfd-connection-point-ref:
       - member-vnf-index-ref: '1'
         vnfd-connection-point-ref: spgwu-s1u-cp
         ip-address: 192.168.248.169
