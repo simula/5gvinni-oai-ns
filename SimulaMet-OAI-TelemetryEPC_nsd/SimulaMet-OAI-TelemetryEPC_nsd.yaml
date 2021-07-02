@@ -151,7 +151,7 @@ nsd:nsd-catalog:
           name: flexran-switch-link
           short-name: flexran-switch-link
           vnfd-connection-point-ref:
-            - vnfd-id-ref: SimulaMet-OAI-FlexRAN_vnfd
+            - vnfd-id-ref: SimulaMet-FlexRAN_vnfd
               member-vnf-index-ref: '5'
               vnfd-connection-point-ref: spgwu-flexran-cp
             - vnfd-id-ref: SimulaMet-P4-SS_vnfd
