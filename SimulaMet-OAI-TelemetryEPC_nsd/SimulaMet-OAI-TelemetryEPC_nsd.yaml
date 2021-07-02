@@ -78,7 +78,7 @@ nsd:nsd-catalog:
               vnfd-id-ref: SimulaMet-P4-SS_vnfd
               vnfd-connection-point-ref: p4switch-mgmt-cp
             - member-vnf-index-ref: '4'
-              vnfd-id-ref: SimulaMet-FlexRAN_vnfd
+              vnfd-id-ref: SimulaMet-P4-SS_vnfd
               vnfd-connection-point-ref: p4switch-mgmt-cp
             - member-vnf-index-ref: '5'
               vnfd-id-ref: SimulaMet-FlexRAN_vnfd
