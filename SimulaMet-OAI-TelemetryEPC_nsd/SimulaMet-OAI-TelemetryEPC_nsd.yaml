@@ -38,12 +38,16 @@ nsd:nsd-catalog:
 
       # ###### VNFDs that are part of this NSD ##############################
       constituent-vnfd:
-        - member-vnf-index: 1
-          vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
+        - vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
+          member-vnf-index: '1'
         - vnfd-id-ref: SimulaMet-P4-SS_vnfd
           member-vnf-index: '2'
         - vnfd-id-ref: SimulaMet-P4-SS_vnfd
           member-vnf-index: '3'
+        - vnfd-id-ref: SimulaMet-P4-SS_vnfd
+          member-vnf-index: '4'
+        - vnfd-id-ref: SimulaMet-FlexRAN_vnfd
+          member-vnf-index: '5'
 
       # ###### VLDs #########################################################
       vld:
@@ -55,24 +59,30 @@ nsd:nsd-catalog:
           type: ELAN
           vim-network-name: mgmt
           vnfd-connection-point-ref:
-            - member-vnf-index-ref: 1
+            - member-vnf-index-ref: '1'
               vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
               vnfd-connection-point-ref: mme-mgmt-cp
-            - member-vnf-index-ref: 1
+            - member-vnf-index-ref: '1'
               vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
               vnfd-connection-point-ref: hss-mgmt-cp
-            - member-vnf-index-ref: 1
+            - member-vnf-index-ref: '1'
               vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
               vnfd-connection-point-ref: spgwc-mgmt-cp
-            - member-vnf-index-ref: 1
+            - member-vnf-index-ref: '1'
               vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
               vnfd-connection-point-ref: spgwu-mgmt-cp
-            - vnfd-id-ref: SimulaMet-P4-SS_vnfd
-              member-vnf-index-ref: '2'
+            - member-vnf-index-ref: '2'
+              vnfd-id-ref: SimulaMet-P4-SS_vnfd
               vnfd-connection-point-ref: p4switch-mgmt-cp
-            - vnfd-id-ref: SimulaMet-P4-SS_vnfd
-              member-vnf-index-ref: '3'
+            - member-vnf-index-ref: '3'
+              vnfd-id-ref: SimulaMet-P4-SS_vnfd
               vnfd-connection-point-ref: p4switch-mgmt-cp
+            - member-vnf-index-ref: '4'
+              vnfd-id-ref: SimulaMet-FlexRAN_vnfd
+              vnfd-connection-point-ref: p4switch-mgmt-cp
+            - member-vnf-index-ref: '5'
+              vnfd-id-ref: SimulaMet-FlexRAN_vnfd
+              vnfd-connection-point-ref: flexran-mgmt-cp
 
         # ====== S1-C =======================================================
         - id: SimulaMet-OAI-TelemetryEPC_nsd-S1C
@@ -81,7 +91,7 @@ nsd:nsd-catalog:
           type: ELAN
           vim-network-name: nornet-simula
           vnfd-connection-point-ref:
-            - member-vnf-index-ref: 1
+            - member-vnf-index-ref: '1'
               vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
               vnfd-connection-point-ref: mme-s1c-cp
 
@@ -92,18 +102,18 @@ nsd:nsd-catalog:
           type: ELAN
           vim-network-name: nornet-simula
           vnfd-connection-point-ref:
-            - vnfd-id-ref: SimulaMet-P4-SS_vnfd
-              member-vnf-index-ref: '2'
+            - member-vnf-index-ref: '2'
+              vnfd-id-ref: SimulaMet-P4-SS_vnfd
               vnfd-connection-point-ref: p4switch-service-port1-cp
         - id: s1u-switch-link
           name: s1u-switch-link
           short-name: s1u-switch-link
           vnfd-connection-point-ref:
-            - member-vnf-index-ref: 1
+            - member-vnf-index-ref: '1'
               vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
               vnfd-connection-point-ref: spgwu-s1u-cp
-            - vnfd-id-ref: SimulaMet-P4-SS_vnfd
-              member-vnf-index-ref: '2'
+            - member-vnf-index-ref: '2'
+              vnfd-id-ref: SimulaMet-P4-SS_vnfd
               vnfd-connection-point-ref: p4switch-service-port2-cp
 
         # ====== SGi ========================================================
@@ -113,16 +123,37 @@ nsd:nsd-catalog:
           type: ELAN
           vim-network-name: nornet-simula
           vnfd-connection-point-ref:
-            - vnfd-id-ref: SimulaMet-P4-SS_vnfd
-              member-vnf-index-ref: '3'
+            - member-vnf-index-ref: '3'
+              vnfd-id-ref: SimulaMet-P4-SS_vnfd
               vnfd-connection-point-ref: p4switch-service-port1-cp
         - id: sgi-switch-link
           name: sgi-switch-link
           short-name: sgi-switch-link
           vnfd-connection-point-ref:
-            - member-vnf-index-ref: 1
+            - member-vnf-index-ref: '1'
               vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
               vnfd-connection-point-ref: spgwu-sgi-cp
+            - member-vnf-index-ref: '3'
+              vnfd-id-ref: SimulaMet-P4-SS_vnfd
+              vnfd-connection-point-ref: p4switch-service-port2-cp
+
+        # ====== FlexRAN ====================================================
+        - id: SimulaMet-OAI-TelemetryEPC_nsd-FlexRAN
+          name: SimulaMet-OAI-TelemetryEPC_nsd-FlexRAN
+          short-name: SimulaMet-OAI-TelemetryEPC_nsd-FlexRAN
+          type: ELAN
+          vim-network-name: nornet-simula
+          vnfd-connection-point-ref:
+            - member-vnf-index-ref: '4'
+              vnfd-id-ref: SimulaMet-P4-SS_vnfd
+              vnfd-connection-point-ref: p4switch-service-port1-cp
+        - id: flexran-switch-link
+          name: flexran-switch-link
+          short-name: flexran-switch-link
+          vnfd-connection-point-ref:
+            - vnfd-id-ref: SimulaMet-OAI-FlexRAN_vnfd
+              member-vnf-index-ref: '5'
+              vnfd-connection-point-ref: spgwu-flexran-cp
             - vnfd-id-ref: SimulaMet-P4-SS_vnfd
-              member-vnf-index-ref: '3'
+              member-vnf-index-ref: '4'
               vnfd-connection-point-ref: p4switch-service-port2-cp
