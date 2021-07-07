@@ -138,9 +138,9 @@ nsd:nsd-catalog:
               vnfd-connection-point-ref: p4switch-service-port2-cp
 
         # ====== FlexRAN ====================================================
-        - id: SimulaMet-OAI-TelemetryEPC_nsd-FlexRAN
-          name: SimulaMet-OAI-TelemetryEPC_nsd-FlexRAN
-          short-name: SimulaMet-OAI-TelemetryEPC_nsd-FlexRAN
+        - id: SimulaMet-FlexRAN_nsd-Service
+          name: SimulaMet-FlexRAN_nsd-Service
+          short-name: SimulaMet-FlexRAN_nsd-Service
           type: ELAN
           vim-network-name: nornet-simula
           vnfd-connection-point-ref:
@@ -153,7 +153,7 @@ nsd:nsd-catalog:
           vnfd-connection-point-ref:
             - vnfd-id-ref: SimulaMet-FlexRAN_vnfd
               member-vnf-index-ref: '5'
-              vnfd-connection-point-ref: spgwu-flexran-cp
+              vnfd-connection-point-ref: flexran-service-cp
             - vnfd-id-ref: SimulaMet-P4-SS_vnfd
               member-vnf-index-ref: '4'
               vnfd-connection-point-ref: p4switch-service-port2-cp
