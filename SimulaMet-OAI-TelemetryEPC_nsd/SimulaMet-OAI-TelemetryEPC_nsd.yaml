@@ -46,8 +46,10 @@ nsd:nsd-catalog:
           member-vnf-index: '3'
         - vnfd-id-ref: SimulaMet-P4-SS_vnfd
           member-vnf-index: '4'
-        - vnfd-id-ref: SimulaMet-FlexRAN_vnfd
+        - vnfd-id-ref: SimulaMet-P4-SS_vnfd
           member-vnf-index: '5'
+        - vnfd-id-ref: SimulaMet-FlexRAN_vnfd
+          member-vnf-index: '6'
 
       # ###### VLDs #########################################################
       vld:
@@ -81,6 +83,9 @@ nsd:nsd-catalog:
               vnfd-id-ref: SimulaMet-P4-SS_vnfd
               vnfd-connection-point-ref: p4switch-mgmt-cp
             - member-vnf-index-ref: '5'
+              vnfd-id-ref: SimulaMet-P4-SS_vnfd
+              vnfd-connection-point-ref: p4switch-mgmt-cp
+            - member-vnf-index-ref: '6'
               vnfd-id-ref: SimulaMet-FlexRAN_vnfd
               vnfd-connection-point-ref: flexran-mgmt-cp
 
@@ -91,9 +96,19 @@ nsd:nsd-catalog:
           type: ELAN
           vim-network-name: nornet-simula
           vnfd-connection-point-ref:
+            - member-vnf-index-ref: '4'
+              vnfd-id-ref: SimulaMet-P4-SS_vnfd
+              vnfd-connection-point-ref: p4switch-service-port1-cp
+        - id: s1c-switch-link
+          name: s1c-switch-link
+          short-name: s1c-switch-link
+          vnfd-connection-point-ref:
             - member-vnf-index-ref: '1'
               vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
               vnfd-connection-point-ref: mme-s1c-cp
+            - member-vnf-index-ref: '4'
+              vnfd-id-ref: SimulaMet-P4-SS_vnfd
+              vnfd-connection-point-ref: p4switch-service-port2-cp
 
         # ====== S1-U =======================================================
         - id: SimulaMet-OAI-TelemetryEPC_nsd-S1U
@@ -144,7 +159,7 @@ nsd:nsd-catalog:
           type: ELAN
           vim-network-name: nornet-simula
           vnfd-connection-point-ref:
-            - member-vnf-index-ref: '4'
+            - member-vnf-index-ref: '5'
               vnfd-id-ref: SimulaMet-P4-SS_vnfd
               vnfd-connection-point-ref: p4switch-service-port1-cp
         - id: flexran-switch-link
@@ -152,8 +167,8 @@ nsd:nsd-catalog:
           short-name: flexran-switch-link
           vnfd-connection-point-ref:
             - vnfd-id-ref: SimulaMet-FlexRAN_vnfd
-              member-vnf-index-ref: '5'
+              member-vnf-index-ref: '6'
               vnfd-connection-point-ref: spgwu-flexran-cp
             - vnfd-id-ref: SimulaMet-P4-SS_vnfd
-              member-vnf-index-ref: '4'
+              member-vnf-index-ref: '5'
               vnfd-connection-point-ref: p4switch-service-port2-cp
