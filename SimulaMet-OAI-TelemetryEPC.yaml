@@ -138,6 +138,9 @@ vld:
         vnfd-connection-point-ref: p4switch-mgmt-cp
         ip-address: 10.208.0.216
       - member-vnf-index-ref: '5'
+        vnfd-connection-point-ref: p4switch-mgmt-cp
+        ip-address: 10.208.0.217
+      - member-vnf-index-ref: '6'
         vnfd-connection-point-ref: flexran-mgmt-cp
         ip-address: 10.208.0.219
 
@@ -163,9 +166,9 @@ vld:
         ip-address: 10.254.1.213
 
   # ====== FlexRAN ==========================================================
-  - name: SimulaMet-OAI-TelemetryEPC_nsd-FlexRAN
+  - name: SimulaMet-FlexRAN_nsd-Service
     vnfd-connection-point-ref:
-      - member-vnf-index-ref: '5'
+      - member-vnf-index-ref: '6'
         vnfd-connection-point-ref: flexran-service-cp
         ip-address: 192.168.246.110
 
