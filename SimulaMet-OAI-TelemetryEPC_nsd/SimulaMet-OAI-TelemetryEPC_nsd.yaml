@@ -153,7 +153,7 @@ nsd:nsd-catalog:
           vnfd-connection-point-ref:
             - vnfd-id-ref: SimulaMet-FlexRAN_vnfd
               member-vnf-index-ref: '5'
-              vnfd-connection-point-ref: spgwu-flexran-cp
+              vnfd-connection-point-ref: flexran-service-cp
             - vnfd-id-ref: SimulaMet-P4-SS_vnfd
               member-vnf-index-ref: '4'
               vnfd-connection-point-ref: p4switch-service-port2-cp
