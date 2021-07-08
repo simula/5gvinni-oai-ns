@@ -91,9 +91,13 @@ additionalParamsForVnf:
     additionalParams:
       hostname: 'switch-flexran'
       password: 'osm4us'
+  - member-vnf-index: '5'
+    additionalParams:
+      hostname: 'switch-s1c'
+      password: 'osm4us'
 
   # ====== FlexRAN ==========================================================
-  - member-vnf-index: '5'
+  - member-vnf-index: '6'
     additionalParams:
       # ====== FlexRAN ======================================================
       flexran_git_repository: 'https://github.com/simula/mosaic5g-mosaic5g.git'
