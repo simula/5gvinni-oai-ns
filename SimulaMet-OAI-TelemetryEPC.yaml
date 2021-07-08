@@ -145,32 +145,32 @@ vld:
         ip-address: 10.208.0.219
 
   # ====== S1-C =============================================================
-  - name: SimulaMet-OAI-TelemetryEPC_nsd-S1C
-    vnfd-connection-point-ref:
-      - member-vnf-index-ref: '1'
-        vnfd-connection-point-ref: mme-s1c-cp
-        ip-address: 192.168.247.112
+  # - name: SimulaMet-OAI-TelemetryEPC_nsd-S1C
+  #   vnfd-connection-point-ref:
+  #     - member-vnf-index-ref: '1'
+  #       vnfd-connection-point-ref: mme-s1c-cp
+  #       ip-address: 192.168.247.112
 
   # ====== S1-U =============================================================
-  - name: SimulaMet-OAI-TelemetryEPC_nsd-S1U
-    vnfd-connection-point-ref:
-      - member-vnf-index-ref: '1'
-        vnfd-connection-point-ref: spgwu-s1u-cp
-        ip-address: 192.168.248.169
+  # - name: SimulaMet-OAI-TelemetryEPC_nsd-S1U
+  #   vnfd-connection-point-ref:
+  #     - member-vnf-index-ref: '1'
+  #       vnfd-connection-point-ref: spgwu-s1u-cp
+  #       ip-address: 192.168.248.169
 
   # ====== SGi ==============================================================
-  - name: SimulaMet-OAI-TelemetryEPC_nsd-SGi
-    vnfd-connection-point-ref:
-      - member-vnf-index-ref: '1'
-        vnfd-connection-point-ref: spgwu-sgi-cp
-        ip-address: 10.254.1.213
+  # - name: SimulaMet-OAI-TelemetryEPC_nsd-SGi
+  #   vnfd-connection-point-ref:
+  #     - member-vnf-index-ref: '1'
+  #       vnfd-connection-point-ref: spgwu-sgi-cp
+  #       ip-address: 10.254.1.213
 
   # ====== FlexRAN ==========================================================
-  - name: SimulaMet-FlexRAN_nsd-Service
-    vnfd-connection-point-ref:
-      - member-vnf-index-ref: '6'
-        vnfd-connection-point-ref: flexran-service-cp
-        ip-address: 192.168.246.110
+  # - name: SimulaMet-FlexRAN_nsd-Service
+  #   vnfd-connection-point-ref:
+  #     - member-vnf-index-ref: '6'
+  #       vnfd-connection-point-ref: flexran-service-cp
+  #       ip-address: 192.168.246.110
 
 
 # ###### VNF-Internal Addresses #############################################
