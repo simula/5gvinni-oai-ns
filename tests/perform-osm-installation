@@ -9,8 +9,11 @@ cd ~
 rm -f install_osm.sh
 wget https://osm-download.etsi.org/ftp/osm-8.0-eight/install_osm.sh
 chmod +x install_osm.sh
+sudo apt install -y curl
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 7EA0A9C3F273FCD8
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys FEEA9169307EA071
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 8B57C5C2836F4BEB
 ./install_osm.sh -y -c k8s --k8s_monitor   2>&1 | tee osm_install_log.txt
-# --k8s_monitor
 
 
 #cd ..
