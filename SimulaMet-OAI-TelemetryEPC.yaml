@@ -89,11 +89,11 @@ additionalParamsForVnf:
       password: 'osm4us'
   - member-vnf-index: '4'
     additionalParams:
-      hostname: 'switch-flexran'
+      hostname: 'switch-s1c'
       password: 'osm4us'
   - member-vnf-index: '5'
     additionalParams:
-      hostname: 'switch-s1c'
+      hostname: 'switch-flexran'
       password: 'osm4us'
 
   # ====== FlexRAN ==========================================================
