@@ -553,6 +553,8 @@ vnfd:vnfd-catalog:
       connection-point:
         - name: mme-mgmt-cp
         - name: mme-s1c-cp
+          # Port Security must to be disabled here, to allow switching!
+          port-security-enabled: false
         - name: hss-mgmt-cp
         - name: spgwc-mgmt-cp
         - name: spgwu-mgmt-cp
