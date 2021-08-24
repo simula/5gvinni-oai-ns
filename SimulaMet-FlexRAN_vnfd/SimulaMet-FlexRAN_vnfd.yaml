@@ -131,6 +131,8 @@ vnfd:vnfd-catalog:
       connection-point:
         - name: flexran-mgmt-cp
         - name: flexran-service-cp
+          # Port Security must to be disabled here, to allow switching!
+          port-security-enabled: false
 
 
       # ###### Monitoring ###################################################
