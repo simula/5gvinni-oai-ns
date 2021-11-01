@@ -43,18 +43,18 @@ call-openstack-quietly ()
 set -e
 
 FLAVOR_NAME="Amiga 6000"
-IMAGE_NAME="5gVINNI-OpenStack-Ubuntu-20.04-LTS"
+IMAGE_NAME="5gVINNI-OpenStack-Ubuntu-18.04-LTS"
 SERVER_NAME="controller"
 
 portName="Port-${SERVER_NAME}"
 call-openstack-quietly port delete "$portName"
 call-openstack port create "$portName" \
-   --network nornet-simula \
-   --allowed-address ip-address=10.208.0.16
+   --network mgmt \
+   --fixed-ip subnet=subnet-mgmt,ip-address=10.208.0.16
 
-# call-openstack-quietly server delete "$SERVER_NAME"
-# call-openstack server create "$SERVER_NAME" \
-#    --flavor "\"$FLAVOR_NAME\"" \
-#    --image "$IMAGE_NAME" \
-#    --port "$portName" \
-#    --key-name mykey
+call-openstack-quietly server delete "$SERVER_NAME"
+call-openstack server create "$SERVER_NAME" \
+   --flavor "\"$FLAVOR_NAME\"" \
+   --image "$IMAGE_NAME" \
+   --port "$portName" \
+   --key-name mykey
