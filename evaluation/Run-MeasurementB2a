@@ -29,8 +29,10 @@
 
 # ===========================================================================
 # Description:
-# Bandwidth limitation: 2 Mbit/s, 10 Mbit/s, 100 Mbit/s (no limit by network)
-# Download, Upload, Bidirectional
+# Packet loss
+# - 300s no packet loss
+# - 300s 0.1% packet loss
+# - 300s no packet loss
 # ===========================================================================
 
 
@@ -39,9 +41,9 @@
 # * Make sure to allow password-less sudo on server and eNodeB!
 
 
-DIRECTORY="MeasurementB4"
+DIRECTORY="MeasurementB2"
 INTERFACE="any"
-RUNTIME=300
+RUNTIME=900
 
 IP_ENODEB="10.1.1.87"
 IP_HSS="10.208.0.200"
@@ -221,7 +223,7 @@ for qosBandwidth in 100000 ; do   # 100000
    qosLossRate=0.0
    qosErrorRate=0.0
    backgroundFlowParameters="-udp const50:exp2500:const50:exp2500"   # 1 Mbit/s!
-   for scenario in Download Upload Bidirectional ; do   #  Download Upload Bidirectional
+   for scenario in Download ; do   #  Download Upload Bidirectional
       for protocol in tcp ; do   # udp tcp sctp
          flowParameters="INVALID!"
          if [ "${protocol}" == "udp" ] ; then
@@ -322,8 +324,17 @@ echo "OK!"
          echo "PID=${netPerfMeterPID}"
 # -vector="${vectorFile}" !!!
 
-
          # §§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
+
+         # ====== QoS changes ===============================================
+
+         sleep 300
+         # 0.1% Packet Loss
+         sudo -u#${SUDO_UID} -g#${SUDO_GID} ssh -p 2909 nornetpp@localhost HENCSAT-QoS-Setup change \
+            ${qosBandwidth} ${qosDelay} 0.10 ${qosErrorRate}
+         sleep 300
+         sudo -u#${SUDO_UID} -g#${SUDO_GID} ssh -p 2909 nornetpp@localhost HENCSAT-QoS-Setup change \
+            ${qosBandwidth} ${qosDelay} ${qosLossRate} ${qosErrorRate}
 
 
          # §§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§

@@ -1,14 +1,17 @@
 #!/bin/sh
 
-if [ ! $# -eq 1 ] ; then
-   echo >&2 "Usage: $0 measurement_name"
+if [ $# -lt 1 ] ; then
+   echo >&2 "Usage: $0 measurement_name ..."
    exit 1
 fi
 
-if [ ! -d $1 ] ; then
-   echo >&2 "ERROR: $1 does not exist!"
-   exit 1
-fi
+while [ $# -gt 0 ] ; do
+   echo "Copying $1 ..."
+   if [ ! -d $1 ] ; then
+      echo >&2 "ERROR: $1 does not exist!"
+      exit 1
+   fi
 
-rsync -Pavz Run-$1 plot-$1.R Results-$1-active.pdf Results-$1-passive.pdf dominos.simula.no:/var/foivos/OAI/
-rsync -Pavz $1 dominos.simula.no:/var/foivos/OAI/
+   rsync -az --partial --info=progress2 Run-$1 plot-$1.R Results-$1-active.pdf Results-$1-passive.pdf $1 dominos.simula.no:/var/foivos/OAI/
+   shift
+done

@@ -1,0 +1,4 @@
+# FIXME!
+# MarkupSafe>=2.0.0 is incompatible with the Ubuntu 16.04 "Xenial" Juju
+# container => use latest working version!
+MarkupSafe==1.1.1

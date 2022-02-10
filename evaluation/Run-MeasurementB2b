@@ -41,7 +41,7 @@
 # * Make sure to allow password-less sudo on server and eNodeB!
 
 
-DIRECTORY="MeasurementB2"
+DIRECTORY="MeasurementB2b"
 INTERFACE="any"
 RUNTIME=900
 
@@ -51,14 +51,15 @@ IP_MME="10.208.0.201"
 IP_SPGWC="10.208.0.202"
 IP_SPGWU="10.208.0.203"
 IP_FLEXRAN="10.208.0.218"
-IP_SERVER="10.1.1.247"
+IP_SERVER="10.1.1.15"
+IP_OSM="10.1.1.89"
 DESTINATION="${IP_SERVER}:9000"   # NetPerfMeter destination
-SSH_EPC="sudo -u dreibh sshpass -p osm4us ssh -4C -oStrictHostKeyChecking=no -J nornetpp@10.1.1.85 nornetpp@"
+SSH_EPC="sudo -u dreibh sshpass -p osm4us ssh -4C -oStrictHostKeyChecking=no -J nornetpp@${IP_OSM} nornetpp@"
 SSH_OTHER="sudo -u#${SUDO_UID} -g#${SUDO_GID} ssh -4C nornetpp@"
 
 # curl 'http://localhost:9091/api/v1/query_range?query=osm_cpu_load_5min&start=2020-09-11T06:00:00.000Z&end=2020-09-11T06:00:30.000Z&step=1s'
 PROMETHEUS='http://localhost:9091/api/v1/query_range'
-PROMETHEUS_METRICS="osm_cpu_load_current osm_cpu_load_15min osm_cpu_load_1min osm_cpu_load_5min osm_cpu_processes osm_disk_usage osm_memory_ram_usage osm_memory_swap_usage osm_network_mgmt_bytes_in osm_network_mgmt_bytes_out osm_network_mgmt_packets_in osm_network_mgmt_packets_out osm_network_S11_bytes_in osm_network_S11_bytes_out osm_network_S11_packets_in osm_network_S11_packets_out osm_network_S1C_bytes_in osm_network_S1C_bytes_out osm_network_S1C_packets_in osm_network_S1C_packets_out osm_network_S6a_bytes_in osm_network_S6a_bytes_out osm_network_S6a_packets_in osm_network_S6a_packets_out osm_system_random osm_system_uptime osm_system_users up"
+PROMETHEUS_METRICS="osm_cpu_load_current osm_cpu_load_15min osm_cpu_load_1min osm_cpu_load_5min osm_cpu_processes osm_disk_usage osm_memory_ram_usage osm_memory_swap_usage osm_network_mgmt_bytes_in osm_network_mgmt_bytes_out osm_network_mgmt_packets_in osm_network_mgmt_packets_out osm_network_S11_bytes_in osm_network_S11_bytes_out osm_network_S11_packets_in osm_network_S11_packets_out osm_network_S1C_bytes_in osm_network_S1C_bytes_out osm_network_S1C_packets_in osm_network_S1C_packets_out osm_osm_network_S1U_bytes_in osm_network_S1U_bytes_out osm_network_S1U_packets_in osm_network_S1U_packets_out network_S6a_bytes_in osm_network_S6a_bytes_out osm_network_S6a_packets_in osm_network_S6a_packets_out osm_network_SGi_bytes_in osm_network_SGi_bytes_out osm_network_SGi_packets_in osm_network_SGi_packets_out osm_system_random osm_system_uptime osm_system_users up"
 
 # ====== Initialise =========================================================
 if [ "${SUDO_UID}:${SUDO_GID}" == ":" ] ; then
@@ -189,7 +190,7 @@ find /tmp -maxdepth 1 -name ${id}-${component}.out   | xargs -r xz -T0 ; \\
 echo \\\"${Component}: monitoring stopped!\\\" ; \\
 \""
 
-sudo -u dreibh rsync -Pavz -e "sshpass -p osm4us ssh -4C -oStrictHostKeyChecking=no -J nornetpp@10.1.1.85" nornetpp@${ip}:/tmp/${id}-${component}* ${DIRECTORY}/
+sudo -u dreibh rsync -Pavz -e "sshpass -p osm4us ssh -4C -oStrictHostKeyChecking=no -J nornetpp@${IP_OSM}" nornetpp@${ip}:/tmp/${id}-${component}* ${DIRECTORY}/
 }
 
 # find /tmp -maxdepth 1 -name ${id}-${component}.pcap  | xargs -r xz -T0 ; \\
@@ -273,7 +274,7 @@ echo \\\"flexran: FlexRAN statistics collection running!\\\"
 echo "OK!"
 
          # ====== Start sysstat in EPC ======================================
-         sysstatParameters="-bqr -n DEV,EDEV,IP,EIP,ICMP,EICMP,IP6,EIP6,ICMP6,EICMP6,TCP,ETCP,UDP,UDP6 1 600"
+         sysstatParameters="-bqr -n DEV,EDEV,IP,EIP,ICMP,EICMP,IP6,EIP6,ICMP6,EICMP6,TCP,ETCP,UDP,UDP6 1"
          start-monitoring ${id} flexran ${IP_FLEXRAN} "${sysstatParameters}" in-epc &
          start-monitoring ${id} hss     ${IP_HSS}     "${sysstatParameters}" in-epc &
          start-monitoring ${id} mme     ${IP_MME}     "${sysstatParameters}" in-epc &
@@ -330,7 +331,7 @@ echo "OK!"
          sleep 300
          # 10% Packet Loss
          sudo -u#${SUDO_UID} -g#${SUDO_GID} ssh -p 2909 nornetpp@localhost HENCSAT-QoS-Setup change \
-            ${qosBandwidth} ${qosDelay} 0.10 ${qosErrorRate}
+            ${qosBandwidth} ${qosDelay} 10 ${qosErrorRate}
          sleep 300
          sudo -u#${SUDO_UID} -g#${SUDO_GID} ssh -p 2909 nornetpp@localhost HENCSAT-QoS-Setup change \
             ${qosBandwidth} ${qosDelay} ${qosLossRate} ${qosErrorRate}

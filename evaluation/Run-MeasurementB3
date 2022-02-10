@@ -51,9 +51,10 @@ IP_MME="10.208.0.201"
 IP_SPGWC="10.208.0.202"
 IP_SPGWU="10.208.0.203"
 IP_FLEXRAN="10.208.0.218"
-IP_SERVER="10.1.1.247"
+IP_SERVER="10.1.1.15"
+IP_OSM="10.1.1.89"
 DESTINATION="${IP_SERVER}:9000"   # NetPerfMeter destination
-SSH_EPC="sudo -u dreibh sshpass -p osm4us ssh -4C -oStrictHostKeyChecking=no -J nornetpp@10.1.1.85 nornetpp@"
+SSH_EPC="sudo -u dreibh sshpass -p osm4us ssh -4C -oStrictHostKeyChecking=no -J nornetpp@${IP_OSM} nornetpp@"
 SSH_OTHER="sudo -u#${SUDO_UID} -g#${SUDO_GID} ssh -4C nornetpp@"
 
 # curl 'http://localhost:9091/api/v1/query_range?query=osm_cpu_load_5min&start=2020-09-11T06:00:00.000Z&end=2020-09-11T06:00:30.000Z&step=1s'
@@ -189,7 +190,7 @@ find /tmp -maxdepth 1 -name ${id}-${component}.out   | xargs -r xz -T0 ; \\
 echo \\\"${Component}: monitoring stopped!\\\" ; \\
 \""
 
-sudo -u dreibh rsync -Pavz -e "sshpass -p osm4us ssh -4C -oStrictHostKeyChecking=no -J nornetpp@10.1.1.85" nornetpp@${ip}:/tmp/${id}-${component}* ${DIRECTORY}/
+sudo -u dreibh rsync -Pavz -e "sshpass -p osm4us ssh -4C -oStrictHostKeyChecking=no -J nornetpp@${IP_OSM}" nornetpp@${ip}:/tmp/${id}-${component}* ${DIRECTORY}/
 }
 
 # find /tmp -maxdepth 1 -name ${id}-${component}.pcap  | xargs -r xz -T0 ; \\
@@ -273,7 +274,7 @@ echo \\\"flexran: FlexRAN statistics collection running!\\\"
 echo "OK!"
 
          # ====== Start sysstat in EPC ======================================
-         sysstatParameters="-bqr -n DEV,EDEV,IP,EIP,ICMP,EICMP,IP6,EIP6,ICMP6,EICMP6,TCP,ETCP,UDP,UDP6 1 600"
+         sysstatParameters="-bqr -n DEV,EDEV,IP,EIP,ICMP,EICMP,IP6,EIP6,ICMP6,EICMP6,TCP,ETCP,UDP,UDP6 1"
          start-monitoring ${id} flexran ${IP_FLEXRAN} "${sysstatParameters}" in-epc &
          start-monitoring ${id} hss     ${IP_HSS}     "${sysstatParameters}" in-epc &
          start-monitoring ${id} mme     ${IP_MME}     "${sysstatParameters}" in-epc &
@@ -328,7 +329,6 @@ echo "OK!"
          # ====== QoS changes ===============================================
 
          sleep 300
-         # 10% Packet Loss
          sudo -u#${SUDO_UID} -g#${SUDO_GID} ssh -p 2909 nornetpp@localhost HENCSAT-QoS-Setup change \
             2000 250 ${qosLossRate} ${qosErrorRate} || true
          sleep 300

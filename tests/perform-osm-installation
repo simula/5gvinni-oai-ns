@@ -1,14 +1,14 @@
 #!/bin/bash -e
 
-export RELEASE=ReleaseNINE
+export RELEASE=ReleaseELEVEN
 export REPOSITORY=stable
-export DOCKER_TAG=10
+export DOCKER_TAG=11
 
 sudo apt install -y colordiff git snapd curl
 
 cd ~
 rm -f install_osm.sh
-wget https://osm-download.etsi.org/ftp/osm-10.0-ten/install_osm.sh
+wget https://osm-download.etsi.org/ftp/osm-11.0-eleven/install_osm.sh
 chmod +x install_osm.sh
 ./install_osm.sh -y --k8s_monitor   2>&1 | tee osm_install_log.txt
 
