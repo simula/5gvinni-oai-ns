@@ -35,40 +35,40 @@ additionalParamsForVnf:
     additionalParams:
       # ====== HSS ==========================================================
       hss_git_repository: 'https://github.com/simula/openairinterface-openair-hss.git'
-      hss_git_commit: 'dreibh/cassandra-build-fix-22oct2020'
+      hss_git_commit: 'dreibh/cassandra-build-fix-v1.1.1'
       hss_S6a_address: '172.16.6.129'
-      network_realm: 'ipv4'
-      network_k: '8baf473f2f8fd09487cccbd7097c6862'
-      network_op: '11111111111111111111111111111111'
-      network_imsi_first: '208920000000001'
-      network_msisdn_first: '001011234561000'
+      network_realm: 'simula.nornet'
+      network_k: '449C4B91AEACD0ACE182CF3A5A72BFA1'
+      network_op: '1006020F0A478BF6B699F15C062E42B3'
+      network_imsi_first: '242881234500000'
+      network_msisdn_first: '24288880000000'
       network_users: '1024'
 
       # ====== MME ==========================================================
       mme_git_repository: 'https://github.com/simula/openairinterface-openair-mme.git'
-      mme_git_commit: 'dreibh/asn1c-url-fix-14Oct2020'
-      mme_S1C_ipv4_interface: '192.168.247.122/24'
+      mme_git_commit: 'v1.1.0'
+      mme_S1C_ipv4_interface: '192.168.253.102/24'
       mme_S1C_ipv4_gateway: '0.0.0.0'
       mme_S1C_ipv6_interface: ''
       mme_S1C_ipv6_gateway: ''
       mme_S11_ipv4_interface: '172.16.1.102/24'
       mme_S6a_address: '172.16.6.2'
-      network_mcc: '208'
-      network_mnc: '92'
+      network_mcc: '242'
+      network_mnc: '88'
 
       # ====== SPGW-C =======================================================
       spgwc_git_repository: 'https://github.com/simula/openairinterface-openair-spgwc.git'
-      spgwc_git_commit: '2020.w36'
+      spgwc_git_commit: 'v1.1.0'
       spgwc_S11_ipv4_interface: '172.16.1.104/24'
       network_ipv4_dns1: '10.1.1.1'
       network_ipv4_dns2: '10.1.2.1'
 
       # ====== SPGW-U =======================================================
       spgwu_git_repository: 'https://github.com/simula/openairinterface-openair-spgwu-tiny.git'
-      spgwu_git_commit: 'dreibh/tx-checksum-ip-generic-off'
-      spgwu_S1U_ipv4_interface: '192.168.248.179/24'
+      spgwu_git_commit: 'v1.1.0'
+      spgwu_S1U_ipv4_interface: '192.168.254.159/24'
       spgwu_S1U_ipv4_gateway: '0.0.0.0'
-      spgwu_SGi_ipv4_interface: '10.254.1.223/24'
+      spgwu_SGi_ipv4_interface: '10.254.1.233/24'
       spgwu_SGi_ipv4_gateway: '10.254.1.1'
       spgwu_SGi_ipv6_interface: ''
       spgwu_SGi_ipv6_gateway: ''
@@ -85,37 +85,37 @@ vld:
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '1'
         vnfd-connection-point-ref: hss-mgmt-cp
-        ip-address: 10.208.0.220
+        ip-address: 10.208.0.230
       - member-vnf-index-ref: '1'
         vnfd-connection-point-ref: mme-mgmt-cp
-        ip-address: 10.208.0.221
+        ip-address: 10.208.0.231
       - member-vnf-index-ref: '1'
         vnfd-connection-point-ref: spgwc-mgmt-cp
-        ip-address: 10.208.0.222
+        ip-address: 10.208.0.232
       - member-vnf-index-ref: '1'
         vnfd-connection-point-ref: spgwu-mgmt-cp
-        ip-address: 10.208.0.223
+        ip-address: 10.208.0.233
 
   # ====== S1-C =============================================================
   - name: SimulaMet-OAI-EPC_nsd-S1C
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '1'
         vnfd-connection-point-ref: mme-s1c-cp
-        ip-address: 192.168.247.122
+        ip-address: 192.168.253.102
 
   # ====== S1-U =============================================================
   - name: SimulaMet-OAI-EPC_nsd-S1U
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '1'
         vnfd-connection-point-ref: spgwu-s1u-cp
-        ip-address: 192.168.248.179
+        ip-address: 192.168.254.159
 
   # ====== SGi ==============================================================
   - name: SimulaMet-OAI-EPC_nsd-SGi
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '1'
         vnfd-connection-point-ref: spgwu-sgi-cp
-        ip-address: 10.254.1.223
+        ip-address: 10.254.1.233
 
 
 # ###### VNF-Internal Addresses #############################################
