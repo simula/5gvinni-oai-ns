@@ -10,7 +10,9 @@ cd ~
 rm -f install_osm.sh
 wget https://osm-download.etsi.org/ftp/osm-11.0-eleven/install_osm.sh
 chmod +x install_osm.sh
-./install_osm.sh -y --k8s_monitor   2>&1 | tee osm_install_log.txt
+./install_osm.sh -y 2>&1 | tee osm_install_log.txt
+# !!! WITHOUT: --k8s_monitor
+# !!! To be installed later with script "add-k8s_monitoring" !!!
 
 
 echo "###### Installing \"charm\" snap"
@@ -23,11 +25,6 @@ sudo apt-get install -y python3-osm-im
 
 echo "###### Adding Python packages"
 sudo apt install -y cmake yamllint
-# python3-setuptools python3-markupsafe
-# sudo -H pip3 install setuptools
-# sudo -H pip3 install yamllint
-# sudo -H pip3 install pyangbind
-# sudo -H pip3 install markupsafe
 
 echo "###### Adding VIM"
 ~/vim
