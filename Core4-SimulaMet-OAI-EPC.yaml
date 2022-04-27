@@ -119,24 +119,24 @@ vld:
 
 
 # ###### VNF-Internal Addresses #############################################
-vnf:
-  - member-vnf-index: '1'
-    internal-vld:
-      - name: s6a
-        internal-connection-point:
-          - id-ref: mme-s6a-cp
-            ip-address: 172.16.6.2
-          - id-ref: hss-s6a-cp
-            ip-address: 172.16.6.129
-      - name: s11
-        internal-connection-point:
-          - id-ref: mme-s11-cp
-            ip-address: 172.16.1.102
-          - id-ref: spgwc-s11-cp
-            ip-address: 172.16.1.104
-      - name: sxab
-        internal-connection-point:
-          - id-ref: spgwu-sxab-cp
-            ip-address: 172.55.55.102
-          - id-ref: spgwc-sxab-cp
-            ip-address: 172.55.55.101
+#vnf:
+  #- member-vnf-index: '1'
+    #internal-vld:
+      #- name: s6a
+        #internal-connection-point:
+          #- id-ref: mme-s6a-cp
+            #ip-address: 172.16.6.2
+          #- id-ref: hss-s6a-cp
+            #ip-address: 172.16.6.129
+      #- name: s11
+        #internal-connection-point:
+          #- id-ref: mme-s11-cp
+            #ip-address: 172.16.1.102
+          #- id-ref: spgwc-s11-cp
+            #ip-address: 172.16.1.104
+      #- name: sxab
+        #internal-connection-point:
+          #- id-ref: spgwu-sxab-cp
+            #ip-address: 172.55.55.102
+          #- id-ref: spgwc-sxab-cp
+            #ip-address: 172.55.55.101
