@@ -54,28 +54,41 @@ nsd:
         df:
         -   id: default-df
             vnf-profile:
+
             -   id: '1'
                 virtual-link-connectivity:
                 -   constituent-cpd-id:
-                    #-   constituent-base-element-id: '1'
-                        #constituent-cpd-id: mme-mgmt-cp-ext
                     -   constituent-base-element-id: '1'
                         constituent-cpd-id: hss-mgmt-cp-ext
-                    #-   constituent-base-element-id: '1'
-                        #constituent-cpd-id: spgwc-mgmt-cp-ext
-                    #-   constituent-base-element-id: '1'
-                        #constituent-cpd-id: spgwu-mgmt-cp-ext
                     virtual-link-profile-id: SimulaMet-OAI-EPC_nsd-Management
                 #-   constituent-cpd-id:
                     #-   constituent-base-element-id: '1'
-                        #constituent-cpd-id: mme-s1c-cp-ext
-                    #virtual-link-profile-id: SimulaMet-OAI-EPC_nsd-S1C
-                #-   constituent-cpd-id:
-                    #-   constituent-base-element-id: '1'
-                        #constituent-cpd-id: spgwu-s1u-cp-ext
-                    #virtual-link-profile-id: SimulaMet-OAI-EPC_nsd-S1U
-                #-   constituent-cpd-id:
-                    #-   constituent-base-element-id: '1'
-                        #constituent-cpd-id: spgwu-sgi-cp-ext
-                    #virtual-link-profile-id: SimulaMet-OAI-EPC_nsd-SGi
+                        #constituent-cpd-id: flexran-service-cp-ext
+                    #virtual-link-profile-id: SimulaMet-FlexRAN_nsd-Service
                 vnfd-id: SimulaMet-OAI-HSS_vnfd
+
+            ####-   id: '1'
+                ####virtual-link-connectivity:
+                ####-   constituent-cpd-id:
+                    #####-   constituent-base-element-id: '1'
+                        #####constituent-cpd-id: mme-mgmt-cp-ext
+                    ####-   constituent-base-element-id: '1'
+                        ####constituent-cpd-id: hss-mgmt-cp-ext
+                    #####-   constituent-base-element-id: '1'
+                        #####constituent-cpd-id: spgwc-mgmt-cp-ext
+                    #####-   constituent-base-element-id: '1'
+                        #####constituent-cpd-id: spgwu-mgmt-cp-ext
+                    ####virtual-link-profile-id: SimulaMet-OAI-EPC_nsd-Management
+                #####-   constituent-cpd-id:
+                    #####-   constituent-base-element-id: '1'
+                        #####constituent-cpd-id: mme-s1c-cp-ext
+                    #####virtual-link-profile-id: SimulaMet-OAI-EPC_nsd-S1C
+                #####-   constituent-cpd-id:
+                    #####-   constituent-base-element-id: '1'
+                        #####constituent-cpd-id: spgwu-s1u-cp-ext
+                    #####virtual-link-profile-id: SimulaMet-OAI-EPC_nsd-S1U
+                #####-   constituent-cpd-id:
+                    #####-   constituent-base-element-id: '1'
+                        #####constituent-cpd-id: spgwu-sgi-cp-ext
+                    #####virtual-link-profile-id: SimulaMet-OAI-EPC_nsd-SGi
+                ####vnfd-id: SimulaMet-OAI-HSS_vnfd
