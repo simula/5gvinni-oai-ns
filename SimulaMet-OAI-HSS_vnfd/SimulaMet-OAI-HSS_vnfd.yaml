@@ -9,7 +9,7 @@
 # =====================================================================
 #
 # SimulaMet OpenAirInterface Evolved Packet Core VNF
-# Copyright (C) 2019-2020 by Thomas Dreibholz
+# Copyright (C) 2019-2022 by Thomas Dreibholz
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ vnfd:
     id: SimulaMet-OAI-HSS_vnfd
     product-name: SimulaMet-OAI-HSS_vnfd
     description: SimulaMet OpenAirInterface HSS VNF
-    version: '1.0'
+    version: '2.0'
     provider: Thomas Dreibholz
 
     # ###### External Connection Points #####################################
@@ -58,80 +58,82 @@ vnfd:
             operate-vnf-op-config:
                 day1-2:
                 -   id: HSS
-                    initial-config-primitive:
-                    -   name: config
-                        execution-environment-ref: hsscharm-ee
-                        parameter:
-                        -   name: ssh-hostname
-                            value: <rw_mgmt_ip>
-                        -   name: ssh-username
-                            value: nornetpp
-                        -   name: ssh-password
-                            value: <password>
-                        seq: '1'
-                    -   name: prepare-cassandra-hss-build
-                        execution-environment-ref: hsscharm-ee
-                        parameter:
-                        -   name: hss-git-repository
-                            value: <hss_git_repository>
-                        -   name: hss-git-commit
-                            value: <hss_git_commit>
-                        seq: '2'
-                    -   name: configure-cassandra
-                        execution-environment-ref: hsscharm-ee
-                        parameter:
-                        -   name: cassandra-server-ip
-                            value: 172.16.6.129
-                        seq: '3'
-                    -   name: configure-hss
-                        execution-environment-ref: hsscharm-ee
-                        parameter:
-                        -   name: cassandra-server-ip
-                            value: 172.16.6.129
-                        -   name: hss-S6a-address
-                            value: <hss_S6a_address>
-                        -   name: mme-S6a-address
-                            value: <mme_S6a_address>
-                        -   name: network-realm
-                            value: <network_realm>
-                        -   name: network-op
-                            value: <network_op>
-                        -   name: network-k
-                            value: <network_k>
-                        -   name: network-imsi-first
-                            value: <network_imsi_first>
-                        -   name: network-msisdn-first
-                            value: <network_msisdn_first>
-                        -   name: network-users
-                            value: <network_users>
-                        seq: '4'
-                    -   name: restart-hss
-                        execution-environment-ref: hsscharm-ee
-                        seq: '5'
-                    execution-environment-list:
-                    - id: hsscharm-ee
-                      juju:
-                          charm: hsscharm
-                    metrics:
-                    -   name: system_random
-                    -   name: system_uptime
-                    -   name: system_users
-                    -   name: cpu_processes
-                    -   name: cpu_load_current
-                    -   name: cpu_load_1min
-                    -   name: cpu_load_5min
-                    -   name: cpu_load_15min
-                    -   name: memory_ram_usage
-                    -   name: memory_swap_usage
-                    -   name: disk_usage
-                    -   name: network_mgmt_bytes_in
-                    -   name: network_mgmt_packets_in
-                    -   name: network_mgmt_bytes_out
-                    -   name: network_mgmt_packets_out
-                    -   name: network_S6a_bytes_in
-                    -   name: network_S6a_packets_in
-                    -   name: network_S6a_bytes_out
-                    -   name: network_S6a_packets_out
+                    #execution-environment-list:
+                    #- id: hsscharm-ee
+                      #juju:
+                          #charm: hsscharm
+
+                    #initial-config-primitive:
+                    #-   name: config
+                        #execution-environment-ref: hsscharm-ee
+                        #parameter:
+                        #-   name: ssh-hostname
+                            #value: <rw_mgmt_ip>
+                        #-   name: ssh-username
+                            #value: nornetpp
+                        #-   name: ssh-password
+                            #value: <password>
+                        #seq: '1'
+                    #-   name: prepare-cassandra-hss-build
+                        #execution-environment-ref: hsscharm-ee
+                        #parameter:
+                        #-   name: hss-git-repository
+                            #value: <hss_git_repository>
+                        #-   name: hss-git-commit
+                            #value: <hss_git_commit>
+                        #seq: '2'
+                    #-   name: configure-cassandra
+                        #execution-environment-ref: hsscharm-ee
+                        #parameter:
+                        #-   name: cassandra-server-ip
+                            #value: 172.16.6.129
+                        #seq: '3'
+                    #-   name: configure-hss
+                        #execution-environment-ref: hsscharm-ee
+                        #parameter:
+                        #-   name: cassandra-server-ip
+                            #value: 172.16.6.129
+                        #-   name: hss-S6a-address
+                            #value: <hss_S6a_address>
+                        #-   name: mme-S6a-address
+                            #value: <mme_S6a_address>
+                        #-   name: network-realm
+                            #value: <network_realm>
+                        #-   name: network-op
+                            #value: <network_op>
+                        #-   name: network-k
+                            #value: <network_k>
+                        #-   name: network-imsi-first
+                            #value: <network_imsi_first>
+                        #-   name: network-msisdn-first
+                            #value: <network_msisdn_first>
+                        #-   name: network-users
+                            #value: <network_users>
+                        #seq: '4'
+                    #-   name: restart-hss
+                        #execution-environment-ref: hsscharm-ee
+                        #seq: '5'
+
+                    #metrics:
+                    #-   name: system_random
+                    #-   name: system_uptime
+                    #-   name: system_users
+                    #-   name: cpu_processes
+                    #-   name: cpu_load_current
+                    #-   name: cpu_load_1min
+                    #-   name: cpu_load_5min
+                    #-   name: cpu_load_15min
+                    #-   name: memory_ram_usage
+                    #-   name: memory_swap_usage
+                    #-   name: disk_usage
+                    #-   name: network_mgmt_bytes_in
+                    #-   name: network_mgmt_packets_in
+                    #-   name: network_mgmt_bytes_out
+                    #-   name: network_mgmt_packets_out
+                    #-   name: network_S6a_bytes_in
+                    #-   name: network_S6a_packets_in
+                    #-   name: network_S6a_bytes_out
+                    #-   name: network_S6a_packets_out
 
         vdu-profile:
         -   id: HSS
