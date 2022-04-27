@@ -67,8 +67,8 @@ nsd:
         -   id: SimulaMet-OAI-EPC_nsd-Management
             mgmt-network: 'true'
             vim-network-name: mgmt
-        -   id: SimulaMet-OAI-EPC_nsd-S1C
-            vim-network-name: nornet-simula
+        #-   id: SimulaMet-OAI-EPC_nsd-S1C
+            #vim-network-name: nornet-simula
         #-   id: SimulaMet-OAI-EPC_nsd-S1U
             #vim-network-name: nornet-simula
         #-   id: SimulaMet-OAI-EPC_nsd-SGi
