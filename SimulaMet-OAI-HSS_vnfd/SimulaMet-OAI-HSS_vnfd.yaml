@@ -141,25 +141,13 @@ vnfd:
     # ###### VDU: Configuration #############################################
     sw-image-desc:
     -   id: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
-        image: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
         name: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
+        image: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
     vdu:
-    -   cloud-init-file: hss-init
-        description: HSS
-        id: HSS
-        int-cpd:
-        -   id: ens3-int
-            virtual-network-interface-requirement:
-            -   name: ens3
-                virtual-interface:
-                    type: PARAVIRT
-        -   id: ens4-int
-            int-virtual-link-desc: s6a
-            virtual-network-interface-requirement:
-            -   name: ens4
-                virtual-interface:
-                    type: PARAVIRT
+    -   id: HSS
         name: HSS
+        description: HSS
+        cloud-init-file: hss-init
         sw-image-desc: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
         virtual-compute-desc: HSS-compute
         virtual-storage-desc:
