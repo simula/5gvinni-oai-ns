@@ -53,6 +53,7 @@ vnfd:
                 -   id: HSS
                     initial-config-primitive:
                     -   name: config
+                        execution-environment-ref: hsscharm-ee
                         parameter:
                         -   name: ssh-hostname
                             value: <rw_mgmt_ip>
@@ -62,6 +63,7 @@ vnfd:
                             value: <password>
                         seq: '1'
                     -   name: prepare-cassandra-hss-build
+                        execution-environment-ref: hsscharm-ee
                         parameter:
                         -   name: hss-git-repository
                             value: <hss_git_repository>
@@ -69,11 +71,13 @@ vnfd:
                             value: <hss_git_commit>
                         seq: '2'
                     -   name: configure-cassandra
+                        execution-environment-ref: hsscharm-ee
                         parameter:
                         -   name: cassandra-server-ip
                             value: 172.16.6.129
                         seq: '3'
                     -   name: configure-hss
+                        execution-environment-ref: hsscharm-ee
                         parameter:
                         -   name: cassandra-server-ip
                             value: 172.16.6.129
@@ -95,9 +99,12 @@ vnfd:
                             value: <network_users>
                         seq: '4'
                     -   name: restart-hss
+                        execution-environment-ref: hsscharm-ee
                         seq: '5'
-                    juju:
-                        charm: hsscharm
+                    execution-environment-list:
+                    - id: hsscharm-ee
+                      juju:
+                          charm: hsscharm
                     metrics:
                     -   name: system_random
                     -   name: system_uptime
@@ -124,6 +131,7 @@ vnfd:
                 -   id: MME
                     initial-config-primitive:
                     -   name: config
+                        execution-environment-ref: mmecharm-ee
                         parameter:
                         -   name: ssh-hostname
                             value: <rw_mgmt_ip>
@@ -133,6 +141,7 @@ vnfd:
                             value: <password>
                         seq: '1'
                     -   name: prepare-mme-build
+                        execution-environment-ref: mmecharm-ee
                         parameter:
                         -   name: mme-git-repository
                             value: <mme_git_repository>
@@ -148,6 +157,7 @@ vnfd:
                             value: <mme_S1C_ipv6_gateway>
                         seq: '2'
                     -   name: configure-mme
+                        execution-environment-ref: mmecharm-ee
                         parameter:
                         -   name: mme-S1C-ipv4-interface
                             value: <mme_S1C_ipv4_interface>
@@ -175,8 +185,11 @@ vnfd:
                             value: <network_users>
                         seq: '3'
                     -   name: restart-mme
+                        execution-environment-ref: mmecharm-ee
                         seq: '4'
-                    juju:
+                    execution-environment-list:
+                    - id: mmecharm-ee
+                      juju:
                         charm: mmecharm
                     metrics:
                     -   name: system_random
@@ -201,8 +214,7 @@ vnfd:
                     -   name: network_S11_bytes_in
                     -   name: network_S11_packets_in
                     -   name: network_S11_bytes_out
-                    -   name: network_S11_packets_out
-                    -   name: network_S1C_bytes_in
+                    -   name: network_S11_packets_out 
                     -   name: network_S1C_packets_in
                     -   name: network_S1C_bytes_out
                     -   name: network_S1C_packets_out
@@ -213,6 +225,7 @@ vnfd:
                 -   id: SPGW-C
                     initial-config-primitive:
                     -   name: config
+                        execution-environment-ref: spgwccharm-ee
                         parameter:
                         -   name: ssh-hostname
                             value: <rw_mgmt_ip>
@@ -222,6 +235,7 @@ vnfd:
                             value: <password>
                         seq: '1'
                     -   name: prepare-spgwc-build
+                        execution-environment-ref: spgwccharm-ee
                         parameter:
                         -   name: spgwc-git-repository
                             value: <spgwc_git_repository>
@@ -229,6 +243,7 @@ vnfd:
                             value: <spgwc_git_commit>
                         seq: '2'
                     -   name: configure-spgwc
+                        execution-environment-ref: spgwccharm-ee
                         parameter:
                         -   name: network-realm
                             value: <network_realm>
@@ -238,8 +253,11 @@ vnfd:
                             value: <network_ipv4_dns2>
                         seq: '3'
                     -   name: restart-spgwc
+                        execution-environment-ref: spgwccharm-ee
                         seq: '4'
-                    juju:
+                    execution-environment-list:
+                    - id: spgwccharm-ee
+                      juju:
                         charm: spgwccharm
                     metrics:
                     -   name: system_random
@@ -272,6 +290,7 @@ vnfd:
                 -   id: SPGW-U
                     initial-config-primitive:
                     -   name: config
+                        execution-environment-ref: spgwucharm-ee
                         parameter:
                         -   name: ssh-hostname
                             value: <rw_mgmt_ip>
@@ -281,6 +300,7 @@ vnfd:
                             value: <password>
                         seq: '1'
                     -   name: prepare-spgwu-build
+                        execution-environment-ref: spgwucharm-ee
                         parameter:
                         -   name: spgwu-git-repository
                             value: <spgwu_git_repository>
@@ -300,13 +320,17 @@ vnfd:
                             value: <spgwu_SGi_ipv6_gateway>
                         seq: '2'
                     -   name: configure-spgwu
+                        execution-environment-ref: spgwucharm-ee
                         parameter:
                         -   name: spgwu-spgwc-list
                             value: <spgwu_spgwc_list>
                         seq: '3'
                     -   name: restart-spgwu
+                        execution-environment-ref: spgwucharm-ee
                         seq: '4'
-                    juju:
+                    execution-environment-list:
+                    - id: spgwucharm-ee
+                      juju:
                         charm: spgwucharm
                     metrics:
                     -   name: system_random
