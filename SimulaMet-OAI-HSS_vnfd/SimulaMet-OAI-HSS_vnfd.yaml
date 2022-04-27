@@ -40,11 +40,12 @@ vnfd:
         int-cpd:
             cpd: ens3-int
             vdu-id: HSS
-    -   id: hss-s6a-cp-ext
-        int-cpd:
-            cpd: ens4-int
-            vdu-id: HSS
+    #-   id: hss-s6a-cp-ext
+        #int-cpd:
+            #cpd: ens4-int
+            #vdu-id: HSS
 
+    # ###### VNF definition #################################################
     df:
     -   id: default-df
         instantiation-level:
@@ -58,11 +59,13 @@ vnfd:
             operate-vnf-op-config:
                 day1-2:
                 -   id: HSS
+                    ## ====== Execution environment ==========================
                     #execution-environment-list:
                     #- id: hsscharm-ee
                       #juju:
                           #charm: hsscharm
 
+                    ## ====== Configuration primitives =======================
                     #initial-config-primitive:
                     #-   name: config
                         #execution-environment-ref: hsscharm-ee
@@ -114,6 +117,7 @@ vnfd:
                         #execution-environment-ref: hsscharm-ee
                         #seq: '5'
 
+                    ## ====== Metrics ========================================
                     #metrics:
                     #-   name: system_random
                     #-   name: system_uptime
@@ -160,11 +164,11 @@ vnfd:
             -   name: ens3
                 virtual-interface:
                     type: PARAVIRT
-        -   id: ens4-int
-            virtual-network-interface-requirement:
-            -   name: ens4
-                virtual-interface:
-                    type: PARAVIRT
+        #-   id: ens4-int
+            #virtual-network-interface-requirement:
+            #-   name: ens4
+                #virtual-interface:
+                    #type: PARAVIRT
 
     # ====== Compute ========================================================
     virtual-compute-desc:
