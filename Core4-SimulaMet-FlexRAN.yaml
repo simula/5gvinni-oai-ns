@@ -48,18 +48,16 @@ additionalParamsForVnf:
 
 # ###### VNF External Addresses #############################################
 vld:
-  # ====== Management =======================================================
-  - name: SimulaMet-FlexRAN_nsd-Management
-    vnfd-connection-point-ref:
-      - member-vnf-index-ref: '1'
-        vnfd-connection-point-ref: flexran-mgmt-cp
-        #-ext
-        ip-address: 10.208.0.234
+# ====== Management =======================================================
+- name: SimulaMet-FlexRAN_nsd-Management
+  vnfd-connection-point-ref:
+    - member-vnf-index-ref: '1'
+      vnfd-connection-point-ref: flexran-mgmt-cp-ext
+      ip-address: 10.208.0.234
 
-  # ====== Service ==========================================================
-  - name: SimulaMet-FlexRAN_nsd-Service
-    vnfd-connection-point-ref:
-      - member-vnf-index-ref: '1'
-        vnfd-connection-point-ref: flexran-service-cp
-        #-ext
-        ip-address: 192.168.246.103
+# ====== Service ==========================================================
+- name: SimulaMet-FlexRAN_nsd-Service
+  vnfd-connection-point-ref:
+    - member-vnf-index-ref: '1'
+      vnfd-connection-point-ref: flexran-service-cp-ext
+      ip-address: 192.168.246.103
