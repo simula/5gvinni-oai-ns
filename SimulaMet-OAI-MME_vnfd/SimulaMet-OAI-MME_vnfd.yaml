@@ -53,8 +53,6 @@ vnfd:
             vdu-level:
             -   number-of-instances: 1
                 vdu-id: MME
-
-        # ###### VNF configuration ##########################################
         lcm-operations-configuration:
             operate-vnf-op-config:
                 day1-2:
@@ -160,7 +158,7 @@ vnfd:
             min-number-of-instances: 1
 
 
-    # ###### VDU: Configuration #############################################
+    # ###### VDU Configuration ##############################################
     sw-image-desc:
     -   id: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
         name: 5gVINNI-OpenStack-Ubuntu-18.04-LTS

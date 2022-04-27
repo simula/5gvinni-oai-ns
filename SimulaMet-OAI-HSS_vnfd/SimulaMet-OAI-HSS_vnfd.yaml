@@ -34,7 +34,6 @@ vnfd:
     provider: Thomas Dreibholz
 
     # ###### External Connection Points #####################################
-    mgmt-cp: hss-mgmt-cp-ext
     ext-cpd:
     -   id: hss-mgmt-cp-ext
         int-cpd:
@@ -44,8 +43,9 @@ vnfd:
         #int-cpd:
             #cpd: ens4-int
             #vdu-id: HSS
+    mgmt-cp: hss-mgmt-cp-ext
 
-    # ###### VNF definition #################################################
+    # ###### VNF Definition #################################################
     df:
     -   id: default-df
         instantiation-level:
@@ -53,12 +53,11 @@ vnfd:
             vdu-level:
             -   number-of-instances: 1
                 vdu-id: HSS
-
-        # ###### VNF configuration ##########################################
         lcm-operations-configuration:
             operate-vnf-op-config:
                 day1-2:
                 -   id: HSS
+
                     ## ====== Execution environment ==========================
                     #execution-environment-list:
                     #- id: hsscharm-ee
@@ -144,7 +143,7 @@ vnfd:
             min-number-of-instances: 1
 
 
-    # ###### VDU: Configuration #############################################
+    # ###### VDU Configuration ##############################################
     sw-image-desc:
     -   id: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
         name: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
@@ -162,13 +161,15 @@ vnfd:
         -   id: ens3-int
             virtual-network-interface-requirement:
             -   name: ens3
+                position: 1
                 virtual-interface:
-                    type: PARAVIRT
+                    type: VIRTIO
         #-   id: ens4-int
             #virtual-network-interface-requirement:
             #-   name: ens4
+                #position: 2
                 #virtual-interface:
-                    #type: PARAVIRT
+                    #type: VIRTIO
 
     # ====== Compute ========================================================
     virtual-compute-desc:

@@ -214,7 +214,7 @@ vnfd:
                     -   name: network_S11_bytes_in
                     -   name: network_S11_packets_in
                     -   name: network_S11_bytes_out
-                    -   name: network_S11_packets_out 
+                    -   name: network_S11_packets_out
                     -   name: network_S1C_packets_in
                     -   name: network_S1C_bytes_out
                     -   name: network_S1C_packets_out
