@@ -75,4 +75,4 @@ nsd:
             #vim-network-name: nornet-simula
 
         vnfd-id:
-        - SimulaMet-OAI-EPC_vnfd
+        - SimulaMet-OAI-HSS_vnfd

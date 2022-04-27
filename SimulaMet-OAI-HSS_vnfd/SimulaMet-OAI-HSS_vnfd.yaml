@@ -34,6 +34,7 @@ vnfd:
     provider: Thomas Dreibholz
 
     # ###### External Connection Points #####################################
+    mgmt-cp: hss-mgmt-cp-ext
     ext-cpd:
     -   id: hss-mgmt-cp-ext
         int-cpd:
