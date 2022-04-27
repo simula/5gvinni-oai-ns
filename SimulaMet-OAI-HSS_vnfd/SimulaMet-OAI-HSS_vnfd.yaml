@@ -152,6 +152,17 @@ vnfd:
         virtual-compute-desc: HSS-compute
         virtual-storage-desc:
         - HSS-storage
+        int-cpd:
+        -   id: ens3-int
+            virtual-network-interface-requirement:
+            -   name: ens3
+                virtual-interface:
+                    type: PARAVIRT
+        -   id: ens4-int
+            virtual-network-interface-requirement:
+            -   name: ens4
+                virtual-interface:
+                    type: PARAVIRT
 
     # ====== Compute ========================================================
     virtual-compute-desc:
