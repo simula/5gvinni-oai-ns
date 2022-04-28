@@ -39,20 +39,24 @@ nsd:
         -   id: Management
             mgmt-network: 'true'
             vim-network-name: mgmt
-        #-   id: SimulaMet-OAI-EPC_nsd-S1C
-            #vim-network-name: nornet-simula
-        #-   id: SimulaMet-OAI-EPC_nsd-S1U
-            #vim-network-name: nornet-simula
-        #-   id: SimulaMet-OAI-EPC_nsd-SGi
-            #vim-network-name: nornet-simula
+        -   id: S1C
+            vim-network-name: nornet-simula
+        -   id: S1U
+            vim-network-name: nornet-simula
+        -   id: SGi
+            vim-network-name: nornet-simula
 
         - id: S6a
+        - id: S11
+        - id: SXab
 
 
         # ###### Used VNFDs #################################################
         vnfd-id:
         - SimulaMet-OAI-HSS_vnfd
         - SimulaMet-OAI-MME_vnfd
+        - SimulaMet-OAI-SPGW-C_vnfd
+        - SimulaMet-OAI-SPGW-U_vnfd
 
         # ###### NS Definition ##############################################
         df:
@@ -81,7 +85,52 @@ nsd:
                     -   constituent-base-element-id: '2'
                         constituent-cpd-id: mme-s6a-cp-ext
                     virtual-link-profile-id: S6a
+                -   constituent-cpd-id:
+                    -   constituent-base-element-id: '3'
+                        constituent-cpd-id: mme-s11-cp-ext
+                    virtual-link-profile-id: S11
+                -   constituent-cpd-id:
+                    -   constituent-base-element-id: '4'
+                        constituent-cpd-id: mme-s1c-cp-ext
+                    virtual-link-profile-id: S1C
                 vnfd-id: SimulaMet-OAI-MME_vnfd
+
+            -   id: '3'
+                virtual-link-connectivity:
+                -   constituent-cpd-id:
+                    -   constituent-base-element-id: '1'
+                        constituent-cpd-id: spgwc-mgmt-cp-ext
+                    virtual-link-profile-id: Management
+                -   constituent-cpd-id:
+                    -   constituent-base-element-id: '2'
+                        constituent-cpd-id: spgwc-sxab-cp-ext
+                    virtual-link-profile-id: SXab
+                -   constituent-cpd-id:
+                    -   constituent-base-element-id: '3'
+                        constituent-cpd-id: spgwc-s11-cp-ext
+                    virtual-link-profile-id: S11
+                vnfd-id: SimulaMet-OAI-SPGWC_vnfd
+
+            -   id: '4'
+                virtual-link-connectivity:
+                -   constituent-cpd-id:
+                    -   constituent-base-element-id: '1'
+                        constituent-cpd-id: spgwu-mgmt-cp-ext
+                    virtual-link-profile-id: Management
+                -   constituent-cpd-id:
+                    -   constituent-base-element-id: '2'
+                        constituent-cpd-id: spgwu-sxab-cp-ext
+                    virtual-link-profile-id: SXab
+                -   constituent-cpd-id:
+                    -   constituent-base-element-id: '3'
+                        constituent-cpd-id: spgwu-s1u-cp-ext
+                    virtual-link-profile-id: S1u
+                -   constituent-cpd-id:
+                    -   constituent-base-element-id: '4'
+                        constituent-cpd-id: spgwu-s1u-sgi-ext
+                    virtual-link-profile-id: SGi
+                vnfd-id: SimulaMet-OAI-SPGWU_vnfd
+
 
             ####-   id: '1'
                 ####virtual-link-connectivity:

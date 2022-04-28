@@ -31,24 +31,25 @@
 
 # ###### VNF Parameters #####################################################
 additionalParamsForVnf:
+  # ====== HSS ==============================================================
   - member-vnf-index: '1'
     additionalParams:
-      # ====== HSS ==========================================================
       hss_git_repository: 'https://github.com/simula/openairinterface-openair-hss.git'
       hss_git_commit: 'dreibh/cassandra-build-fix-26apr2022'
       hss_S6a_address: '172.16.6.129'
+
       network_realm: 'simula.nornet'
       network_k: '449C4B91AEACD0ACE182CF3A5A72BFA1'
       network_op: '1006020F0A478BF6B699F15C062E42B3'
       network_imsi_first: '242881234500000'
       network_msisdn_first: '24288880000000'
       network_users: '1024'
-      # ====== Other ========================================================
+
       password: 'osm4us'
 
+  # ====== MME ==============================================================
   - member-vnf-index: '2'
     additionalParams:
-      # ====== MME ==========================================================
       mme_git_repository: 'https://github.com/simula/openairinterface-openair-mme.git'
       mme_git_commit: '2020.w44'
       mme_S1C_ipv4_interface: '192.168.253.102/24'
@@ -57,17 +58,31 @@ additionalParamsForVnf:
       mme_S1C_ipv6_gateway: ''
       mme_S11_ipv4_interface: '172.16.1.102/24'
       mme_S6a_address: '172.16.6.2'
+
+      network_realm: 'simula.nornet'
+      network_k: '449C4B91AEACD0ACE182CF3A5A72BFA1'   # FIXME!
+      network_op: '1006020F0A478BF6B699F15C062E42B3'   # FIXME!
       network_mcc: '242'
       network_mnc: '88'
 
-      # ====== SPGW-C =======================================================
+      password: 'osm4us'
+
+  # ====== SPGW-C ===========================================================
+  - member-vnf-index: '3'
+    additionalParams:
       spgwc_git_repository: 'https://github.com/simula/openairinterface-openair-spgwc.git'
       spgwc_git_commit: 'v1.2.0'
       spgwc_S11_ipv4_interface: '172.16.1.104/24'
+
+      network_realm: 'simula.nornet'   # !!!
       network_ipv4_dns1: '10.1.1.1'
       network_ipv4_dns2: '10.1.2.1'
 
-      # ====== SPGW-U =======================================================
+      password: 'osm4us'
+
+  # ====== SPGW-U ===========================================================
+  - member-vnf-index: '4'
+    additionalParams:
       spgwu_git_repository: 'https://github.com/simula/openairinterface-openair-spgwu-tiny.git'
       spgwu_git_commit: 'v1.2.0'
       spgwu_S1U_ipv4_interface: '192.168.254.159/24'
@@ -78,7 +93,6 @@ additionalParamsForVnf:
       spgwu_SGi_ipv6_gateway: ''
       spgwu_spgwc_list: '172.55.55.101'
 
-      # ====== Other ========================================================
       password: 'osm4us'
 
 
@@ -93,13 +107,33 @@ vld:
       - member-vnf-index-ref: '2'
         vnfd-connection-point-ref: mme-mgmt-cp-ext
         ip-address: 10.208.0.231
+      - member-vnf-index-ref: '3'
+        vnfd-connection-point-ref: spgwc-mgmt-cp-ext
+        ip-address: 10.208.0.232
+      - member-vnf-index-ref: '4'
+        vnfd-connection-point-ref: spgwu-mgmt-cp-ext
+        ip-address: 10.208.0.233
 
-      #- member-vnf-index-ref: '3'
-        #vnfd-connection-point-ref: spgwc-mgmt-cp-ext
-        #ip-address: 10.208.0.232
-      #- member-vnf-index-ref: '4'
-        #vnfd-connection-point-ref: spgwu-mgmt-cp-ext
-        #ip-address: 10.208.0.233
+  # ====== S1-C =============================================================
+  - name: S1C
+    vnfd-connection-point-ref:
+      - member-vnf-index-ref: '2'
+        vnfd-connection-point-ref: mme-s1c-cp-ext
+        ip-address: 192.168.253.102
+
+  # ====== S1-U =============================================================
+  - name: S1U
+    vnfd-connection-point-ref:
+      - member-vnf-index-ref: '4'
+        vnfd-connection-point-ref: spgwu-s1u-cp-ext
+        ip-address: 192.168.254.159
+
+  # ====== SGi ==============================================================
+  - name: SGi
+    vnfd-connection-point-ref:
+      - member-vnf-index-ref: '4'
+        vnfd-connection-point-ref: spgwu-sgi-cp-ext
+        ip-address: 10.254.1.233
 
   # ====== S6a ==============================================================
   - name: S6a
@@ -117,47 +151,34 @@ vld:
         vnfd-connection-point-ref: mme-s6a-cp-ext
         ip-address: 172.16.6.2
 
-  ## ====== S1-C =============================================================
-  #- name: SimulaMet-OAI-EPC_nsd-S1C
-    #vnfd-connection-point-ref:
-      #- member-vnf-index-ref: '1'
-        #vnfd-connection-point-ref: mme-s1c-cp
-        #ip-address: 192.168.253.102
+  # ====== S11 ==============================================================
+  - name: S11
+    ip-profile:
+      ip-version: ipv4
+      subnet-address: 172.16.1.0/24
+      gateway-address: 0.0.0.0
+      dhcp-params:
+        enabled: false
+    vnfd-connection-point-ref:
+      - member-vnf-index-ref: '2'
+        vnfd-connection-point-ref: mme-s11-cp-ext
+        ip-address: 172.16.1.102
+      - member-vnf-index-ref: '3'
+        vnfd-connection-point-ref: spgwc-s11-cp-ext
+        ip-address: 172.16.1.104
 
-  ## ====== S1-U =============================================================
-  #- name: SimulaMet-OAI-EPC_nsd-S1U
-    #vnfd-connection-point-ref:
-      #- member-vnf-index-ref: '1'
-        #vnfd-connection-point-ref: spgwu-s1u-cp
-        #ip-address: 192.168.254.159
-
-  ## ====== SGi ==============================================================
-  #- name: SimulaMet-OAI-EPC_nsd-SGi
-    #vnfd-connection-point-ref:
-      #- member-vnf-index-ref: '1'
-        #vnfd-connection-point-ref: spgwu-sgi-cp
-        #ip-address: 10.254.1.233
-
-
-# ###### VNF-Internal Addresses #############################################
-#vnf:
-  #- member-vnf-index: '1'
-    #internal-vld:
-      #- name: S6a
-        #internal-connection-point:
-          #- id-ref: mme-s6a-cp
-            #ip-address: 172.16.6.2
-          #- id-ref: hss-s6a-cp
-            #ip-address: 172.16.6.129
-      #- name: s11
-        #internal-connection-point:
-          #- id-ref: mme-s11-cp
-            #ip-address: 172.16.1.102
-          #- id-ref: spgwc-s11-cp
-            #ip-address: 172.16.1.104
-      #- name: sxab
-        #internal-connection-point:
-          #- id-ref: spgwu-sxab-cp
-            #ip-address: 172.55.55.102
-          #- id-ref: spgwc-sxab-cp
-            #ip-address: 172.55.55.101
+  # ====== SXab =============================================================
+  - name: S11
+    ip-profile:
+      ip-version: ipv4
+      subnet-address: 172.55.55.0/24
+      gateway-address: 0.0.0.0
+      dhcp-params:
+        enabled: false
+    vnfd-connection-point-ref:
+      - member-vnf-index-ref: '3'
+        vnfd-connection-point-ref: spgwc-sxab-cp-ext
+        ip-address: 172.55.55.101
+      - member-vnf-index-ref: '4'
+        vnfd-connection-point-ref: spgwu-sxab-cp-ext
+        ip-address: 172.55.55.102
