@@ -44,14 +44,14 @@ vnfd:
         int-cpd:
             cpd: ens4-int
             vdu-id: MME
-    #-   id: mme-s11-cp-ext
-        #int-cpd:
-            #cpd: ens5-int
-            #vdu-id: MME
-    #-   id: mme-s1c-cp-ext
-        #int-cpd:
-            #cpd: ens6-int
-            #vdu-id: MME
+    -   id: mme-s11-cp-ext
+        int-cpd:
+            cpd: ens5-int
+            vdu-id: MME
+    -   id: mme-s1c-cp-ext
+        int-cpd:
+            cpd: ens6-int
+            vdu-id: MME
 
     # ###### VNF definition #################################################
     df:
