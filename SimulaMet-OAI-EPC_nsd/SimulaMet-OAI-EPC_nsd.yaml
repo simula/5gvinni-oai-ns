@@ -36,7 +36,7 @@ nsd:
 
         # ###### Connections ################################################
         virtual-link-desc:
-        -   id: SimulaMet-OAI-EPC_nsd-Management
+        -   id: Management
             mgmt-network: 'true'
             vim-network-name: mgmt
         #-   id: SimulaMet-OAI-EPC_nsd-S1C
@@ -64,7 +64,7 @@ nsd:
                 -   constituent-cpd-id:
                     -   constituent-base-element-id: '1'
                         constituent-cpd-id: hss-mgmt-cp-ext
-                    virtual-link-profile-id: SimulaMet-OAI-EPC_nsd-Management
+                    virtual-link-profile-id: Management
                 -   constituent-cpd-id:
                     -   constituent-base-element-id: '2'
                         constituent-cpd-id: hss-s6a-cp-ext
@@ -76,7 +76,7 @@ nsd:
                 -   constituent-cpd-id:
                     -   constituent-base-element-id: '1'
                         constituent-cpd-id: mme-mgmt-cp-ext
-                    virtual-link-profile-id: SimulaMet-OAI-EPC_nsd-Management
+                    virtual-link-profile-id: Management
                 -   constituent-cpd-id:
                     -   constituent-base-element-id: '2'
                         constituent-cpd-id: mme-s6a-cp-ext
@@ -94,7 +94,7 @@ nsd:
                         #####constituent-cpd-id: spgwc-mgmt-cp-ext
                     #####-   constituent-base-element-id: '1'
                         #####constituent-cpd-id: spgwu-mgmt-cp-ext
-                    ####virtual-link-profile-id: SimulaMet-OAI-EPC_nsd-Management
+                    ####virtual-link-profile-id: Management
                 #####-   constituent-cpd-id:
                     #####-   constituent-base-element-id: '1'
                         #####constituent-cpd-id: mme-s1c-cp-ext
