@@ -163,13 +163,13 @@ vnfd:
             -   name: ens3
                 position: 1
                 virtual-interface:
-                    type: VIRTIO
+                    type: PARAVIRT
         #-   id: ens4-int
             #virtual-network-interface-requirement:
             #-   name: ens4
                 #position: 2
                 #virtual-interface:
-                    #type: VIRTIO
+                    #type: PARAVIRT
 
     # ====== Compute ========================================================
     virtual-compute-desc:

@@ -177,24 +177,24 @@ vnfd:
             virtual-network-interface-requirement:
             -   name: ens3
                 virtual-interface:
-                    type: VIRTIO
+                    type: PARAVIRT
         #-   id: ens4-int
             #int-virtual-link-desc: s6a
             #virtual-network-interface-requirement:
             #-   name: ens4
                 #virtual-interface:
-                    #type: VIRTIO
+                    #type: PARAVIRT
         #-   id: ens5-int
             #int-virtual-link-desc: s11
             #virtual-network-interface-requirement:
             #-   name: ens5
                 #virtual-interface:
-                    #type: VIRTIO
+                    #type: PARAVIRT
         #-   id: ens6-int
             #virtual-network-interface-requirement:
             #-   name: ens6
                 #virtual-interface:
-                    #type: VIRTIO
+                    #type: PARAVIRT
 
     # ====== Compute ========================================================
     virtual-compute-desc:
