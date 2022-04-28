@@ -59,16 +59,18 @@ nsd:
             -   id: '1'
                 virtual-link-connectivity:
                 -   constituent-cpd-id:
-                    -   constituent-base-element-id: '1'
-                        constituent-cpd-id: hss-mgmt-cp-ext
+                    virtual-link-profile-id: SimulaMet-OAI-EPC_nsd-Management
                     -   constituent-base-element-id: '2'
                         constituent-cpd-id: mme-mgmt-cp-ext
-                    virtual-link-profile-id: SimulaMet-OAI-EPC_nsd-Management
-                #-   constituent-cpd-id:
-                    #-   constituent-base-element-id: '1'
-                        #constituent-cpd-id: flexran-service-cp-ext
-                    #virtual-link-profile-id: SimulaMet-FlexRAN_nsd-Service
                 vnfd-id: SimulaMet-OAI-HSS_vnfd
+
+            -   id: '2'
+                virtual-link-connectivity:
+                -   constituent-cpd-id:
+                    virtual-link-profile-id: SimulaMet-OAI-EPC_nsd-Management
+                    -   constituent-base-element-id: '1'
+                        constituent-cpd-id: mme-mgmt-cp-ext
+                vnfd-id: SimulaMet-OAI-MME_vnfd
 
             ####-   id: '1'
                 ####virtual-link-connectivity:
