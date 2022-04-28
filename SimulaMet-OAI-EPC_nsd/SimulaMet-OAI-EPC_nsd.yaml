@@ -127,7 +127,7 @@ nsd:
                     virtual-link-profile-id: S1u
                 -   constituent-cpd-id:
                     -   constituent-base-element-id: '4'
-                        constituent-cpd-id: spgwu-s1u-sgi-ext
+                        constituent-cpd-id: spgwu-sgi-ext
                     virtual-link-profile-id: SGi
                 vnfd-id: SimulaMet-OAI-SPGW-U_vnfd
 
