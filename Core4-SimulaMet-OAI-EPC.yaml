@@ -101,13 +101,14 @@ vld:
         #vnfd-connection-point-ref: spgwu-mgmt-cp-ext
         #ip-address: 10.208.0.233
 
+  # ====== S6a ==============================================================
   - name: S6a
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '1'
-        vnfd-connection-point-ref: hss-s6a-cp
+        vnfd-connection-point-ref: hss-s6a-cp-ext
         ip-address: 172.16.6.129
       - member-vnf-index-ref: '2'
-        vnfd-connection-point-ref: mme-s6a-cp
+        vnfd-connection-point-ref: mme-s6a-cp-ext
         ip-address: 172.16.6.2
 
   ## ====== S1-C =============================================================
