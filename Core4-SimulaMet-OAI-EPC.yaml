@@ -123,15 +123,15 @@ vld:
 
 
 # ###### VNF-Internal Addresses #############################################
-#vnf:
-  #- member-vnf-index: '1'
-    #internal-vld:
-      #- name: s6a
-        #internal-connection-point:
-          #- id-ref: mme-s6a-cp
-            #ip-address: 172.16.6.2
-          #- id-ref: hss-s6a-cp
-            #ip-address: 172.16.6.129
+vnf:
+  - member-vnf-index: '1'
+    internal-vld:
+      - name: S6a
+        internal-connection-point:
+          - id-ref: mme-s6a-cp
+            ip-address: 172.16.6.2
+          - id-ref: hss-s6a-cp
+            ip-address: 172.16.6.129
       #- name: s11
         #internal-connection-point:
           #- id-ref: mme-s11-cp
