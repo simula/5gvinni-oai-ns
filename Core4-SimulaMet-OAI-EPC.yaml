@@ -44,7 +44,10 @@ additionalParamsForVnf:
       network_msisdn_first: '24288880000000'
       network_users: '1024'
 
-  - member-vnf-index: '1'
+      # ====== Other ========================================================
+      password: 'osm4us'
+
+  - member-vnf-index: '2'
     additionalParams:
       # ====== MME ==========================================================
       mme_git_repository: 'https://github.com/simula/openairinterface-openair-mme.git'
