@@ -168,7 +168,7 @@ vld:
         ip-address: 172.16.1.104
 
   # ====== SXab =============================================================
-  - name: S11
+  - name: SXab
     ip-profile:
       ip-version: ipv4
       subnet-address: 172.55.55.0/24
