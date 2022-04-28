@@ -36,7 +36,7 @@ nsd:
 
         # ###### Connections ################################################
         virtual-link-desc:
-        -   id: Management
+        -   id: SimulaMet-OAI-EPC_nsd-Management
             mgmt-network: 'true'
             vim-network-name: mgmt
         #-   id: SimulaMet-OAI-EPC_nsd-S1C
@@ -46,19 +46,7 @@ nsd:
         #-   id: SimulaMet-OAI-EPC_nsd-SGi
             #vim-network-name: nornet-simula
 
-        int-virtual-link-desc:
         - id: S6a
-
-        virtual-link-profile:
-        -   flavour: ''
-            id: S6a
-            virtual-link-protocol-data:
-                l3-protocol-data:
-                    cidr: 172.16.6.0/24
-                    description: S6a Network
-                    dhcp-enabled: true
-                    ip-version: ipv4
-                    name: s6a-l3-protocol-data
 
 
         # ###### Used VNFDs #################################################
@@ -76,7 +64,7 @@ nsd:
                 -   constituent-cpd-id:
                     -   constituent-base-element-id: '1'
                         constituent-cpd-id: hss-mgmt-cp-ext
-                    virtual-link-profile-id: Management
+                    virtual-link-profile-id: SimulaMet-OAI-EPC_nsd-Management
                 -   constituent-cpd-id:
                     -   constituent-base-element-id: '2'
                         constituent-cpd-id: hss-s6a-cp-ext
@@ -88,7 +76,7 @@ nsd:
                 -   constituent-cpd-id:
                     -   constituent-base-element-id: '1'
                         constituent-cpd-id: mme-mgmt-cp-ext
-                    virtual-link-profile-id: Management
+                    virtual-link-profile-id: SimulaMet-OAI-EPC_nsd-Management
                 -   constituent-cpd-id:
                     -   constituent-base-element-id: '2'
                         constituent-cpd-id: mme-s6a-cp-ext
@@ -106,7 +94,7 @@ nsd:
                         #####constituent-cpd-id: spgwc-mgmt-cp-ext
                     #####-   constituent-base-element-id: '1'
                         #####constituent-cpd-id: spgwu-mgmt-cp-ext
-                    ####virtual-link-profile-id: Management
+                    ####virtual-link-profile-id: SimulaMet-OAI-EPC_nsd-Management
                 #####-   constituent-cpd-id:
                     #####-   constituent-base-element-id: '1'
                         #####constituent-cpd-id: mme-s1c-cp-ext
