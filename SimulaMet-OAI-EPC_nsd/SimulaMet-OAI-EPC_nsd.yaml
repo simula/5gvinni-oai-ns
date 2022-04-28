@@ -40,11 +40,11 @@ nsd:
             mgmt-network: 'true'
             vim-network-name: mgmt
         -   id: S1-C
-            vim-network-name: nornet-simula
+            # vim-network-name: nornet-simula
         -   id: S1-U
-            vim-network-name: nornet-simula
+            # vim-network-name: nornet-simula
         -   id: SGi
-            vim-network-name: nornet-simula
+            # vim-network-name: nornet-simula
 
         - id: S6a
         - id: S11

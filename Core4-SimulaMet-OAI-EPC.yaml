@@ -60,8 +60,6 @@ additionalParamsForVnf:
       mme_S6a_address: '172.16.6.2'
 
       network_realm: 'simula.nornet'
-      network_k: '449C4B91AEACD0ACE182CF3A5A72BFA1'   # FIXME!
-      network_op: '1006020F0A478BF6B699F15C062E42B3'   # FIXME!
       network_mcc: '242'
       network_mnc: '88'
 
@@ -119,6 +117,7 @@ vld:
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '2'
         vnfd-connection-point-ref: mme-s1c-cp-ext
+        vim-network-name: nornet-simula
         ip-address: 192.168.253.102
 
   # ====== S1-U =============================================================
@@ -126,6 +125,7 @@ vld:
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '4'
         vnfd-connection-point-ref: spgwu-s1u-cp-ext
+        vim-network-name: nornet-simula
         ip-address: 192.168.254.159
 
   # ====== SGi ==============================================================
@@ -133,6 +133,7 @@ vld:
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '4'
         vnfd-connection-point-ref: spgwu-sgi-cp-ext
+        vim-network-name: nornet-simula
         ip-address: 10.254.1.233
 
   # ====== S6a ==============================================================
