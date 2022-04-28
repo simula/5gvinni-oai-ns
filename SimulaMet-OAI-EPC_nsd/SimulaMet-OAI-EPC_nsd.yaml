@@ -60,7 +60,7 @@ nsd:
                 virtual-link-connectivity:
                 -   constituent-cpd-id:
                     -   constituent-base-element-id: '2'
-                        constituent-cpd-id: mme-mgmt-cp-ext
+                        constituent-cpd-id: hss-mgmt-cp-ext
                     virtual-link-profile-id: SimulaMet-OAI-EPC_nsd-Management
                 vnfd-id: SimulaMet-OAI-HSS_vnfd
 

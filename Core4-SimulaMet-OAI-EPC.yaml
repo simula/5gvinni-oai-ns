@@ -86,9 +86,9 @@ vld:
       - member-vnf-index-ref: '1'
         vnfd-connection-point-ref: hss-mgmt-cp-ext
         ip-address: 10.208.0.230
-      #- member-vnf-index-ref: '1'
-        #vnfd-connection-point-ref: mme-mgmt-cp-ext
-        #ip-address: 10.208.0.231
+      - member-vnf-index-ref: '2'
+        vnfd-connection-point-ref: mme-mgmt-cp-ext
+        ip-address: 10.208.0.231
       #- member-vnf-index-ref: '1'
         #vnfd-connection-point-ref: spgwc-mgmt-cp-ext
         #ip-address: 10.208.0.232
