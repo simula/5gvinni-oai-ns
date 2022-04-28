@@ -82,7 +82,7 @@ additionalParamsForVnf:
       password: 'osm4us'
 
 
-# ###### VNF External Addresses #############################################
+# ###### VNF Addresses ######################################################
 vld:
   # ====== Management =======================================================
   - name: SimulaMet-OAI-EPC_nsd-Management
@@ -90,18 +90,9 @@ vld:
       - member-vnf-index-ref: '1'
         vnfd-connection-point-ref: hss-mgmt-cp-ext
         ip-address: 10.208.0.230
-
       - member-vnf-index-ref: '2'
         vnfd-connection-point-ref: mme-mgmt-cp-ext
         ip-address: 10.208.0.231
-
-  - name: S6a
-      - member-vnf-index-ref: '1'
-        vnfd-connection-point-ref: hss-s6a-cp
-        ip-address: 172.16.6.129
-      - member-vnf-index-ref: '1'
-        vnfd-connection-point-ref: mme-s6a-cp
-        ip-address: 172.16.6.2
 
       #- member-vnf-index-ref: '1'
         #vnfd-connection-point-ref: spgwc-mgmt-cp-ext
@@ -109,6 +100,14 @@ vld:
       #- member-vnf-index-ref: '1'
         #vnfd-connection-point-ref: spgwu-mgmt-cp-ext
         #ip-address: 10.208.0.233
+
+  - name: S6a
+      - member-vnf-index-ref: '1'
+        vnfd-connection-point-ref: hss-s6a-cp
+        ip-address: 172.16.6.129
+      - member-vnf-index-ref: '2'
+        vnfd-connection-point-ref: mme-s6a-cp
+        ip-address: 172.16.6.2
 
   ## ====== S1-C =============================================================
   #- name: SimulaMet-OAI-EPC_nsd-S1C
