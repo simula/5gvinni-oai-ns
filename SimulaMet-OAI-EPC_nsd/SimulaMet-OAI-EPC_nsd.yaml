@@ -109,7 +109,7 @@ nsd:
                     -   constituent-base-element-id: '3'
                         constituent-cpd-id: spgwc-s11-cp-ext
                     virtual-link-profile-id: S11
-                vnfd-id: SimulaMet-OAI-SPGWC_vnfd
+                vnfd-id: SimulaMet-OAI-SPGW-C_vnfd
 
             -   id: '4'
                 virtual-link-connectivity:
@@ -129,7 +129,7 @@ nsd:
                     -   constituent-base-element-id: '4'
                         constituent-cpd-id: spgwu-s1u-sgi-ext
                     virtual-link-profile-id: SGi
-                vnfd-id: SimulaMet-OAI-SPGWU_vnfd
+                vnfd-id: SimulaMet-OAI-SPGW-U_vnfd
 
 
             ####-   id: '1'
