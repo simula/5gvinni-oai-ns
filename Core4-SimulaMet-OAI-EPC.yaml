@@ -94,10 +94,10 @@ vld:
         vnfd-connection-point-ref: mme-mgmt-cp-ext
         ip-address: 10.208.0.231
 
-      #- member-vnf-index-ref: '1'
+      #- member-vnf-index-ref: '3'
         #vnfd-connection-point-ref: spgwc-mgmt-cp-ext
         #ip-address: 10.208.0.232
-      #- member-vnf-index-ref: '1'
+      #- member-vnf-index-ref: '4'
         #vnfd-connection-point-ref: spgwu-mgmt-cp-ext
         #ip-address: 10.208.0.233
 
