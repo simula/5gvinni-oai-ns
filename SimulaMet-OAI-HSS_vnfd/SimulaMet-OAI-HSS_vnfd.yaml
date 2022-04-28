@@ -39,10 +39,10 @@ vnfd:
         int-cpd:
             cpd: ens3-int
             vdu-id: HSS
-    #-   id: hss-s6a-cp-ext
-        #int-cpd:
-            #cpd: ens4-int
-            #vdu-id: HSS
+    -   id: hss-s6a-cp-ext
+        int-cpd:
+            cpd: ens4-int
+            vdu-id: HSS
     mgmt-cp: hss-mgmt-cp-ext
 
     # ###### VNF Definition #################################################
@@ -164,12 +164,12 @@ vnfd:
                 position: 1
                 virtual-interface:
                     type: PARAVIRT
-        #-   id: ens4-int
-            #virtual-network-interface-requirement:
-            #-   name: ens4
-                #position: 2
-                #virtual-interface:
-                    #type: PARAVIRT
+        -   id: ens4-int
+            virtual-network-interface-requirement:
+            -   name: ens4
+                position: 2
+                virtual-interface:
+                    type: PARAVIRT
 
     # ====== Compute ========================================================
     virtual-compute-desc:

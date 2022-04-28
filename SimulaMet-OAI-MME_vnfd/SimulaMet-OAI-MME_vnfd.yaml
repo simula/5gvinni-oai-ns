@@ -40,6 +40,14 @@ vnfd:
         int-cpd:
             cpd: ens3-int
             vdu-id: MME
+    -   id: mme-s6a-cp-ext
+        int-cpd:
+            cpd: ens4-int
+            vdu-id: MME
+    #-   id: mme-s11-cp-ext
+        #int-cpd:
+            #cpd: ens5-int
+            #vdu-id: MME
     #-   id: mme-s1c-cp-ext
         #int-cpd:
             #cpd: ens6-int
@@ -178,12 +186,12 @@ vnfd:
             -   name: ens3
                 virtual-interface:
                     type: PARAVIRT
-        #-   id: ens4-int
+        -   id: ens4-int
             #int-virtual-link-desc: s6a
-            #virtual-network-interface-requirement:
-            #-   name: ens4
-                #virtual-interface:
-                    #type: PARAVIRT
+            virtual-network-interface-requirement:
+            -   name: ens4
+                virtual-interface:
+                    type: PARAVIRT
         #-   id: ens5-int
             #int-virtual-link-desc: s11
             #virtual-network-interface-requirement:

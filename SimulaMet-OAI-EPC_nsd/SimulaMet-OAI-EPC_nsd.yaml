@@ -46,6 +46,10 @@ nsd:
         #-   id: SimulaMet-OAI-EPC_nsd-SGi
             #vim-network-name: nornet-simula
 
+        - id: S6a
+        #int-virtual-link-desc: ???
+
+
         # ###### Used VNFDs #################################################
         vnfd-id:
         - SimulaMet-OAI-HSS_vnfd
@@ -59,9 +63,13 @@ nsd:
             -   id: '1'
                 virtual-link-connectivity:
                 -   constituent-cpd-id:
-                    -   constituent-base-element-id: '2'
+                    -   constituent-base-element-id: '1'
                         constituent-cpd-id: hss-mgmt-cp-ext
                     virtual-link-profile-id: SimulaMet-OAI-EPC_nsd-Management
+                -   constituent-cpd-id:
+                    -   constituent-base-element-id: '2'
+                        constituent-cpd-id: hss-s6a-cp-ext
+                    virtual-link-profile-id: S6a
                 vnfd-id: SimulaMet-OAI-HSS_vnfd
 
             -   id: '2'
@@ -70,6 +78,10 @@ nsd:
                     -   constituent-base-element-id: '1'
                         constituent-cpd-id: mme-mgmt-cp-ext
                     virtual-link-profile-id: SimulaMet-OAI-EPC_nsd-Management
+                -   constituent-cpd-id:
+                    -   constituent-base-element-id: '2'
+                        constituent-cpd-id: mme-s6a-cp-ext
+                    virtual-link-profile-id: S6a
                 vnfd-id: SimulaMet-OAI-MME_vnfd
 
             ####-   id: '1'
