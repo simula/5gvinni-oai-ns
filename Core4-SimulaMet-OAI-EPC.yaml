@@ -90,9 +90,17 @@ vld:
       - member-vnf-index-ref: '1'
         vnfd-connection-point-ref: hss-mgmt-cp-ext
         ip-address: 10.208.0.230
+      - member-vnf-index-ref: '1'
+        vnfd-connection-point-ref: hss-s6a-cp
+        ip-address: 172.16.6.129
+
       - member-vnf-index-ref: '2'
         vnfd-connection-point-ref: mme-mgmt-cp-ext
         ip-address: 10.208.0.231
+      - member-vnf-index-ref: '1'
+        vnfd-connection-point-ref: mme-s6a-cp
+        ip-address: 172.16.6.2
+
       #- member-vnf-index-ref: '1'
         #vnfd-connection-point-ref: spgwc-mgmt-cp-ext
         #ip-address: 10.208.0.232
@@ -123,15 +131,15 @@ vld:
 
 
 # ###### VNF-Internal Addresses #############################################
-vnf:
-  - member-vnf-index: '1'
-    internal-vld:
-      - name: S6a
-        internal-connection-point:
-          - id-ref: mme-s6a-cp
-            ip-address: 172.16.6.2
-          - id-ref: hss-s6a-cp
-            ip-address: 172.16.6.129
+#vnf:
+  #- member-vnf-index: '1'
+    #internal-vld:
+      #- name: S6a
+        #internal-connection-point:
+          #- id-ref: mme-s6a-cp
+            #ip-address: 172.16.6.2
+          #- id-ref: hss-s6a-cp
+            #ip-address: 172.16.6.129
       #- name: s11
         #internal-connection-point:
           #- id-ref: mme-s11-cp
