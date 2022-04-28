@@ -107,6 +107,8 @@ vld:
       ip-version: ipv4
       subnet-address: 172.16.6.0/24
       gateway-address: 0.0.0.0
+      dhcp-params:
+        enabled: false
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '1'
         vnfd-connection-point-ref: hss-s6a-cp-ext
