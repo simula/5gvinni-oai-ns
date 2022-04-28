@@ -102,6 +102,7 @@ vld:
         #ip-address: 10.208.0.233
 
   - name: S6a
+    vnfd-connection-point-ref:
       - member-vnf-index-ref: '1'
         vnfd-connection-point-ref: hss-s6a-cp
         ip-address: 172.16.6.129
