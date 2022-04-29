@@ -3,5 +3,5 @@
 HOST="10.208.0.203"
 
 ssh-keygen -q -R ${HOST}
-echo "SSH to SPGW-U in Test Core ..."
+echo "SSH to SPGW-U in Core #1 ..."
 ssh -CX -oStrictHostKeyChecking=no nornetpp@${HOST}

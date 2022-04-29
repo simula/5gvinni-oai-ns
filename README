@@ -8,26 +8,23 @@ Run tests/perform-osm-installation script!
 ------ Core #1 -------
 
 ./create-instance Core1-SimulaMet-OAI-EPC.yaml
+./create-instance Core1-SimulaMet-FlexRAN.yaml
 
-Helper scripts: sshA1 ... sshA4 for SSH to HSS, MME, SPGW-C and SPGW-U
-
+Helper scripts:
+* sshA1 ... sshA4 for SSH to HSS, MME, SPGW-C and SPGW-U of Core #4
+* sshF for SSH to FlexRAN Controller
 
 ------ Core #2 -------
 
-./create-instance Core2-SimulaMet-OAI-EPC.yaml
-./create-instance Core2-SimulaMet-FlexRAN.yaml
+TBD.
+
+------ Core #4 -------
+
+./create-instance Core4-SimulaMet-OAI-EPC.yaml
+./create-instance Core4-SimulaMet-FlexRAN.yaml
 
 Helper scripts:
-* sshB1 ... sshB4 for SSH to HSS, MME, SPGW-C and SPGW-U of Core #1
-* sshF for SSH to FlexRAN Controller
-
-
------- 1 Core setup for CloudRAN demo scenario ------
-
-./create-instance SimulaMet-CloudRAN.yaml
-
-Helper scripts: sshC1 ... sshC4 for SSH to HSS, MME, SPGW-C and SPGW-U
-
+* sshD1 ... sshD4 for SSH to HSS, MME, SPGW-C and SPGW-U of Core #4
 
 
 ==== If something goes wrong: debugging commands ====

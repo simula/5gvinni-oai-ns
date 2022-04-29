@@ -1,6 +1,6 @@
 #!/bin/sh
 
-HOST="10.208.0.214"
+HOST="10.208.0.210"
 
 ssh-keygen -q -R ${HOST}
 echo "SSH to HSS in Core #2 ..."

@@ -3,5 +3,5 @@
 HOST="10.208.0.221"
 
 ssh-keygen -q -R ${HOST}
-echo "SSH to MME in CloudRAN Core ..."
+echo "SSH to MME in Core #3 ..."
 ssh -CX -oStrictHostKeyChecking=no nornetpp@${HOST}
