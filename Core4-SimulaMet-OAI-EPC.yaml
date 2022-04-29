@@ -87,7 +87,7 @@ additionalParamsForVnf:
   - member-vnf-index: '4'
     additionalParams:
       spgwu_git_repository: 'https://github.com/simula/openairinterface-openair-spgwu-tiny.git'
-      spgwc_git_commit: 'v1.1.0'
+      spgwu_git_commit: 'v1.1.0'
       spgwu_S1U_ipv4_interface: '192.168.254.159/24'
       spgwu_S1U_ipv4_gateway: '0.0.0.0'
       spgwu_SGi_ipv4_interface: '10.254.1.233/24'
