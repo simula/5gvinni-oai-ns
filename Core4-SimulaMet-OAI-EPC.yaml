@@ -74,7 +74,7 @@ additionalParamsForVnf:
   - member-vnf-index: '3'
     additionalParams:
       spgwc_git_repository: 'https://github.com/simula/openairinterface-openair-spgwc.git'
-      spgwc_git_commit: 'v1.2.0'
+      spgwc_git_commit: 'v1.1.0'
       spgwc_S11_ipv4_interface: '172.16.1.104/24'
 
       network_realm: 'simula.nornet'  # Must match with HSS and SPGW-C!
@@ -87,7 +87,7 @@ additionalParamsForVnf:
   - member-vnf-index: '4'
     additionalParams:
       spgwu_git_repository: 'https://github.com/simula/openairinterface-openair-spgwu-tiny.git'
-      spgwu_git_commit: 'v1.2.0'
+      spgwc_git_commit: 'v1.1.0'
       spgwu_S1U_ipv4_interface: '192.168.254.159/24'
       spgwu_S1U_ipv4_gateway: '0.0.0.0'
       spgwu_SGi_ipv4_interface: '10.254.1.233/24'
