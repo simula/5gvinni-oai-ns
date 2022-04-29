@@ -113,20 +113,6 @@ vnfd:
                             value: <hss_S6a_address>
                         -   name: network-realm
                             value: <network_realm>
-                        -   name: network-mcc
-                            value: <network_mcc>
-                        -   name: network-mnc
-                            value: <network_mnc>
-                        -   name: network-op
-                            value: <network_op>
-                        -   name: network-k
-                            value: <network_k>
-                        -   name: network-imsi-first
-                            value: <network_imsi_first>
-                        -   name: network-msisdn-first
-                            value: <network_msisdn_first>
-                        -   name: network-users
-                            value: <network_users>
                         seq: '3'
                     -   name: restart-mme
                         execution-environment-ref: mmecharm-ee
