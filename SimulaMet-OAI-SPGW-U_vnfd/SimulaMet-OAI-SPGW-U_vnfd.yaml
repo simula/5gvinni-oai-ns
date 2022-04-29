@@ -27,175 +27,174 @@
 # Contact: dreibh@simula.no
 
 vnfd:
-    id: SimulaMet-OAI-SPGW-U_vnfd
-    product-name: SimulaMet-OAI-SPGW-U_vnfd
-    description: SimulaMet OpenAirInterface SPGW-U VNF
-    version: '2.0'
-    provider: Thomas Dreibholz
+  id: SimulaMet-OAI-SPGW-U_vnfd
+  product-name: SimulaMet-OAI-SPGW-U_vnfd
+  description: SimulaMet OpenAirInterface SPGW-U VNF
+  version: '2.0'
+  provider: Thomas Dreibholz
 
-    # ###### External Connection Points #####################################
-    ext-cpd:
-    -   id: spgwu-mgmt-cp-ext
-        int-cpd:
-            cpd: ens3-int
-            vdu-id: SPGW-U
-    -   id: spgwu-sxab-cp-ext
-        int-cpd:
-            cpd: ens4-int
-            vdu-id: SPGW-U
-    -   id: spgwu-s1u-cp-ext
-        int-cpd:
-            cpd: ens5-int
-            vdu-id: SPGW-U
-        port-security-enabled: false
-    -   id: spgwu-sgi-cp-ext
-        int-cpd:
-            cpd: ens6-int
-            vdu-id: SPGW-U
-        port-security-enabled: false
-    mgmt-cp: spgwu-mgmt-cp-ext
+  # ###### External Connection Points #######################################
+  ext-cpd:
+    - id: spgwu-mgmt-cp-ext
+      int-cpd:
+        cpd: ens3-int
+        vdu-id: SPGW-U
+    - id: spgwu-sxab-cp-ext
+      int-cpd:
+        cpd: ens4-int
+        vdu-id: SPGW-U
+    - id: spgwu-s1u-cp-ext
+      int-cpd:
+        cpd: ens5-int
+        vdu-id: SPGW-U
+      port-security-enabled: false
+    - id: spgwu-sgi-cp-ext
+      int-cpd:
+        cpd: ens6-int
+        vdu-id: SPGW-U
+      port-security-enabled: false
+  mgmt-cp: spgwu-mgmt-cp-ext
 
-    # ###### VNF Definition #################################################
-    df:
-    -   id: default-df
-        instantiation-level:
-        -   id: default-instantiation-level
-            vdu-level:
-            -   number-of-instances: 1
-                vdu-id: SPGW-U
-        lcm-operations-configuration:
-            operate-vnf-op-config:
-                day1-2:
-                -   id: SPGW-U
+  # ###### VNF Definition ###################################################
+  df:
+    - id: default-df
+      instantiation-level:
+        - id: default-instantiation-level
+          vdu-level:
+            - number-of-instances: 1
+              vdu-id: SPGW-U
+      lcm-operations-configuration:
+        operate-vnf-op-config:
+          day1-2:
+            - id: SPGW-U
 
-                    # ====== Execution environment ==========================
-                    execution-environment-list:
-                    - id: spgwucharm-ee
-                      juju:
-                          charm: spgwucharm
+              # ====== Execution environment ================================
+              execution-environment-list:
+                - id: spgwucharm-ee
+                  juju:
+                    charm: spgwucharm
 
-                    # ====== Configuration primitives =======================
-                    initial-config-primitive:
-                    -   seq: '1'
-                        name: config
-                        execution-environment-ref: spgwucharm-ee
-                        parameter:
-                        -   name: ssh-hostname
-                            value: <rw_mgmt_ip>
-                        -   name: ssh-username
-                            value: nornetpp
-                        -   name: ssh-password
-                            value: <password>
-                    -   seq: '2'
-                        name: prepare-spgwu-build
-                        execution-environment-ref: spgwucharm-ee
-                        parameter:
-                        -   name: spgwu-git-repository
-                            value: <spgwu_git_repository>
-                        -   name: spgwu-git-commit
-                            value: <spgwu_git_commit>
-                        -   name: spgwu-S1U-ipv4-interface
-                            value: <spgwu_S1U_ipv4_interface>
-                        -   name: spgwu-S1U-ipv4-gateway
-                            value: <spgwu_S1U_ipv4_gateway>
-                        -   name: spgwu-SGi-ipv4-interface
-                            value: <spgwu_SGi_ipv4_interface>
-                        -   name: spgwu-SGi-ipv4-gateway
-                            value: <spgwu_SGi_ipv4_gateway>
-                        -   name: spgwu-SGi-ipv6-interface
-                            value: <spgwu_SGi_ipv6_interface>
-                        -   name: spgwu-SGi-ipv6-gateway
-                            value: <spgwu_SGi_ipv6_gateway>
-                    -   seq: '3'
-                        name: configure-spgwu
-                        execution-environment-ref: spgwucharm-ee
-                        parameter:
-                        -   name: spgwu-spgwc-list
-                            value: <spgwu_spgwc_list>
-                    -   seq: '4'
-                        name: restart-spgwu
-                        execution-environment-ref: spgwucharm-ee
+              # ====== Configuration primitives =============================
+              initial-config-primitive:
+                - seq: '1'
+                  name: config
+                  execution-environment-ref: spgwucharm-ee
+                  parameter:
+                    - name: ssh-hostname
+                      value: <rw_mgmt_ip>
+                    - name: ssh-username
+                      value: nornetpp
+                    - name: ssh-password
+                      value: <password>
+                - seq: '2'
+                  name: prepare-spgwu-build
+                  execution-environment-ref: spgwucharm-ee
+                  parameter:
+                    - name: spgwu-git-repository
+                      value: <spgwu_git_repository>
+                    - name: spgwu-git-commit
+                      value: <spgwu_git_commit>
+                    - name: spgwu-S1U-ipv4-interface
+                      value: <spgwu_S1U_ipv4_interface>
+                    - name: spgwu-S1U-ipv4-gateway
+                      value: <spgwu_S1U_ipv4_gateway>
+                    - name: spgwu-SGi-ipv4-interface
+                      value: <spgwu_SGi_ipv4_interface>
+                    - name: spgwu-SGi-ipv4-gateway
+                      value: <spgwu_SGi_ipv4_gateway>
+                    - name: spgwu-SGi-ipv6-interface
+                      value: <spgwu_SGi_ipv6_interface>
+                    - name: spgwu-SGi-ipv6-gateway
+                      value: <spgwu_SGi_ipv6_gateway>
+                - seq: '3'
+                  name: configure-spgwu
+                  execution-environment-ref: spgwucharm-ee
+                  parameter:
+                    - name: spgwu-spgwc-list
+                      value: <spgwu_spgwc_list>
+                - seq: '4'
+                  name: restart-spgwu
+                  execution-environment-ref: spgwucharm-ee
 
-                    # ====== Metrics ========================================
-                    metrics:
-                    -   name: system_random
-                    -   name: system_uptime
-                    -   name: system_users
-                    -   name: cpu_processes
-                    -   name: cpu_load_current
-                    -   name: cpu_load_1min
-                    -   name: cpu_load_5min
-                    -   name: cpu_load_15min
-                    -   name: memory_ram_usage
-                    -   name: memory_swap_usage
-                    -   name: disk_usage
-                    -   name: network_mgmt_bytes_in
-                    -   name: network_mgmt_packets_in
-                    -   name: network_mgmt_bytes_out
-                    -   name: network_mgmt_packets_out
-                    -   name: network_SXab_bytes_in
-                    -   name: network_SXab_packets_in
-                    -   name: network_SXab_bytes_out
-                    -   name: network_SXab_packets_out
-                    -   name: network_S1U_bytes_in
-                    -   name: network_S1U_packets_in
-                    -   name: network_S1U_bytes_out
-                    -   name: network_S1U_packets_out
-                    -   name: network_SGi_bytes_in
-                    -   name: network_SGi_packets_in
-                    -   name: network_SGi_bytes_out
-                    -   name: network_SGi_packets_out
+              # ====== Metrics ==============================================
+              metrics:
+                - name: system_random
+                - name: system_uptime
+                - name: system_users
+                - name: cpu_processes
+                - name: cpu_load_current
+                - name: cpu_load_1min
+                - name: cpu_load_5min
+                - name: cpu_load_15min
+                - name: memory_ram_usage
+                - name: memory_swap_usage
+                - name: disk_usage
+                - name: network_mgmt_bytes_in
+                - name: network_mgmt_packets_in
+                - name: network_mgmt_bytes_out
+                - name: network_mgmt_packets_out
+                - name: network_SXab_bytes_in
+                - name: network_SXab_packets_in
+                - name: network_SXab_bytes_out
+                - name: network_SXab_packets_out
+                - name: network_S1U_bytes_in
+                - name: network_S1U_packets_in
+                - name: network_S1U_bytes_out
+                - name: network_S1U_packets_out
+                - name: network_SGi_bytes_in
+                - name: network_SGi_packets_in
+                - name: network_SGi_bytes_out
+                - name: network_SGi_packets_out
 
-        vdu-profile:
-        -   id: SPGW-U
-            min-number-of-instances: 1
+      vdu-profile:
+        - id: SPGW-U
+          min-number-of-instances: 1
 
-
-    # ###### VDU Configuration ##############################################
-    sw-image-desc:
-    -   id: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
-        name: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
-        image: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
-    vdu:
-    -   id: SPGW-U
-        name: SPGW-U
-        description: SPGW-U
-        cloud-init-file: spgwu-init
-        sw-image-desc: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
-        virtual-compute-desc: SPGW-U-compute
-        virtual-storage-desc:
+  # ###### VDU Configuration ################################################
+  sw-image-desc:
+    - id: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
+      name: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
+      image: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
+  vdu:
+    - id: SPGW-U
+      name: SPGW-U
+      description: SPGW-U
+      cloud-init-file: spgwu-init
+      sw-image-desc: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
+      virtual-compute-desc: SPGW-U-compute
+      virtual-storage-desc:
         - SPGW-U-storage
-        int-cpd:
-        -   id: ens3-int
-            virtual-network-interface-requirement:
-            -   name: ens3
-                virtual-interface:
-                    type: PARAVIRT
-        -   id: ens4-int
-            virtual-network-interface-requirement:
-            -   name: ens4
-                virtual-interface:
-                    type: PARAVIRT
-        -   id: ens5-int
-            virtual-network-interface-requirement:
-            -   name: ens5
-                virtual-interface:
-                    type: PARAVIRT
-        -   id: ens6-int
-            virtual-network-interface-requirement:
-            -   name: ens6
-                virtual-interface:
-                    type: PARAVIRT
+      int-cpd:
+        - id: ens3-int
+          virtual-network-interface-requirement:
+            - name: ens3
+              virtual-interface:
+                type: PARAVIRT
+        - id: ens4-int
+          virtual-network-interface-requirement:
+            - name: ens4
+              virtual-interface:
+                type: PARAVIRT
+        - id: ens5-int
+          virtual-network-interface-requirement:
+            - name: ens5
+              virtual-interface:
+                type: PARAVIRT
+        - id: ens6-int
+          virtual-network-interface-requirement:
+            - name: ens6
+              virtual-interface:
+                type: PARAVIRT
 
-    # ====== Compute ========================================================
-    virtual-compute-desc:
-    -   id: SPGW-U-compute
-        virtual-cpu:
-            num-virtual-cpu: 4
-        virtual-memory:
-            size: 3.0
+  # ====== Compute ==========================================================
+  virtual-compute-desc:
+    - id: SPGW-U-compute
+      virtual-cpu:
+        num-virtual-cpu: 4
+      virtual-memory:
+        size: 3.0
 
-    # ====== Storage ========================================================
-    virtual-storage-desc:
-    -   id: SPGW-U-storage
-        size-of-storage: 64
+  # ====== Storage ==========================================================
+  virtual-storage-desc:
+    - id: SPGW-U-storage
+      size-of-storage: 64
