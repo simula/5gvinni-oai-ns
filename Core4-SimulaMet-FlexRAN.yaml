@@ -31,33 +31,32 @@
 
 # ###### VNF Parameters #####################################################
 additionalParamsForVnf:
+  # ====== FlexRAN ==========================================================
   - member-vnf-index: '1'
     additionalParams:
-      # ====== FlexRAN ======================================================
       flexran_git_repository: 'https://github.com/simula/mosaic5g-mosaic5g.git'
       flexran_git_commit: 'master'
       flexran_service_ipv4_interface: '192.168.246.103/24'
       flexran_service_ipv4_gateway: '0.0.0.0'
       flexran_service_ipv6_interface: ''
       flexran_service_ipv6_gateway: ''
-      #network_users: '1024'
 
-      # ====== Other ========================================================
       password: 'osm4us'
 
 
-# ###### VNF External Addresses #############################################
+# ###### Addresses ##########################################################
 vld:
-# ====== Management =======================================================
-- name: SimulaMet-FlexRAN_nsd-Management
-  vnfd-connection-point-ref:
-    - member-vnf-index-ref: '1'
-      vnfd-connection-point-ref: flexran-mgmt-cp-ext
-      ip-address: 10.208.0.234
+  # ====== Management =======================================================
+  - name: Management
+    vnfd-connection-point-ref:
+      - member-vnf-index-ref: '1'
+        vnfd-connection-point-ref: flexran-mgmt-cp-ext
+        ip-address: 10.208.0.234
 
-# ====== Service ==========================================================
-- name: SimulaMet-FlexRAN_nsd-Service
-  vnfd-connection-point-ref:
-    - member-vnf-index-ref: '1'
-      vnfd-connection-point-ref: flexran-service-cp-ext
-      ip-address: 192.168.246.103
+  # ====== FlexRAN ==========================================================
+  - name: FlexRAN
+    vim-network-name: nornet-simula
+    vnfd-connection-point-ref:
+      - member-vnf-index-ref: '1'
+        vnfd-connection-point-ref: flexran-service-cp-ext
+        ip-address: 192.168.246.103
