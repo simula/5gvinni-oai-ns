@@ -114,26 +114,26 @@ vld:
 
   # ====== S1-C =============================================================
   - name: S1-C
+    vim-network-name: nornet-simula
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '2'
         vnfd-connection-point-ref: mme-s1c-cp-ext
-        vim-network-name: nornet-simula
         ip-address: 192.168.253.102
 
   # ====== S1-U =============================================================
   - name: S1-U
+    vim-network-name: nornet-simula
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '4'
         vnfd-connection-point-ref: spgwu-s1u-cp-ext
-        vim-network-name: nornet-simula
         ip-address: 192.168.254.159
 
   # ====== SGi ==============================================================
   - name: SGi
+    vim-network-name: nornet-simula
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '4'
         vnfd-connection-point-ref: spgwu-sgi-cp-ext
-        vim-network-name: nornet-simula
         ip-address: 10.254.1.233
 
   # ====== S6a ==============================================================
