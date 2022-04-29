@@ -121,6 +121,10 @@ vnfd:
                       value: <hss_S6a_address>
                     - name: network-realm
                       value: <network_realm>
+                    - name: network-mcc
+                      value: <network_mcc>
+                    - name: network-mnc
+                      value: <network_mnc>
 
                 - seq: '4'
                   name: restart-mme
