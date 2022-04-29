@@ -74,7 +74,8 @@ vnfd:
 
                     # ====== Configuration primitives =======================
                     initial-config-primitive:
-                    -   name: config
+                    -   seq: '1'
+                        name: config
                         execution-environment-ref: mmecharm-ee
                         parameter:
                         -   name: ssh-hostname
@@ -83,8 +84,8 @@ vnfd:
                             value: nornetpp
                         -   name: ssh-password
                             value: <password>
-                        seq: '1'
-                    -   name: prepare-mme-build
+                    -   seq: '2'
+                        name: prepare-mme-build
                         execution-environment-ref: mmecharm-ee
                         parameter:
                         -   name: mme-git-repository
@@ -99,8 +100,8 @@ vnfd:
                             value: <mme_S1C_ipv6_interface>
                         -   name: mme-S1C-ipv6-gateway
                             value: <mme_S1C_ipv6_gateway>
-                        seq: '2'
-                    -   name: configure-mme
+                    -   seq: '3'
+                        name: configure-mme
                         execution-environment-ref: mmecharm-ee
                         parameter:
                         -   name: mme-S1C-ipv4-interface
@@ -113,10 +114,9 @@ vnfd:
                             value: <hss_S6a_address>
                         -   name: network-realm
                             value: <network_realm>
-                        seq: '3'
-                    -   name: restart-mme
+                    -   seq: '4'
+                        name: restart-mme
                         execution-environment-ref: mmecharm-ee
-                        seq: '4'
 
                     # ====== Metrics ========================================
                     metrics:
