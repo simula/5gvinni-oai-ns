@@ -66,7 +66,8 @@ vnfd:
 
                     # ====== Configuration primitives =======================
                     initial-config-primitive:
-                    -   name: config
+                    -   seq: '1'
+                        name: config
                         execution-environment-ref: hsscharm-ee
                         parameter:
                         -   name: ssh-hostname
@@ -75,22 +76,22 @@ vnfd:
                             value: nornetpp
                         -   name: ssh-password
                             value: <password>
-                        seq: '1'
-                    -   name: prepare-cassandra-hss-build
+                    -   seq: '2'
+                        name: prepare-cassandra-hss-build
                         execution-environment-ref: hsscharm-ee
                         parameter:
                         -   name: hss-git-repository
                             value: <hss_git_repository>
                         -   name: hss-git-commit
                             value: <hss_git_commit>
-                        seq: '2'
-                    -   name: configure-cassandra
+                    -   seq: '3'
+                        name: configure-cassandra
                         execution-environment-ref: hsscharm-ee
                         parameter:
                         -   name: cassandra-server-ip
                             value: 172.16.6.129
-                        seq: '3'
-                    -   name: configure-hss
+                    -   seq: '4'
+                        name: configure-hss
                         execution-environment-ref: hsscharm-ee
                         parameter:
                         -   name: cassandra-server-ip
@@ -111,10 +112,9 @@ vnfd:
                             value: <network_msisdn_first>
                         -   name: network-users
                             value: <network_users>
-                        seq: '4'
-                    -   name: restart-hss
+                    -   seq: '5'
+                        name: restart-hss
                         execution-environment-ref: hsscharm-ee
-                        seq: '5'
 
                     # ====== Metrics ========================================
                     metrics:
