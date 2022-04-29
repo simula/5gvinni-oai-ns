@@ -65,6 +65,7 @@ additionalParamsForVnf:
       network_mcc: '242'
       network_mnc: '88'
 
+      hss_S6a_address: '172.16.6.129'   # Must match with HSS!
       spgwc_S11_ipv4_interface: '172.16.1.104/24'  # Must match with SPGW-C!
 
       password: 'osm4us'
