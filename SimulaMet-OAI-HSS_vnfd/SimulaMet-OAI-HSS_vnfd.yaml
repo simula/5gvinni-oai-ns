@@ -27,159 +27,161 @@
 # Contact: dreibh@simula.no
 
 vnfd:
-    id: SimulaMet-OAI-HSS_vnfd
-    product-name: SimulaMet-OAI-HSS_vnfd
-    description: SimulaMet OpenAirInterface HSS VNF
-    version: '2.0'
-    provider: Thomas Dreibholz
+  id: SimulaMet-OAI-HSS_vnfd
+  product-name: SimulaMet-OAI-HSS_vnfd
+  description: SimulaMet OpenAirInterface HSS VNF
+  version: '2.0'
+  provider: Thomas Dreibholz
 
-    # ###### External Connection Points #####################################
-    ext-cpd:
-    -   id: hss-mgmt-cp-ext
-        int-cpd:
-            cpd: ens3-int
-            vdu-id: HSS
-    -   id: hss-s6a-cp-ext
-        int-cpd:
-            cpd: ens4-int
-            vdu-id: HSS
-    mgmt-cp: hss-mgmt-cp-ext
+  # ###### External Connection Points #####################################
+  ext-cpd:
+    - id: hss-mgmt-cp-ext
+      int-cpd:
+        cpd: ens3-int
+        vdu-id: HSS
+    - id: hss-s6a-cp-ext
+      int-cpd:
+        cpd: ens4-int
+        vdu-id: HSS
+  mgmt-cp: hss-mgmt-cp-ext
 
-    # ###### VNF Definition #################################################
-    df:
-    -   id: default-df
-        instantiation-level:
-        -   id: default-instantiation-level
-            vdu-level:
-            -   number-of-instances: 1
-                vdu-id: HSS
-        lcm-operations-configuration:
-            operate-vnf-op-config:
-                day1-2:
-                -   id: HSS
+  # ###### VNF Definition #################################################
+  df:
+    - id: default-df
+      instantiation-level:
+        - id: default-instantiation-level
+          vdu-level:
+            - number-of-instances: 1
+              vdu-id: HSS
+      vdu-profile:
+        - id: HSS
+          min-number-of-instances: 1
 
-                    # ====== Execution environment ==========================
-                    execution-environment-list:
-                    - id: hsscharm-ee
-                      juju:
-                          charm: hsscharm
+      lcm-operations-configuration:
+        operate-vnf-op-config:
+          day1-2:
+            - id: HSS
 
-                    # ====== Configuration primitives =======================
-                    initial-config-primitive:
-                    -   seq: '1'
-                        name: config
-                        execution-environment-ref: hsscharm-ee
-                        parameter:
-                        -   name: ssh-hostname
-                            value: <rw_mgmt_ip>
-                        -   name: ssh-username
-                            value: nornetpp
-                        -   name: ssh-password
-                            value: <password>
-                    -   seq: '2'
-                        name: prepare-cassandra-hss-build
-                        execution-environment-ref: hsscharm-ee
-                        parameter:
-                        -   name: hss-git-repository
-                            value: <hss_git_repository>
-                        -   name: hss-git-commit
-                            value: <hss_git_commit>
-                    -   seq: '3'
-                        name: configure-cassandra
-                        execution-environment-ref: hsscharm-ee
-                        parameter:
-                        -   name: cassandra-server-ip
-                            value: 172.16.6.129
-                    -   seq: '4'
-                        name: configure-hss
-                        execution-environment-ref: hsscharm-ee
-                        parameter:
-                        -   name: cassandra-server-ip
-                            value: 172.16.6.129
-                        -   name: hss-S6a-address
-                            value: <hss_S6a_address>
-                        -   name: mme-S6a-address
-                            value: <mme_S6a_address>
-                        -   name: network-realm
-                            value: <network_realm>
-                        -   name: network-op
-                            value: <network_op>
-                        -   name: network-k
-                            value: <network_k>
-                        -   name: network-imsi-first
-                            value: <network_imsi_first>
-                        -   name: network-msisdn-first
-                            value: <network_msisdn_first>
-                        -   name: network-users
-                            value: <network_users>
-                    -   seq: '5'
-                        name: restart-hss
-                        execution-environment-ref: hsscharm-ee
+              # ====== Execution environment ================================
+              execution-environment-list:
+                - id: hsscharm-ee
+                  juju:
+                    charm: hsscharm
 
-                    # ====== Metrics ========================================
-                    metrics:
-                    -   name: system_random
-                    -   name: system_uptime
-                    -   name: system_users
-                    -   name: cpu_processes
-                    -   name: cpu_load_current
-                    -   name: cpu_load_1min
-                    -   name: cpu_load_5min
-                    -   name: cpu_load_15min
-                    -   name: memory_ram_usage
-                    -   name: memory_swap_usage
-                    -   name: disk_usage
-                    -   name: network_mgmt_bytes_in
-                    -   name: network_mgmt_packets_in
-                    -   name: network_mgmt_bytes_out
-                    -   name: network_mgmt_packets_out
-                    -   name: network_S6a_bytes_in
-                    -   name: network_S6a_packets_in
-                    -   name: network_S6a_bytes_out
-                    -   name: network_S6a_packets_out
+              # ====== Configuration primitives =============================
+              initial-config-primitive:
 
-        vdu-profile:
-        -   id: HSS
-            min-number-of-instances: 1
+                - seq: '1'
+                  name: config
+                  execution-environment-ref: hsscharm-ee
+                  parameter:
+                    - name: ssh-hostname
+                      value: <rw_mgmt_ip>
+                    - name: ssh-username
+                      value: nornetpp
+                    - name: ssh-password
+                      value: <password>
 
+                - seq: '2'
+                  name: prepare-cassandra-hss-build
+                  execution-environment-ref: hsscharm-ee
+                  parameter:
+                    - name: hss-git-repository
+                      value: <hss_git_repository>
+                    - name: hss-git-commit
+                      value: <hss_git_commit>
 
-    # ###### VDU Configuration ##############################################
-    sw-image-desc:
-    -   id: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
-        name: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
-        image: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
-    vdu:
-    -   id: HSS
-        name: HSS
-        description: HSS
-        cloud-init-file: hss-init
-        sw-image-desc: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
-        virtual-compute-desc: HSS-compute
-        virtual-storage-desc:
+                - seq: '3'
+                  name: configure-cassandra
+                  execution-environment-ref: hsscharm-ee
+                  parameter:
+                    - name: cassandra-server-ip
+                      value: 172.16.6.129
+
+                - seq: '4'
+                  name: configure-hss
+                  execution-environment-ref: hsscharm-ee
+                  parameter:
+                    - name: cassandra-server-ip
+                      value: 172.16.6.129
+                    - name: hss-S6a-address
+                      value: <hss_S6a_address>
+                    - name: mme-S6a-address
+                      value: <mme_S6a_address>
+                    - name: network-realm
+                      value: <network_realm>
+                    - name: network-op
+                      value: <network_op>
+                    - name: network-k
+                      value: <network_k>
+                    - name: network-imsi-first
+                      value: <network_imsi_first>
+                    - name: network-msisdn-first
+                      value: <network_msisdn_first>
+                    - name: network-users
+                      value: <network_users>
+
+                - seq: '5'
+                  name: restart-hss
+                  execution-environment-ref: hsscharm-ee
+
+              # ====== Metrics ==============================================
+              metrics:
+                - name: system_random
+                - name: system_uptime
+                - name: system_users
+                - name: cpu_processes
+                - name: cpu_load_current
+                - name: cpu_load_1min
+                - name: cpu_load_5min
+                - name: cpu_load_15min
+                - name: memory_ram_usage
+                - name: memory_swap_usage
+                - name: disk_usage
+                - name: network_mgmt_bytes_in
+                - name: network_mgmt_packets_in
+                - name: network_mgmt_bytes_out
+                - name: network_mgmt_packets_out
+                - name: network_S6a_bytes_in
+                - name: network_S6a_packets_in
+                - name: network_S6a_bytes_out
+                - name: network_S6a_packets_out
+
+  # ###### VDU Configuration ################################################
+  sw-image-desc:
+    - id: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
+      name: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
+      image: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
+  vdu:
+    - id: HSS
+      name: HSS
+      description: HSS
+      cloud-init-file: hss-init
+      sw-image-desc: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
+      virtual-compute-desc: HSS-compute
+      virtual-storage-desc:
         - HSS-storage
-        int-cpd:
-        -   id: ens3-int
-            virtual-network-interface-requirement:
-            -   name: ens3
-                position: 1
-                virtual-interface:
-                    type: PARAVIRT
-        -   id: ens4-int
-            virtual-network-interface-requirement:
-            -   name: ens4
-                position: 2
-                virtual-interface:
-                    type: PARAVIRT
-
-    # ====== Compute ========================================================
-    virtual-compute-desc:
-    -   id: HSS-compute
-        virtual-cpu:
-            num-virtual-cpu: 4
-        virtual-memory:
-            size: 3.0
-
-    # ====== Storage ========================================================
-    virtual-storage-desc:
-    -   id: HSS-storage
-        size-of-storage: 64
+      int-cpd:
+        - id: ens3-int
+          virtual-network-interface-requirement:
+            - name: ens3
+              position: 1
+              virtual-interface:
+                type: PARAVIRT
+        - id: ens4-int
+          virtual-network-interface-requirement:
+            - name: ens4
+              position: 2
+              virtual-interface:
+                type: PARAVIRT
+  # ====== Compute ========================================================
+  virtual-compute-desc:
+    - id: HSS-compute
+      virtual-cpu:
+        num-virtual-cpu: 4
+      virtual-memory:
+        size: 3.0
+  # ====== Storage ========================================================
+  virtual-storage-desc:
+    - id: HSS-storage
+      size-of-storage: 64

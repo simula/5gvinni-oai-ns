@@ -27,176 +27,179 @@
 # Contact: dreibh@simula.no
 
 vnfd:
-    id: SimulaMet-OAI-MME_vnfd
-    product-name: SimulaMet-OAI-MME_vnfd
-    description: SimulaMet OpenAirInterface MME VNF
-    version: '2.0'
-    provider: Thomas Dreibholz
+  id: SimulaMet-OAI-MME_vnfd
+  product-name: SimulaMet-OAI-MME_vnfd
+  description: SimulaMet OpenAirInterface MME VNF
+  version: '2.0'
+  provider: Thomas Dreibholz
 
-    # ###### External Connection Points #####################################
-    mgmt-cp: mme-mgmt-cp-ext
-    ext-cpd:
-    -   id: mme-mgmt-cp-ext
-        int-cpd:
-            cpd: ens3-int
-            vdu-id: MME
-    -   id: mme-s6a-cp-ext
-        int-cpd:
-            cpd: ens4-int
-            vdu-id: MME
-    -   id: mme-s11-cp-ext
-        int-cpd:
-            cpd: ens5-int
-            vdu-id: MME
-    -   id: mme-s1c-cp-ext
-        int-cpd:
-            cpd: ens6-int
-            vdu-id: MME
+  # ###### External Connection Points #######################################
+  mgmt-cp: mme-mgmt-cp-ext
+  ext-cpd:
+    - id: mme-mgmt-cp-ext
+      int-cpd:
+        cpd: ens3-int
+        vdu-id: MME
+    - id: mme-s6a-cp-ext
+      int-cpd:
+        cpd: ens4-int
+        vdu-id: MME
+    - id: mme-s11-cp-ext
+      int-cpd:
+        cpd: ens5-int
+        vdu-id: MME
+    - id: mme-s1c-cp-ext
+      int-cpd:
+        cpd: ens6-int
+        vdu-id: MME
 
-    # ###### VNF definition #################################################
-    df:
-    -   id: default-df
-        instantiation-level:
-        -   id: default-instantiation-level
-            vdu-level:
-            -   number-of-instances: 1
-                vdu-id: MME
-        lcm-operations-configuration:
-            operate-vnf-op-config:
-                day1-2:
-                -   id: MME
+  # ###### VNF definition ###################################################
+  df:
+    - id: default-df
+      instantiation-level:
+        - id: default-instantiation-level
+          vdu-level:
+            - number-of-instances: 1
+              vdu-id: MME
+      vdu-profile:
+        - id: MME
+          min-number-of-instances: 1
 
-                    # ====== Execution environment ==========================
-                    execution-environment-list:
-                    - id: mmecharm-ee
-                      juju:
-                        charm: mmecharm
+      lcm-operations-configuration:
+        operate-vnf-op-config:
+          day1-2:
+            - id: MME
 
-                    # ====== Configuration primitives =======================
-                    initial-config-primitive:
-                    -   seq: '1'
-                        name: config
-                        execution-environment-ref: mmecharm-ee
-                        parameter:
-                        -   name: ssh-hostname
-                            value: <rw_mgmt_ip>
-                        -   name: ssh-username
-                            value: nornetpp
-                        -   name: ssh-password
-                            value: <password>
-                    -   seq: '2'
-                        name: prepare-mme-build
-                        execution-environment-ref: mmecharm-ee
-                        parameter:
-                        -   name: mme-git-repository
-                            value: <mme_git_repository>
-                        -   name: mme-git-commit
-                            value: <mme_git_commit>
-                        -   name: mme-S1C-ipv4-interface
-                            value: <mme_S1C_ipv4_interface>
-                        -   name: mme-S1C-ipv4-gateway
-                            value: <mme_S1C_ipv4_gateway>
-                        -   name: mme-S1C-ipv6-interface
-                            value: <mme_S1C_ipv6_interface>
-                        -   name: mme-S1C-ipv6-gateway
-                            value: <mme_S1C_ipv6_gateway>
-                    -   seq: '3'
-                        name: configure-mme
-                        execution-environment-ref: mmecharm-ee
-                        parameter:
-                        -   name: mme-S1C-ipv4-interface
-                            value: <mme_S1C_ipv4_interface>
-                        -   name: mme-S11-ipv4-interface
-                            value: <mme_S11_ipv4_interface>
-                        -   name: spgwc-S11-ipv4-interface
-                            value: <spgwc_S11_ipv4_interface>
-                        -   name: hss-S6a-address
-                            value: <hss_S6a_address>
-                        -   name: network-realm
-                            value: <network_realm>
-                    -   seq: '4'
-                        name: restart-mme
-                        execution-environment-ref: mmecharm-ee
+              # ====== Execution environment ================================
+              execution-environment-list:
+                - id: mmecharm-ee
+                  juju:
+                    charm: mmecharm
 
-                    # ====== Metrics ========================================
-                    metrics:
-                    -   name: system_random
-                    -   name: system_uptime
-                    -   name: system_users
-                    -   name: cpu_processes
-                    -   name: cpu_load_current
-                    -   name: cpu_load_1min
-                    -   name: cpu_load_5min
-                    -   name: cpu_load_15min
-                    -   name: memory_ram_usage
-                    -   name: memory_swap_usage
-                    -   name: disk_usage
-                    -   name: network_mgmt_bytes_in
-                    -   name: network_mgmt_packets_in
-                    -   name: network_mgmt_bytes_out
-                    -   name: network_mgmt_packets_out
-                    -   name: network_S6a_bytes_in
-                    -   name: network_S6a_packets_in
-                    -   name: network_S6a_bytes_out
-                    -   name: network_S6a_packets_out
-                    -   name: network_S11_bytes_in
-                    -   name: network_S11_packets_in
-                    -   name: network_S11_bytes_out
-                    -   name: network_S11_packets_out
-                    -   name: network_S1C_packets_in
-                    -   name: network_S1C_bytes_out
-                    -   name: network_S1C_packets_out
+              # ====== Configuration primitives =============================
+              initial-config-primitive:
 
-        vdu-profile:
-        -   id: MME
-            min-number-of-instances: 1
+                - seq: '1'
+                  name: config
+                  execution-environment-ref: mmecharm-ee
+                  parameter:
+                    - name: ssh-hostname
+                      value: <rw_mgmt_ip>
+                    - name: ssh-username
+                      value: nornetpp
+                    - name: ssh-password
+                      value: <password>
 
+                - seq: '2'
+                  name: prepare-mme-build
+                  execution-environment-ref: mmecharm-ee
+                  parameter:
+                    - name: mme-git-repository
+                      value: <mme_git_repository>
+                    - name: mme-git-commit
+                      value: <mme_git_commit>
+                    - name: mme-S1C-ipv4-interface
+                      value: <mme_S1C_ipv4_interface>
+                    - name: mme-S1C-ipv4-gateway
+                      value: <mme_S1C_ipv4_gateway>
+                    - name: mme-S1C-ipv6-interface
+                      value: <mme_S1C_ipv6_interface>
+                    - name: mme-S1C-ipv6-gateway
+                      value: <mme_S1C_ipv6_gateway>
 
-    # ###### VDU Configuration ##############################################
-    sw-image-desc:
-    -   id: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
-        name: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
-        image: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
-    vdu:
-    -   id: MME
-        name: MME
-        description: MME
-        cloud-init-file: mme-init
-        sw-image-desc: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
-        virtual-compute-desc: MME-compute
-        virtual-storage-desc:
+                - seq: '3'
+                  name: configure-mme
+                  execution-environment-ref: mmecharm-ee
+                  parameter:
+                    - name: mme-S1C-ipv4-interface
+                      value: <mme_S1C_ipv4_interface>
+                    - name: mme-S11-ipv4-interface
+                      value: <mme_S11_ipv4_interface>
+                    - name: spgwc-S11-ipv4-interface
+                      value: <spgwc_S11_ipv4_interface>
+                    - name: hss-S6a-address
+                      value: <hss_S6a_address>
+                    - name: network-realm
+                      value: <network_realm>
+
+                - seq: '4'
+                  name: restart-mme
+                  execution-environment-ref: mmecharm-ee
+
+              # ====== Metrics ==============================================
+              metrics:
+                - name: system_random
+                - name: system_uptime
+                - name: system_users
+                - name: cpu_processes
+                - name: cpu_load_current
+                - name: cpu_load_1min
+                - name: cpu_load_5min
+                - name: cpu_load_15min
+                - name: memory_ram_usage
+                - name: memory_swap_usage
+                - name: disk_usage
+                - name: network_mgmt_bytes_in
+                - name: network_mgmt_packets_in
+                - name: network_mgmt_bytes_out
+                - name: network_mgmt_packets_out
+                - name: network_S6a_bytes_in
+                - name: network_S6a_packets_in
+                - name: network_S6a_bytes_out
+                - name: network_S6a_packets_out
+                - name: network_S11_bytes_in
+                - name: network_S11_packets_in
+                - name: network_S11_bytes_out
+                - name: network_S11_packets_out
+                - name: network_S1C_packets_in
+                - name: network_S1C_bytes_out
+                - name: network_S1C_packets_out
+
+  # ###### VDU Configuration ################################################
+  sw-image-desc:
+    - id: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
+      name: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
+      image: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
+  vdu:
+    - id: MME
+      name: MME
+      description: MME
+      cloud-init-file: mme-init
+      sw-image-desc: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
+      virtual-compute-desc: MME-compute
+      virtual-storage-desc:
         - MME-storage
-        int-cpd:
-        -   id: ens3-int
-            virtual-network-interface-requirement:
-            -   name: ens3
-                virtual-interface:
-                    type: PARAVIRT
-        -   id: ens4-int
-            virtual-network-interface-requirement:
-            -   name: ens4
-                virtual-interface:
-                    type: PARAVIRT
-        -   id: ens5-int
-            virtual-network-interface-requirement:
-            -   name: ens5
-                virtual-interface:
-                    type: PARAVIRT
-        -   id: ens6-int
-            virtual-network-interface-requirement:
-            -   name: ens6
-                virtual-interface:
-                    type: PARAVIRT
+      int-cpd:
+        - id: ens3-int
+          virtual-network-interface-requirement:
+            - name: ens3
+              virtual-interface:
+                type: PARAVIRT
+        - id: ens4-int
+          virtual-network-interface-requirement:
+            - name: ens4
+              virtual-interface:
+                type: PARAVIRT
+        - id: ens5-int
+          virtual-network-interface-requirement:
+            - name: ens5
+              virtual-interface:
+                type: PARAVIRT
+        - id: ens6-int
+          virtual-network-interface-requirement:
+            - name: ens6
+              virtual-interface:
+                type: PARAVIRT
 
-    # ====== Compute ========================================================
-    virtual-compute-desc:
-    -   id: MME-compute
-        virtual-cpu:
-            num-virtual-cpu: 4
-        virtual-memory:
-            size: 2.0
+  # ====== Compute ========================================================
+  virtual-compute-desc:
+    - id: MME-compute
+      virtual-cpu:
+        num-virtual-cpu: 4
+      virtual-memory:
+        size: 2.0
 
-    # ====== Storage ========================================================
-    virtual-storage-desc:
-    -   id: MME-storage
-        size-of-storage: 64
+  # ====== Storage ========================================================
+  virtual-storage-desc:
+    - id: MME-storage
+      size-of-storage: 64

@@ -63,6 +63,10 @@ vnfd:
           vdu-level:
             - number-of-instances: 1
               vdu-id: SPGW-U
+      vdu-profile:
+        - id: SPGW-U
+          min-number-of-instances: 1
+
       lcm-operations-configuration:
         operate-vnf-op-config:
           day1-2:
@@ -149,10 +153,6 @@ vnfd:
                 - name: network_SGi_packets_in
                 - name: network_SGi_bytes_out
                 - name: network_SGi_packets_out
-
-      vdu-profile:
-        - id: SPGW-U
-          min-number-of-instances: 1
 
   # ###### VDU Configuration ################################################
   sw-image-desc:
