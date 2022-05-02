@@ -55,7 +55,7 @@ vld:
 
   # ====== FlexRAN ==========================================================
   - name: FlexRAN
-    vim-network-name: nornet-simula
+    vim-network-name: 5gvinni-core1-flexran
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '1'
         vnfd-connection-point-ref: flexran-service-cp-ext
