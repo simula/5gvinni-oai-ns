@@ -148,7 +148,7 @@ vld:
       subnet-address: 172.16.6.0/24
       gateway-address: 0.0.0.0
       dhcp-params:
-        enabled: false
+        enabled: true
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '1'
         vnfd-connection-point-ref: hss-s6a-cp-ext
@@ -164,7 +164,7 @@ vld:
       subnet-address: 172.16.1.0/24
       gateway-address: 0.0.0.0
       dhcp-params:
-        enabled: false
+        enabled: true
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '2'
         vnfd-connection-point-ref: mme-s11-cp-ext
@@ -180,7 +180,7 @@ vld:
       subnet-address: 172.55.55.0/24
       gateway-address: 0.0.0.0
       dhcp-params:
-        enabled: false
+        enabled: true
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '3'
         vnfd-connection-point-ref: spgwc-sxab-cp-ext
