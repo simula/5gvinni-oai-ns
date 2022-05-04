@@ -36,7 +36,7 @@ additionalParamsForVnf:
     additionalParams:
       flexran_git_repository: 'https://github.com/simula/mosaic5g-mosaic5g.git'
       flexran_git_commit: 'master'
-      flexran_service_ipv4_interface: '192.168.246.103/24'
+      flexran_service_ipv4_interface: '192.168.243.100/24'
       flexran_service_ipv4_gateway: '0.0.0.0'
       flexran_service_ipv6_interface: ''
       flexran_service_ipv6_gateway: ''
@@ -55,8 +55,8 @@ vld:
 
   # ====== FlexRAN ==========================================================
   - name: FlexRAN
-    vim-network-name: 5gvinni-core1-flexran
+    vim-network-name: 5gvinni-core4-flexran    # <<-- VIM Network for FlexRAN
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '1'
         vnfd-connection-point-ref: flexran-service-cp-ext
-        ip-address: 192.168.246.103
+        ip-address: 192.168.243.100
