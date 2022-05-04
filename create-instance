@@ -29,7 +29,7 @@
 
 # ###### Print usage ########################################################
 PROGRAM="$0"
-VIM_ACCOUNT="openstack-site"
+VIM_ACCOUNT="simulamet-openstack"
 function usage()
 {
    echo >&2 "Usage: ${PROGRAM} parameter-file [parameter-file ...]"
