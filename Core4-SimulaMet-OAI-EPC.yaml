@@ -118,7 +118,7 @@ vld:
         ip-address: 10.208.0.233
 
   # ====== S1-C =============================================================
-  - name: S1C
+  - name: S1-C
     vim-network-name: 5gvinni-core4-s1c        # <<-- VIM Network for S1C
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '2'
@@ -126,7 +126,7 @@ vld:
         ip-address: 192.168.253.102
 
   # ====== S1-U =============================================================
-  - name: S1U
+  - name: S1-U
     vim-network-name: 5gvinni-core4-s1u        # <<-- VIM Network for S1U
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '4'
