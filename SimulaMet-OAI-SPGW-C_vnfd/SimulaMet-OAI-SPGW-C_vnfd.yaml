@@ -66,76 +66,76 @@ vnfd:
           day1-2:
             - id: SPGW-C
 
-              # ====== Execution environment ================================
-              execution-environment-list:
-                - id: spgwccharm-ee
-                  juju:
-                    charm: spgwccharm
+              ## ====== Execution environment ================================
+              #execution-environment-list:
+                #- id: spgwccharm-ee
+                  #juju:
+                    #charm: spgwccharm
 
-              # ====== Configuration primitives =============================
-              initial-config-primitive:
+              ## ====== Configuration primitives =============================
+              #initial-config-primitive:
 
-                - seq: '1'
-                  name: config
-                  execution-environment-ref: spgwccharm-ee
-                  parameter:
-                    - name: ssh-hostname
-                      value: <rw_mgmt_ip>
-                    - name: ssh-username
-                      value: nornetpp
-                    - name: ssh-password
-                      value: <password>
+                #- seq: '1'
+                  #name: config
+                  #execution-environment-ref: spgwccharm-ee
+                  #parameter:
+                    #- name: ssh-hostname
+                      #value: <rw_mgmt_ip>
+                    #- name: ssh-username
+                      #value: nornetpp
+                    #- name: ssh-password
+                      #value: <password>
 
-                - seq: '2'
-                  name: prepare-spgwc-build
-                  execution-environment-ref: spgwccharm-ee
-                  parameter:
-                    - name: spgwc-git-repository
-                      value: <spgwc_git_repository>
-                    - name: spgwc-git-commit
-                      value: <spgwc_git_commit>
+                #- seq: '2'
+                  #name: prepare-spgwc-build
+                  #execution-environment-ref: spgwccharm-ee
+                  #parameter:
+                    #- name: spgwc-git-repository
+                      #value: <spgwc_git_repository>
+                    #- name: spgwc-git-commit
+                      #value: <spgwc_git_commit>
 
-                - seq: '3'
-                  name: configure-spgwc
-                  execution-environment-ref: spgwccharm-ee
-                  parameter:
-                    - name: network-realm
-                      value: <network_realm>
-                    - name: network-ipv4-dns1
-                      value: <network_ipv4_dns1>
-                    - name: network-ipv4-dns2
-                      value: <network_ipv4_dns2>
+                #- seq: '3'
+                  #name: configure-spgwc
+                  #execution-environment-ref: spgwccharm-ee
+                  #parameter:
+                    #- name: network-realm
+                      #value: <network_realm>
+                    #- name: network-ipv4-dns1
+                      #value: <network_ipv4_dns1>
+                    #- name: network-ipv4-dns2
+                      #value: <network_ipv4_dns2>
 
-                - seq: '4'
-                  name: restart-spgwc
-                  execution-environment-ref: spgwccharm-ee
+                #- seq: '4'
+                  #name: restart-spgwc
+                  #execution-environment-ref: spgwccharm-ee
 
 
-              # ====== Metrics ==============================================
-              metrics:
-                - name: system_random
-                - name: system_uptime
-                - name: system_users
-                - name: cpu_processes
-                - name: cpu_load_current
-                - name: cpu_load_1min
-                - name: cpu_load_5min
-                - name: cpu_load_15min
-                - name: memory_ram_usage
-                - name: memory_swap_usage
-                - name: disk_usage
-                - name: network_mgmt_bytes_in
-                - name: network_mgmt_packets_in
-                - name: network_mgmt_bytes_out
-                - name: network_mgmt_packets_out
-                - name: network_SXab_bytes_in
-                - name: network_SXab_packets_in
-                - name: network_SXab_bytes_out
-                - name: network_SXab_packets_out
-                - name: network_S11_bytes_in
-                - name: network_S11_packets_in
-                - name: network_S11_bytes_out
-                - name: network_S11_packets_out
+              ## ====== Metrics ==============================================
+              #metrics:
+                #- name: system_random
+                #- name: system_uptime
+                #- name: system_users
+                #- name: cpu_processes
+                #- name: cpu_load_current
+                #- name: cpu_load_1min
+                #- name: cpu_load_5min
+                #- name: cpu_load_15min
+                #- name: memory_ram_usage
+                #- name: memory_swap_usage
+                #- name: disk_usage
+                #- name: network_mgmt_bytes_in
+                #- name: network_mgmt_packets_in
+                #- name: network_mgmt_bytes_out
+                #- name: network_mgmt_packets_out
+                #- name: network_SXab_bytes_in
+                #- name: network_SXab_packets_in
+                #- name: network_SXab_bytes_out
+                #- name: network_SXab_packets_out
+                #- name: network_S11_bytes_in
+                #- name: network_S11_packets_in
+                #- name: network_S11_bytes_out
+                #- name: network_S11_packets_out
 
   # ###### VDU Configuration ################################################
   sw-image-desc:
