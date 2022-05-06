@@ -1,51 +1,37 @@
 ==== Install development tools ====
 
-Juju Charm build tools:
- sudo snap install charm --classic
-
-Other tools:
- sudo apt install -y cmake yamllint
-
-OSM Information Model (IM) packages:
- RELEASE=ReleaseEIGHT   # !!! Update release here !!!
- REPOSITORY=stable      # !!! Update repository here !!!
- sudo apt-key adv --recv-key 6112814124E7559F
- sudo add-apt-repository -y "deb [arch=amd64] https://osm-download.etsi.org/repository/osm/debian/${RELEASE} ${REPOSITORY} IM devops"
- sudo apt-get update
- sudo apt-get install -y python-osm-im osm-devops
-
+Run tests/perform-osm-installation script!
 
 
 ==== Create instances ====
 
------- 1 Core setup, as in the OpenAirInterface example ------
+------ Core #1 -------
 
-./create-instance SimulaMet-OAI-EPC.yaml
-
-Helper scripts: sshA1 ... sshA4 for SSH to HSS, MME, SPGW-C and SPGW-U
-
-
------- 2 Cores Mosaic5G setup ------
-
-./create-instance SimulaMet-Mosaic5G-EPC-Core1.yaml
-./create-instance SimulaMet-Mosaic5G-EPC-Core2.yaml
-./create-instance SimulaMet-FlexRAN.yaml
+./create-instance Core1-SimulaMet-OAI-EPC.yaml
+./create-instance Core1-SimulaMet-FlexRAN.yaml
 
 Helper scripts:
-* sshB1a ... sshB4a for SSH to HSS, MME, SPGW-C and SPGW-U of Core #1
-* sshB1b ... sshB4b for SSH to HSS, MME, SPGW-C and SPGW-U of Core #2
+* sshA1 ... sshA4 for SSH to HSS, MME, SPGW-C and SPGW-U of Core #4
 * sshF for SSH to FlexRAN Controller
 
+------ Core #2 -------
 
------- 1 Core setup for CloudRAN demo scenario ------
+TBD.
 
-./create-instance SimulaMet-CloudRAN.yaml
+------ Core #4 -------
 
-Helper scripts: sshC1 ... sshC4 for SSH to HSS, MME, SPGW-C and SPGW-U
+./create-instance Core4-SimulaMet-OAI-EPC.yaml
+./create-instance Core4-SimulaMet-FlexRAN.yaml
 
+Helper scripts:
+* sshD1 ... sshD4 for SSH to HSS, MME, SPGW-C and SPGW-U of Core #4
 
 
 ==== If something goes wrong: debugging commands ====
+
+* Watch Juju status:
+
+ watch -n 5 --color juju status --color
 
 * Simple check for failed Juju actions:
 

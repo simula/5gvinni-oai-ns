@@ -1,0 +1,2 @@
+#!/bin/sh
+watch -n 5 --color juju status --color

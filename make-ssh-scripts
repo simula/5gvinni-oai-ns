@@ -1,0 +1,36 @@
+#!/bin/bash
+
+make-script ()
+{
+   local scriptName="$1"
+   local coreName="$2"
+   local deviceName="$3"
+   local ip="$4"
+
+   cat >${scriptName} <<EOF
+#!/bin/sh
+
+HOST="${ip}"
+
+ssh-keygen -q -R \${HOST}
+echo "SSH to ${deviceName} in ${coreName} ..."
+ssh -CX -oStrictHostKeyChecking=no nornetpp@\${HOST}
+EOF
+   chmod +x ${scriptName}
+}
+
+core=0
+for coreName in A B C D ; do   # for: #1 #2 #3 #4
+   device=0
+   for deviceName in HSS MME SPGW-C SPGW-U ; do
+      ip=10.208.0.2${core}${device}
+      let device=${device}+1
+      let coreNumber=${core}+1
+
+      echo "Core ${coreName}: ${ip} -> ${deviceName}"
+
+      make-script ssh${coreName}${device} "Core #${coreNumber}" ${deviceName} ${ip}
+
+   done
+   let core=${core}+1
+done

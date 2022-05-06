@@ -11,7 +11,7 @@
 # =====================================================================
 #
 # SimulaMet OpenAirInterface Evolved Packet Core NS
-# Copyright (C) 2019-2020 by Thomas Dreibholz
+# Copyright (C) 2019-2022 by Thomas Dreibholz
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -154,11 +154,6 @@ def configure_mme():
       networkRealm           = function_get('network-realm')
       networkMCC             = int(function_get('network-mcc'))
       networkMNC             = int(function_get('network-mnc'))
-      networkOP              = function_get('network-op')
-      networkK               = function_get('network-k')
-      networkIMSIFirst       = function_get('network-imsi-first')
-      networkMSISDNFirst     = function_get('network-msisdn-first')
-      networkUsers           = int(function_get('network-users'))
 
       TAC_SGW_TEST = 7
       TAC_SGW_0    = 600
@@ -267,11 +262,6 @@ sudo ./check_mme_s6a_certificate $PREFIX/freeDiameter mme.{networkRealm} >logs/c
          networkRealm           = networkRealm,
          networkMCC             = networkMCC,
          networkMNC             = networkMNC,
-         networkOP              = networkOP,
-         networkK               = networkK,
-         networkIMSIFirst       = networkIMSIFirst,
-         networkMSISDNFirst     = networkMSISDNFirst,
-         networkUsers           = networkUsers,
 
          tac_sgw_test_hi        = tac_sgw_test[0:2],
          tac_sgw_test_lo        = tac_sgw_test[2:4],

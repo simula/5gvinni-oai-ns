@@ -1,0 +1,182 @@
+# =====================================================================
+#     #######  #####          #     #   ###   #     # #     #   ###
+#     #       #     #         #     #    #    ##    # ##    #    #
+#     #       #               #     #    #    # #   # # #   #    #
+#      #####  #  ####  #####  #     #    #    #  #  # #  #  #    #
+#           # #     #          #   #     #    #   # # #   # #    #
+#     #     # #     #           # #      #    #    ## #    ##    #
+#      #####   #####             #      ###   #     # #     #   ###
+# =====================================================================
+#
+# SimulaMet OpenAirInterface Evolved Packet Core VNF
+# Copyright (C) 2019-2022 by Thomas Dreibholz
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Contact: dreibh@simula.no
+
+vnfd:
+  id: SimulaMet-OAI-SPGW-C_vnfd
+  product-name: SimulaMet-OAI-SPGW-C_vnfd
+  description: SimulaMet OpenAirInterface SPGW-C VNF
+  version: '2.0'
+  provider: Thomas Dreibholz
+
+  # ###### External Connection Points #######################################
+  ext-cpd:
+    - id: spgwc-mgmt-cp-ext
+      int-cpd:
+        cpd: ens3-int
+        vdu-id: SPGW-C
+    - id: spgwc-sxab-cp-ext
+      int-cpd:
+        cpd: ens4-int
+        vdu-id: SPGW-C
+    - id: spgwc-s11-cp-ext
+      int-cpd:
+        cpd: ens5-int
+        vdu-id: SPGW-C
+  mgmt-cp: spgwc-mgmt-cp-ext
+
+  # ###### VNF Definition ###################################################
+  df:
+    - id: default-df
+      instantiation-level:
+        - id: default-instantiation-level
+          vdu-level:
+            - number-of-instances: 1
+              vdu-id: SPGW-C
+      vdu-profile:
+        - id: SPGW-C
+          min-number-of-instances: 1
+
+      lcm-operations-configuration:
+        operate-vnf-op-config:
+          day1-2:
+            - id: SPGW-C
+
+              # ====== Execution environment ================================
+              execution-environment-list:
+                - id: spgwccharm-ee
+                  juju:
+                    charm: spgwccharm
+
+              # ====== Configuration primitives =============================
+              initial-config-primitive:
+
+                - seq: '1'
+                  name: config
+                  execution-environment-ref: spgwccharm-ee
+                  parameter:
+                    - name: ssh-hostname
+                      value: <rw_mgmt_ip>
+                    - name: ssh-username
+                      value: nornetpp
+                    - name: ssh-password
+                      value: <password>
+
+                - seq: '2'
+                  name: prepare-spgwc-build
+                  execution-environment-ref: spgwccharm-ee
+                  parameter:
+                    - name: spgwc-git-repository
+                      value: <spgwc_git_repository>
+                    - name: spgwc-git-commit
+                      value: <spgwc_git_commit>
+
+                - seq: '3'
+                  name: configure-spgwc
+                  execution-environment-ref: spgwccharm-ee
+                  parameter:
+                    - name: network-realm
+                      value: <network_realm>
+                    - name: network-ipv4-dns1
+                      value: <network_ipv4_dns1>
+                    - name: network-ipv4-dns2
+                      value: <network_ipv4_dns2>
+
+                - seq: '4'
+                  name: restart-spgwc
+                  execution-environment-ref: spgwccharm-ee
+
+
+              # ====== Metrics ==============================================
+              metrics:
+                - name: system_random
+                - name: system_uptime
+                - name: system_users
+                - name: cpu_processes
+                - name: cpu_load_current
+                - name: cpu_load_1min
+                - name: cpu_load_5min
+                - name: cpu_load_15min
+                - name: memory_ram_usage
+                - name: memory_swap_usage
+                - name: disk_usage
+                - name: network_mgmt_bytes_in
+                - name: network_mgmt_packets_in
+                - name: network_mgmt_bytes_out
+                - name: network_mgmt_packets_out
+                - name: network_SXab_bytes_in
+                - name: network_SXab_packets_in
+                - name: network_SXab_bytes_out
+                - name: network_SXab_packets_out
+                - name: network_S11_bytes_in
+                - name: network_S11_packets_in
+                - name: network_S11_bytes_out
+                - name: network_S11_packets_out
+
+  # ###### VDU Configuration ################################################
+  sw-image-desc:
+    - id: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
+      name: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
+      image: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
+  vdu:
+    - id: SPGW-C
+      name: SPGW-C
+      description: SPGW-C
+      cloud-init-file: spgwc-init
+      sw-image-desc: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
+      virtual-compute-desc: SPGW-C-compute
+      virtual-storage-desc:
+        - SPGW-C-storage
+      int-cpd:
+        - id: ens3-int
+          virtual-network-interface-requirement:
+            - name: ens3
+              virtual-interface:
+                type: PARAVIRT
+        - id: ens4-int
+          virtual-network-interface-requirement:
+            - name: ens4
+              virtual-interface:
+                type: PARAVIRT
+        - id: ens5-int
+          virtual-network-interface-requirement:
+            - name: ens5
+              virtual-interface:
+                type: PARAVIRT
+
+  # ====== Compute ==========================================================
+  virtual-compute-desc:
+    - id: SPGW-C-compute
+      virtual-cpu:
+        num-virtual-cpu: 4
+      virtual-memory:
+        size: 3.0
+
+  # ====== Storage ==========================================================
+  virtual-storage-desc:
+    - id: SPGW-C-storage
+      size-of-storage: 64
