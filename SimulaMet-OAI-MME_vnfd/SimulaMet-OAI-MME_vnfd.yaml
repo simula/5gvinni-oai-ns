@@ -52,6 +52,7 @@ vnfd:
       int-cpd:
         cpd: ens6-int
         vdu-id: MME
+      port-security-enabled: false
 
   # ###### VNF definition ###################################################
   df:
