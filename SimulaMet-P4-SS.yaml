@@ -47,7 +47,7 @@ vld:
     vim-network-name: openstack-management     # <<-- VIM Network for Management
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '1'
-        vnfd-connection-point-ref: p4ovs-mgmt-cp-ext
+        vnfd-connection-point-ref: p4ss-mgmt-cp-ext
         ip-address: 10.208.0.110
 
   # ====== Service, Port 1 ==================================================
@@ -55,7 +55,7 @@ vld:
     vim-network-name: 5gvinni-core4-flexran    # <<-- VIM Network for service port
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '1'
-        vnfd-connection-point-ref: p4ovs-service-port1-cp-ext
+        vnfd-connection-point-ref: p4ss-service-port1-cp-ext
         ip-address: 192.168.243.110
 
   # ====== Service, Port 2 ==================================================
@@ -63,5 +63,5 @@ vld:
     vim-network-name: hermod-management        # <<-- VIM Network for service port
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '1'
-        vnfd-connection-point-ref: p4ovs-service-port2-cp-ext
+        vnfd-connection-point-ref: p4ss-service-port2-cp-ext
         ip-address: 10.0.225.110

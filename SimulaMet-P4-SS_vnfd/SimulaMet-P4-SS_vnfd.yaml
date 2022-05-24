@@ -35,21 +35,21 @@ vnfd:
 
   # ###### External Connection Points #####################################
   ext-cpd:
-    - id: p4ovs-mgmt-cp-ext
+    - id: p4ss-mgmt-cp-ext
       int-cpd:
         cpd: ens3-int
         vdu-id: P4-SS
-    - id: p4ovs-service-port1-cp-ext
+    - id: p4ss-service-port1-cp-ext
       int-cpd:
         cpd: ens4-int
         vdu-id: P4-SS
       port-security-enabled: false
-    - id: p4ovs-service-port2-cp-ext
+    - id: p4ss-service-port2-cp-ext
       int-cpd:
         cpd: ens5-int
         vdu-id: P4-SS
       port-security-enabled: false
-  mgmt-cp: p4ovs-mgmt-cp-ext
+  mgmt-cp: p4ss-mgmt-cp-ext
 
   # ###### VNF Definition #################################################
   df:
@@ -70,9 +70,9 @@ vnfd:
 
               # ====== Execution environment ================================
               execution-environment-list:
-                - id: p4ovscharm-ee
+                - id: p4sscharm-ee
                   juju:
-                    charm: p4ovscharm
+                    charm: p4sscharm
 
               # ====== Configuration primitives =============================
               initial-config-primitive:
@@ -88,10 +88,10 @@ vnfd:
                       value: <password>
 
                 - seq: '2'
-                  name: configure-p4ovs
+                  name: configure-p4ss
 
                 - seq: '3'
-                  name: restart-p4ovs
+                  name: restart-p4ss
 
               # ====== Metrics ==============================================
               metrics:
@@ -124,7 +124,7 @@ vnfd:
       image: 5gVINNI-OpenStack-Ubuntu-20.04-LTS
       name: 5gVINNI-OpenStack-Ubuntu-20.04-LTS
   vdu:
-    - cloud-init-file: p4ovs-init
+    - cloud-init-file: p4ss-init
       description: P4-SS
       id: P4-SS
       int-cpd:

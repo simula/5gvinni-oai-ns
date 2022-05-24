@@ -56,14 +56,14 @@ nsd:
               virtual-link-connectivity:
                 - constituent-cpd-id:
                     - constituent-base-element-id: '1'
-                      constituent-cpd-id: p4ovs-mgmt-cp-ext
+                      constituent-cpd-id: p4ss-mgmt-cp-ext
                   virtual-link-profile-id: Management
                 - constituent-cpd-id:
                     - constituent-base-element-id: '1'
-                      constituent-cpd-id: p4ovs-service-port1-cp-ext
+                      constituent-cpd-id: p4ss-service-port1-cp-ext
                   virtual-link-profile-id: Service-Port1
                 - constituent-cpd-id:
                     - constituent-base-element-id: '1'
-                      constituent-cpd-id: p4ovs-service-port2-cp-ext
+                      constituent-cpd-id: p4ss-service-port2-cp-ext
                   virtual-link-profile-id: Service-Port2
               vnfd-id: SimulaMet-P4-SS_vnfd
