@@ -8,7 +8,7 @@
 #      #####   #####             #      ###   #     # #     #   ###
 # =====================================================================
 #
-# SimulaMet P4-OvS VNF and NS
+# SimulaMet P4-SS VNF and NS
 # Copyright (C) 2021-2022 by Thomas Dreibholz
 #
 # This program is free software: you can redistribute it and/or modify
@@ -27,16 +27,16 @@
 # Contact: dreibh@simula.no
 
 # The following line tells "create-instance" the name of the NSD:
-#! NSD SimulaMet-P4-OvS_nsd
+#! NSD SimulaMet-P4-SS_nsd
 
 # ###### VNF Parameters #####################################################
 additionalParamsForVnf:
   - member-vnf-index: '1'
     additionalParams:
-      # ====== P4-OvS =======================================================
+      # ====== P4-SS ========================================================
 
       # ====== Other ========================================================
-      hostname: 'p4'
+      hostname: 'p4-ss'
       password: 'osm4us'
 
 
@@ -48,7 +48,7 @@ vld:
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '1'
         vnfd-connection-point-ref: p4ovs-mgmt-cp-ext
-        ip-address: 10.208.0.111
+        ip-address: 10.208.0.110
 
   # ====== Service, Port 1 ==================================================
   - name: Service-Port1
@@ -56,7 +56,7 @@ vld:
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '1'
         vnfd-connection-point-ref: p4ovs-service-port1-cp-ext
-        ip-address: 192.168.243.111
+        ip-address: 192.168.243.110
 
   # ====== Service, Port 2 ==================================================
   - name: Service-Port2
@@ -64,4 +64,4 @@ vld:
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '1'
         vnfd-connection-point-ref: p4ovs-service-port2-cp-ext
-        ip-address: 10.0.225.111
+        ip-address: 10.0.225.110
