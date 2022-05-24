@@ -1,0 +1,163 @@
+# =====================================================================
+#     #######  #####          #     #   ###   #     # #     #   ###
+#     #       #     #         #     #    #    ##    # ##    #    #
+#     #       #               #     #    #    # #   # # #   #    #
+#      #####  #  ####  #####  #     #    #    #  #  # #  #  #    #
+#           # #     #          #   #     #    #   # # #   # #    #
+#     #     # #     #           # #      #    #    ## #    ##    #
+#      #####   #####             #      ###   #     # #     #   ###
+# =====================================================================
+#
+# SimulaMet P4-SS VNF
+# Copyright (C) 2019-2022 by Thomas Dreibholz
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Contact: dreibh@simula.no
+
+vnfd:
+  id: SimulaMet-P4-SS_vnfd
+  product-name: SimulaMet-P4-SS_vnfd
+  description: SimulaMet P4-SS VNF
+  version: '2.0'
+  provider: Thomas Dreibholz
+
+  # ###### External Connection Points #####################################
+  ext-cpd:
+    - id: p4ovs-mgmt-cp-ext
+      int-cpd:
+        cpd: ens3-int
+        vdu-id: P4-SS
+    - id: p4ovs-service-port1-cp-ext
+      int-cpd:
+        cpd: ens4-int
+        vdu-id: P4-SS
+      port-security-enabled: false
+    - id: p4ovs-service-port2-cp-ext
+      int-cpd:
+        cpd: ens5-int
+        vdu-id: P4-SS
+      port-security-enabled: false
+  mgmt-cp: p4ovs-mgmt-cp-ext
+
+  # ###### VNF Definition #################################################
+  df:
+    - id: default-df
+      instantiation-level:
+        - id: default-instantiation-level
+          vdu-level:
+            - number-of-instances: 1
+              vdu-id: P4-SS
+      vdu-profile:
+        - id: P4-SS
+          min-number-of-instances: 1
+
+      lcm-operations-configuration:
+        operate-vnf-op-config:
+          day1-2:
+            - id: P4-SS
+
+              # ====== Execution environment ================================
+              execution-environment-list:
+                - id: p4ovscharm-ee
+                  juju:
+                    charm: p4ovscharm
+
+              # ====== Configuration primitives =============================
+              initial-config-primitive:
+
+                - seq: '1'
+                  name: config
+                  parameter:
+                    - name: ssh-hostname
+                      value: <rw_mgmt_ip>
+                    - name: ssh-username
+                      value: nornetpp
+                    - name: ssh-password
+                      value: <password>
+
+                - seq: '2'
+                  name: configure-p4ovs
+
+                - seq: '3'
+                  name: restart-p4ovs
+
+              # ====== Metrics ==============================================
+              metrics:
+                - name: system_random
+                - name: system_uptime
+                - name: system_users
+                - name: cpu_processes
+                - name: cpu_load_1min
+                - name: cpu_load_5min
+                - name: cpu_load_15min
+                - name: memory_ram_usage
+                - name: memory_swap_usage
+                - name: disk_usage
+                - name: network_mgmt_bytes_in
+                - name: network_mgmt_packets_in
+                - name: network_mgmt_bytes_out
+                - name: network_mgmt_packets_out
+                - name: network_service_port1_bytes_in
+                - name: network_service_port1_packets_in
+                - name: network_service_port1_bytes_out
+                - name: network_service_port1_packets_out
+                - name: network_service_port2_bytes_in
+                - name: network_service_port2_packets_in
+                - name: network_service_port2_bytes_out
+                - name: network_service_port2_packets_out
+
+  # ###### VDU Configuration ################################################
+  sw-image-desc:
+    - id: 5gVINNI-OpenStack-Ubuntu-20.04-LTS
+      image: 5gVINNI-OpenStack-Ubuntu-20.04-LTS
+      name: 5gVINNI-OpenStack-Ubuntu-20.04-LTS
+  vdu:
+    - cloud-init-file: p4ovs-init
+      description: P4-SS
+      id: P4-SS
+      int-cpd:
+        - id: ens3-int
+          virtual-network-interface-requirement:
+            - name: ens3
+              virtual-interface:
+                type: PARAVIRT
+        - id: ens4-int
+          virtual-network-interface-requirement:
+            - name: ens4
+              virtual-interface:
+                type: PARAVIRT
+        - id: ens5-int
+          virtual-network-interface-requirement:
+            - name: ens5
+              virtual-interface:
+                type: PARAVIRT
+      name: P4-SS
+      sw-image-desc: 5gVINNI-OpenStack-Ubuntu-20.04-LTS
+      virtual-compute-desc: P4-SS-compute
+      virtual-storage-desc:
+        - P4-SS-storage
+
+  # ====== Compute ========================================================
+  virtual-compute-desc:
+    - id: P4-SS-compute
+      virtual-cpu:
+        num-virtual-cpu: 4
+      virtual-memory:
+        size: 4.0
+
+  # ====== Storage ========================================================
+  virtual-storage-desc:
+    - id: P4-SS-storage
+      size-of-storage: 64
