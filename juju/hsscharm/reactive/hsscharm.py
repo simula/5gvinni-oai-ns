@@ -156,10 +156,10 @@ sudo yq w -i /etc/cassandra/cassandra.yaml "listen_address" "{cassandraServerIP}
 sudo yq w -i /etc/cassandra/cassandra.yaml "rpc_address" "{cassandraServerIP}" && \\
 sudo yq w -i /etc/cassandra/cassandra.yaml "endpoint_snitch" "GossipingPropertyFileSnitch" && \\
 sudo service cassandra start && \\
-sleep 60 && \\
+t=1 ; while [ $t -le 120 ] ; do echo "Trying $t ..." ; if echo "SHOW VERSION;" | cqlsh 172.16.6.129 ; then break ; fi ; let t=$t+1 ; done && \\
 sudo service cassandra status | cat && \\
 cqlsh --file ../src/hss_rel14/db/oai_db.cql {cassandraServerIP} >logs/oai_db.log 2>&1 && \\
-cqlsh -e "SELECT COUNT(*) FROM vhss.users_imsi;" {cassandraServerIP} >/dev/null && echo "Cassandra is okay!" || echo "Cassandra seems to be unavailable!"
+cqlsh -e "SELECT COUNT(*) FROM vhss.users_imsi;" {cassandraServerIP} >logs/oai_db_check.log 2>&1 && echo "Cassandra is okay!" || echo "Cassandra seems to be unavailable!"
 """.format(
          gitDirectory      = gitDirectory,
          cassandraServerIP = cassandraServerIP
