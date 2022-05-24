@@ -40,7 +40,7 @@ nsd:
           mgmt-network: 'true'
           vim-network-name: mgmt
         - id: FlexRAN
-          vim-network-name: nornet-simula
+          # vim-network-name: nornet-simula
 
       # ###### Used VNFDs ###################################################
       vnfd-id:

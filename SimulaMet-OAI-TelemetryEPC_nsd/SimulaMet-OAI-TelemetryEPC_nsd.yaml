@@ -40,16 +40,16 @@ nsd:
           mgmt-network: "true"
           vim-network-name: mgmt
         - id: S1C
-          vim-network-name: nornet-simula
+          # vim-network-name: nornet-simula
         - id: s1c-switch-link
         - id: S1U
-          vim-network-name: nornet-simula
+          # vim-network-name: nornet-simula
         - id: s1u-switch-link
         - id: SGi
-          vim-network-name: nornet-simula
+          # vim-network-name: nornet-simula
         - id: sgi-switch-link
-        - id: Service
-          vim-network-name: nornet-simula
+        - id: FlexRAN
+          # vim-network-name: nornet-simula
         - id: flexran-switch-link
 
       # ###### Used VNFDs ###################################################
@@ -145,7 +145,7 @@ nsd:
                 - constituent-cpd-id:
                     - constituent-base-element-id: "5"
                       constituent-cpd-id: p4switch-service-port1-cp-ext
-                  virtual-link-profile-id: Service
+                  virtual-link-profile-id: FlexRAN
                 - constituent-cpd-id:
                     - constituent-base-element-id: "5"
                       constituent-cpd-id: p4switch-service-port2-cp-ext
