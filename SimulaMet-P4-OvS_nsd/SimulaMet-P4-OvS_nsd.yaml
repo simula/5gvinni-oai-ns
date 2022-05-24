@@ -27,37 +27,43 @@
 # Contact: dreibh@simula.no
 
 nsd:
-    nsd:
-    -   description: SimulaMet P4-capable Open vSwitch NS
-        designer: Thomas Dreibholz
-        df:
-        -   id: default-df
-            vnf-profile:
-            -   id: '1'
-                virtual-link-connectivity:
-                -   constituent-cpd-id:
-                    -   constituent-base-element-id: '1'
-                        constituent-cpd-id: p4ovs-mgmt-cp-ext
-                    virtual-link-profile-id: SimulaMet-P4-OvS_nsd-Management
-                -   constituent-cpd-id:
-                    -   constituent-base-element-id: '1'
-                        constituent-cpd-id: p4ovs-service-port1-cp-ext
-                    virtual-link-profile-id: SimulaMet-P4-OvS_nsd-Service-Port1
-                -   constituent-cpd-id:
-                    -   constituent-base-element-id: '1'
-                        constituent-cpd-id: p4ovs-service-port2-cp-ext
-                    virtual-link-profile-id: SimulaMet-P4-OvS_nsd-Service-Port2
-                vnfd-id: SimulaMet-P4-OvS_vnfd
-        id: SimulaMet-P4-OvS_nsd
-        name: SimulaMet-P4-OvS_nsd
-        version: '1.0'
-        virtual-link-desc:
-        -   id: SimulaMet-P4-OvS_nsd-Management
-            mgmt-network: 'true'
-            vim-network-name: mgmt
-        -   id: SimulaMet-P4-OvS_nsd-Service-Port1
-            vim-network-name: nornet-simula
-        -   id: SimulaMet-P4-OvS_nsd-Service-Port2
-            vim-network-name: nornet-simula
-        vnfd-id:
+  nsd:
+    - id: SimulaMet-P4-OvS_nsd
+      name: SimulaMet-P4-OvS_nsd
+      description: SimulaMet P4-capable Open vSwitch NS
+      version: '2.0'
+      designer: Thomas Dreibholz
+
+      # ###### Connections ##################################################
+      virtual-link-desc:
+        - id: Management
+          mgmt-network: 'true'
+          vim-network-name: mgmt
+        - id: Service-Port1
+          vim-network-name: nornet-simula
+        - id: Service-Port2
+          vim-network-name: nornet-simula
+
+      # ###### Used VNFDs ###################################################
+      vnfd-id:
         - SimulaMet-P4-OvS_vnfd
+
+      # ###### NS Definition ################################################
+      df:
+        - id: default-df
+          vnf-profile:
+            - id: '1'
+              virtual-link-connectivity:
+                - constituent-cpd-id:
+                    - constituent-base-element-id: '1'
+                      constituent-cpd-id: p4ovs-mgmt-cp-ext
+                  virtual-link-profile-id: Management
+                - constituent-cpd-id:
+                    - constituent-base-element-id: '1'
+                      constituent-cpd-id: p4ovs-service-port1-cp-ext
+                  virtual-link-profile-id: Service-Port1
+                - constituent-cpd-id:
+                    - constituent-base-element-id: '1'
+                      constituent-cpd-id: p4ovs-service-port2-cp-ext
+                  virtual-link-profile-id: Service-Port2
+              vnfd-id: SimulaMet-P4-OvS_vnfd
