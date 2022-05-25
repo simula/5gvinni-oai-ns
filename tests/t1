@@ -232,7 +232,7 @@ sudo yq w -i /etc/cassandra/cassandra.yaml "listen_address" "{cassandraServerIP}
 sudo yq w -i /etc/cassandra/cassandra.yaml "rpc_address" "{cassandraServerIP}" && \\
 sudo yq w -i /etc/cassandra/cassandra.yaml "endpoint_snitch" "GossipingPropertyFileSnitch" && \\
 sudo service cassandra start && \\
-t=1 ; while [ $t -le 120 ] ; do echo "Trying $t ..." ; if echo "SHOW VERSION;" | cqlsh 172.16.6.129 ; then break ; fi ; let t=$t+1 ; done && \\
+t=1 ; while [ $t -le 180 ] ; do echo "Trying $t ..." ; if echo "SHOW VERSION;" | cqlsh 172.16.6.129 ; then break ; sleep 1 ; fi ; let t=$t+1 ; done && \\
 sudo service cassandra status | cat && \\
 cqlsh --file ../src/hss_rel14/db/oai_db.cql {cassandraServerIP} >logs/oai_db.log 2>&1 && \\
 cqlsh -e "SELECT COUNT(*) FROM vhss.users_imsi;" {cassandraServerIP} >logs/oai_db_check.log 2>&1 && echo "Cassandra is okay!" || echo "Cassandra seems to be unavailable!"
@@ -292,6 +292,9 @@ mkdir -p logs && \\
 export MAKEFLAGS="-j`nproc`" && \\
 cd /home/nornetpp/src/{gitDirectory}/scripts && \\
 ./build_hss_rel14 --clean >logs/build_hss_rel14-2.log 2>&1
+sudo service cassandra restart 2>&1 | tee logs/oai_db_check2.log && \\
+t=1 ; while [ $t -le 180 ] ; do echo "Trying $t ..." | tee --append logs/oai_db_check2.log ; if echo "SHOW VERSION;" | cqlsh 172.16.6.129 >>logs/oai_db_check2.log 2>&1 ; then break ; sleep 1 ; fi ; let t=$t+1 ; done && \\
+sudo service cassandra status 2>&1 | tee --append logs/oai_db_check2.log
 """.format(
          gitDirectory       = gitDirectory,
          cassandraServerIP  = cassandraServerIP
