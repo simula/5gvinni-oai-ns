@@ -1,5 +1,17 @@
 #!/bin/sh -e
 
-ssh-copy-id -p 2909 -i ~/.ssh/id_rsa nornetpp@localhost
-ssh -p 2909 -i ~/.ssh/id_rsa nornetpp@localhost hostname
-HENCSAT-QoS-Controller -router "Access to Public Data Network" -sshuser nornetpp -sshhost localhost  -sshport 2909
+# ssh-copy-id -p 2909 -i ~/.ssh/id_rsa nornetpp@localhost
+# ssh -p 2909 -i ~/.ssh/id_rsa nornetpp@localhost hostname
+# HENCSAT-QoS-Controller -router "Access to Public Data Network" -sshuser nornetpp -sshhost localhost  -sshport 2909
+
+PROXY="128.39.37.188,nornetpp@frigg.simula.nornet"
+SPGW_U="10.208.0.213"
+
+# Just a test, to make sure SSH key-based authentication is working!
+ssh -J $PROXY nornetpp@$SPGW_U hostname
+
+HENCSAT-QoS-Controller \
+   -router "SPGW-U QoS Control" \
+   -sshuser nornetpp \
+   -sshhost $SPGW_U \
+   -sshproxy $PROXY
