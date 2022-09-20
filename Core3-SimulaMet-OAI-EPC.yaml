@@ -35,7 +35,7 @@ additionalParamsForVnf:
   - member-vnf-index: '1'
     additionalParams:
       hss_git_repository: 'https://github.com/simula/openairinterface-openair-hss.git'
-      hss_git_commit: 'dreibh/cassandra-build-fix-26apr2022'
+      hss_git_commit: 'dreibh/cassandra-build-fix-22oct2020'
       hss_S6a_address: '172.16.6.129'
 
       network_realm: 'simula.nornet'
@@ -53,7 +53,7 @@ additionalParamsForVnf:
   - member-vnf-index: '2'
     additionalParams:
       mme_git_repository: 'https://github.com/simula/openairinterface-openair-mme.git'
-      mme_git_commit: 'v1.1.0'
+      mme_git_commit: 'dreibh/asn1c-url-fix-14Oct2020'
       mme_S1C_ipv4_interface: '192.168.251.102/24'
       mme_S1C_ipv4_gateway: '0.0.0.0'
       mme_S1C_ipv6_interface: ''
@@ -88,7 +88,7 @@ additionalParamsForVnf:
   - member-vnf-index: '4'
     additionalParams:
       spgwu_git_repository: 'https://github.com/simula/openairinterface-openair-spgwu-tiny.git'
-      spgwu_git_commit: 'v1.1.0'
+      spgwu_git_commit: 'dreibh/tx-checksum-ip-generic-off'
       spgwu_S1U_ipv4_interface: '192.168.252.159/24'
       spgwu_S1U_ipv4_gateway: '0.0.0.0'
       spgwu_SGi_ipv4_interface: '10.254.1.233/24'
