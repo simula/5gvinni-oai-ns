@@ -55,7 +55,12 @@ MyParameters = {
    # ====== MME =============================================================
    'mme-git-repository': 'https://github.com/simula/openairinterface-openair-mme.git',
    'mme-git-commit': 'dreibh/asn1c-url-fix-14Oct2020',
-   'mme-S1C-ipv4-interface': '192.168.247.102/24',
+   # MME:
+   # Core #1: 192.168.247.102
+   # Core #2: 192.168.249.102
+   # Core #3: 192.168.251.102
+   # Core #4: 192.168.253.102
+   'mme-S1C-ipv4-interface': '192.168.253.102/24',
    'mme-S1C-ipv4-gateway': '0.0.0.0',
    'mme-S11-ipv4-interface': '172.16.1.102/24',
    'mme-S1C-ipv6-interface': '',
@@ -70,13 +75,24 @@ MyParameters = {
    'spgwc-git-commit': '2020.w36',
    'network-ipv4-dns1': '10.1.1.1',
    'network-ipv4-dns2': '10.1.2.1',
+   'network-ipv4-ue-address-pool': '12.1.1.2 - 12.1.1.128',
 
    # ====== SPGW-U ==========================================================
    'spgwu-git-repository': 'https://github.com/simula/openairinterface-openair-spgwu-tiny.git',
    'spgwu-git-commit': 'dreibh/tx-checksum-ip-generic-off',
-   'spgwu-S1U-ipv4-interface': '192.168.248.159/24',
+   # SPGW-U:
+   # Core #1: 192.168.248.159
+   # Core #2: 192.168.250.159
+   # Core #3: 192.168.242.159
+   # Core #4: 192.168.254.159
+   'spgwu-S1U-ipv4-interface': '192.168.254.159/24',   # !!!!!!
    'spgwu-S1U-ipv4-gateway': '0.0.0.0',
-   'spgwu-SGi-ipv4-interface': '10.254.1.203/24',
+   # SGi:
+   # Core #1: 10.254.1.230
+   # Core #2: 10.254.1.231
+   # Core #3: 10.254.1.232
+   # Core #4: 10.254.1.233
+   'spgwu-SGi-ipv4-interface': '10.254.1.233/24',   # !!!!!!
    'spgwu-SGi-ipv4-gateway': '10.254.1.1',
    'spgwu-SGi-ipv6-interface': '',
    'spgwu-SGi-ipv6-gateway': '',
@@ -85,6 +101,11 @@ MyParameters = {
    # ====== FlexRAN =========================================================
    'flexran-git-repository': 'https://github.com/simula/mosaic5g-mosaic5g.git',
    'flexran-git-commit': 'master',
+   # FlexRAN:
+   # Core #1: 192.168.246.100
+   # Core #2: 192.168.245.100
+   # Core #3: 192.168.244.100
+   # Core #4: 192.168.243.100
    'flexran-service-ipv4-interface': '192.168.246.100/24',
    'flexran-service-ipv4-gateway': '0.0.0.0',
    'flexran-service-ipv6-interface': '',
@@ -584,7 +605,7 @@ PREFIX='/usr/local/etc/oai' && \\
 sudo mkdir -m 0777 -p $PREFIX && \\
 sudo mkdir -m 0777 -p $PREFIX/freeDiameter && \\
 sudo cp ../etc/mme_fd.sprint.conf  $PREFIX/freeDiameter/mme_fd.conf && \\
-sudo cp ../etc/mme.conf  $PREFIX && \\
+sudo cp ../etc/mme.conf $PREFIX && \\
 declare -A MME_CONF && \\
 MME_CONF[@MME_S6A_IP_ADDR@]="127.0.0.11" && \\
 MME_CONF[@INSTANCE@]=$INSTANCE && \\
@@ -806,17 +827,18 @@ def configure_spgwc():
       # For a documentation of the installation procedure, see:
       # https://github.com/simula/openairinterface-openair-cn-cups/wiki/OpenAirSoftwareSupport#install-spgw-c
 
-      gitDirectory         = 'openair-spgwc'
+      gitDirectory             = 'openair-spgwc'
 
-      networkRealm         = function_get('network-realm')
-      networkDNS1_IPv4     = IPv4Address(function_get('network-ipv4-dns1'))
-      networkDNS2_IPv4     = IPv4Address(function_get('network-ipv4-dns2'))
+      networkRealm             = function_get('network-realm')
+      networkDNS1_IPv4         = IPv4Address(function_get('network-ipv4-dns1'))
+      networkDNS2_IPv4         = IPv4Address(function_get('network-ipv4-dns2'))
+      networkIPv4UEAddressPool = function_get('network-ipv4-ue-address-pool')
 
       # Prepare network configurations:
-      spgwcSXab_IfName     = 'ens4'
-      spgwcS11_IfName      = 'ens5'
-      spgwcS5S8_SGW_IfName = 'dummy0'
-      spgwcS5S8_PGW_IfName = 'dummy1'
+      spgwcSXab_IfName         = 'ens4'
+      spgwcS11_IfName          = 'ens5'
+      spgwcS5S8_SGW_IfName     = 'dummy0'
+      spgwcS5S8_PGW_IfName     = 'dummy1'
 
       # ====== Build SPGW-C dependencies ====================================
       vduHelper.beginBlock('Building SPGW-C dependencies')
@@ -844,15 +866,19 @@ cd /home/nornetpp/src/{gitDirectory}/build/scripts && \\
 INSTANCE=1 && \\
 PREFIX='/usr/local/etc/oai' && \\
 sudo mkdir -m 0777 -p $PREFIX && \\
-sudo cp ../../etc/spgw_c.conf  $PREFIX && \\
+sudo cp ../../etc/spgw_c.conf $PREFIX && \\
 declare -A SPGWC_CONF && \\
 SPGWC_CONF[@INSTANCE@]=$INSTANCE && \\
 SPGWC_CONF[@PREFIX@]=$PREFIX && \\
 SPGWC_CONF[@PID_DIRECTORY@]='/var/run' && \\
 SPGWC_CONF[@SGW_INTERFACE_NAME_FOR_S11@]='{spgwcS11_IfName}' && \\
 SPGWC_CONF[@SGW_INTERFACE_NAME_FOR_S5_S8_CP@]='{spgwcS5S8_SGW_IfName}' && \\
+SPGWC_CONF[@SGW_IP_FOR_S5_S8_CP@]='172.58.58.102' && \\
 SPGWC_CONF[@PGW_INTERFACE_NAME_FOR_S5_S8_CP@]='{spgwcS5S8_PGW_IfName}' && \\
+SPGWC_CONF[@PGW_IP_FOR_S5_S8_CP@]='172.58.58.101' && \\
 SPGWC_CONF[@PGW_INTERFACE_NAME_FOR_SX@]='{spgwcSXab_IfName}' && \\
+SPGWC_CONF[@UE_IP_ADDRESS_POOL@]='{networkIPv4UEAddressPool}' && \\
+SPGWC_CONF[@PUSH_PROTOCOL_OPTION@]='no' && \\
 SPGWC_CONF[@DEFAULT_DNS_IPV4_ADDRESS@]='{networkDNS1_IPv4}' && \\
 SPGWC_CONF[@DEFAULT_DNS_SEC_IPV4_ADDRESS@]='{networkDNS2_IPv4}' && \\
 SPGWC_CONF[@DEFAULT_APN@]='default.{networkRealm}' && \\
@@ -860,14 +886,15 @@ for K in "${{!SPGWC_CONF[@]}}"; do sudo egrep -lRZ "$K" $PREFIX | xargs -0 -l su
 sudo sed -e "s/APN_NI = \\"default\\"/APN_NI = \\"default.{networkRealm}\\"/g" -i /usr/local/etc/oai/spgw_c.conf && \\
 sudo sed -e "s/APN_NI = \\"apn1\\"/APN_NI = \\"internet.{networkRealm}\\"/g" -i /usr/local/etc/oai/spgw_c.conf
 """.format(
-         gitDirectory         = gitDirectory,
-         networkRealm         = networkRealm,
-         networkDNS1_IPv4     = networkDNS1_IPv4,
-         networkDNS2_IPv4     = networkDNS2_IPv4,
-         spgwcSXab_IfName     = spgwcSXab_IfName,
-         spgwcS11_IfName      = spgwcS11_IfName,
-         spgwcS5S8_SGW_IfName = spgwcS5S8_SGW_IfName,
-         spgwcS5S8_PGW_IfName = spgwcS5S8_PGW_IfName
+         gitDirectory             = gitDirectory,
+         networkRealm             = networkRealm,
+         networkDNS1_IPv4         = networkDNS1_IPv4,
+         networkDNS2_IPv4         = networkDNS2_IPv4,
+         networkIPv4UEAddressPool = networkIPv4UEAddressPool,
+         spgwcSXab_IfName         = spgwcSXab_IfName,
+         spgwcS11_IfName          = spgwcS11_IfName,
+         spgwcS5S8_SGW_IfName     = spgwcS5S8_SGW_IfName,
+         spgwcS5S8_PGW_IfName     = spgwcS5S8_PGW_IfName
       ))
       vduHelper.endBlock()
 
@@ -1070,7 +1097,7 @@ cd /home/nornetpp/src/{gitDirectory}/build/scripts && \\
 INSTANCE=1 && \\
 PREFIX='/usr/local/etc/oai' && \\
 sudo mkdir -m 0777 -p $PREFIX && \\
-sudo cp ../../etc/spgw_u.conf  $PREFIX && \\
+sudo cp ../../etc/spgw_u.conf $PREFIX && \\
 declare -A SPGWU_CONF && \\
 SPGWU_CONF[@INSTANCE@]=$INSTANCE && \\
 SPGWU_CONF[@PREFIX@]=$PREFIX && \\
@@ -1465,10 +1492,10 @@ def restart_p4ovs():
 
 testAll     = False
 
-testHSS     = True
+testHSS     = False
 testMME     = False
-testSPGWC   = False
-testSPGWU   = False
+testSPGWC   = True
+testSPGWU   = True
 testFlexRAN = False
 testP4OvS   = False
 

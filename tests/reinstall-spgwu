@@ -1,0 +1,21 @@
+#!/bin/bash -e
+
+sudo service mme spgwu
+
+sudo rm -rf /usr/local
+sudo mkdir -p /usr/local/bin
+
+sudo apt install -fy
+sudo updatedb
+
+
+# ------ Fetching Git repository openair-spgwu-tiny --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+time bash -c "cd /home/nornetpp/src && \
+if [ ! -d \"openair-spgwu-tiny\" ] ; then git clone --quiet https://github.com/simula/openairinterface-openair-spgwu-tiny.git openair-spgwu-tiny && cd openair-spgwu-tiny ; else cd openair-spgwu-tiny && git pull ; fi && \
+git checkout dreibh/tx-checksum-ip-generic-off"
+# ------ Building SPGW-U dependencies ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+time bash -c "echo \"ZXhwb3J0IE1BS0VGTEFHUz0iLWpgbnByb2NgIiAmJiBcCmNkIC9ob21lL25vcm5ldHBwL3NyYy9vcGVuYWlyLXNwZ3d1LXRpbnkvYnVpbGQvc2NyaXB0cyAmJiBcCm1rZGlyIC1wIGxvZ3MgJiYgXAouL2J1aWxkX3NwZ3d1IC1JIC1mID5sb2dzL2J1aWxkX3NwZ3d1LTEubG9nIDI+JjE=\" | base64 -d | /bin/bash -x"
+# ------ Building SPGW-U itself ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+time bash -c "echo \"ZXhwb3J0IE1BS0VGTEFHUz0iLWpgbnByb2NgIiAmJiBcCmNkIC9ob21lL25vcm5ldHBwL3NyYy9vcGVuYWlyLXNwZ3d1LXRpbnkvYnVpbGQvc2NyaXB0cyAmJiBcCi4vYnVpbGRfc3Bnd3UgLWMgLVYgLWIgRGVidWcgLWogPmxvZ3MvYnVpbGRfc3Bnd3UtMi5sb2cgMj4mMQ==\" | base64 -d | /bin/bash -x"
+# ------ Configuring SPGW-U --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+time bash -c "echo \"Y2QgL2hvbWUvbm9ybmV0cHAvc3JjL29wZW5haXItc3Bnd3UtdGlueS9idWlsZC9zY3JpcHRzICYmIFwKSU5TVEFOQ0U9MSAmJiBcClBSRUZJWD0nL3Vzci9sb2NhbC9ldGMvb2FpJyAmJiBcCnN1ZG8gbWtkaXIgLW0gMDc3NyAtcCAkUFJFRklYICYmIFwKc3VkbyBjcCAuLi8uLi9ldGMvc3Bnd191LmNvbmYgJFBSRUZJWCAmJiBcCmRlY2xhcmUgLUEgU1BHV1VfQ09ORiAmJiBcClNQR1dVX0NPTkZbQElOU1RBTkNFQF09JElOU1RBTkNFICYmIFwKU1BHV1VfQ09ORltAUFJFRklYQF09JFBSRUZJWCAmJiBcClNQR1dVX0NPTkZbQFBJRF9ESVJFQ1RPUllAXT0nL3Zhci9ydW4nICYmIFwKU1BHV1VfQ09ORltAU0dXX0lOVEVSRkFDRV9OQU1FX0ZPUl9TMVVfUzEyX1M0X1VQQF09J2VuczUnICYmIFwKU1BHV1VfQ09ORltAU0dXX0lOVEVSRkFDRV9OQU1FX0ZPUl9TWEBdPSdlbnM0JyAmJiBcClNQR1dVX0NPTkZbQFNHV19JTlRFUkZBQ0VfTkFNRV9GT1JfU0dJQF09J2VuczYnICYmIFwKZm9yIEsgaW4gIiR7IVNQR1dVX0NPTkZbQF19IjsgZG8gc3VkbyBlZ3JlcCAtbFJaICIkSyIgJFBSRUZJWCB8IHhhcmdzIC0wIC1sIHN1ZG8gc2VkIC1pIC1lICJzfCRLfCR7U1BHV1VfQ09ORlskS119fGciIDsgcmV0PSQ/O1tbIHJldCAtbmUgMCBdXSAmJiBlY2hvICJUcmllZCB0byByZXBsYWNlICRLIHdpdGggJHtTUEdXVV9DT05GWyRLXX0iIHx8IHRydWUgOyBkb25lICYmIFwKc3VkbyBzZWQgLWUgInMvey4qSVBWNF9BRERSRVNTPVwiMTkyLjE2OC4xNjAuMTAwfFwiLio7Lip9XHx7LipJUFY0X0FERFJFU1M9XCJAU1BHV0MwX0lQX0FERFJFU1NAXCIuKjsuKn0veyBJUFY0X0FERFJFU1M9XFxcIjE3Mi41NS41NS4xMDFcXFwiOyB9L2ciIC1pIC91c3IvbG9jYWwvZXRjL29haS9zcGd3X3UuY29uZg==\" | base64 -d | /bin/bash -x"

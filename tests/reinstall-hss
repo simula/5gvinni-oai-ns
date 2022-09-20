@@ -1,0 +1,40 @@
+#!/bin/bash -e
+
+sudo service hss stop
+sudo service cassandra stop
+
+sudo rm -rf /usr/local
+sudo rm -rf /etc/cassandra
+sudo rm -rf /var/lib/cassandra
+sudo rm -rf /var/log/cassandra
+sudo apt autopurge '*cassandra*'
+sudo apt autoremove --purge -y '*cassandra*'
+sudo mkdir -p /usr/local/bin
+
+sudo apt install -fy
+sudo updatedb
+
+
+# ------ Fetching Git repository openair-hss ---------------------------------------------------------------------------------------------------------------------------------------------------------------
+time bash -c "cd /home/nornetpp/src && \
+if [ ! -d \"openair-hss\" ] ; then git clone --quiet https://github.com/simula/openairinterface-openair-hss.git openair-hss && cd openair-hss ; else cd openair-hss && git pull ; fi && \
+git checkout dreibh/cassandra-build-fix-22oct2020"
+# ------ Building Cassandra --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+time bash -c "echo \"ZXhwb3J0IE1BS0VGTEFHUz0iLWpgbnByb2NgIiAmJiBcCmNkIC9ob21lL25vcm5ldHBwL3NyYy9vcGVuYWlyLWhzcy9zY3JpcHRzICYmIFwKbWtkaXIgLXAgbG9ncyAmJiBcCnN1ZG8gcm0gLWYgL2V0Yy9hcHQvc291cmNlcy5saXN0LmQvY2Fzc2FuZHJhLnNvdXJjZXMubGlzdCAmJiBcCi4vYnVpbGRfY2Fzc2FuZHJhIC0tY2Fzc2FuZHJhLXNlcnZlci1pcCAxNzIuMTYuNi4xMjkgLS1jaGVjay1pbnN0YWxsZWQtc29mdHdhcmUgLS1mb3JjZSA+bG9ncy9idWlsZF9jYXNzYW5kcmEubG9nIDI+JjEK\" | base64 -d | /bin/bash -x"
+# ------ Configuring Cassandra -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+time bash -c "echo \"Y2QgL2hvbWUvbm9ybmV0cHAvc3JjL29wZW5haXItaHNzL3NjcmlwdHMgJiYgXApzdWRvIHVwZGF0ZS1hbHRlcm5hdGl2ZXMgLS1zZXQgamF2YSAvdXNyL2xpYi9qdm0vamF2YS04LW9wZW5qZGstYW1kNjQvanJlL2Jpbi9qYXZhICYmIFwKc3VkbyBzZXJ2aWNlIGNhc3NhbmRyYSBzdG9wICYmIFwKc3VkbyBybSAtcmYgL3Zhci9saWIvY2Fzc2FuZHJhL2RhdGEvc3lzdGVtLyogJiYgXApzdWRvIHJtIC1yZiAvdmFyL2xpYi9jYXNzYW5kcmEvY29tbWl0bG9nLyogJiYgXApzdWRvIHJtIC1yZiAvdmFyL2xpYi9jYXNzYW5kcmEvZGF0YS9zeXN0ZW1fdHJhY2VzLyogJiYgXApzdWRvIHJtIC1yZiAvdmFyL2xpYi9jYXNzYW5kcmEvc2F2ZWRfY2FjaGVzLyogJiYgXApzdWRvIHlxIHcgLWkgL2V0Yy9jYXNzYW5kcmEvY2Fzc2FuZHJhLnlhbWwgImNsdXN0ZXJfbmFtZSIgIkhTUyBDbHVzdGVyIiAmJiBcCnN1ZG8geXEgdyAtaSAvZXRjL2Nhc3NhbmRyYS9jYXNzYW5kcmEueWFtbCAic2VlZF9wcm92aWRlclswXS5jbGFzc19uYW1lIiAib3JnLmFwYWNoZS5jYXNzYW5kcmEubG9jYXRvci5TaW1wbGVTZWVkUHJvdmlkZXIiICYmIFwKc3VkbyB5cSB3IC1pIC9ldGMvY2Fzc2FuZHJhL2Nhc3NhbmRyYS55YW1sICJzZWVkX3Byb3ZpZGVyWzBdLnBhcmFtZXRlcnNbMF0uc2VlZHMiICIxNzIuMTYuNi4xMjkiICYmIFwKc3VkbyB5cSB3IC1pIC9ldGMvY2Fzc2FuZHJhL2Nhc3NhbmRyYS55YW1sICJsaXN0ZW5fYWRkcmVzcyIgIjE3Mi4xNi42LjEyOSIgJiYgXApzdWRvIHlxIHcgLWkgL2V0Yy9jYXNzYW5kcmEvY2Fzc2FuZHJhLnlhbWwgInJwY19hZGRyZXNzIiAiMTcyLjE2LjYuMTI5IiAmJiBcCnN1ZG8geXEgdyAtaSAvZXRjL2Nhc3NhbmRyYS9jYXNzYW5kcmEueWFtbCAiZW5kcG9pbnRfc25pdGNoIiAiR29zc2lwaW5nUHJvcGVydHlGaWxlU25pdGNoIiAmJiBcCnN1ZG8gc2VydmljZSBjYXNzYW5kcmEgc3RhcnQgJiYgXApzbGVlcCA2MCAmJiBcCnN1ZG8gc2VydmljZSBjYXNzYW5kcmEgc3RhdHVzIHwgY2F0ICYmIFwKY3Fsc2ggLS1maWxlIC4uL3NyYy9oc3NfcmVsMTQvZGIvb2FpX2RiLmNxbCAxNzIuMTYuNi4xMjkgPmxvZ3Mvb2FpX2RiLmxvZyAyPiYxICYmIFwKY3Fsc2ggLWUgIlNFTEVDVCBDT1VOVCgqKSBGUk9NIHZoc3MudXNlcnNfaW1zaTsiIDE3Mi4xNi42LjEyOSA+L2Rldi9udWxsICYmIGVjaG8gIkNhc3NhbmRyYSBpcyBva2F5ISIgfHwgZWNobyAiQ2Fzc2FuZHJhIHNlZW1zIHRvIGJlIHVuYXZhaWxhYmxlISIK\" | base64 -d | /bin/bash -x"
+# ------ Building HSS dependencies -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+time bash -c "echo \"ZXhwb3J0IE1BS0VGTEFHUz0iLWpgbnByb2NgIiAmJiBcCmNkIC9ob21lL25vcm5ldHBwL3NyYy9vcGVuYWlyLWhzcy9zY3JpcHRzICYmIFwKbWtkaXIgLXAgbG9ncyAmJiBcCi4vYnVpbGRfaHNzX3JlbDE0IC0tY2hlY2staW5zdGFsbGVkLXNvZnR3YXJlIC0tZm9yY2UgPmxvZ3MvYnVpbGRfaHNzX3JlbDE0LTEubG9nIDI+JjEK\" | base64 -d | /bin/bash -x"
+# ------ Building HSS itself -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+time bash -c "echo \"ZXhwb3J0IE1BS0VGTEFHUz0iLWpgbnByb2NgIiAmJiBcCmNkIC9ob21lL25vcm5ldHBwL3NyYy9vcGVuYWlyLWhzcy9zY3JpcHRzICYmIFwKLi9idWlsZF9oc3NfcmVsMTQgLS1jbGVhbiA+bG9ncy9idWlsZF9oc3NfcmVsMTQtMi5sb2cgMj4mMQo=\" | base64 -d | /bin/bash -x"
+
+
+# !!! Check whether Cassandra is still okay !!!
+# cqlsh 172.16.6.129
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+# ------ Provisioning users and MME ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+time bash -c "echo \"Y2QgL2hvbWUvbm9ybmV0cHAvc3JjL29wZW5haXItaHNzL3NjcmlwdHMgJiYgXAouL2RhdGFfcHJvdmlzaW9uaW5nX3VzZXJzIC0tYXBuIGRlZmF1bHQuc2ltdWxhLm5vcm5ldCAtLWFwbjIgaW50ZXJuZXQuc2ltdWxhLm5vcm5ldCAtLWtleSA0NDlDNEI5MUFFQUNEMEFDRTE4MkNGM0E1QTcyQkZBMSAtLWltc2ktZmlyc3QgMjQyODgxMjM0NTAwMDAwIC0tbXNpc2RuLWZpcnN0IDI0Mjg4ODgwMDAwMDAwIC0tbW1lLWlkZW50aXR5IG1tZS5zaW11bGEubm9ybmV0IC0tbm8tb2YtdXNlcnMgMTAyNCAtLXJlYWxtIHNpbXVsYS5ub3JuZXQgLS10cnVuY2F0ZSBUcnVlICAtLXZlcmJvc2UgVHJ1ZSAtLWNhc3NhbmRyYS1jbHVzdGVyIDE3Mi4xNi42LjEyOSA+bG9ncy9kYXRhX3Byb3Zpc2lvbmluZ191c2Vycy5sb2cgMj4mMSAmJiBcCi4vZGF0YV9wcm92aXNpb25pbmdfbW1lIC0taWQgMyAtLW1tZS1pZGVudGl0eSBtbWUuc2ltdWxhLm5vcm5ldCAtLXJlYWxtIHNpbXVsYS5ub3JuZXQgLS11ZS1yZWFjaGFiaWxpdHkgMSAtLXRydW5jYXRlIFRydWUgIC0tdmVyYm9zZSBUcnVlIC1DIDE3Mi4xNi42LjEyOSA+bG9ncy9kYXRhX3Byb3Zpc2lvbmluZ19tbWUubG9nIDI+JjEK\" | base64 -d | /bin/bash -x"
+# ------ Configuring HSS -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+time bash -c "echo \"Y2QgL2hvbWUvbm9ybmV0cHAvc3JjL29wZW5haXItaHNzL3NjcmlwdHMgJiYgXAplY2hvICIxNzIuMTYuNi4xMjkgICBoc3Muc2ltdWxhLm5vcm5ldCBoc3MiIHwgc3VkbyB0ZWUgLWEgL2V0Yy9ob3N0cyAmJiBcCmVjaG8gIjE3Mi4xNi42LjIgICBtbWUuc2ltdWxhLm5vcm5ldCBtbWUiIHwgc3VkbyB0ZWUgLWEgL2V0Yy9ob3N0cyAmJiBcCm9wZW5zc2wgcmFuZCAtb3V0ICRIT01FLy5ybmQgMTI4ICYmIFwKZWNobyAiPT09PT09IENvbmZpZ3VyaW5nIERpYW1ldGVyIC4uLiA9PT09PT0iICYmIFwKUFJFRklYPScvdXNyL2xvY2FsL2V0Yy9vYWknICYmIFwKc3VkbyBta2RpciAtbSAwNzc3IC1wICRQUkVGSVggJiYgXApzdWRvIG1rZGlyIC1tIDA3NzcgLXAgJFBSRUZJWC9mcmVlRGlhbWV0ZXIgJiYgXApzdWRvIGNwIC4uL2V0Yy9hY2wuY29uZiAuLi9ldGMvaHNzX3JlbDE0X2ZkLmNvbmYgJFBSRUZJWC9mcmVlRGlhbWV0ZXIgJiYgXApzdWRvIGNwIC4uL2V0Yy9oc3NfcmVsMTQuY29uZiAuLi9ldGMvaHNzX3JlbDE0Lmpzb24gJFBSRUZJWCAmJiBcCnN1ZG8gc2VkIC1pIC1lICdzLyNMaXN0ZW5Pbi9MaXN0ZW5Pbi9nJyAkUFJFRklYL2ZyZWVEaWFtZXRlci9oc3NfcmVsMTRfZmQuY29uZiAmJiBcCmVjaG8gIj09PT09PSBVcGRhdGluZyBjb25maWd1cmF0aW9uIGZpbGVzIC4uLiA9PT09PT0iICYmIFwKZGVjbGFyZSAtQSBIU1NfQ09ORiAmJiBcCkhTU19DT05GW0BQUkVGSVhAXT0kUFJFRklYICYmIFwKSFNTX0NPTkZbQFJFQUxNQF09J3NpbXVsYS5ub3JuZXQnICYmIFwKSFNTX0NPTkZbQEhTU19GUUROQF09J2hzcy5zaW11bGEubm9ybmV0JyAmJiBcCkhTU19DT05GW0BIU1NfSE9TVE5BTUVAXT0naHNzJyAmJiBcCkhTU19DT05GW0BjYXNzYW5kcmFfU2VydmVyX0lQQF09JzE3Mi4xNi42LjEyOScgJiYgXApIU1NfQ09ORltAY2Fzc2FuZHJhX0lQQF09JzE3Mi4xNi42LjEyOScgJiYgXApIU1NfQ09ORltAT1BfS0VZQF09JzEwMDYwMjBGMEE0NzhCRjZCNjk5RjE1QzA2MkU0MkIzJyAmJiBcCkhTU19DT05GW0BST0FNSU5HX0FMTE9XRURAXT0ndHJ1ZScgJiYgXApmb3IgSyBpbiAiJHshSFNTX0NPTkZbQF19IjsgZG8gZWNobyAiSz0kSyAuLi4iICYmIHN1ZG8gZWdyZXAgLWxSWiAiJEsiICRQUkVGSVggfCB4YXJncyAtMCAtbCBzdWRvIHNlZCAtaSAtZSAic3wkS3wke0hTU19DT05GWyRLXX18ZyIgOyBkb25lICYmIFwKLi4vc3JjL2hzc19yZWwxNC9iaW4vbWFrZV9jZXJ0cy5zaCBoc3Mgc2ltdWxhLm5vcm5ldCAkUFJFRklYICYmIFwKZWNobyAiPT09PT09IFVwZGF0aW5nIGtleSAuLi4gPT09PT09IiAmJiBcCm9haV9oc3MgLWogJFBSRUZJWC9oc3NfcmVsMTQuanNvbiAtLW9ubHlsb2Fka2V5ID5sb2dzL29ubHlsb2Fka2V5LmxvZyAyPiYxCg==\" | base64 -d | /bin/bash -x"
