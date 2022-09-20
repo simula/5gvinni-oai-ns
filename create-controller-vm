@@ -1,0 +1,60 @@
+#!/bin/bash
+# Create test VM in management network
+# Copyright (C) 2021 by Thomas Dreibholz
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Contact: dreibh@simula.no
+
+
+# ###### Call OpenStack command #############################################
+call-openstack ()
+{
+   echo -e "\x1b[36m$ openstack $@\x1b[0m"
+   p="$@"
+   bash -c -- "openstack $p"
+}
+
+
+# ###### Call OpenStack command #############################################
+call-openstack-quietly ()
+{
+   echo -e "\x1b[36m$ openstack $@\x1b[0m"
+   openstack $@ >/dev/null 2>&1 || true
+}
+
+
+
+# ###########################################################################
+# #### Main Program                                                      ####
+# ###########################################################################
+
+set -e
+
+FLAVOR_NAME="Amiga 8000"
+IMAGE_NAME="5gVINNI-OpenStack-Ubuntu-18.04-LTS"
+SERVER_NAME="controller"
+
+portName="Port-${SERVER_NAME}"
+call-openstack-quietly port delete "$portName"
+call-openstack port create "$portName" \
+   --network mgmt \
+   --fixed-ip subnet=subnet-mgmt,ip-address=10.208.0.16
+
+call-openstack-quietly server delete "$SERVER_NAME"
+call-openstack server create "$SERVER_NAME" \
+   --flavor "\"$FLAVOR_NAME\"" \
+   --image "$IMAGE_NAME" \
+   --port "$portName" \
+   --key-name mykey

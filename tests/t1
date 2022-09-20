@@ -55,7 +55,7 @@ MyParameters = {
    # ====== MME =============================================================
    'mme-git-repository': 'https://github.com/simula/openairinterface-openair-mme.git',
    'mme-git-commit': 'dreibh/asn1c-url-fix-14Oct2020',
-   'mme-S1C-ipv4-interface': '192.168.247.102/24',
+   'mme-S1C-ipv4-interface': '192.168.247.112/24',
    'mme-S1C-ipv4-gateway': '0.0.0.0',
    'mme-S11-ipv4-interface': '172.16.1.102/24',
    'mme-S1C-ipv6-interface': '',
@@ -74,9 +74,9 @@ MyParameters = {
    # ====== SPGW-U ==========================================================
    'spgwu-git-repository': 'https://github.com/simula/openairinterface-openair-spgwu-tiny.git',
    'spgwu-git-commit': 'dreibh/tx-checksum-ip-generic-off',
-   'spgwu-S1U-ipv4-interface': '192.168.248.159/24',
+   'spgwu-S1U-ipv4-interface': '192.168.248.169/24',
    'spgwu-S1U-ipv4-gateway': '0.0.0.0',
-   'spgwu-SGi-ipv4-interface': '10.254.1.203/24',
+   'spgwu-SGi-ipv4-interface': '10.254.1.213/24',
    'spgwu-SGi-ipv4-gateway': '10.254.1.1',
    'spgwu-SGi-ipv6-interface': '',
    'spgwu-SGi-ipv6-gateway': '',
@@ -1462,8 +1462,8 @@ def restart_p4ovs():
 
 testAll     = False
 
-testHSS     = True
-testMME     = False
+testHSS     = False
+testMME     = True
 testSPGWC   = False
 testSPGWU   = False
 testFlexRAN = False

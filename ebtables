@@ -1,0 +1,61 @@
+#!/bin/bash -ex
+
+PHYSICAL_INTERFACE="ens4"
+FILTER_BRIDGE="filter-ens4"
+ACCESS_BRIDGE="br-ens4"
+
+MACs=""
+MACs="$MACs 00:24:9b:06:69:14"   # eNodeB
+MACs="$MACs fa:16:3e:4c:87:69"   # SPGW-U
+# MACs="$MACs 00:50:56:af:3d:d1"   # Server
+# MACs="$MACs 52:54:00:2c:c5:f9"   # Router
+
+
+# ====== Remove old configuration ===========================================
+ip link set down dev ${ACCESS_BRIDGE} || true
+brctl delbr ${ACCESS_BRIDGE} || true
+ip link set down dev ${FILTER_BRIDGE} || true
+brctl delbr ${FILTER_BRIDGE} || true
+ip link del veth0 || true
+
+nft delete chain bridge my-mac-filter forward || true
+nft delete table bridge filter || true
+
+
+# ====== Add new configuration ==============================================
+# ~~~~~~ Access Bridge ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+brctl addbr ${ACCESS_BRIDGE}
+sysctl -w net.ipv6.conf.${ACCESS_BRIDGE}.autoconf=0
+sysctl -w net.ipv6.conf.${ACCESS_BRIDGE}.disable_ipv6=1
+ip link set up dev ${ACCESS_BRIDGE}
+
+# ~~~~~~ Filter Bridge ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+brctl addbr ${FILTER_BRIDGE}
+brctl addif ${FILTER_BRIDGE} ${PHYSICAL_INTERFACE}
+sysctl -w net.ipv6.conf.${FILTER_BRIDGE}.autoconf=0
+sysctl -w net.ipv6.conf.${FILTER_BRIDGE}.disable_ipv6=1
+ip link set up dev ${FILTER_BRIDGE}
+
+# ~~~~~~ Virtual Cable: Access Bridge <-> Filter Bridge ~~~
+ip link add veth0 type veth peer name veth1
+sysctl -w net.ipv6.conf.veth0.autoconf=0
+sysctl -w net.ipv6.conf.veth1.autoconf=0
+sysctl -w net.ipv6.conf.veth0.disable_ipv6=1
+sysctl -w net.ipv6.conf.veth1.disable_ipv6=1
+brctl addif ${FILTER_BRIDGE} veth0
+brctl addif ${ACCESS_BRIDGE} veth1
+ip link set up dev veth0
+ip link set up dev veth1
+
+# ~~~~~~ Filter Rules ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+nft add table bridge my-mac-filter
+nft add chain bridge my-mac-filter forward '{type filter hook forward priority 0; }'
+# nft add rule bridge my-mac-filter forward ether type arp accept
+for mac in $MACs ; do
+   nft add rule bridge my-mac-filter forward "ether saddr == $mac ether type { ip, arp } accept"
+   nft add rule bridge my-mac-filter forward "ether daddr == $mac ether type { ip, arp } accept"
+done
+nft add rule bridge my-mac-filter forward drop
+
+# ~~~~~~ Show Status ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+nft list chain bridge my-mac-filter forward
