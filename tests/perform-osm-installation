@@ -8,9 +8,9 @@ sudo apt install -y colordiff git snapd curl
 
 cd ~
 rm -f install_osm.sh
-wget https://osm-download.etsi.org/ftp/osm-12.0-eleven/install_osm.sh
+wget https://osm-download.etsi.org/ftp/osm-12.0-twelve/install_osm.sh
 chmod +x install_osm.sh
-./install_osm.sh -y --k8s_monitor 2>&1 | tee osm_install_log.txt
+./install_osm.sh -y 2>&1 | tee osm_install_log.txt
 # !!! WITHOUT: --k8s_monitor
 # !!! To be installed later with script "add-k8s_monitoring" !!!
 
