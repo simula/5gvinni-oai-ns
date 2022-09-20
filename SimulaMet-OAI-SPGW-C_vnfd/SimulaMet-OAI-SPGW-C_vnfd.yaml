@@ -105,6 +105,8 @@ vnfd:
                       value: <network_ipv4_dns1>
                     - name: network-ipv4-dns2
                       value: <network_ipv4_dns2>
+                    -name: network-ipv4-ue-address-pool
+                     value: <network_ipv4_ue_address_pool>
 
                 - seq: '4'
                   name: restart-spgwc

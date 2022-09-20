@@ -56,6 +56,10 @@ configure-spgwc:
       description: Network DNS 2
       data-type: string
       default: 10.1.2.1
+    network-ipv4-ue-address-pool:
+      description: Network IPv4 UE Address Pool
+      data-type: string
+      default: 12.1.1.2 - 12.1.1.128
   required:
     - network-realm
     - network-ipv4-dns1

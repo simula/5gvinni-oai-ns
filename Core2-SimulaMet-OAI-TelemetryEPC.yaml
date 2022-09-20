@@ -63,6 +63,7 @@ additionalParamsForVnf:
       spgwc_S11_ipv4_interface: '172.16.1.104/24'
       network_ipv4_dns1: '10.1.1.1'
       network_ipv4_dns2: '10.1.2.1'
+      network_ipv4_ue_address_pool: '12.1.1.2 - 12.1.1.128'
 
       # ====== SPGW-U =======================================================
       spgwu_git_repository: 'https://github.com/simula/openairinterface-openair-spgwu-tiny.git'
