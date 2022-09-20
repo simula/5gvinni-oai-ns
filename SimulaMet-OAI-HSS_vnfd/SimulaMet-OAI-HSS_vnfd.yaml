@@ -181,7 +181,7 @@ vnfd:
       virtual-cpu:
         num-virtual-cpu: 4
       virtual-memory:
-        size: 3.0
+        size: 4.0
 
   # ====== Storage ========================================================
   virtual-storage-desc:
