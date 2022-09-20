@@ -1,3 +1,4 @@
+vnfd:
 # =====================================================================
 #     #######  #####          #     #   ###   #     # #     #   ###
 #     #       #     #         #     #    #    ##    # ##    #    #
@@ -26,7 +27,6 @@
 #
 # Contact: dreibh@simula.no
 
-vnfd:
   id: SimulaMet-OAI-SPGW-U_vnfd
   product-name: SimulaMet-OAI-SPGW-U_vnfd
   description: SimulaMet OpenAirInterface SPGW-U VNF

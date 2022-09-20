@@ -1,3 +1,4 @@
+vnfd:
 # =====================================================================
 #     #######  #####          #     #   ###   #     # #     #   ###
 #     #       #     #         #     #    #    ##    # ##    #    #
@@ -26,7 +27,6 @@
 #
 # Contact: dreibh@simula.no
 
-vnfd:
     description: SimulaMet OpenAirInterface Evolved Packet Core VNF
     df:
     -   id: default-df

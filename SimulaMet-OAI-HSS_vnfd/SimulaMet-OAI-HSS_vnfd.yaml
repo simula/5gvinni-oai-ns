@@ -1,3 +1,4 @@
+vnfd:
 # =====================================================================
 #     #######  #####          #     #   ###   #     # #     #   ###
 #     #       #     #         #     #    #    ##    # ##    #    #
@@ -26,7 +27,6 @@
 #
 # Contact: dreibh@simula.no
 
-vnfd:
   id: SimulaMet-OAI-HSS_vnfd
   product-name: SimulaMet-OAI-HSS_vnfd
   description: SimulaMet OpenAirInterface HSS VNF

@@ -1,3 +1,4 @@
+nsd:
 # =====================================================================
 #     #######  #####          #     #   ###   #     # #     #   ###
 #     #       #     #         #     #    #    ##    # ##    #    #
@@ -26,7 +27,6 @@
 #
 # Contact: dreibh@simula.no
 
-nsd:
   nsd:
     - id: SimulaMet-OAI-TelemetryEPC_nsd
       name: SimulaMet-OAI-TelemetryEPC_nsd
