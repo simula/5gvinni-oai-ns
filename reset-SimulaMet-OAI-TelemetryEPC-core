@@ -1,0 +1,37 @@
+#!/bin/bash
+
+IP_HSS=10.208.0.210
+IP_MME=10.208.0.211
+IP_SPGWC=10.208.0.212
+IP_SPGWU=10.208.0.213
+IP_FLEXRAN=10.208.0.219
+
+# Reset HSS, MME, SPGW-C, SPGW-U, FlexRAN:
+echo "Stopping services ..."
+ssh nornetpp@${IP_HSS}     sudo service hss     stop &
+ssh nornetpp@${IP_MME}     sudo service mme     stop &
+ssh nornetpp@${IP_SPGWC}   sudo service spgwc   stop &
+ssh nornetpp@${IP_SPGWU}   sudo service spgwu   stop &
+ssh nornetpp@${IP_FLEXRAN} sudo service flexran stop &
+wait
+
+
+echo "Starting services ..."
+echo "HSS ..."
+ssh nornetpp@${IP_HSS}     sudo service hss     start
+sleep 10
+echo "MME ..."
+ssh nornetpp@${IP_MME}     sudo service mme     start
+sleep 10
+echo "SPGW-C ..."
+ssh nornetpp@${IP_SPGWC}   sudo service spgwc   start
+sleep 10
+echo "SPGW-U ..."
+ssh nornetpp@${IP_SPGWU}   sudo service spgwu   start
+sleep 10
+ssh nornetpp@${IP_SPGWU}   sudo HENCSAT-QoS-Setup stop
+ssh nornetpp@${IP_SPGWU}   sudo HENCSAT-QoS-Setup start 100000 0 0 0
+echo "FlexRAN ..."
+ssh nornetpp@${IP_FLEXRAN} sudo service flexran start
+
+echo "Done!"
