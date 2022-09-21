@@ -56,7 +56,7 @@ vld:
 
   # ====== FlexRAN ==========================================================
   - name: FlexRAN
-    vim-network-name: 5gvinni-core4-flexran    # <<-- VIM Network for FlexRAN
+    vim-network-name: 5gvinni-core3-flexran    # <<-- VIM Network for FlexRAN
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '1'
         vnfd-connection-point-ref: flexran-service-cp-ext

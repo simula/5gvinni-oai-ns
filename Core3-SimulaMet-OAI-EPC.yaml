@@ -121,7 +121,7 @@ vld:
 
   # ====== S1-C =============================================================
   - name: S1-C
-    vim-network-name: 5gvinni-core4-s1c        # <<-- VIM Network for S1C
+    vim-network-name: 5gvinni-core3-s1c        # <<-- VIM Network for S1C
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '2'
         vnfd-connection-point-ref: mme-s1c-cp-ext
@@ -129,7 +129,7 @@ vld:
 
   # ====== S1-U =============================================================
   - name: S1-U
-    vim-network-name: 5gvinni-core4-s1u        # <<-- VIM Network for S1U
+    vim-network-name: 5gvinni-core3-s1u        # <<-- VIM Network for S1U
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '4'
         vnfd-connection-point-ref: spgwu-s1u-cp-ext
