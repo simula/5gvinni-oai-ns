@@ -91,7 +91,7 @@ additionalParamsForVnf:
       spgwu_git_commit: 'dreibh/tx-checksum-ip-generic-off'
       spgwu_S1U_ipv4_interface: '192.168.252.159/24'
       spgwu_S1U_ipv4_gateway: '0.0.0.0'
-      spgwu_SGi_ipv4_interface: '10.254.1.233/24'
+      spgwu_SGi_ipv4_interface: '10.254.1.223/24'
       spgwu_SGi_ipv4_gateway: '10.254.1.1'
       spgwu_SGi_ipv6_interface: ''
       spgwu_SGi_ipv6_gateway: ''
@@ -141,7 +141,7 @@ vld:
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '4'
         vnfd-connection-point-ref: spgwu-sgi-cp-ext
-        ip-address: 10.254.1.232
+        ip-address: 10.254.1.223
 
   # ====== S6a ==============================================================
   - name: S6a
