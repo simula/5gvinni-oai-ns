@@ -5,7 +5,8 @@ export RELEASE=ReleaseTHIRTEEN
 export REPOSITORY=stable
 export DOCKER_TAG=13
 
-sudo apt install -y colordiff git snapd curl
+sudo apt install -y colordiff curl git joe python3-virtualenv snapd
+
 
 cd ~
 rm -f install_osm.sh
