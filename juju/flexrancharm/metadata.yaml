@@ -36,6 +36,5 @@ tags:
   - network
 subordinate: false
 series:
-  - bionic
   - focal
   - jammy
