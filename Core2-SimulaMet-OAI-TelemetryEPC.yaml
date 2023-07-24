@@ -9,7 +9,7 @@
 # =====================================================================
 #
 # SimulaMet OpenAirInterface Evolved Packet Core VNF and NS
-# Copyright (C) 2019-2022 by Thomas Dreibholz
+# Copyright (C) 2019-2023 by Thomas Dreibholz
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -61,8 +61,8 @@ additionalParamsForVnf:
       spgwc_git_repository: 'https://github.com/simula/openairinterface-openair-spgwc.git'
       spgwc_git_commit: '2020.w36'
       spgwc_S11_ipv4_interface: '172.16.1.104/24'
-      network_ipv4_dns1: '10.1.1.1'
-      network_ipv4_dns2: '10.1.2.1'
+      network_ipv4_dns1: '1.1.1.1'
+      network_ipv4_dns2: '9.9.9.9'
       network_ipv4_ue_address_pool: '12.1.1.2 - 12.1.1.128'
 
       # ====== SPGW-U =======================================================
