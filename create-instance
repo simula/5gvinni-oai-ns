@@ -114,7 +114,7 @@ while [ $# -gt 0 ] ; do
       --nsd_name ${NSD} \
       ${config_file_option} \
       --vim_account ${VIM_ACCOUNT} \
-      --ssh_keys ~/.ssh/id_rsa.pub
+      --ssh_keys ~/.ssh/osm-user.pub
    # --config '{vld: [ {name: mgmtnet, vim-network-name: osm-ext} ] }'
 
 
