@@ -1,6 +1,6 @@
 #!/bin/sh
 
-HOST="10.208.0.223"
+HOST="10.132.13.223"
 
 ssh-keygen -q -R ${HOST}
 echo "SSH to SPGW-U in Core #3 ..."

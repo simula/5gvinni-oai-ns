@@ -1,6 +1,6 @@
 #!/bin/sh
 
-HOST="10.208.0.231"
+HOST="10.132.13.231"
 
 ssh-keygen -q -R ${HOST}
 echo "SSH to MME in Core #4 ..."

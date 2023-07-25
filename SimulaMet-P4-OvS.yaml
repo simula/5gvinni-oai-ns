@@ -48,7 +48,7 @@ vld:
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '1'
         vnfd-connection-point-ref: p4ovs-mgmt-cp-ext
-        ip-address: 10.208.0.111
+        ip-address: 10.132.13.111
 
   # ====== Service, Port 1 ==================================================
   - name: Service-Port1

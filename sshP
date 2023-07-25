@@ -1,6 +1,6 @@
 #!/bin/sh
 
-HOST="10.208.0.219"
+HOST="10.132.13.219"
 
 ssh-keygen -q -R ${HOST}
 echo "SSH to P4-OvS Switch ..."

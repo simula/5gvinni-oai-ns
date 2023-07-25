@@ -107,16 +107,16 @@ vld:
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '1'
         vnfd-connection-point-ref: hss-mgmt-cp-ext
-        ip-address: 10.208.0.200
+        ip-address: 10.132.13.200
       - member-vnf-index-ref: '2'
         vnfd-connection-point-ref: mme-mgmt-cp-ext
-        ip-address: 10.208.0.201
+        ip-address: 10.132.13.201
       - member-vnf-index-ref: '3'
         vnfd-connection-point-ref: spgwc-mgmt-cp-ext
-        ip-address: 10.208.0.202
+        ip-address: 10.132.13.202
       - member-vnf-index-ref: '4'
         vnfd-connection-point-ref: spgwu-mgmt-cp-ext
-        ip-address: 10.208.0.203
+        ip-address: 10.132.13.203
 
   # ====== S1-C =============================================================
   - name: S1-C

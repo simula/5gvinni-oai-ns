@@ -23,7 +23,7 @@ core=0
 for coreName in A B C D ; do   # for: #1 #2 #3 #4
    device=0
    for deviceName in HSS MME SPGW-C SPGW-U ; do
-      ip=10.208.0.2${core}${device}
+      ip=10.132.13.2${core}${device}
       let device=${device}+1
       let coreNumber=${core}+1
 

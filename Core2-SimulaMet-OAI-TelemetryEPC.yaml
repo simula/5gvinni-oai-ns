@@ -97,22 +97,22 @@ vld:
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '1'
         vnfd-connection-point-ref: hss-mgmt-cp
-        ip-address: 10.208.0.210
+        ip-address: 10.132.13.210
       - member-vnf-index-ref: '1'
         vnfd-connection-point-ref: mme-mgmt-cp
-        ip-address: 10.208.0.211
+        ip-address: 10.132.13.211
       - member-vnf-index-ref: '1'
         vnfd-connection-point-ref: spgwc-mgmt-cp
-        ip-address: 10.208.0.212
+        ip-address: 10.132.13.212
       - member-vnf-index-ref: '1'
         vnfd-connection-point-ref: spgwu-mgmt-cp
-        ip-address: 10.208.0.213
+        ip-address: 10.132.13.213
       - member-vnf-index-ref: '2'
         vnfd-connection-point-ref: p4ovs-mgmt-cp
-        ip-address: 10.208.0.214
+        ip-address: 10.132.13.214
       - member-vnf-index-ref: '3'
         vnfd-connection-point-ref: p4ovs-mgmt-cp
-        ip-address: 10.208.0.215
+        ip-address: 10.132.13.215
 
   # ====== S1-C =============================================================
   - name: SimulaMet-OAI-TelemetryEPC_nsd-S1C

@@ -52,7 +52,7 @@ vld:
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '1'
         vnfd-connection-point-ref: flexran-mgmt-cp-ext
-        ip-address: 10.208.0.234
+        ip-address: 10.132.13.234
 
   # ====== FlexRAN ==========================================================
   - name: FlexRAN
