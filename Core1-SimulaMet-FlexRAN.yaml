@@ -48,6 +48,7 @@ additionalParamsForVnf:
 vld:
   # ====== Management =======================================================
   - name: Management
+    vim-network-name: osm-management
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '1'
         vnfd-connection-point-ref: flexran-mgmt-cp-ext
@@ -55,7 +56,7 @@ vld:
 
   # ====== FlexRAN ==========================================================
   - name: FlexRAN
-    vim-network-name: openstack-vms
+    vim-network-name: 5gvinni-core1-flexran
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '1'
         vnfd-connection-point-ref: flexran-service-cp-ext
