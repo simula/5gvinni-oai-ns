@@ -38,13 +38,13 @@ nsd:
       virtual-link-desc:
         - id: Management
           mgmt-network: 'true'
-          vim-network-name: osm-management
+          # vim-network-name: osm-management
         - id: S1-C
           # vim-network-name: simulamet-5gvinni-core1-s1c
         - id: S1-U
           # vim-network-name: simulamet-5gvinni-core1-s1u
         - id: SGi
-          # vim-network-name: nornet-simula
+          # vim-network-name: openstack-vms
         - id: S6a
         - id: S11
         - id: SXab

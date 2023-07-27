@@ -104,6 +104,7 @@ additionalParamsForVnf:
 vld:
   # ====== Management =======================================================
   - name: Management
+    vim-network-name: osm-management
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '1'
         vnfd-connection-point-ref: hss-mgmt-cp-ext
