@@ -70,7 +70,7 @@ vnfd:
       lcm-operations-configuration:
         operate-vnf-op-config:
           day1-2:
-            - id: MME
+            - id: SPGW-U
 
               # ====== Execution environment ================================
               execution-environment-list:
