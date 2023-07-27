@@ -38,7 +38,7 @@ nsd:
       virtual-link-desc:
         - id: Management
           mgmt-network: 'true'
-          vim-network-name: mgmt
+          vim-network-name: osm-management
         - id: S1-C
           # vim-network-name: simulamet-5gvinni-core1-s1c
         - id: S1-U
