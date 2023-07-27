@@ -118,6 +118,11 @@ IF(NOT CHARM)
    MESSAGE(FATAL_ERROR "charm (Ubuntu: sudo snap install charm --classic) not found!")
 ENDIF()
 
+FIND_PROGRAM(OSM osm)
+IF(NOT OSM)
+   MESSAGE(FATAL_ERROR "osm (Ubuntu: sudo snap install osmclient) not found!")
+ENDIF()
+
 FIND_PROGRAM(YAMLLINT yamllint)
 IF(NOT YAMLLINT)
    MESSAGE(FATAL_ERROR "yamllint (Ubuntu: sudo apt install -y yamllint) not found!")
@@ -279,8 +284,8 @@ FOREACH(vnfd IN LISTS VNFD_LIST)
    makeUniqueTarget(generate_vnfdPackage "generate_vnfd_${vnfdPackage}")
 
    ADD_CUSTOM_COMMAND(OUTPUT  ${vnfdPackage}
-                      COMMAND osm package-validate ${vnfd}
-                      COMMAND osm package-build ${vnfd}
+                      COMMAND ${OSM} package-validate ${vnfd}
+                      COMMAND ${OSM} package-build ${vnfd}
                       COMMAND du -k ${vnfdPackage}
                       DEPENDS ${vnfdFiles} ${allYAMLsChecked} ${allCloudInitFilesChecked} ${allCharmsCopyedIntoVNFD})
    ADD_CUSTOM_TARGET(${generate_vnfdPackage} DEPENDS ${vnfdPackage})
@@ -311,8 +316,8 @@ FOREACH(nsd IN LISTS NSD_LIST)
    makeUniqueTarget(generate_nsdPackage "generate_nsd_${nsdPackage}")
 
    ADD_CUSTOM_COMMAND(OUTPUT  ${nsdPackage}
-                      COMMAND osm package-validate ${nsd}
-                      COMMAND osm package-build ${nsd}
+                      COMMAND ${OSM} package-validate ${nsd}
+                      COMMAND ${OSM} package-build ${nsd}
                       COMMAND du -k ${nsdPackage}
                       DEPENDS ${nsdFiles} ${allYAMLsChecked} ${allRequiredVNFDPackages})
    ADD_CUSTOM_TARGET(${generate_nsdPackage} ALL DEPENDS ${nsdPackage})

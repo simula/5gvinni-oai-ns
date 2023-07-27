@@ -120,7 +120,7 @@ vld:
 
   # ====== S1-C =============================================================
   - name: S1-C
-    vim-network-name: openstack-vms
+    vim-network-name: 5gvinni-core1-s1c
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '2'
         vnfd-connection-point-ref: mme-s1c-cp-ext
@@ -128,7 +128,7 @@ vld:
 
   # ====== S1-U =============================================================
   - name: S1-U
-    vim-network-name: openstack-vms
+    vim-network-name: 5gvinni-core1-s1u
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '4'
         vnfd-connection-point-ref: spgwu-s1u-cp-ext
@@ -140,7 +140,7 @@ vld:
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '4'
         vnfd-connection-point-ref: spgwu-sgi-cp-ext
-        ip-address: 10.254.1.203
+        ip-address: 10.132.12.201
 
   # ====== S6a ==============================================================
   - name: S6a

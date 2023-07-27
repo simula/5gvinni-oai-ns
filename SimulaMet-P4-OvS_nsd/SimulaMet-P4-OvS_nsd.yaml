@@ -38,7 +38,7 @@ nsd:
       virtual-link-desc:
         - id: Management
           mgmt-network: 'true'
-          vim-network-name: mgmt
+          vim-network-name: osm-management
         - id: Service-Port1
           # vim-network-name: nornet-simula
         - id: Service-Port2
