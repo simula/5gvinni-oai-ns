@@ -38,20 +38,20 @@ vnfd:
     - id: spgwu-mgmt-cp-ext
       int-cpd:
         cpd: ens3-int
-        vdu-id: SPGW-U
+        vdu-id: SPGWU
     - id: spgwu-sxab-cp-ext
       int-cpd:
         cpd: ens4-int
-        vdu-id: SPGW-U
+        vdu-id: SPGWU
     - id: spgwu-s1u-cp-ext
       int-cpd:
         cpd: ens5-int
-        vdu-id: SPGW-U
+        vdu-id: SPGWU
       port-security-enabled: false
     - id: spgwu-sgi-cp-ext
       int-cpd:
         cpd: ens6-int
-        vdu-id: SPGW-U
+        vdu-id: SPGWU
       port-security-enabled: false
   mgmt-cp: spgwu-mgmt-cp-ext
 
@@ -62,15 +62,15 @@ vnfd:
         - id: default-instantiation-level
           vdu-level:
             - number-of-instances: 1
-              vdu-id: SPGW-U
+              vdu-id: SPGWU
       vdu-profile:
-        - id: SPGW-U
+        - id: SPGWU
           min-number-of-instances: 1
 
       lcm-operations-configuration:
         operate-vnf-op-config:
           day1-2:
-            - id: SPGW-U
+            - id: SPGWU
 
               # ====== Execution environment ================================
               execution-environment-list:
@@ -96,7 +96,7 @@ vnfd:
       #lcm-operations-configuration:
         #operate-vnf-op-config:
           #day1-2:
-            #- id: SPGW-U
+            #- id: SPGWU
 
               ## ====== Execution environment ================================
               #execution-environment-list:
@@ -186,14 +186,14 @@ vnfd:
       name: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
       image: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
   vdu:
-    - id: SPGW-U
-      name: SPGW-U
-      description: SPGW-U
+    - id: SPGWU
+      name: SPGWU
+      description: SPGWU
       cloud-init-file: spgwu-init
       sw-image-desc: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
-      virtual-compute-desc: SPGW-U-compute
+      virtual-compute-desc: SPGWU-compute
       virtual-storage-desc:
-        - SPGW-U-storage
+        - SPGWU-storage
       int-cpd:
         - id: ens3-int
           virtual-network-interface-requirement:
@@ -218,7 +218,7 @@ vnfd:
 
   # ====== Compute ==========================================================
   virtual-compute-desc:
-    - id: SPGW-U-compute
+    - id: SPGWU-compute
       virtual-cpu:
         num-virtual-cpu: 4
       virtual-memory:
@@ -226,5 +226,5 @@ vnfd:
 
   # ====== Storage ==========================================================
   virtual-storage-desc:
-    - id: SPGW-U-storage
+    - id: SPGWU-storage
       size-of-storage: 64
