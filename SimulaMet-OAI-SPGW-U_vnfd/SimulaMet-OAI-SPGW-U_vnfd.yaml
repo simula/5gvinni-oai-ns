@@ -67,23 +67,24 @@ vnfd:
         - id: SPGW-U
           min-number-of-instances: 1
 
+# FIXME!
       lcm-operations-configuration:
         operate-vnf-op-config:
           day1-2:
-            - id: SPGW-U
+            - id: MME
 
               # ====== Execution environment ================================
               execution-environment-list:
-                - id: spgwucharm-ee
+                - id: mmecharm-ee
                   juju:
-                    charm: spgwucharm
+                    charm: mmecharm
 
               # ====== Configuration primitives =============================
               initial-config-primitive:
 
                 - seq: '1'
                   name: config
-                  execution-environment-ref: spgwucharm-ee
+                  execution-environment-ref: mmecharm-ee
                   parameter:
                     - name: ssh-hostname
                       value: <rw_mgmt_ip>
@@ -91,6 +92,32 @@ vnfd:
                       value: nornetpp
                     - name: ssh-password
                       value: <password>
+# FIXME!
+
+      #lcm-operations-configuration:
+        #operate-vnf-op-config:
+          #day1-2:
+            #- id: SPGW-U
+
+              ## ====== Execution environment ================================
+              #execution-environment-list:
+                #- id: spgwucharm-ee
+                  #juju:
+                    #charm: spgwucharm
+
+              ## ====== Configuration primitives =============================
+              #initial-config-primitive:
+
+                #- seq: '1'
+                  #name: config
+                  #execution-environment-ref: spgwucharm-ee
+                  #parameter:
+                    #- name: ssh-hostname
+                      #value: <rw_mgmt_ip>
+                    #- name: ssh-username
+                      #value: nornetpp
+                    #- name: ssh-password
+                      #value: <password>
 
                 #- seq: '2'
                   #name: prepare-spgwu-build
