@@ -77,7 +77,7 @@ additionalParamsForVnf:
       spgwc_git_commit: 'v1.1.0'
       spgwc_S11_ipv4_interface: '172.16.1.104/24'
 
-      network_realm: 'simula.nornet'  # Must match with HSS and SPGW-C!
+      network_realm: 'simula.nornet'   # Must match with HSS and SPGW-C!
       network_ipv4_dns1: '1.1.1.1'
       network_ipv4_dns2: '9.9.9.9'
       network_ipv4_ue_address_pool: '12.1.1.2 - 12.1.1.128'
@@ -91,8 +91,8 @@ additionalParamsForVnf:
       spgwu_git_commit: 'v1.1.0'
       spgwu_S1U_ipv4_interface: '192.168.248.159/24'
       spgwu_S1U_ipv4_gateway: '0.0.0.0'
-      spgwu_SGi_ipv4_interface: '10.254.1.203/24'
-      spgwu_SGi_ipv4_gateway: '10.254.1.1'
+      spgwu_SGi_ipv4_interface: '10.132.12.201/24'
+      spgwu_SGi_ipv4_gateway: '10.132.12.1'
       spgwu_SGi_ipv6_interface: ''
       spgwu_SGi_ipv6_gateway: ''
       spgwu_spgwc_list: '172.55.55.101'

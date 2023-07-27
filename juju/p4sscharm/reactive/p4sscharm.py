@@ -80,7 +80,7 @@ def configure_p4ss():
       # => unwanted configuration on ens3 and ens4
       # Get rid of the Cloud-Init configuration, then configure the
       # interfaces manually with the correct configuration.
-      vduHelper.runInShell('sudo rm -f /etc/netplan/50-cloud-init.yaml')
+      vduHelper.runInShell('sudo mv /etc/netplan/50-cloud-init.yaml /home/nornetpp')
       interfaceConfiguration = vduHelper.makeInterfaceConfiguration('ens3')
       vduHelper.configureInterface('ens3', interfaceConfiguration, 50)
       n = 0

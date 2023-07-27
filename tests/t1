@@ -88,12 +88,12 @@ MyParameters = {
    'spgwu-S1U-ipv4-interface': '192.168.254.159/24',   # !!!!!!
    'spgwu-S1U-ipv4-gateway': '0.0.0.0',
    # SGi:
-   # Core #1: 10.254.1.230
-   # Core #2: 10.254.1.231
-   # Core #3: 10.254.1.232
-   # Core #4: 10.254.1.233
-   'spgwu-SGi-ipv4-interface': '10.254.1.233/24',   # !!!!!!
-   'spgwu-SGi-ipv4-gateway': '10.254.1.1',
+   # Core #1: 10.132.12.230
+   # Core #2: 10.132.12.231
+   # Core #3: 10.132.12.232
+   # Core #4: 10.132.12.233
+   'spgwu-SGi-ipv4-interface': '10.132.12.233/24',   # !!!!!!
+   'spgwu-SGi-ipv4-gateway': '10.132.12.1',
    'spgwu-SGi-ipv6-interface': '',
    'spgwu-SGi-ipv6-gateway': '',
    'spgwu-spgwc-list': '172.55.55.101',
@@ -1244,7 +1244,7 @@ def prepare_flexran_build():
       # => unwanted configuration on ens3 and ens4
       # Get rid of the Cloud-Init configuration, then configure the
       # interfaces manually with the correct configuration.
-      vduHelper.runInShell('sudo rm -f /etc/netplan/50-cloud-init.yaml')
+      vduHelper.runInShell('sudo mv /etc/netplan/50-cloud-init.yaml /home/nornetpp')
       interfaceConfiguration = vduHelper.makeInterfaceConfiguration('ens3')
       vduHelper.configureInterface('ens3', interfaceConfiguration, 50)
 
@@ -1414,7 +1414,7 @@ def configure_p4ovs():
       # => unwanted configuration on ens3 and ens4
       # Get rid of the Cloud-Init configuration, then configure the
       # interfaces manually with the correct configuration.
-      vduHelper.runInShell('sudo rm -f /etc/netplan/50-cloud-init.yaml')
+      vduHelper.runInShell('sudo mv /etc/netplan/50-cloud-init.yaml /home/nornetpp')
       interfaceConfiguration = vduHelper.makeInterfaceConfiguration('ens3')
       vduHelper.configureInterface('ens3', interfaceConfiguration, 50)
       n = 0

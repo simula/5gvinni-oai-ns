@@ -225,7 +225,7 @@ for qosBandwidth in 10000 ; do   # 100000
          echo "Running NetPerfMeter background flow from SPGW-U ..."
          ${SSH_EPC}${IP_SPGWU} sudo -u nornetpp killall netperfmeter || true
          ${SSH_EPC}${IP_SPGWU} sudo -u nornetpp netperfmeter ${DESTINATION} \
-            -local=10.254.1.203 \
+            -local=10.132.12.230 \
             -quiet -runtime=${RUNTIME} \
             -vector=/tmp/background.vec \
             -scalar=/tmp/background.sca \

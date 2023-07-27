@@ -91,8 +91,8 @@ additionalParamsForVnf:
       spgwu_git_commit: 'v1.1.0'
       spgwu_S1U_ipv4_interface: '192.168.254.159/24'
       spgwu_S1U_ipv4_gateway: '0.0.0.0'
-      spgwu_SGi_ipv4_interface: '10.254.1.233/24'
-      spgwu_SGi_ipv4_gateway: '10.254.1.1'
+      spgwu_SGi_ipv4_interface: '10.132.12.233/24'
+      spgwu_SGi_ipv4_gateway: '10.132.12.1'
       spgwu_SGi_ipv6_interface: ''
       spgwu_SGi_ipv6_gateway: ''
       spgwu_spgwc_list: '172.55.55.101'
@@ -141,7 +141,7 @@ vld:
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '4'
         vnfd-connection-point-ref: spgwu-sgi-cp-ext
-        ip-address: 10.254.1.233
+        ip-address: 10.132.12.233
 
   # ====== S6a ==============================================================
   - name: S6a
