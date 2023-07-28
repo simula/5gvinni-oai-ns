@@ -87,8 +87,8 @@ def prepare_spgwc_build():
       # Prepare network configurations:
       spgwcS11_IfName   = 'ens5'
       spgwcSXab_IfName  = 'ens4'
-      configurationS11  = vduHelper.makeInterfaceConfiguration(spgwcS11_IfName,  IPv4Interface('0.0.0.0/0'))
-      configurationSXab = vduHelper.makeInterfaceConfiguration(spgwcSXab_IfName, IPv4Interface('0.0.0.0/0'))
+      configurationS11  = vduHelper.makeInterfaceConfiguration(spgwcS11_IfName,  None)
+      configurationSXab = vduHelper.makeInterfaceConfiguration(spgwcSXab_IfName, None)
 
       # S5S8 dummy interfaces:
       spgwcS5S8_SGW_IfName  = 'dummy0'
