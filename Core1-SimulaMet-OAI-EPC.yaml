@@ -40,9 +40,9 @@ additionalParamsForVnf:
 
       network_realm: 'simula.nornet'
       network_k: '449C4B91AEACD0ACE182CF3A5A72BFA1'
-      network_op: '10nullA478BF6B699F15C062E42B3'
+      network_op: '1006020F0A478BF6B699F15C062E42B3'
       network_imsi_first: '242881234500000'
-      network_msisdn_first: '2428888null'
+      network_msisdn_first: '24288880000000'
       network_users: '1024'
 
       mme_S6a_address: '172.16.6.2'  # Must match with MME!
@@ -148,7 +148,7 @@ vld:
     ip-profile:
       ip-version: ipv4
       subnet-address: 172.16.6.0/24
-      gateway-address: ''
+      # gateway-address:
       dhcp-params:
         enabled: true
     vnfd-connection-point-ref:
@@ -164,7 +164,7 @@ vld:
     ip-profile:
       ip-version: ipv4
       subnet-address: 172.16.1.0/24
-      gateway-address: ''
+      # gateway-address:
       dhcp-params:
         enabled: true
     vnfd-connection-point-ref:
@@ -180,7 +180,7 @@ vld:
     ip-profile:
       ip-version: ipv4
       subnet-address: 172.55.55.0/24
-      gateway-address: ''
+      # gateway-address:
       dhcp-params:
         enabled: true
     vnfd-connection-point-ref:
