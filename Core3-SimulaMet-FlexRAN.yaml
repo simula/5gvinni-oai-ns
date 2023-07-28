@@ -37,7 +37,7 @@ additionalParamsForVnf:
       flexran_git_repository: 'https://github.com/simula/mosaic5g-mosaic5g.git'
       flexran_git_commit: 'master'
       flexran_service_ipv4_interface: '192.168.244.100/24'
-      flexran_service_ipv4_gateway: ''
+      flexran_service_ipv4_gateway: '0.0.0.0'
       flexran_service_ipv6_interface: ''
       flexran_service_ipv6_gateway: ''
 
