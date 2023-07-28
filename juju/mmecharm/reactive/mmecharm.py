@@ -78,8 +78,6 @@ def prepare_mme_build():
       # For a documentation of the installation procedure, see:
       # https://github.com/simula/openairinterface-openair-cn/wiki/OpenAirSoftwareSupport#install-mme
 
-      gitName       = function_get('git-name')
-      gitEmail      = function_get('git-email')
       gitRepository = function_get('mme-git-repository')
       gitCommit     = function_get('mme-git-commit')
       gitDirectory  = 'openair-mme'
@@ -115,7 +113,6 @@ def prepare_mme_build():
 
       # ====== Prepare system ===============================================
       vduHelper.beginBlock('Preparing system')
-      vduHelper.configureGit(gitName, gitEmail)
       vduHelper.configureInterface(mmeS6a_IfName, configurationS6a, 61)
       vduHelper.configureInterface(mmeS11_IfName, configurationS11, 62)
       vduHelper.configureInterface(mmeS1C_IfName, configurationS1C, 63)
@@ -161,11 +158,11 @@ def configure_mme():
       networkRealm           = function_get('network-realm')
       networkMCC             = int(function_get('network-mcc'))
       networkMNC             = int(function_get('network-mnc'))
-      networkOP              = function_get('network-op')
-      networkK               = function_get('network-k')
-      networkIMSIFirst       = function_get('network-imsi-first')
-      networkMSISDNFirst     = function_get('network-msisdn-first')
-      networkUsers           = int(function_get('network-users'))
+      #networkOP              = function_get('network-op')
+      #networkK               = function_get('network-k')
+      #networkIMSIFirst       = function_get('network-imsi-first')
+      #networkMSISDNFirst     = function_get('network-msisdn-first')
+      #networkUsers           = int(function_get('network-users'))
 
       TAC_SGW_TEST = 7
       TAC_SGW_0    = 600
@@ -274,11 +271,11 @@ sudo ./check_mme_s6a_certificate $PREFIX/freeDiameter mme.{networkRealm} >logs/c
          networkRealm           = networkRealm,
          networkMCC             = networkMCC,
          networkMNC             = networkMNC,
-         networkOP              = networkOP,
-         networkK               = networkK,
-         networkIMSIFirst       = networkIMSIFirst,
-         networkMSISDNFirst     = networkMSISDNFirst,
-         networkUsers           = networkUsers,
+         #networkOP              = networkOP,
+         #networkK               = networkK,
+         #networkIMSIFirst       = networkIMSIFirst,
+         #networkMSISDNFirst     = networkMSISDNFirst,
+         #networkUsers           = networkUsers,
 
          tac_sgw_test_hi        = tac_sgw_test[0:2],
          tac_sgw_test_lo        = tac_sgw_test[2:4],

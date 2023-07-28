@@ -100,12 +100,37 @@ configure-mme:
       description: Mobile Network Code (MNC)
       data-type: string
       default: '88'
+    network-op:
+      description: OP
+      type: string
+      default: '1006020f0a478bf6b699f15c062e42b3'
+    network-k:
+      description: K
+      type: string
+      default: '449c4b91aeacd0ace182cf3a5a72bfa1'
+    network-imsi-first:
+      description: First IMSI
+      type: string
+      default: '242881234500000'
+    network-msisdn-first:
+      description: First MSISDN
+      type: string
+      default: '24288880000000'
+    network-users:
+      description: Number of users
+      type: string
+      default: '1024'
   required:
     - mme-S1C-ipv4-interface
     - mme-S11-ipv4-interface
     - spgwc-S11-ipv4-interface
     - hss-S6a-address
     - network-realm
+    - network-op
+    - network-k
+    - network-imsi-first
+    - network-msisdn-first
+    - network-users
     - network-mcc
     - network-mnc
 
