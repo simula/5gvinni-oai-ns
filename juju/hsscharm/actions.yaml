@@ -37,6 +37,14 @@ prepare-cassandra-hss-build:
       description: HSS Git commit
       type: string
       default: develop
+    git-name:
+      description: Git name
+      type: string
+      default: Thomas Dreibholz
+    git-email:
+      description: Git E-mail
+      type: string
+      default: dreibh@simula.no
   required:
     - hss-git-repository
     - hss-git-commit

@@ -53,6 +53,14 @@ prepare-mme-build:
       description: MME S1C IPv6 gateway
       type: string
       default: ''
+    git-name:
+      description: Git name
+      type: string
+      default: Thomas Dreibholz
+    git-email:
+      description: Git E-mail
+      type: string
+      default: dreibh@simula.no
   required:
     - mme-git-repository
     - mme-git-commit

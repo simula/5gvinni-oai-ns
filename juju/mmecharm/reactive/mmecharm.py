@@ -78,6 +78,8 @@ def prepare_mme_build():
       # For a documentation of the installation procedure, see:
       # https://github.com/simula/openairinterface-openair-cn/wiki/OpenAirSoftwareSupport#install-mme
 
+      gitName       = function_get('git-name')
+      gitEmail      = function_get('git-email')
       gitRepository = function_get('mme-git-repository')
       gitCommit     = function_get('mme-git-commit')
       gitDirectory  = 'openair-mme'
@@ -113,6 +115,7 @@ def prepare_mme_build():
 
       # ====== Prepare system ===============================================
       vduHelper.beginBlock('Preparing system')
+      vduHelper.configureGit(gitName, gitEmail)
       vduHelper.configureInterface(mmeS6a_IfName, configurationS6a, 61)
       vduHelper.configureInterface(mmeS11_IfName, configurationS11, 62)
       vduHelper.configureInterface(mmeS1C_IfName, configurationS1C, 63)

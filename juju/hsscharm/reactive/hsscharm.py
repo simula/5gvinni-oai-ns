@@ -78,6 +78,8 @@ def prepare_cassandra_hss_build():
       # For a documentation of the installation procedure, see:
       # https://github.com/simula/openairinterface-openair-cn/wiki/OpenAirSoftwareSupport#install-hss
 
+      gitName       = function_get('git-name')
+      gitEmail      = function_get('git-email')
       gitRepository = function_get('hss-git-repository')
       gitCommit     = function_get('hss-git-commit')
       gitDirectory  = 'openair-hss'
@@ -88,6 +90,7 @@ def prepare_cassandra_hss_build():
 
       # ====== Prepare system ===============================================
       vduHelper.beginBlock('Preparing system')
+      vduHelper.configureGit(gitName, gitEmail)
       vduHelper.configureInterface(hssS6a_IfName, configurationS6a, 61)
       vduHelper.testNetworking()
       vduHelper.waitForPackageUpdatesToComplete()

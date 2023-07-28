@@ -61,6 +61,14 @@ prepare-spgwu-build:
       description: SPGW-U SGi IPv6 gateway
       type: string
       default: 3ffe::1
+    git-name:
+      description: Git name
+      type: string
+      default: Thomas Dreibholz
+    git-email:
+      description: Git E-mail
+      type: string
+      default: dreibh@simula.no
   required:
     - spgwu-git-repository
     - spgwu-git-commit

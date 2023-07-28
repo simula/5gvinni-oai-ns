@@ -78,6 +78,8 @@ def prepare_spgwu_build():
       # For a documentation of the installation procedure, see:
       # https://github.com/simula/openairinterface-openair-cn-cups/wiki/OpenAirSoftwareSupport#install-spgw-u
 
+      gitName       = function_get('git-name')
+      gitEmail      = function_get('git-email')
       gitRepository = function_get('spgwu-git-repository')
       gitCommit     = function_get('spgwu-git-commit')
       gitDirectory  = 'openair-spgwu-tiny'
@@ -113,6 +115,7 @@ def prepare_spgwu_build():
 
       # ====== Prepare system ===============================================
       vduHelper.beginBlock('Preparing system')
+      vduHelper.configureGit(gitName, gitEmail)
       vduHelper.configureInterface(spgwuSXab_IfName, configurationSXab, 61)
       vduHelper.configureInterface(spgwuS1U_IfName,  configurationS1U,  62)
       vduHelper.configureInterface(spgwuSGi_IfName,  configurationSGi,  63)

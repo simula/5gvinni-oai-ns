@@ -78,9 +78,11 @@ def prepare_spgwc_build():
       # For a documentation of the installation procedure, see:
       # https://github.com/OPENAIRINTERFACE/openair-cn-cups/wiki/OpenAirSoftwareSupport#install-spgw-c
 
-      gitRepository     = function_get('spgwc-git-repository')
-      gitCommit         = function_get('spgwc-git-commit')
-      gitDirectory      = 'openair-spgwc'
+      gitName       = function_get('git-name')
+      gitEmail      = function_get('git-email')
+      gitRepository = function_get('spgwc-git-repository')
+      gitCommit     = function_get('spgwc-git-commit')
+      gitDirectory  = 'openair-spgwc'
 
       # Prepare network configurations:
       spgwcS11_IfName   = 'ens5'
@@ -96,6 +98,7 @@ def prepare_spgwc_build():
 
       # ====== Prepare system ===============================================
       vduHelper.beginBlock('Preparing system')
+      vduHelper.configureGit(gitName, gitEmail)
       vduHelper.configureInterface(spgwcS11_IfName,       configurationS11,       61)
       vduHelper.configureInterface(spgwcSXab_IfName,      configurationSXab,      62)
       vduHelper.configureInterface(spgwcS5S8_SGW_IfName,  configurationS5S8_SGW,  63)
