@@ -37,6 +37,14 @@ prepare-flexran-build:
       description: FlexRAN Git commit
       type: string
       default: master
+    git-name:
+      description: Git name
+      type: string
+      default: Thomas Dreibholz
+    git-email:
+      description: Git E-mail
+      type: string
+      default: dreibh@simula.no
   required:
     - flexran-git-repository
     - flexran-git-commit

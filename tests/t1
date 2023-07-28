@@ -1503,11 +1503,11 @@ def restart_p4ovs():
 
 testAll     = False
 
-testHSS     = True
-testMME     = True
+testHSS     = False
+testMME     = False
 testSPGWC   = True
-testSPGWU   = True
-testFlexRAN = True
+testSPGWU   = False
+testFlexRAN = False
 testP4OvS   = False
 
 # ------ HSS ----------------------------------------------------------------

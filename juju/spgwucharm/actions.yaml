@@ -44,7 +44,7 @@ prepare-spgwu-build:
     spgwu-S1U-ipv4-gateway:
       description: SPGW-U S1U IPv4 gateway
       type: string
-      default: null
+      default: ''
     spgwu-SGi-ipv4-interface:
       description: SPGW-U SGi IPv4 interface
       type: string
