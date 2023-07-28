@@ -55,7 +55,7 @@ additionalParamsForVnf:
       mme_git_repository: 'https://github.com/simula/openairinterface-openair-mme.git'
       mme_git_commit: 'v1.1.0'
       mme_S1C_ipv4_interface: '192.168.247.102/24'
-      mme_S1C_ipv4_gateway: null
+      mme_S1C_ipv4_gateway: ''
       mme_S1C_ipv6_interface: ''
       mme_S1C_ipv6_gateway: ''
       mme_S11_ipv4_interface: '172.16.1.102/24'
@@ -90,7 +90,7 @@ additionalParamsForVnf:
       spgwu_git_repository: 'https://github.com/simula/openairinterface-openair-spgwu-tiny.git'
       spgwu_git_commit: 'v1.1.0'
       spgwu_S1U_ipv4_interface: '192.168.248.159/24'
-      spgwu_S1U_ipv4_gateway: null
+      spgwu_S1U_ipv4_gateway: ''
       spgwu_SGi_ipv4_interface: '10.132.12.201/24'
       spgwu_SGi_ipv4_gateway: '10.132.12.1'
       spgwu_SGi_ipv6_interface: ''
@@ -148,7 +148,7 @@ vld:
     ip-profile:
       ip-version: ipv4
       subnet-address: 172.16.6.0/24
-      gateway-address: null
+      gateway-address: ''
       dhcp-params:
         enabled: true
     vnfd-connection-point-ref:
@@ -164,7 +164,7 @@ vld:
     ip-profile:
       ip-version: ipv4
       subnet-address: 172.16.1.0/24
-      gateway-address: null
+      gateway-address: ''
       dhcp-params:
         enabled: true
     vnfd-connection-point-ref:
@@ -180,7 +180,7 @@ vld:
     ip-profile:
       ip-version: ipv4
       subnet-address: 172.55.55.0/24
-      gateway-address: null
+      gateway-address: ''
       dhcp-params:
         enabled: true
     vnfd-connection-point-ref:
