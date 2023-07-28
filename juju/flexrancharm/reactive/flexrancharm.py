@@ -85,15 +85,19 @@ def prepare_flexran_build():
       gitDirectory  = 'mosaic5g'
 
       flexranService_IPv4Interface = IPv4Interface(function_get('flexran-service-ipv4-interface'))
-      flexranService_IPv4Gateway   = IPv4Address(function_get('flexran-service-ipv4-gateway'))
+      if (function_get('flexran-service-ipv4-gateway') == None) or (function_get('flexran-service-ipv4-gateway') == ''):
+         flexranService_IPv4Gateway = None
+      else:
+         flexranService_IPv4Gateway = IPv4Address(function_get('flexran-service-ipv4-gateway'))
+
       if function_get('flexran-service-ipv6-interface') != '':
          flexranService_IPv6Interface = IPv6Interface(function_get('flexran-service-ipv6-interface'))
       else:
          flexranService_IPv6Interface = None
-      if function_get('flexran-service-ipv6-gateway') != '':
-         flexranService_IPv6Gateway   = IPv6Address(function_get('flexran-service-ipv6-gateway'))
-      else:
+      if (function_get('flexran-service-ipv6-gateway') == None) or (function_get('flexran-service-ipv6-gateway') == ''):
          flexranService_IPv6Gateway = None
+      else:
+         flexranService_IPv6Gateway = IPv6Address(function_get('flexran-service-ipv6-gateway'))
 
       # Prepare network configuration:
       # Cloud-Init configures all 3 interfaces in Ubuntu 20.04+

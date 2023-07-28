@@ -84,7 +84,7 @@ def prepare_cassandra_hss_build():
 
       # Prepare network configuration:
       hssS6a_IfName    = 'ens4'
-      configurationS6a = vduHelper.makeInterfaceConfiguration(hssS6a_IfName, IPv4Interface('0.0.0.0/0'))
+      configurationS6a = vduHelper.makeInterfaceConfiguration(hssS6a_IfName, None)
 
       # ====== Prepare system ===============================================
       vduHelper.beginBlock('Preparing system')

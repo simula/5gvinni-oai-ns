@@ -212,7 +212,7 @@ class VDUHelper:
    # ######  Get /etc/network/interfaces setup for interface #################
    def makeInterfaceConfiguration(self,
                                   interfaceName,
-                                  ipv4Interface = ipaddress.IPv4Interface('0.0.0.0/0'),
+                                  ipv4Interface = None,
                                   ipv4Gateway   = None,
                                   ipv6Interface = None,
                                   ipv6Gateway   = None,
@@ -238,7 +238,7 @@ class VDUHelper:
 
       # ====== Addressing ===================================================
       networks = []
-      if ipv4Interface == ipaddress.IPv4Interface('0.0.0.0/0'):
+      if ipv4Interface == None:
          interfaceConfiguration = interfaceConfiguration + '      dhcp4: true\n'
       else:
          interfaceConfiguration = interfaceConfiguration + '      dhcp4: false\n'
@@ -249,10 +249,10 @@ class VDUHelper:
          interfaceConfiguration = interfaceConfiguration + '      dhcp6: false\n'
          interfaceConfiguration = interfaceConfiguration + '      accept-ra: no\n'
 
-      if ( (ipv4Interface != ipaddress.IPv4Interface('0.0.0.0/0')) or
+      if ( (ipv4Interface != None) or
            ((ipv6Interface == None) and (ipv6Interface == ipaddress.IPv6Interface('::/0'))) ):
 
-         if ( ((ipv4Interface != None) and (ipv4Interface != ipaddress.IPv4Interface('0.0.0.0/0'))) or
+         if ( ((ipv4Interface != None) and (ipv4Interface != None)) or
               ((ipv6Interface != None) and (ipv6Interface == ipaddress.IPv6Interface('::/0'))) ):
             interfaceConfiguration = interfaceConfiguration + '      addresses:\n'
 

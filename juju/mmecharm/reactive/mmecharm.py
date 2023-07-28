@@ -76,30 +76,34 @@ def prepare_mme_build():
 
       # ====== Get MME parameters ===========================================
       # For a documentation of the installation procedure, see:
-      # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-mme
+      # https://github.com/simula/openairinterface-openair-cn/wiki/OpenAirSoftwareSupport#install-mme
 
-      gitRepository        = function_get('mme-git-repository')
-      gitCommit            = function_get('mme-git-commit')
-      gitDirectory         = 'openair-mme'
+      gitRepository = function_get('mme-git-repository')
+      gitCommit     = function_get('mme-git-commit')
+      gitDirectory  = 'openair-mme'
 
       mmeS1C_IPv4Interface = IPv4Interface(function_get('mme-S1C-ipv4-interface'))
-      mmeS1C_IPv4Gateway   = IPv4Address(function_get('mme-S1C-ipv4-gateway'))
+      if (function_get('mme-S1C-ipv4-gateway') == None) or (function_get('mme-S1C-ipv4-gateway') == ''):
+         mmeS1C_IPv4Gateway   = None
+      else:
+         mmeS1C_IPv4Gateway   = IPv4Address(function_get('mme-S1C-ipv4-gateway'))
+
       if function_get('mme-S1C-ipv6-interface') != '':
          mmeS1C_IPv6Interface = IPv6Interface(function_get('mme-S1C-ipv6-interface'))
       else:
          mmeS1C_IPv6Interface = None
-      if function_get('mme-S1C-ipv6-gateway') != '':
-         mmeS1C_IPv6Gateway   = IPv6Address(function_get('mme-S1C-ipv6-gateway'))
+      if (function_get('mme-S1C-ipv6-gateway') == None) or (function_get('mme-S1C-ipv6-gateway') == ''):
+         mmeS1C_IPv6Gateway   = None
       else:
-         mmeS1C_IPv6Gateway = None
+         mmeS1C_IPv6Gateway   = IPv6Address(function_get('mme-S1C-ipv6-gateway'))
 
       # Prepare network configurations:
       mmeS6a_IfName = 'ens4'
       mmeS11_IfName = 'ens5'
       mmeS1C_IfName = 'ens6'
 
-      configurationS6a = vduHelper.makeInterfaceConfiguration(mmeS6a_IfName, IPv4Interface('0.0.0.0/0'))
-      configurationS11 = vduHelper.makeInterfaceConfiguration(mmeS11_IfName, IPv4Interface('0.0.0.0/0'))
+      configurationS6a = vduHelper.makeInterfaceConfiguration(mmeS6a_IfName, None)
+      configurationS11 = vduHelper.makeInterfaceConfiguration(mmeS11_IfName, None)
       configurationS1C = vduHelper.makeInterfaceConfiguration(mmeS1C_IfName, mmeS1C_IPv4Interface, mmeS1C_IPv4Gateway,
                                                               mmeS1C_IPv6Interface, mmeS1C_IPv6Gateway)
 
@@ -142,7 +146,7 @@ def configure_mme():
 
       # ====== Get MME parameters ===========================================
       # For a documentation of the installation procedure, see:
-      # https://github.com/OPENAIRINTERFACE/openair-cn/wiki/OpenAirSoftwareSupport#install-mme
+      # https://github.com/simula/openairinterface-openair-cn/wiki/OpenAirSoftwareSupport#install-mme
 
       gitDirectory           = 'openair-mme'
 
@@ -154,6 +158,11 @@ def configure_mme():
       networkRealm           = function_get('network-realm')
       networkMCC             = int(function_get('network-mcc'))
       networkMNC             = int(function_get('network-mnc'))
+      networkOP              = function_get('network-op')
+      networkK               = function_get('network-k')
+      networkIMSIFirst       = function_get('network-imsi-first')
+      networkMSISDNFirst     = function_get('network-msisdn-first')
+      networkUsers           = int(function_get('network-users'))
 
       TAC_SGW_TEST = 7
       TAC_SGW_0    = 600
@@ -203,7 +212,7 @@ PREFIX='/usr/local/etc/oai' && \\
 sudo mkdir -m 0777 -p $PREFIX && \\
 sudo mkdir -m 0777 -p $PREFIX/freeDiameter && \\
 sudo cp ../etc/mme_fd.sprint.conf  $PREFIX/freeDiameter/mme_fd.conf && \\
-sudo cp ../etc/mme.conf  $PREFIX && \\
+sudo cp ../etc/mme.conf $PREFIX && \\
 declare -A MME_CONF && \\
 MME_CONF[@MME_S6A_IP_ADDR@]="127.0.0.11" && \\
 MME_CONF[@INSTANCE@]=$INSTANCE && \\
@@ -262,6 +271,11 @@ sudo ./check_mme_s6a_certificate $PREFIX/freeDiameter mme.{networkRealm} >logs/c
          networkRealm           = networkRealm,
          networkMCC             = networkMCC,
          networkMNC             = networkMNC,
+         networkOP              = networkOP,
+         networkK               = networkK,
+         networkIMSIFirst       = networkIMSIFirst,
+         networkMSISDNFirst     = networkMSISDNFirst,
+         networkUsers           = networkUsers,
 
          tac_sgw_test_hi        = tac_sgw_test[0:2],
          tac_sgw_test_lo        = tac_sgw_test[2:4],

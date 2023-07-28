@@ -76,14 +76,17 @@ def prepare_spgwu_build():
 
       # ====== Get SPGW-U parameters ========================================
       # For a documentation of the installation procedure, see:
-      # https://github.com/OPENAIRINTERFACE/openair-cn-cups/wiki/OpenAirSoftwareSupport#install-spgw-u
+      # https://github.com/simula/openairinterface-openair-cn-cups/wiki/OpenAirSoftwareSupport#install-spgw-u
 
-      gitRepository          = function_get('spgwu-git-repository')
-      gitCommit              = function_get('spgwu-git-commit')
-      gitDirectory           = 'openair-spgwu-tiny'
+      gitRepository = function_get('spgwu-git-repository')
+      gitCommit     = function_get('spgwu-git-commit')
+      gitDirectory  = 'openair-spgwu-tiny'
 
       spgwuS1U_IPv4Interface = IPv4Interface(function_get('spgwu-S1U-ipv4-interface'))
-      spgwuS1U_IPv4Gateway   = IPv4Address(function_get('spgwu-S1U-ipv4-gateway'))
+      if (function_get('spgwu-S1U-ipv4-gateway') == None) or (function_get('spgwu-S1U-ipv4-gateway') == ''):
+         spgwuS1U_IPv4Gateway = None
+      else:
+         spgwuS1U_IPv4Gateway = IPv4Address(function_get('spgwu-S1U-ipv4-gateway'))
 
       spgwuSGi_IPv4Interface = IPv4Interface(function_get('spgwu-SGi-ipv4-interface'))
       spgwuSGi_IPv4Gateway   = IPv4Address(function_get('spgwu-SGi-ipv4-gateway'))
@@ -91,7 +94,7 @@ def prepare_spgwu_build():
          spgwuSGi_IPv6Interface = None
       else:
          spgwuSGi_IPv6Interface = IPv6Interface(function_get('spgwu-SGi-ipv6-interface'))
-      if function_get('spgwu-SGi-ipv6-gateway') == '':
+      if (function_get('spgwu-SGi-ipv6-gateway') == None) or (function_get('spgwu-SGi-ipv6-gateway') == ''):
          spgwuSGi_IPv6Gateway = None
       else:
          spgwuSGi_IPv6Gateway = IPv6Address(function_get('spgwu-SGi-ipv6-gateway'))
@@ -101,7 +104,7 @@ def prepare_spgwu_build():
       spgwuS1U_IfName        = 'ens5'
       spgwuSGi_IfName        = 'ens6'
 
-      configurationSXab = vduHelper.makeInterfaceConfiguration(spgwuSXab_IfName, IPv4Interface('0.0.0.0/0'), metric=261)
+      configurationSXab = vduHelper.makeInterfaceConfiguration(spgwuSXab_IfName, None, metric=261)
       configurationS1U  = vduHelper.makeInterfaceConfiguration(spgwuS1U_IfName, spgwuS1U_IPv4Interface, spgwuS1U_IPv4Gateway, metric=262)
       configurationSGi  = vduHelper.makeInterfaceConfiguration(spgwuSGi_IfName, spgwuSGi_IPv4Interface, spgwuSGi_IPv4Gateway,
                                                                spgwuSGi_IPv6Interface, spgwuSGi_IPv6Gateway,
@@ -142,7 +145,7 @@ def configure_spgwu():
 
       # ====== Get SPGW-U parameters ========================================
       # For a documentation of the installation procedure, see:
-      # https://github.com/OPENAIRINTERFACE/openair-cn-cups/wiki/OpenAirSoftwareSupport#install-spgw-u
+      # https://github.com/simula/openairinterface-openair-cn-cups/wiki/OpenAirSoftwareSupport#install-spgw-u
 
       gitDirectory     = 'openair-spgwu-tiny'
 
@@ -183,7 +186,7 @@ cd /home/nornetpp/src/{gitDirectory}/build/scripts && \\
 INSTANCE=1 && \\
 PREFIX='/usr/local/etc/oai' && \\
 sudo mkdir -m 0777 -p $PREFIX && \\
-sudo cp ../../etc/spgw_u.conf  $PREFIX && \\
+sudo cp ../../etc/spgw_u.conf $PREFIX && \\
 declare -A SPGWU_CONF && \\
 SPGWU_CONF[@INSTANCE@]=$INSTANCE && \\
 SPGWU_CONF[@PREFIX@]=$PREFIX && \\

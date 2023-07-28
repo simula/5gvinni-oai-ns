@@ -42,7 +42,7 @@ MyParameters = {
 
    # ====== HSS =============================================================
    'hss-git-repository': 'https://github.com/simula/openairinterface-openair-hss.git',
-   'hss-git-commit': 'dreibh/cassandra-build-fix-22oct2020',
+   'hss-git-commit': 'dreibh/cassandra-build-fix-v1.1.1',
    'hss-S6a-address': '172.16.6.129',
    'network-realm': 'simula.nornet',
    'network-k': '449C4B91AEACD0ACE182CF3A5A72BFA1',
@@ -61,7 +61,7 @@ MyParameters = {
    # Core #3: 192.168.251.102
    # Core #4: 192.168.253.102
    'mme-S1C-ipv4-interface': '192.168.253.102/24',
-   'mme-S1C-ipv4-gateway': '0.0.0.0',
+   'mme-S1C-ipv4-gateway': None,
    'mme-S11-ipv4-interface': '172.16.1.102/24',
    'mme-S1C-ipv6-interface': '',
    'mme-S1C-ipv6-gateway': '',
@@ -86,7 +86,7 @@ MyParameters = {
    # Core #3: 192.168.242.159
    # Core #4: 192.168.254.159
    'spgwu-S1U-ipv4-interface': '192.168.254.159/24',   # !!!!!!
-   'spgwu-S1U-ipv4-gateway': '0.0.0.0',
+   'spgwu-S1U-ipv4-gateway': None,
    # SGi:
    # Core #1: 10.132.12.230
    # Core #2: 10.132.12.231
@@ -107,7 +107,7 @@ MyParameters = {
    # Core #3: 192.168.244.100
    # Core #4: 192.168.243.100
    'flexran-service-ipv4-interface': '192.168.246.100/24',
-   'flexran-service-ipv4-gateway': '0.0.0.0',
+   'flexran-service-ipv4-gateway': None,
    'flexran-service-ipv6-interface': '',
    'flexran-service-ipv6-gateway': ''
 
@@ -181,7 +181,7 @@ def prepare_cassandra_hss_build():
 
       # Prepare network configuration:
       hssS6a_IfName    = 'ens4'
-      configurationS6a = vduHelper.makeInterfaceConfiguration(hssS6a_IfName, IPv4Interface('0.0.0.0/0'))
+      configurationS6a = vduHelper.makeInterfaceConfiguration(hssS6a_IfName, None)
 
       # ====== Prepare system ===============================================
       vduHelper.beginBlock('Preparing system')
@@ -475,28 +475,32 @@ def prepare_mme_build():
       # For a documentation of the installation procedure, see:
       # https://github.com/simula/openairinterface-openair-cn/wiki/OpenAirSoftwareSupport#install-mme
 
-      gitRepository        = function_get('mme-git-repository')
-      gitCommit            = function_get('mme-git-commit')
-      gitDirectory         = 'openair-mme'
+      gitRepository = function_get('mme-git-repository')
+      gitCommit     = function_get('mme-git-commit')
+      gitDirectory  = 'openair-mme'
 
       mmeS1C_IPv4Interface = IPv4Interface(function_get('mme-S1C-ipv4-interface'))
-      mmeS1C_IPv4Gateway   = IPv4Address(function_get('mme-S1C-ipv4-gateway'))
+      if (function_get('mme-S1C-ipv4-gateway') == None) or (function_get('mme-S1C-ipv4-gateway') == ''):
+         mmeS1C_IPv4Gateway   = None
+      else:
+         mmeS1C_IPv4Gateway   = IPv4Address(function_get('mme-S1C-ipv4-gateway'))
+
       if function_get('mme-S1C-ipv6-interface') != '':
          mmeS1C_IPv6Interface = IPv6Interface(function_get('mme-S1C-ipv6-interface'))
       else:
          mmeS1C_IPv6Interface = None
-      if function_get('mme-S1C-ipv6-gateway') != '':
-         mmeS1C_IPv6Gateway   = IPv6Address(function_get('mme-S1C-ipv6-gateway'))
+      if (function_get('mme-S1C-ipv6-gateway') == None) or (function_get('mme-S1C-ipv6-gateway') == ''):
+         mmeS1C_IPv6Gateway   = None
       else:
-         mmeS1C_IPv6Gateway = None
+         mmeS1C_IPv6Gateway   = IPv6Address(function_get('mme-S1C-ipv6-gateway'))
 
       # Prepare network configurations:
       mmeS6a_IfName = 'ens4'
       mmeS11_IfName = 'ens5'
       mmeS1C_IfName = 'ens6'
 
-      configurationS6a = vduHelper.makeInterfaceConfiguration(mmeS6a_IfName, IPv4Interface('0.0.0.0/0'))
-      configurationS11 = vduHelper.makeInterfaceConfiguration(mmeS11_IfName, IPv4Interface('0.0.0.0/0'))
+      configurationS6a = vduHelper.makeInterfaceConfiguration(mmeS6a_IfName, None)
+      configurationS11 = vduHelper.makeInterfaceConfiguration(mmeS11_IfName, None)
       configurationS1C = vduHelper.makeInterfaceConfiguration(mmeS1C_IfName, mmeS1C_IPv4Interface, mmeS1C_IPv4Gateway,
                                                               mmeS1C_IPv6Interface, mmeS1C_IPv6Gateway)
 
@@ -781,8 +785,8 @@ def prepare_spgwc_build():
       # Prepare network configurations:
       spgwcS11_IfName   = 'ens5'
       spgwcSXab_IfName  = 'ens4'
-      configurationS11  = vduHelper.makeInterfaceConfiguration(spgwcS11_IfName,  IPv4Interface('0.0.0.0/0'))
-      configurationSXab = vduHelper.makeInterfaceConfiguration(spgwcSXab_IfName, IPv4Interface('0.0.0.0/0'))
+      configurationS11  = vduHelper.makeInterfaceConfiguration(spgwcS11_IfName,  None)
+      configurationSXab = vduHelper.makeInterfaceConfiguration(spgwcSXab_IfName, None)
 
       # S5S8 dummy interfaces:
       spgwcS5S8_SGW_IfName  = 'dummy0'
@@ -992,12 +996,15 @@ def prepare_spgwu_build():
       # For a documentation of the installation procedure, see:
       # https://github.com/simula/openairinterface-openair-cn-cups/wiki/OpenAirSoftwareSupport#install-spgw-u
 
-      gitRepository          = function_get('spgwu-git-repository')
-      gitCommit              = function_get('spgwu-git-commit')
-      gitDirectory           = 'openair-spgwu-tiny'
+      gitRepository = function_get('spgwu-git-repository')
+      gitCommit     = function_get('spgwu-git-commit')
+      gitDirectory  = 'openair-spgwu-tiny'
 
       spgwuS1U_IPv4Interface = IPv4Interface(function_get('spgwu-S1U-ipv4-interface'))
-      spgwuS1U_IPv4Gateway   = IPv4Address(function_get('spgwu-S1U-ipv4-gateway'))
+      if (function_get('spgwu-S1U-ipv4-gateway') == None) or (function_get('spgwu-S1U-ipv4-gateway') == ''):
+         spgwuS1U_IPv4Gateway = None
+      else:
+         spgwuS1U_IPv4Gateway = IPv4Address(function_get('spgwu-S1U-ipv4-gateway'))
 
       spgwuSGi_IPv4Interface = IPv4Interface(function_get('spgwu-SGi-ipv4-interface'))
       spgwuSGi_IPv4Gateway   = IPv4Address(function_get('spgwu-SGi-ipv4-gateway'))
@@ -1005,7 +1012,7 @@ def prepare_spgwu_build():
          spgwuSGi_IPv6Interface = None
       else:
          spgwuSGi_IPv6Interface = IPv6Interface(function_get('spgwu-SGi-ipv6-interface'))
-      if function_get('spgwu-SGi-ipv6-gateway') == '':
+      if (function_get('spgwu-SGi-ipv6-gateway') == None) or (function_get('spgwu-SGi-ipv6-gateway') == ''):
          spgwuSGi_IPv6Gateway = None
       else:
          spgwuSGi_IPv6Gateway = IPv6Address(function_get('spgwu-SGi-ipv6-gateway'))
@@ -1015,7 +1022,7 @@ def prepare_spgwu_build():
       spgwuS1U_IfName        = 'ens5'
       spgwuSGi_IfName        = 'ens6'
 
-      configurationSXab = vduHelper.makeInterfaceConfiguration(spgwuSXab_IfName, IPv4Interface('0.0.0.0/0'), metric=261)
+      configurationSXab = vduHelper.makeInterfaceConfiguration(spgwuSXab_IfName, None, metric=261)
       configurationS1U  = vduHelper.makeInterfaceConfiguration(spgwuS1U_IfName, spgwuS1U_IPv4Interface, spgwuS1U_IPv4Gateway, metric=262)
       configurationSGi  = vduHelper.makeInterfaceConfiguration(spgwuSGi_IfName, spgwuSGi_IPv4Interface, spgwuSGi_IPv4Gateway,
                                                                spgwuSGi_IPv6Interface, spgwuSGi_IPv6Gateway,
@@ -1229,15 +1236,19 @@ def prepare_flexran_build():
       gitDirectory  = 'mosaic5g'
 
       flexranService_IPv4Interface = IPv4Interface(function_get('flexran-service-ipv4-interface'))
-      flexranService_IPv4Gateway   = IPv4Address(function_get('flexran-service-ipv4-gateway'))
+      if (function_get('flexran-service-ipv4-gateway') == None) or (function_get('flexran-service-ipv4-gateway') == ''):
+         flexranService_IPv4Gateway = None
+      else:
+         flexranService_IPv4Gateway = IPv4Address(function_get('flexran-service-ipv4-gateway'))
+
       if function_get('flexran-service-ipv6-interface') != '':
          flexranService_IPv6Interface = IPv6Interface(function_get('flexran-service-ipv6-interface'))
       else:
          flexranService_IPv6Interface = None
-      if function_get('flexran-service-ipv6-gateway') != '':
-         flexranService_IPv6Gateway   = IPv6Address(function_get('flexran-service-ipv6-gateway'))
-      else:
+      if (function_get('flexran-service-ipv6-gateway') == None) or (function_get('flexran-service-ipv6-gateway') == ''):
          flexranService_IPv6Gateway = None
+      else:
+         flexranService_IPv6Gateway = IPv6Address(function_get('flexran-service-ipv6-gateway'))
 
       # Prepare network configuration:
       # Cloud-Init configures all 3 interfaces in Ubuntu 20.04+
@@ -1492,11 +1503,11 @@ def restart_p4ovs():
 
 testAll     = False
 
-testHSS     = False
-testMME     = False
+testHSS     = True
+testMME     = True
 testSPGWC   = True
 testSPGWU   = True
-testFlexRAN = False
+testFlexRAN = True
 testP4OvS   = False
 
 # ------ HSS ----------------------------------------------------------------
@@ -1564,7 +1575,7 @@ if testAll or testP4OvS:
 #spgwuS1U_IfName        = 'ens5'
 #spgwuSGi_IfName        = 'ens6'
 
-#configurationSXab = vduHelper.makeInterfaceConfiguration(spgwuSXab_IfName, IPv4Interface('0.0.0.0/0'), metric=261)
+#configurationSXab = vduHelper.makeInterfaceConfiguration(spgwuSXab_IfName, None, metric=261)
 #vduHelper.configureInterface(spgwuSXab_IfName, configurationSXab)
 #configurationS1U  = vduHelper.makeInterfaceConfiguration(spgwuS1U_IfName, spgwuS1U_IPv4Interface, spgwuS1U_IPv4Gateway, metric=262)
 #vduHelper.configureInterface(spgwuS1U_IfName, configurationS1U)
@@ -1573,7 +1584,7 @@ if testAll or testP4OvS:
                                                          #metric=200)
 #vduHelper.configureInterface(spgwuSGi_IfName, configurationSGi)
 
-#vduHelper.configureInterface('ens4', vduHelper.makeInterfaceConfiguration('ens4', IPv4Interface('0.0.0.0/0')))
+#vduHelper.configureInterface('ens4', vduHelper.makeInterfaceConfiguration('ens4', None))
 #vduHelper.configureInterface('dummy1', vduHelper.makeInterfaceConfiguration('dummy1',
                              #IPv4Interface('172.58.58.101/24'), createDummy = True))
 

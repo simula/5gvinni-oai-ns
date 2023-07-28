@@ -40,9 +40,9 @@ additionalParamsForVnf:
 
       network_realm: 'simula.nornet'
       network_k: '449C4B91AEACD0ACE182CF3A5A72BFA1'
-      network_op: '1006020F0A478BF6B699F15C062E42B3'
+      network_op: '10nullA478BF6B699F15C062E42B3'
       network_imsi_first: '242881234500000'
-      network_msisdn_first: '24288880000000'
+      network_msisdn_first: '2428888null'
       network_users: '1024'
 
       mme_S6a_address: '172.16.6.2'  # Must match with MME!
@@ -55,7 +55,7 @@ additionalParamsForVnf:
       mme_git_repository: 'https://github.com/simula/openairinterface-openair-mme.git'
       mme_git_commit: 'dreibh/asn1c-url-fix-14Oct2020'
       mme_S1C_ipv4_interface: '192.168.251.102/24'
-      mme_S1C_ipv4_gateway: '0.0.0.0'
+      mme_S1C_ipv4_gateway: null
       mme_S1C_ipv6_interface: ''
       mme_S1C_ipv6_gateway: ''
       mme_S11_ipv4_interface: '172.16.1.102/24'
@@ -90,7 +90,7 @@ additionalParamsForVnf:
       spgwu_git_repository: 'https://github.com/simula/openairinterface-openair-spgwu-tiny.git'
       spgwu_git_commit: 'dreibh/tx-checksum-ip-generic-off'
       spgwu_S1U_ipv4_interface: '192.168.252.159/24'
-      spgwu_S1U_ipv4_gateway: '0.0.0.0'
+      spgwu_S1U_ipv4_gateway: null
       spgwu_SGi_ipv4_interface: '10.132.12.223/24'
       spgwu_SGi_ipv4_gateway: '10.132.12.1'
       spgwu_SGi_ipv6_interface: ''
@@ -148,7 +148,7 @@ vld:
     ip-profile:
       ip-version: ipv4
       subnet-address: 172.16.6.0/24
-      gateway-address: 0.0.0.0
+      gateway-address: null
       dhcp-params:
         enabled: true
     vnfd-connection-point-ref:
@@ -164,7 +164,7 @@ vld:
     ip-profile:
       ip-version: ipv4
       subnet-address: 172.16.1.0/24
-      gateway-address: 0.0.0.0
+      gateway-address: null
       dhcp-params:
         enabled: true
     vnfd-connection-point-ref:
@@ -180,7 +180,7 @@ vld:
     ip-profile:
       ip-version: ipv4
       subnet-address: 172.55.55.0/24
-      gateway-address: 0.0.0.0
+      gateway-address: null
       dhcp-params:
         enabled: true
     vnfd-connection-point-ref:

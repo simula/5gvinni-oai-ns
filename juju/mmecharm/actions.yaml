@@ -44,7 +44,7 @@ prepare-mme-build:
     mme-S1C-ipv4-gateway:
       description: MME S1C IPv4 gateway
       type: string
-      default: 0.0.0.0
+      default: null
     mme-S1C-ipv6-interface:
       description: MME S1C IPv6 interface
       type: string
