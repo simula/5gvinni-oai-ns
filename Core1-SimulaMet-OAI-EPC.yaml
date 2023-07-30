@@ -53,7 +53,7 @@ additionalParamsForVnf:
   - member-vnf-index: '2'
     additionalParams:
       mme_git_repository: 'https://github.com/simula/openairinterface-openair-mme.git'
-      mme_git_commit: 'v1.1.0'
+      mme_git_commit: 'dreibh/lfds-build-fix-v1.1.0'
       mme_S1C_ipv4_interface: '192.168.247.102/24'
       mme_S1C_ipv4_gateway: ''
       mme_S1C_ipv6_interface: ''
