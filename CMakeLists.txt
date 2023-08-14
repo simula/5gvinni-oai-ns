@@ -43,7 +43,7 @@ PROJECT(SimulaMet-OAI-EPC C)
 EXECUTE_PROCESS(COMMAND git ls-files
                 COMMAND cut -d/ -f1
                 COMMAND sort -u
-                COMMAND grep "nsd$\\|ns$"
+                COMMAND grep "nsd$\\|[^o]ns$"
                 COMMAND tr "\n" ";"
                 COMMAND sed -e "s/;$//g"
                 OUTPUT_VARIABLE NSD_LIST OUTPUT_STRIP_TRAILING_WHITESPACE)
@@ -139,7 +139,7 @@ FOREACH(nsd IN LISTS NSD_LIST)
          ENDIF()
       ENDFOREACH()
       IF (NOT ${found})
-         MESSAGE(FATAL_ERROR "There is no VNFD for ${vnfDependency}! ${VNFD_LIST}")
+         MESSAGE(FATAL_ERROR "There is no VNFD for ${vnfDependency}!")
       ENDIF()
    ENDFOREACH()
 
@@ -259,8 +259,8 @@ FOREACH(charmName IN LISTS CHARM_SOURCE_LIST)
          MESSAGE(FATAL_ERROR "${charmSourceDirectory}/mod/operator/.git does not exist!\nTry: git submodule init && git submodule update")
       ENDIF()
       ADD_CUSTOM_COMMAND(OUTPUT  ${charmBuildTimestampFile}
-                         COMMAND echo cp ${vduHelperFiles} ${charmSourceDirectory}/reactive
-                         COMMAND cp ${vduHelperFiles} ${charmSourceDirectory}/reactive
+                         COMMAND echo cp ${vduHelperFiles} ${charmSourceDirectory}/src/
+                         COMMAND cp ${vduHelperFiles} ${charmSourceDirectory}/src/
                          COMMAND rm -rf ${charmBuildDirectory}
                          COMMAND cp -a ${charmSourceDirectory} ${charmBuildDirectory}
                          COMMAND touch ${charmBuildTimestampFile}
@@ -271,7 +271,7 @@ FOREACH(charmName IN LISTS CHARM_SOURCE_LIST)
    ELSE()
       MESSAGE("Charm ${charmName} is using DEPRECATED \"charm build ...\"!")
       ADD_CUSTOM_COMMAND(OUTPUT  ${charmBuildTimestampFile}
-                         COMMAND cp ${vduHelperFiles} ${charmSourceDirectory}/reactive
+                         COMMAND cp ${vduHelperFiles} ${charmSourceDirectory}/reactive/
                          COMMAND rm -rf ${charmBuildDirectory}
                          COMMAND env CHARM_LAYERS_DIR=${CHARMS_BASELAYERS_DIRECTORY} ${CHARM} build --build-dir ${charmsOutputDirectory}
                          COMMAND touch ${charmBuildTimestampFile}

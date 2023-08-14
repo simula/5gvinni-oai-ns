@@ -31,7 +31,7 @@ vnfd:
   product-name: SimulaMet-FlexRAN_vnfd
   description: SimulaMet FlexRAN VNF
   provider: Thomas Dreibholz
-  version: '2.0'
+  version: 2.0
 
   # ###### External Connection Points #######################################
   mgmt-cp: flexran-mgmt-cp-ext
@@ -60,9 +60,10 @@ vnfd:
       lcm-operations-configuration:
         operate-vnf-op-config:
           day1-2:
-            - config-access:
+            - id: FlexRAN
+              config-access:
                 ssh-access:
-                  default-user: ubuntu
+                  default-user: nornetpp
                   required: true
 
               # ====== Execution environment ================================
@@ -75,18 +76,7 @@ vnfd:
               # ====== Configuration primitives =============================
               initial-config-primitive:
 
-                - seq: '1'
-                  name: config
-                  execution-environment-ref: flexrancharm-ee
-                  parameter:
-                    - name: ssh-hostname
-                      value: <rw_mgmt_ip>
-                    - name: ssh-username
-                      value: nornetpp
-                    - name: ssh-password
-                      value: <password>
-
-                - seq: '2'
+                - seq: 1
                   name: prepare-flexran-build
                   execution-environment-ref: flexrancharm-ee
                   parameter:
@@ -103,11 +93,11 @@ vnfd:
                     - name: flexran-service-ipv6-gateway
                       value: <flexran_service_ipv6_gateway>
 
-                - seq: '3'
+                - seq: 2
                   name: configure-flexran
                   execution-environment-ref: flexrancharm-ee
 
-                - seq: '4'
+                - seq: 3
                   name: restart-flexran
                   execution-environment-ref: flexrancharm-ee
 
