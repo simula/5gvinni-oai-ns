@@ -36,5 +36,5 @@ tags:
   - network
 subordinate: false
 series:
-  - focal
   - jammy
+  - focal

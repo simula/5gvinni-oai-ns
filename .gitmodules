@@ -7,3 +7,6 @@
 [submodule "vmimage-builder-scripts"]
 	path = vmimage-builder-scripts
 	url = https://github.com/simula/nornet-vmimage-builder-scripts.git
+[submodule "juju/flexrancharm/mod/operator"]
+	path = juju/flexrancharm/mod/operator
+	url = https://github.com/canonical/operator

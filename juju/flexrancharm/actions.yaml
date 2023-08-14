@@ -51,13 +51,6 @@ prepare-flexran-build:
 
 configure-flexran:
   description: Configures FlexRAN
-  #params:
-    #network-users:
-      #description: Number of users
-      #type: string
-      #default: '1024'
-  #required:
-    #- network-users
 
 restart-flexran:
   description: Restarts FlexRAN
