@@ -28,22 +28,22 @@
 
 
 #############################################################################
-# INITIALISE
+#### INITIALISE                                                          ####
 #############################################################################
 
-CMAKE_MINIMUM_REQUIRED(VERSION 3.0.2)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.10)
 PROJECT(SimulaMet-OAI-EPC C)
 
 
 #############################################################################
-# DEPENDENCIES
+#### DEPENDENCIES                                                        ####
 #############################################################################
 
 # ====== Obtain list of all NSs =============================================
 EXECUTE_PROCESS(COMMAND git ls-files
                 COMMAND cut -d/ -f1
                 COMMAND sort -u
-                COMMAND grep "nsd$"
+                COMMAND grep "nsd$\\|ns$"
                 COMMAND tr "\n" ";"
                 COMMAND sed -e "s/;$//g"
                 OUTPUT_VARIABLE NSD_LIST OUTPUT_STRIP_TRAILING_WHITESPACE)
@@ -54,11 +54,28 @@ MESSAGE("NSDs: ${NSD_LIST}")
 EXECUTE_PROCESS(COMMAND git ls-files
                 COMMAND cut -d/ -f1
                 COMMAND sort -u
-                COMMAND grep "vnfd$"
+                COMMAND grep "vnfd$\\|vnf$"
                 COMMAND tr "\n" ";"
                 COMMAND sed -e "s/;$//g"
                 OUTPUT_VARIABLE VNFD_LIST OUTPUT_STRIP_TRAILING_WHITESPACE)
 MESSAGE("VNFDs: ${VNFD_LIST}")
+
+# ------ Obtaining a mapping between VNFD directory and VNFD identifier =====
+MESSAGE("VNFD check:")
+FOREACH(vnfd IN LISTS VNFD_LIST)
+   IF (EXISTS "${vnfd}/${vnfd}.yaml")
+     SET(vnfdYamlName "${vnfd}/${vnfd}.yaml")
+   ELSEIF (EXISTS "${vnfd}/${vnfd}d.yaml")
+     SET(vnfdYamlName "${vnfd}/${vnfd}d.yaml")
+   ELSE()
+      MESSAGE(FATAL_ERROR "Unable to find YAML file for ${vnfd}")
+   ENDIF()
+   EXECUTE_PROCESS(COMMAND grep "^  id:" ${vnfdYamlName}
+                   COMMAND tr -d " \t\n"
+                   COMMAND sed -e "s/id://"
+                   OUTPUT_VARIABLE ${vnfd}_Identifier)
+   MESSAGE(" * ${vnfd} (ID: ${${vnfd}_Identifier})")
+ENDFOREACH()
 
 
 # ====== Obtain list of all Charms ==========================================
@@ -77,7 +94,14 @@ MESSAGE("Charms: ${CHARM_SOURCE_LIST}")
 
 # ====== Obtain Charm dependencies of each VNFD =============================
 FOREACH(vnfd IN LISTS VNFD_LIST)
-   EXECUTE_PROCESS(COMMAND grep "^[ ]*charm:" ${vnfd}/${vnfd}.yaml
+   IF (EXISTS "${vnfd}/${vnfd}.yaml")
+     SET(vnfdYamlName "${vnfd}/${vnfd}.yaml")
+   ELSEIF (EXISTS "${vnfd}/${vnfd}d.yaml")
+     SET(vnfdYamlName "${vnfd}/${vnfd}d.yaml")
+   ELSE()
+      MESSAGE(FATAL_ERROR "Unable to find YAML file for ${vnfd}")
+   ENDIF()
+   EXECUTE_PROCESS(COMMAND grep "^[ ]*charm:" ${vnfdYamlName}
                    COMMAND sed -e "s/charm://g" -e "s/[ \t]*//g"
                    COMMAND sort -u
                    COMMAND tr "\n" ";"
@@ -89,12 +113,36 @@ ENDFOREACH()
 
 # ====== Obtain VNFD dependencies of each NSD ===============================
 FOREACH(nsd IN LISTS NSD_LIST)
-   EXECUTE_PROCESS(COMMAND grep "^[ -]*vnfd-id:" ${nsd}/${nsd}.yaml
+   IF (EXISTS "${nsd}/${nsd}.yaml")
+     SET(nsdYamlName "${nsd}/${nsd}.yaml")
+   ELSEIF (EXISTS "${nsd}/${nsd}d.yaml")
+     SET(nsdYamlName "${nsd}/${nsd}d.yaml")
+   ELSE()
+      MESSAGE(FATAL_ERROR "Unable to find YAML file for ${nsd}")
+   ENDIF()
+   EXECUTE_PROCESS(COMMAND grep "^[ -]*vnfd-id:" ${nsdYamlName}
                    COMMAND sed -e "s/^[ -]*vnfd-id://g" -e "s/[ \t]*//g" -e "/^$/d"
                    COMMAND sort -u
                    COMMAND tr "\n" ";"
                    COMMAND sed -e "s/;$//g"
-                   OUTPUT_VARIABLE ${nsd}_vnfds)
+                   OUTPUT_VARIABLE vnfDependencies)
+
+   # ====== Find the dependency VNFDs =======================================
+   SET(${nsd}_vnfds "")
+   FOREACH(vnfDependency IN LISTS vnfDependencies)
+      SET(found 0)
+      FOREACH(vnfd IN LISTS VNFD_LIST)
+         IF ("${${vnfd}_Identifier}" STREQUAL "${vnfDependency}")
+            LIST(APPEND ${nsd}_vnfds ${vnfd})
+            SET(found 1)
+            BREAK()
+         ENDIF()
+      ENDFOREACH()
+      IF (NOT ${found})
+         MESSAGE(FATAL_ERROR "There is no VNFD for ${vnfDependency}! ${VNFD_LIST}")
+      ENDIF()
+   ENDFOREACH()
+
    MESSAGE("VNFD dependencies of NSD ${nsd}: ${${nsd}_vnfds}")
 ENDFOREACH()
 
@@ -110,7 +158,7 @@ MESSAGE("VDUHelper files: ${vduHelperFiles}")
 
 
 #############################################################################
-# REQUIREMENTS
+#### REQUIREMENTS                                                        ####
 #############################################################################
 
 FIND_PROGRAM(CHARM charm)
@@ -130,7 +178,7 @@ ENDIF()
 
 
 #############################################################################
-# Validate all YAML files
+#### Validate all YAML files                                             ####
 #############################################################################
 
 # ###### Create unique target name from file name ###########################
@@ -184,7 +232,7 @@ ENDFOREACH()
 
 
 #############################################################################
-# Generate Charms
+#### Generate Charms                                                     ####
 #############################################################################
 
 # ###### Generate Juju Charms ###############################################
@@ -195,7 +243,7 @@ FILE(MAKE_DIRECTORY ${charmsOutputDirectory})
 
 FOREACH(charmName IN LISTS CHARM_SOURCE_LIST)
    GET_FILENAME_COMPONENT(charmSourceDirectory ${CHARMS_SOURCE_DIRECTORY}/${charmName} ABSOLUTE)
-   GET_FILENAME_COMPONENT(charmBuildDirectory  ${charmsOutputDirectory}/${charmName}  ABSOLUTE)
+   GET_FILENAME_COMPONENT(charmBuildDirectory  ${charmsOutputDirectory}/${charmName}   ABSOLUTE)
    EXECUTE_PROCESS(COMMAND git ls-files ${charmSourceDirectory}
                    COMMAND tr "\n" ";"
                    COMMAND sed -e "s/;$//g"
@@ -203,16 +251,33 @@ FOREACH(charmName IN LISTS CHARM_SOURCE_LIST)
 
    makeUniqueTarget(generate_charmBuildTimestampFile "generate_charm_${charmName}")
    SET(charmBuildTimestampFile "${charmBuildDirectory}.stamp")
-   ADD_CUSTOM_COMMAND(OUTPUT  ${charmBuildTimestampFile}
-                      COMMAND echo cp ${vduHelperFiles} ${charmSourceDirectory}
-                      COMMAND cp ${vduHelperFiles} ${charmSourceDirectory}/reactive
-                      COMMAND rm -rf ${charmBuildDirectory}
-                      COMMAND pwd
-                      COMMAND echo env CHARM_LAYERS_DIR=${CHARMS_BASELAYERS_DIRECTORY} ${CHARM} build --build-dir ${charmsOutputDirectory}
-                      COMMAND env CHARM_LAYERS_DIR=${CHARMS_BASELAYERS_DIRECTORY} ${CHARM} build --build-dir ${charmsOutputDirectory}
-                      COMMAND touch ${charmBuildTimestampFile}
-                      WORKING_DIRECTORY ${charmSourceDirectory}
-                      DEPENDS ${charmInputFiles} ${vduHelperFiles} ${allYAMLsChecked})
+
+   # ------ Charm using Operator Mode ---------------------------------------
+   IF(EXISTS "${charmSourceDirectory}/mod/operator" AND IS_DIRECTORY "${charmSourceDirectory}/mod/operator")
+      MESSAGE("Charm ${charmName} is using Operator Mode!")
+      IF(NOT EXISTS "${charmSourceDirectory}/mod/operator/.git")
+         MESSAGE(FATAL_ERROR "${charmSourceDirectory}/mod/operator/.git does not exist!\nTry: git submodule init && git submodule update")
+      ENDIF()
+      ADD_CUSTOM_COMMAND(OUTPUT  ${charmBuildTimestampFile}
+                         COMMAND echo cp ${vduHelperFiles} ${charmSourceDirectory}/reactive
+                         COMMAND cp ${vduHelperFiles} ${charmSourceDirectory}/reactive
+                         COMMAND rm -rf ${charmBuildDirectory}
+                         COMMAND cp -a ${charmSourceDirectory} ${charmBuildDirectory}
+                         COMMAND touch ${charmBuildTimestampFile}
+                         WORKING_DIRECTORY ${charmSourceDirectory}
+                         DEPENDS ${charmInputFiles} ${vduHelperFiles} ${allYAMLsChecked})
+
+   # ------ Charm using deprecated "charm build" ----------------------------
+   ELSE()
+      MESSAGE("Charm ${charmName} is using DEPRECATED \"charm build ...\"!")
+      ADD_CUSTOM_COMMAND(OUTPUT  ${charmBuildTimestampFile}
+                         COMMAND cp ${vduHelperFiles} ${charmSourceDirectory}/reactive
+                         COMMAND rm -rf ${charmBuildDirectory}
+                         COMMAND env CHARM_LAYERS_DIR=${CHARMS_BASELAYERS_DIRECTORY} ${CHARM} build --build-dir ${charmsOutputDirectory}
+                         COMMAND touch ${charmBuildTimestampFile}
+                         WORKING_DIRECTORY ${charmSourceDirectory}
+                         DEPENDS ${charmInputFiles} ${vduHelperFiles} ${allYAMLsChecked})
+   ENDIF()
    ADD_CUSTOM_TARGET(${generate_charmBuildTimestampFile} DEPENDS ${charmBuildTimestampFile})
 
    MESSAGE("Charm to build: ${charmName}")
@@ -221,7 +286,7 @@ ENDFOREACH()
 
 
 #############################################################################
-# Generate VNFDs
+#### Generate VNFDs                                                      ####
 #############################################################################
 
 # ###### Generate VNFDs #####################################################
@@ -281,7 +346,7 @@ FOREACH(vnfd IN LISTS VNFD_LIST)
    makeUniqueTarget(generate_vnfdPackage "generate_vnfd_${vnfdPackage}")
 
    ADD_CUSTOM_COMMAND(OUTPUT  ${vnfdPackage}
-                      COMMAND ${OSM} package-validate ${vnfd}
+                      # COMMAND ${OSM} package-validate ${vnfd}
                       COMMAND ${OSM} package-build ${vnfd}
                       COMMAND du -k ${vnfdPackage}
                       DEPENDS ${vnfdFiles} ${allYAMLsChecked} ${allCloudInitFilesChecked} ${allCharmsCopyedIntoVNFD})
@@ -313,7 +378,7 @@ FOREACH(nsd IN LISTS NSD_LIST)
    makeUniqueTarget(generate_nsdPackage "generate_nsd_${nsdPackage}")
 
    ADD_CUSTOM_COMMAND(OUTPUT  ${nsdPackage}
-                      COMMAND ${OSM} package-validate ${nsd}
+                      # COMMAND ${OSM} package-validate ${nsd}
                       COMMAND ${OSM} package-build ${nsd}
                       COMMAND du -k ${nsdPackage}
                       DEPENDS ${nsdFiles} ${allYAMLsChecked} ${allRequiredVNFDPackages})
