@@ -60,13 +60,17 @@ vnfd:
       lcm-operations-configuration:
         operate-vnf-op-config:
           day1-2:
-            - id: FlexRAN
+            - config-access:
+                ssh-access:
+                  default-user: ubuntu
+                  required: true
 
               # ====== Execution environment ================================
               execution-environment-list:
                 - id: flexrancharm-ee
                   juju:
                     charm: flexrancharm
+                    proxy: false
 
               # ====== Configuration primitives =============================
               initial-config-primitive:
