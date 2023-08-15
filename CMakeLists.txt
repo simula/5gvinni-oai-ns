@@ -259,8 +259,8 @@ FOREACH(charmName IN LISTS CHARM_SOURCE_LIST)
          MESSAGE(FATAL_ERROR "${charmSourceDirectory}/mod/operator/.git does not exist!\nTry: git submodule init && git submodule update")
       ENDIF()
       ADD_CUSTOM_COMMAND(OUTPUT  ${charmBuildTimestampFile}
-                         COMMAND echo cp ${vduHelperFiles} ${charmSourceDirectory}/src/
-                         COMMAND cp ${vduHelperFiles} ${charmSourceDirectory}/src/
+                         COMMAND echo cp ${vduHelperFiles} ${charmSourceDirectory}/lib/
+                         COMMAND cp ${vduHelperFiles} ${charmSourceDirectory}/lib/
                          COMMAND rm -rf ${charmBuildDirectory}
                          COMMAND cp -a ${charmSourceDirectory} ${charmBuildDirectory}
                          COMMAND touch ${charmBuildTimestampFile}

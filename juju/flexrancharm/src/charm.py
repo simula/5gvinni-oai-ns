@@ -42,7 +42,7 @@ import sys
 import traceback
 from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
 
-from . import VDUHelper
+import VDUHelper
 
 vduHelper = VDUHelper.VDUHelper()
 
