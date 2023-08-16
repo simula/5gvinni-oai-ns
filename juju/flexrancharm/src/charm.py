@@ -28,8 +28,11 @@
 #
 # Contact: dreibh@simula.no
 
-import sys
+import os
 import subprocess
+import sys
+import traceback
+from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
 
 sys.path.append("lib")
 
@@ -37,10 +40,6 @@ from ops.charm import CharmBase
 from ops.main  import main
 from ops.model import ActiveStatus
 
-import subprocess
-import sys
-import traceback
-from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
 
 import VDUHelper
 
