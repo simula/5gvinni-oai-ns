@@ -44,7 +44,7 @@ from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
 
 import VDUHelper
 
-vduHelper = VDUHelper.VDUHelper()
+vduHelper = VDUHelper.VDUHelper(1000)   # <<-- Default user ID for "ubuntu"!
 
 
 # ###########################################################################
@@ -65,7 +65,7 @@ class FlexRANCharm(CharmBase):
       # Listen to the action events
       self.framework.observe(self.on.prepare_flexran_build_action, self.on_prepare_flexran_build_action)
       self.framework.observe(self.on.configure_flexran_action, self.on_configure_flexran_action)
-      self.framework.observe(self.on.prepare_flexran_build_action, self.on_restart_flexran_action)
+      self.framework.observe(self.on.restart_flexran_action, self.on_restart_flexran_action)
 
 
    # ###### Configuration ###################################################
@@ -121,7 +121,7 @@ class FlexRANCharm(CharmBase):
          # => unwanted configuration on ens3 and ens4
          # Get rid of the Cloud-Init configuration, then configure the
          # interfaces manually with the correct configuration.
-         vduHelper.runInShell('sudo mv /etc/netplan/50-cloud-init.yaml /home/nornetpp')
+         vduHelper.runInShell('mv /etc/netplan/50-cloud-init.yaml ' + vduHelper.getHomeDirectory())
          interfaceConfiguration = vduHelper.makeInterfaceConfiguration('ens3')
          vduHelper.configureInterface('ens3', interfaceConfiguration, 50)
 
@@ -132,20 +132,31 @@ class FlexRANCharm(CharmBase):
 
          # ====== Prepare system ============================================
          vduHelper.beginBlock('Preparing system')
+         vduHelper.executeFromString("""\
+sudo -u {user} -g {group} mkdir -p {homeDirectory}/src
+""".format(user          = vduHelper.getUser(),
+           group         = vduHelper.getGroup(),
+           homeDirectory = vduHelper.getHomeDirectory(),
+           gitDirectory  = gitDirectory))
          vduHelper.configureGit(gitName, gitEmail)
          vduHelper.configureInterface(flexranService_IfName, configurationService, 61)
          vduHelper.testNetworking()
          vduHelper.waitForPackageUpdatesToComplete()
+         vduHelper.aptAddRepository('ppa:dreibh/ppa')
          vduHelper.endBlock()
 
          # ====== Prepare sources ===========================================
          vduHelper.beginBlock('Preparing sources')
          vduHelper.fetchGitRepository(gitDirectory, gitRepository, gitCommit)
          vduHelper.executeFromString("""\
-cd /home/nornetpp/src/{gitDirectory} && \
-git submodule init && \
-git submodule update flexran
-""".format(gitDirectory = gitDirectory))
+chown -R {user}:{group} {homeDirectory}/src/{gitDirectory} && \
+cd {homeDirectory}/src/{gitDirectory} && \
+sudo -u {user} -g {group} git submodule init && \
+sudo -u {user} -g {group} git submodule update flexran
+""".format(user          = vduHelper.getUser(),
+           group         = vduHelper.getGroup(),
+           homeDirectory = vduHelper.getHomeDirectory(),
+           gitDirectory  = gitDirectory))
          vduHelper.endBlock()
 
 
@@ -177,22 +188,29 @@ git submodule update flexran
          # https://gitlab.eurecom.fr/flexran/flexran-rtc/-/issues/7)
          vduHelper.executeFromString("""\
 export MAKEFLAGS="-j`nproc`" && \
-cd /home/nornetpp/src/{gitDirectory} && \
-mkdir -p logs && \
-sed -e 's#^    cd pistache .. exit$#    cd pistache \&\& git checkout 9a65f40975fafca5bb5370ba6d0d00f42cbc4356 || exit 1#' -i flexran/tools/install_dependencies && \
-./build_m5g -f >logs/build_flexran.log 2>&1
-""".format(gitDirectory = gitDirectory))
+cd {homeDirectory}/src/{gitDirectory} && \
+sudo -u {user} -g {group} mkdir -p logs && \
+sudo -u {user} -g {group} sed -e 's#^    cd pistache .. exit$#    cd pistache \&\& git checkout 9a65f40975fafca5bb5370ba6d0d00f42cbc4356 || exit 1#' -i flexran/tools/install_dependencies && \
+sudo -u {user} -g {group} --preserve-env=MAKEFLAGS ./build_m5g -f >logs/build_flexran.log 2>&1
+""".format(user          = vduHelper.getUser(),
+           group         = vduHelper.getGroup(),
+           homeDirectory = vduHelper.getHomeDirectory(),
+           gitDirectory  = gitDirectory))
          vduHelper.endBlock()
 
          # ====== Configure FlexRAN =========================================
          vduHelper.beginBlock('Configuring FlexRAN')
          vduHelper.executeFromString("""\
-cd /home/nornetpp/src/{gitDirectory}/flexran
-""".format(gitDirectory = gitDirectory))
+cd {homeDirectory}/src/{gitDirectory}/flexran
+""".format(user          = vduHelper.getUser(),
+           group         = vduHelper.getGroup(),
+           homeDirectory = vduHelper.getHomeDirectory(),
+           gitDirectory  = gitDirectory))
          vduHelper.endBlock()
 
          # ====== Set up FlexRAN service ====================================
          vduHelper.beginBlock('Setting up FlexRAN service')
+         vduHelper.aptInstallPackages('td-system-info')
          vduHelper.configureSystemInfo('FlexRAN Controller', 'This is the FlexRAN Controller of the SimulaMet FlexRAN VNF!')
          vduHelper.createFileFromString('/lib/systemd/system/flexran.service', """\
 [Unit]
@@ -200,29 +218,34 @@ Description=FlexRAN Controller
 After=ssh.target
 
 [Service]
-ExecStart=/bin/sh -c 'exec /usr/bin/env FLEXRAN_RTC_HOME=/home/nornetpp/src/{gitDirectory}/flexran FLEXRAN_RTC_EXEC=/home/nornetpp/src/{gitDirectory}/flexran/build ./build/rt_controller -c log_config/basic_log >>/var/log/flexran.log 2>&1'
+ExecStart=/bin/sh -c 'exec /usr/bin/env FLEXRAN_RTC_HOME={homeDirectory}/src/{gitDirectory}/flexran FLEXRAN_RTC_EXEC={homeDirectory}/src/{gitDirectory}/flexran/build ./build/rt_controller -c log_config/basic_log >>/var/log/flexran.log 2>&1'
 KillMode=process
 Restart=on-failure
 RestartPreventExitStatus=255
-WorkingDirectory=/home/nornetpp/src/{gitDirectory}/flexran
+WorkingDirectory={homeDirectory}/src/{gitDirectory}/flexran
 
 [Install]
 WantedBy=multi-user.target
-""".format(gitDirectory = gitDirectory))
+""".format(homeDirectory = vduHelper.getHomeDirectory(),
+           gitDirectory  = gitDirectory))
 
-         vduHelper.createFileFromString('/home/nornetpp/log',
+         vduHelper.createFileFromString(os.path.join(vduHelper.getHomeDirectory(), 'log'),
 """\
 #!/bin/sh
 tail -f /var/log/flexran.log
 """, True)
 
-         vduHelper.createFileFromString('/home/nornetpp/restart',
+         vduHelper.createFileFromString(os.path.join(vduHelper.getHomeDirectory(), 'restart'),
 """\
 #!/bin/sh
 DIRECTORY=`dirname $0`
-sudo service flexran restart && $DIRECTORY/log
+service flexran restart && $DIRECTORY/log
 """, True)
-         vduHelper.runInShell('sudo chown nornetpp:nornetpp /home/nornetpp/log /home/nornetpp/restart')
+         vduHelper.runInShell("""\
+chown {user}:{group} {homeDirectory}/log {homeDirectory}/restart
+""".format(user          = vduHelper.getUser(),
+           group         = vduHelper.getGroup(),
+           homeDirectory = vduHelper.getHomeDirectory()))
          vduHelper.endBlock()
 
          # ====== Set up sysstat service ====================================
@@ -245,7 +268,7 @@ sudo service flexran restart && $DIRECTORY/log
       vduHelper.beginBlock('restart_flexran')
       try:
 
-         vduHelper.runInShell('sudo service flexran restart')
+         vduHelper.runInShell('service flexran restart')
 
          message = vduHelper.endBlock()
          event.set_results( { 'restarted': True, 'outout': message } )

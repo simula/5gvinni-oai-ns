@@ -63,7 +63,7 @@ vnfd:
             - id: FlexRAN
               config-access:
                 ssh-access:
-                  default-user: nornetpp
+                  default-user: ubuntu
                   required: true
 
               # ====== Execution environment ================================
@@ -125,9 +125,9 @@ vnfd:
 
   # ###### VDU Configuration ################################################
   sw-image-desc:
-    - id: 5gVINNI-OpenStack-Ubuntu-20.04-LTS
-      image: 5gVINNI-OpenStack-Ubuntu-20.04-LTS
-      name: 5gVINNI-OpenStack-Ubuntu-20.04-LTS
+    - id: ubuntu22.04
+      image: ubuntu22.04
+      name: ubuntu22.04
   vdu:
     - cloud-init-file: flexran-init
       description: FlexRAN
@@ -144,7 +144,7 @@ vnfd:
               virtual-interface:
                 type: PARAVIRT
       name: FlexRAN
-      sw-image-desc: 5gVINNI-OpenStack-Ubuntu-20.04-LTS
+      sw-image-desc: ubuntu22.04
       virtual-compute-desc: FlexRAN-compute
       virtual-storage-desc:
         - FlexRAN-storage
