@@ -86,8 +86,8 @@ class FlexRANCharm(CharmBase):
       self.model.unit.status = ActiveStatus()
 
 
-   # ###### prepare-flexran-build Action ####################################
-   def on_prepare_flexran_build_action():
+   # ###### prepare-flexran-build action ####################################
+   def on_prepare_flexran_build_action(self, event):
       vduHelper.beginBlock('prepare_flexran_build')
       try:
 
@@ -95,26 +95,26 @@ class FlexRANCharm(CharmBase):
          # For a documentation of the installation procedure, see:
          # https://gitlab.eurecom.fr/mosaic5g/mosaic5g/-/wikis/tutorials/slicing
 
-         gitName       = function_get('git-name')
-         gitEmail      = function_get('git-email')
-         gitRepository = function_get('flexran-git-repository')
-         gitCommit     = function_get('flexran-git-commit')
+         gitName       = event.params['git-name']
+         gitEmail      = event.params['git-email']
+         gitRepository = event.params['flexran-git-repository']
+         gitCommit     = event.params['flexran-git-commit']
          gitDirectory  = 'mosaic5g'
 
-         flexranService_IPv4Interface = IPv4Interface(function_get('flexran-service-ipv4-interface'))
-         if (function_get('flexran-service-ipv4-gateway') == None) or (function_get('flexran-service-ipv4-gateway') == ''):
+         flexranService_IPv4Interface = IPv4Interface(event.params['flexran-service-ipv4-interface'])
+         if (event.params['flexran-service-ipv4-gateway'] == None) or (event.params['flexran-service-ipv4-gateway'] == ''):
             flexranService_IPv4Gateway = None
          else:
-            flexranService_IPv4Gateway = IPv4Address(function_get('flexran-service-ipv4-gateway'))
+            flexranService_IPv4Gateway = IPv4Address(event.params['flexran-service-ipv4-gateway'])
 
-         if function_get('flexran-service-ipv6-interface') != '':
-            flexranService_IPv6Interface = IPv6Interface(function_get('flexran-service-ipv6-interface'))
+         if event.params['flexran-service-ipv6-interface'] != '':
+            flexranService_IPv6Interface = IPv6Interface(event.params['flexran-service-ipv6-interface'])
          else:
             flexranService_IPv6Interface = None
-         if (function_get('flexran-service-ipv6-gateway') == None) or (function_get('flexran-service-ipv6-gateway') == ''):
+         if (event.params['flexran-service-ipv6-gateway'] == None) or (event.params['flexran-service-ipv6-gateway'] == ''):
             flexranService_IPv6Gateway = None
          else:
-            flexranService_IPv6Gateway = IPv6Address(function_get('flexran-service-ipv6-gateway'))
+            flexranService_IPv6Gateway = IPv6Address(event.params['flexran-service-ipv6-gateway'])
 
          # Prepare network configuration:
          # Cloud-Init configures all 3 interfaces in Ubuntu 20.04+
@@ -142,8 +142,8 @@ class FlexRANCharm(CharmBase):
          vduHelper.beginBlock('Preparing sources')
          vduHelper.fetchGitRepository(gitDirectory, gitRepository, gitCommit)
          vduHelper.executeFromString("""\
-cd /home/nornetpp/src/{gitDirectory} && \\
-git submodule init && \\
+cd /home/nornetpp/src/{gitDirectory} && \
+git submodule init && \
 git submodule update flexran
 """.format(gitDirectory = gitDirectory))
          vduHelper.endBlock()
@@ -158,40 +158,40 @@ git submodule update flexran
          self.model.unit.status = ActiveStatus()
 
 
-   # ###### configure-flexran function #########################################
-   def on_configure_flexran_action():
+   # ###### configure-flexran action ########################################
+   def on_configure_flexran_action(self, event):
       vduHelper.beginBlock('configure_flexran')
       try:
 
-         # ====== Get FlexRAN parameters =======================================
+         # ====== Get FlexRAN parameters ====================================
          # For a documentation of the installation procedure, see:
          # https://gitlab.eurecom.fr/mosaic5g/mosaic5g/-/wikis/tutorials/slicing
 
          gitDirectory = 'mosaic5g'
 
-         # ====== Build FlexRAN ================================================
+         # ====== Build FlexRAN =============================================
          vduHelper.beginBlock('Building FlexRAN itself')
          # NOTE:
          # Use commit 9a65f40975fafca5bb5370ba6d0d00f42cbc4356 of Pistache as
          # work-around for issue:
          # https://gitlab.eurecom.fr/flexran/flexran-rtc/-/issues/7)
          vduHelper.executeFromString("""\
-export MAKEFLAGS="-j`nproc`" && \\
-cd /home/nornetpp/src/{gitDirectory} && \\
-mkdir -p logs && \\
-sed -e 's#^    cd pistache .. exit$#    cd pistache \&\& git checkout 9a65f40975fafca5bb5370ba6d0d00f42cbc4356 || exit 1#' -i flexran/tools/install_dependencies && \\
+export MAKEFLAGS="-j`nproc`" && \
+cd /home/nornetpp/src/{gitDirectory} && \
+mkdir -p logs && \
+sed -e 's#^    cd pistache .. exit$#    cd pistache \&\& git checkout 9a65f40975fafca5bb5370ba6d0d00f42cbc4356 || exit 1#' -i flexran/tools/install_dependencies && \
 ./build_m5g -f >logs/build_flexran.log 2>&1
 """.format(gitDirectory = gitDirectory))
          vduHelper.endBlock()
 
-         # ====== Configure FlexRAN ================================================
+         # ====== Configure FlexRAN =========================================
          vduHelper.beginBlock('Configuring FlexRAN')
          vduHelper.executeFromString("""\
 cd /home/nornetpp/src/{gitDirectory}/flexran
 """.format(gitDirectory = gitDirectory))
          vduHelper.endBlock()
 
-         # ====== Set up FlexRAN service ===========================================
+         # ====== Set up FlexRAN service ====================================
          vduHelper.beginBlock('Setting up FlexRAN service')
          vduHelper.configureSystemInfo('FlexRAN Controller', 'This is the FlexRAN Controller of the SimulaMet FlexRAN VNF!')
          vduHelper.createFileFromString('/lib/systemd/system/flexran.service', """\
@@ -240,8 +240,8 @@ sudo service flexran restart && $DIRECTORY/log
          self.model.unit.status = ActiveStatus()
 
 
-   # ###### restart-flexran function ########################################
-   def on_restart_flexran_action():
+   # ###### restart-flexran action ##########################################
+   def on_restart_flexran_action(self, event):
       vduHelper.beginBlock('restart_flexran')
       try:
 

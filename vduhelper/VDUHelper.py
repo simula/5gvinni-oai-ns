@@ -31,12 +31,32 @@
 import base64
 import ipaddress
 import logging
-import logging.config
 import os
 import subprocess
 import shutil
 import sys
 import traceback
+
+
+# ###########################################################################
+# #### Colored Log Formatter class                                       ####
+# ###########################################################################
+
+class ColouredLogFormatter(logging.Formatter):
+   formatString = '%(asctime)s.%(msecs)03d [%(levelname)s] %(message)s'   # (%(filename)s:%(lineno)d)
+   FORMATS = {
+      logging.CRITICAL: '\x1b[37;41;1m' + formatString + '\x1b[0m',
+      logging.ERROR:    '\x1b[31m' + formatString + '\x1b[0m',
+      logging.WARNING:  '\x1b[33m' + formatString + '\x1b[0m',
+      logging.INFO:     '\x1b[34m' + formatString + '\x1b[0m',
+      logging.DEBUG:    '\x1b[37m' + formatString + '\x1b[0m'
+    }
+
+   def format(self, record):
+      logFormatter = self.FORMATS.get(record.levelno)
+      formatter = logging.Formatter(logFormatter)
+      return formatter.format(record)
+
 
 
 # ###########################################################################
@@ -51,29 +71,33 @@ class VDUHelper:
       self.blockStack = []
       self.lastError  = None
 
-      if self.testMode == False:
-         import charmhelpers.core.hookenv
-         self.hookenv_module = charmhelpers.core.hookenv
-         import charms.sshproxy
-         self.sshproxy_module = charms.sshproxy
-
       # ====== Initialise logger ============================================
       self.logger = logging.getLogger(__name__)
+      streamHandler = logging.StreamHandler()
+      streamHandler.setFormatter(ColouredLogFormatter())
+      self.logger.addHandler(streamHandler)
+      self.logger.setLevel(logging.DEBUG)   # <<-- Enabling verbose output!
+
+      # ------ TEST ONLY! ---------------------------------
+      self.logger.critical('critical message')
+      self.logger.error('error message')
+      self.logger.warning('warning message')
+      self.logger.info('info message')
+      self.logger.debug('debug message')
+      # ---------------------------------------------------
+
       if self.testMode == False:
-         self.logger.error('Starting')
+         self.logger.info('Starting')
       else:
-         self.logger.error('Starting in Test Mode!')
+         self.logger.info('Starting in Test Mode!')
 
 
    # ###### Begin block #####################################################
    def setStatus(self, message, isError = False):
-      # print('Status: ' + message)
       if isError:
          self.logger.error(message)
       else:
-         self.logger.debug(message)
-      if self.testMode == False:
-         self.hookenv_module.status_set('active', message)
+         self.logger.info(message)
 
 
    # ###### Begin block #####################################################
@@ -131,9 +155,8 @@ class VDUHelper:
    def execute(self, commands):
       # ====== Run via SSH ==================================================
       if self.testMode == False:
-         print('Shell: ' + commands)
          self.logger.debug('Shell: ' + commands)
-         self.sshproxy_module._run(commands)
+         subprocess.run(commands, shell = True, check = True)
 
       # ====== Test Mode ====================================================
       else:
@@ -146,9 +169,6 @@ class VDUHelper:
             n = 0
          sys.stdout.write('\x1b[34m# ------' + label + ('-' * n) + '\x1b[0m\n')
          sys.stdout.write('time bash -c "' + commands + '"\n')
-
-         # commands = 'echo "' + commands + '"'
-         # subprocess.check_call(commands, shell=True)
 
 
    # ###### Run shell commands and handle exceptions ########################
@@ -171,7 +191,7 @@ class VDUHelper:
 
       contentBase64 = self.makeBase64(contentString)
       try:
-         commands = 'echo \\\"{contentBase64}\\\" | base64 -d | sudo tee {fileName}'.format(
+         commands = 'echo "{contentBase64}" | base64 -d | sudo tee {fileName}'.format(
                        fileName = fileName, contentBase64 = contentBase64)
          if makeExecutable == False:
             commands = commands + ' && \\\nsudo chmod +x {fileName}'.format(fileName = fileName)
@@ -189,7 +209,7 @@ class VDUHelper:
    def executeFromString(self, commandLineString):
       commandLineBase64 = self.makeBase64(commandLineString)
       try:
-         commands = 'echo \\\"{commandLineBase64}\\\" | base64 -d | /bin/bash -x'.format(
+         commands = 'echo "{commandLineBase64}" | base64 -d | /bin/bash -x'.format(
                        commandLineBase64 = commandLineBase64)
          self.runInShell(commands)
       except:
@@ -205,7 +225,9 @@ class VDUHelper:
       # VDU's shell by using "base64 -d".
 
       if string != None:
-         return base64.b64encode(string.encode('utf-8')).decode('ascii')
+         b64 = base64.b64encode(string.encode('utf-8')).decode('ascii')
+         self.logger.debug('makeBase64("' + string + '")="' + b64 + '"')
+         return b64
       return None
 
 
@@ -320,7 +342,7 @@ class VDUHelper:
 
       # ------ Create pre-down rules ----------------------------------------
       preDown = \
-         '#\\x21/bin/sh\n' + \
+         '#\x21/bin/sh\n' + \
          'if [ "$IFACE" = "' + interfaceName + '" ] ; then\n'
       for gateway in gateways:
          preDown = preDown + \
@@ -419,7 +441,7 @@ network:
 
       contentBase64 = self.makeBase64(contentString)
       try:
-         commands = 'echo \\\"{contentBase64}\\\" | base64 -d | sudo tee {fileName}'.format(
+         commands = 'echo "{contentBase64}" | base64 -d | sudo tee {fileName}'.format(
                        fileName = fileName, contentBase64 = contentBase64)
          if makeExecutable == True:
             commands = commands + ' && \\\nsudo chmod +x {fileName}'.format(fileName = fileName)
@@ -435,7 +457,7 @@ network:
    def executeFromString(self, commandLineString):
       commandLineBase64 = self.makeBase64(commandLineString)
       try:
-         commands = 'echo \\\"{commandLineBase64}\\\" | base64 -d | /bin/bash -x'.format(
+         commands = 'echo "{commandLineBase64}" | base64 -d | /bin/bash -x'.format(
                        commandLineBase64 = commandLineBase64)
          self.runInShell(commands)
       except:
@@ -589,8 +611,8 @@ exit 1   # With exit code 1, no further files in /etc/system-info.d are processe
       self.beginBlock('Setting up sysstat service')
       self.aptInstallPackages([ 'sysstat' ], False)
       self.executeFromString("""\
-sudo sed -e "s/^ENABLED=.*$/ENABLED=\\"true\\"/g" -i /etc/default/sysstat && \\
-sudo sed -e "s/^SADC_OPTIONS=.*$/SADC_OPTIONS=\\"-S ALL\\"/g" -i /etc/sysstat/sysstat && \\
+sudo sed -e "s/^ENABLED=.*$/ENABLED=\"true\"/g" -i /etc/default/sysstat && \
+sudo sed -e "s/^SADC_OPTIONS=.*$/SADC_OPTIONS=\"-S ALL\"/g" -i /etc/sysstat/sysstat && \
 sudo service sysstat restart""")
       self.endBlock()
 
@@ -601,8 +623,8 @@ sudo service sysstat restart""")
 
       try:
          commands = """\
-cd /home/nornetpp/src && \\
-if [ ! -d \\\"{gitDirectory}\\\" ] ; then git clone --quiet {gitRepository} {gitDirectory} && cd {gitDirectory} ; else cd {gitDirectory} && git pull ; fi && \\
+cd /home/nornetpp/src && \
+if [ ! -d "{gitDirectory}" ] ; then git clone --quiet {gitRepository} {gitDirectory} && cd {gitDirectory} ; else cd {gitDirectory} && git pull ; fi && \
 git checkout {gitCommit}""".format(
             gitRepository    = gitRepository,
             gitDirectory     = gitDirectory,
