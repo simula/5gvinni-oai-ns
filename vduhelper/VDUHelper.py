@@ -647,7 +647,7 @@ exit 1   # With exit code 1, no further files in /etc/system-info.d are processe
       self.aptInstallPackages([ 'sysstat' ], False)
       self.executeFromString("""\
 sed -e "s/^ENABLED=.*$/ENABLED=\"true\"/g" -i /etc/default/sysstat && \
-sed -e "s/^SADC_OPTIONS=.*$/SADC_OPTIONS=\"-S ALL\"/g" -i /etc/sysstat/sysstat && \
+sed -e "s/^SADC_OPTIONS=.*$/SADC_OPTIONS=\\"-S ALL\\"/g" -i /etc/sysstat/sysstat && \
 service sysstat restart""")
       self.endBlock()
 

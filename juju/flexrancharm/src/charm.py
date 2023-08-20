@@ -209,7 +209,7 @@ cd {homeDirectory}/src/{gitDirectory}/flexran
 
          # ====== Set up FlexRAN service ====================================
          vduHelper.beginBlock('Setting up FlexRAN service')
-         vduHelper.aptInstallPackages([ 'td-system-info' ])
+         vduHelper.aptInstallPackages([ 'joe', 'plocate', 'td-system-info' ])
          vduHelper.configureSystemInfo('FlexRAN Controller', 'This is the FlexRAN Controller of the SimulaMet FlexRAN VNF!')
          vduHelper.createFileFromString('/lib/systemd/system/flexran.service', """\
 [Unit]
