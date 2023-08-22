@@ -125,9 +125,9 @@ vnfd:
 
   # ###### VDU Configuration ################################################
   sw-image-desc:
-    - id: ubuntu22.04
-      image: ubuntu22.04
-      name: ubuntu22.04
+    - id: ubuntu20.04
+      image: ubuntu20.04
+      name: ubuntu20.04
   vdu:
     - cloud-init-file: flexran-init
       description: FlexRAN
@@ -144,7 +144,7 @@ vnfd:
               virtual-interface:
                 type: PARAVIRT
       name: FlexRAN
-      sw-image-desc: ubuntu22.04
+      sw-image-desc: ubuntu20.04
       virtual-compute-desc: FlexRAN-compute
       virtual-storage-desc:
         - FlexRAN-storage

@@ -142,6 +142,9 @@ sudo -u {user} -g {group} mkdir -p {homeDirectory}/src
          vduHelper.testNetworking()
          vduHelper.waitForPackageUpdatesToComplete()
          vduHelper.aptAddRepository('ppa:dreibh/ppa')
+         vduHelper.aptInstallPackages([ 'joe', 'mlocate', 'td-system-info',
+                                        'liblog4cxx-dev'
+                                      ])
          vduHelper.endBlock()
 
          # ====== Prepare sources ===========================================
@@ -209,7 +212,6 @@ cd {homeDirectory}/src/{gitDirectory}/flexran
 
          # ====== Set up FlexRAN service ====================================
          vduHelper.beginBlock('Setting up FlexRAN service')
-         vduHelper.aptInstallPackages([ 'td-system-info' ])
          vduHelper.configureSystemInfo('FlexRAN Controller', 'This is the FlexRAN Controller of the SimulaMet FlexRAN VNF!')
          vduHelper.createFileFromString('/lib/systemd/system/flexran.service', """\
 [Unit]
