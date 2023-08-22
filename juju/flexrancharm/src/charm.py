@@ -87,7 +87,7 @@ class FlexRANCharm(CharmBase):
 
    # ###### prepare-flexran-build action ####################################
    def on_prepare_flexran_build_action(self, event):
-      vduHelper.beginBlock('prepare_flexran_build')
+      vduHelper.beginBlock('on_prepare_flexran_build_action')
       try:
 
          # ====== Get FlexRAN parameters ====================================
@@ -173,7 +173,7 @@ sudo -u {user} -g {group} git submodule update flexran
 
    # ###### configure-flexran action ########################################
    def on_configure_flexran_action(self, event):
-      vduHelper.beginBlock('configure_flexran')
+      vduHelper.beginBlock('on_configure_flexran_action')
       try:
 
          # ====== Get FlexRAN parameters ====================================
@@ -266,7 +266,7 @@ chown {user}:{group} {homeDirectory}/log {homeDirectory}/restart
 
    # ###### restart-flexran action ##########################################
    def on_restart_flexran_action(self, event):
-      vduHelper.beginBlock('restart_flexran')
+      vduHelper.beginBlock('on_restart_flexran_action')
       try:
 
          vduHelper.runInShell('service flexran restart')

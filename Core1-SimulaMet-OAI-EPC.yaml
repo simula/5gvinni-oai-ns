@@ -45,7 +45,7 @@ additionalParamsForVnf:
       network_msisdn_first: '24288880000000'
       network_users: '1024'
 
-      mme_S6a_address: '172.16.6.2'  # Must match with MME!
+      mme_S6a_address: '172.16.6.2'   # Must match with MME!
 
       password: 'osm4us'
 
@@ -61,7 +61,7 @@ additionalParamsForVnf:
       mme_S11_ipv4_interface: '172.16.1.102/24'
       mme_S6a_address: '172.16.6.2'
 
-      network_realm: 'simula.nornet'  # Must match with MME and SPGW-C!
+      network_realm: 'simula.nornet'   # Must match with MME and SPGW-C!
       network_mcc: '242'
       network_mnc: '88'
 
@@ -104,7 +104,7 @@ additionalParamsForVnf:
 vld:
   # ====== Management =======================================================
   - name: Management
-    vim-network-name: osm-management
+    vim-network-name: osm-management           # <<-- VIM Network for Management
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '1'
         vnfd-connection-point-ref: hss-mgmt-cp-ext
@@ -121,7 +121,7 @@ vld:
 
   # ====== S1-C =============================================================
   - name: S1-C
-    vim-network-name: 5gvinni-core1-s1c
+    vim-network-name: 5gvinni-core4-s1c        # <<-- VIM Network for S1C
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '2'
         vnfd-connection-point-ref: mme-s1c-cp-ext
@@ -129,7 +129,7 @@ vld:
 
   # ====== S1-U =============================================================
   - name: S1-U
-    vim-network-name: 5gvinni-core1-s1u
+    vim-network-name: 5gvinni-core4-s1u        # <<-- VIM Network for S1U
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '4'
         vnfd-connection-point-ref: spgwu-s1u-cp-ext
@@ -137,7 +137,7 @@ vld:
 
   # ====== SGi ==============================================================
   - name: SGi
-    vim-network-name: openstack-vms
+    vim-network-name: openstack-vms            # <<-- VIM Network for SGi
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '4'
         vnfd-connection-point-ref: spgwu-sgi-cp-ext

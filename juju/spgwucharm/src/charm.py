@@ -28,29 +28,22 @@
 #
 # Contact: dreibh@simula.no
 
-
-from charmhelpers.core.hookenv import (
-    function_get,
-    function_fail,
-    function_set,
-    status_set
-)
-from charms.reactive import (
-    clear_flag,
-    set_flag,
-    when,
-    when_not
-)
-import charms.sshproxy
-
+import os
 import subprocess
 import sys
 import traceback
 from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
 
-from . import VDUHelper
+sys.path.append("lib")
 
-vduHelper = VDUHelper.VDUHelper()
+from ops.charm import CharmBase
+from ops.main  import main
+from ops.model import ActiveStatus
+
+
+import VDUHelper
+
+vduHelper = VDUHelper.VDUHelper(1000)   # <<-- Default user ID for "ubuntu"!
 
 
 
