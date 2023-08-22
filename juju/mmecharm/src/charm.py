@@ -133,6 +133,13 @@ class MMECharm(CharmBase):
 
          # ====== Prepare system ===============================================
          vduHelper.beginBlock('Preparing system')
+
+         vduHelper.configureInterface(mmeS6a_IfName, configurationS6a, 61)
+         vduHelper.configureInterface(mmeS11_IfName, configurationS11, 62)
+         vduHelper.configureInterface(mmeS1C_IfName, configurationS1C, 63)
+         vduHelper.configureInterface(mmeS10_IfName, configurationS10, 64)
+         vduHelper.testNetworking()
+
          vduHelper.executeFromString("""\
 sudo -u {user} -g {group} mkdir -p {homeDirectory}/src
 """.format(user          = vduHelper.getUser(),
@@ -140,16 +147,10 @@ sudo -u {user} -g {group} mkdir -p {homeDirectory}/src
            homeDirectory = vduHelper.getHomeDirectory(),
            gitDirectory  = gitDirectory))
          vduHelper.configureGit(gitName, gitEmail)
-         vduHelper.configureInterface(mmeS6a_IfName, configurationS6a, 61)
-         vduHelper.configureInterface(mmeS11_IfName, configurationS11, 62)
-         vduHelper.configureInterface(mmeS1C_IfName, configurationS1C, 63)
-         vduHelper.configureInterface(mmeS10_IfName, configurationS10, 64)
-         vduHelper.testNetworking()
          vduHelper.waitForPackageUpdatesToComplete()
          vduHelper.aptAddRepository('ppa:dreibh/ppa')
-         vduHelper.aptInstallPackages([ 'joe', 'mlocate', 'td-system-info',
-                                        'yq'
-                                      ])
+         vduHelper.aptInstallPackages([ 'joe', 'mlocate', 'td-system-info' ])
+
          vduHelper.endBlock()
 
          # ====== Prepare sources ==============================================

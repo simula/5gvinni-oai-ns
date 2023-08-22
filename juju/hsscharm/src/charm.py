@@ -109,6 +109,10 @@ class HSSCharm(CharmBase):
 
          # ====== Prepare system ============================================
          vduHelper.beginBlock('Preparing system')
+
+         vduHelper.configureInterface(hssS6a_IfName, configurationS6a, 61)
+         vduHelper.testNetworking()
+
          vduHelper.executeFromString("""\
 sudo -u {user} -g {group} mkdir -p {homeDirectory}/src
 """.format(user          = vduHelper.getUser(),
@@ -116,16 +120,13 @@ sudo -u {user} -g {group} mkdir -p {homeDirectory}/src
            homeDirectory = vduHelper.getHomeDirectory(),
            gitDirectory  = gitDirectory))
          vduHelper.configureGit(gitName, gitEmail)
-         vduHelper.configureInterface(hssS6a_IfName, configurationS6a, 61)
-         vduHelper.testNetworking()
          vduHelper.waitForPackageUpdatesToComplete()
-         vduHelper.executeFromString("""\
-if [ "`find /etc/apt/sources.list.d -name 'rmescandon-ubuntu-yq-*.list'`" == "" ] ; then sudo add-apt-repository -y ppa:rmescandon/yq ; fi
-""")
          vduHelper.aptAddRepository('ppa:dreibh/ppa')
+         vduHelper.aptAddRepository('ppa:rmescandon/yq')
          vduHelper.aptInstallPackages([ 'joe', 'mlocate', 'td-system-info',
                                         'yq'
                                       ])
+
          vduHelper.endBlock()
 
          # ====== Prepare sources ===========================================

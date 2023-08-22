@@ -131,6 +131,10 @@ class FlexRANCharm(CharmBase):
 
          # ====== Prepare system ============================================
          vduHelper.beginBlock('Preparing system')
+
+         vduHelper.configureInterface(flexranService_IfName, configurationService, 61)
+         vduHelper.testNetworking()
+
          vduHelper.executeFromString("""\
 sudo -u {user} -g {group} mkdir -p {homeDirectory}/src
 """.format(user          = vduHelper.getUser(),
@@ -138,13 +142,12 @@ sudo -u {user} -g {group} mkdir -p {homeDirectory}/src
            homeDirectory = vduHelper.getHomeDirectory(),
            gitDirectory  = gitDirectory))
          vduHelper.configureGit(gitName, gitEmail)
-         vduHelper.configureInterface(flexranService_IfName, configurationService, 61)
-         vduHelper.testNetworking()
          vduHelper.waitForPackageUpdatesToComplete()
          vduHelper.aptAddRepository('ppa:dreibh/ppa')
          vduHelper.aptInstallPackages([ 'joe', 'mlocate', 'td-system-info',
                                         'liblog4cxx-dev'
                                       ])
+
          vduHelper.endBlock()
 
          # ====== Prepare sources ===========================================

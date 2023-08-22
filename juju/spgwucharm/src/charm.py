@@ -133,6 +133,12 @@ class SPGWUCharm(CharmBase):
 
          # ====== Prepare system ============================================
          vduHelper.beginBlock('Preparing system')
+
+         vduHelper.configureInterface(spgwuSXab_IfName, configurationSXab, 61)
+         vduHelper.configureInterface(spgwuS1U_IfName,  configurationS1U,  62)
+         vduHelper.configureInterface(spgwuSGi_IfName,  configurationSGi,  63)
+         vduHelper.testNetworking()
+
          vduHelper.executeFromString("""\
 sudo -u {user} -g {group} mkdir -p {homeDirectory}/src
 """.format(user          = vduHelper.getUser(),
@@ -140,15 +146,10 @@ sudo -u {user} -g {group} mkdir -p {homeDirectory}/src
            homeDirectory = vduHelper.getHomeDirectory(),
            gitDirectory  = gitDirectory))
          vduHelper.configureGit(gitName, gitEmail)
-         vduHelper.configureInterface(spgwuSXab_IfName, configurationSXab, 61)
-         vduHelper.configureInterface(spgwuS1U_IfName,  configurationS1U,  62)
-         vduHelper.configureInterface(spgwuSGi_IfName,  configurationSGi,  63)
-         vduHelper.testNetworking()
          vduHelper.waitForPackageUpdatesToComplete()
          vduHelper.aptAddRepository('ppa:dreibh/ppa')
-         vduHelper.aptInstallPackages([ 'joe', 'mlocate', 'td-system-info',
-                                        'yq'
-                                      ])
+         vduHelper.aptInstallPackages([ 'joe', 'mlocate', 'td-system-info' ])
+
          vduHelper.endBlock()
 
          # ====== Prepare sources ===========================================

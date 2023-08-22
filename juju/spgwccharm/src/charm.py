@@ -116,6 +116,13 @@ class SPGWCCharm(CharmBase):
 
          # ====== Prepare system ============================================
          vduHelper.beginBlock('Preparing system')
+
+         vduHelper.configureInterface(spgwcS11_IfName,       configurationS11,      61)
+         vduHelper.configureInterface(spgwcSXab_IfName,      configurationSXab,     62)
+         vduHelper.configureInterface(spgwcS5S8_SGW_IfName,  configurationS5S8_SGW, 63)
+         vduHelper.configureInterface(spgwcS5S8_PGW_IfName,  configurationS5S8_PGW, 64)
+         vduHelper.testNetworking()
+
          vduHelper.executeFromString("""\
 sudo -u {user} -g {group} mkdir -p {homeDirectory}/src
 """.format(user          = vduHelper.getUser(),
@@ -123,16 +130,10 @@ sudo -u {user} -g {group} mkdir -p {homeDirectory}/src
            homeDirectory = vduHelper.getHomeDirectory(),
            gitDirectory  = gitDirectory))
          vduHelper.configureGit(gitName, gitEmail)
-         vduHelper.configureInterface(spgwcS11_IfName,       configurationS11,       61)
-         vduHelper.configureInterface(spgwcSXab_IfName,      configurationSXab,      62)
-         vduHelper.configureInterface(spgwcS5S8_SGW_IfName,  configurationS5S8_SGW,  63)
-         vduHelper.configureInterface(spgwcS5S8_PGW_IfName,  configurationS5S8_PGW,  64)
-         vduHelper.testNetworking()
          vduHelper.waitForPackageUpdatesToComplete()
          vduHelper.aptAddRepository('ppa:dreibh/ppa')
-         vduHelper.aptInstallPackages([ 'joe', 'mlocate', 'td-system-info',
-                                        'yq'
-                                      ])
+         vduHelper.aptInstallPackages([ 'joe', 'mlocate', 'td-system-info' ])
+
          vduHelper.endBlock()
 
          # ====== Prepare sources ===========================================
