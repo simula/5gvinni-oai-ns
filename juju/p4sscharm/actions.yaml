@@ -28,13 +28,6 @@
 
 configure-p4ss:
   description: Configures P4-SS
-  #params:
-    #network-users:
-      #description: Number of users
-      #type: string
-      #default: '1024'
-  #required:
-    #- network-users
 
 restart-p4ss:
   description: Restarts P4-SS

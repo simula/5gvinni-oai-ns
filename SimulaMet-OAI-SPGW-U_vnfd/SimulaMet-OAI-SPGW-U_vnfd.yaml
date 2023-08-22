@@ -30,8 +30,8 @@ vnfd:
   id: SimulaMet-OAI-SPGW-U_vnfd
   product-name: SimulaMet-OAI-SPGW-U_vnfd
   description: SimulaMet OpenAirInterface SPGW-U VNF
-  version: '2.0'
   provider: Thomas Dreibholz
+  version: 3.0
 
   # ###### External Connection Points #######################################
   ext-cpd:
@@ -71,28 +71,22 @@ vnfd:
         operate-vnf-op-config:
           day1-2:
             - id: SPGWU
+              config-access:
+                ssh-access:
+                  default-user: ubuntu
+                  required: true
 
               # ====== Execution environment ================================
               execution-environment-list:
                 - id: spgwucharm-ee
                   juju:
                     charm: spgwucharm
+                    proxy: false
 
               # ====== Configuration primitives =============================
               initial-config-primitive:
 
-                - seq: '1'
-                  name: config
-                  execution-environment-ref: spgwucharm-ee
-                  parameter:
-                    - name: ssh-hostname
-                      value: <rw_mgmt_ip>
-                    - name: ssh-username
-                      value: nornetpp
-                    - name: ssh-password
-                      value: <password>
-
-                - seq: '2'
+                - seq: 1
                   name: prepare-spgwu-build
                   execution-environment-ref: spgwucharm-ee
                   parameter:
@@ -113,14 +107,14 @@ vnfd:
                     - name: spgwu-SGi-ipv6-gateway
                       value: <spgwu_SGi_ipv6_gateway>
 
-                - seq: '3'
+                - seq: 2
                   name: configure-spgwu
                   execution-environment-ref: spgwucharm-ee
                   parameter:
                     - name: spgwu-spgwc-list
                       value: <spgwu_spgwc_list>
 
-                - seq: '4'
+                - seq: 3
                   name: restart-spgwu
                   execution-environment-ref: spgwucharm-ee
 
@@ -156,15 +150,15 @@ vnfd:
 
   # ###### VDU Configuration ################################################
   sw-image-desc:
-    - id: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
-      name: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
-      image: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
+    - id: ubuntu18.04
+      name: ubuntu18.04
+      image: ubuntu18.04
   vdu:
     - id: SPGWU
       name: SPGWU
       description: SPGWU
       cloud-init-file: spgwu-init
-      sw-image-desc: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
+      sw-image-desc: ubuntu18.04
       virtual-compute-desc: SPGWU-compute
       virtual-storage-desc:
         - SPGWU-storage

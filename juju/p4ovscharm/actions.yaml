@@ -28,13 +28,6 @@
 
 configure-p4ovs:
   description: Configures P4-OvS
-  #params:
-    #network-users:
-      #description: Number of users
-      #type: string
-      #default: '1024'
-  #required:
-    #- network-users
 
 restart-p4ovs:
   description: Restarts P4-OvS
