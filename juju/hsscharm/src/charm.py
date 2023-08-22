@@ -35,6 +35,7 @@ import traceback
 from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
 
 sys.path.append("lib")
+sys.path.append("mod/operator")
 
 from ops.charm import CharmBase
 from ops.main  import main
@@ -108,6 +109,12 @@ class HSSCharm(CharmBase):
 
          # ====== Prepare system ============================================
          vduHelper.beginBlock('Preparing system')
+         vduHelper.executeFromString("""\
+sudo -u {user} -g {group} mkdir -p {homeDirectory}/src
+""".format(user          = vduHelper.getUser(),
+           group         = vduHelper.getGroup(),
+           homeDirectory = vduHelper.getHomeDirectory(),
+           gitDirectory  = gitDirectory))
          vduHelper.configureGit(gitName, gitEmail)
          vduHelper.configureInterface(hssS6a_IfName, configurationS6a, 61)
          vduHelper.testNetworking()

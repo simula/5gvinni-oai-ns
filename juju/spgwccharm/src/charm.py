@@ -35,6 +35,7 @@ import traceback
 from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
 
 sys.path.append("lib")
+sys.path.append("mod/operator")
 
 from ops.charm import CharmBase
 from ops.main  import main
@@ -154,9 +155,9 @@ chown -R {user}:{group} {homeDirectory}/src/{gitDirectory}
          self.model.unit.status = ActiveStatus()
 
 
-   # ###### configure-flexran action ########################################
-   def on_configure_flexran_action(self, event):
-      vduHelper.beginBlock('on_configure_flexran_action')
+   # ###### configure-spgwc action ##########################################
+   def on_configure_spgwc_action(self, event):
+      vduHelper.beginBlock('on_configure_spgwc_action')
       try:
 
          # ====== Get SPGW-C parameters =====================================

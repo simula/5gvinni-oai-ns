@@ -35,6 +35,7 @@ import traceback
 from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
 
 sys.path.append("lib")
+sys.path.append("mod/operator")
 
 from ops.charm import CharmBase
 from ops.main  import main

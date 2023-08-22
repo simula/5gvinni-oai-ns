@@ -34,5 +34,5 @@ chpasswd: {expire: False}
 ssh_pwauth: True
 system_info:
   default_user:
-    name: nornetpp
+    name: ubuntu
     sudo: ALL=(ALL) NOPASSWD:ALL

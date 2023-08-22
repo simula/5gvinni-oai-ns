@@ -35,6 +35,7 @@ import traceback
 from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
 
 sys.path.append("lib")
+sys.path.append("mod/operator")
 
 from ops.charm import CharmBase
 from ops.main  import main
@@ -95,6 +96,8 @@ class MMECharm(CharmBase):
          # For a documentation of the installation procedure, see:
          # https://github.com/simula/openairinterface-openair-cn/wiki/OpenAirSoftwareSupport#install-mme
 
+         gitName       = event.params['git-name']
+         gitEmail      = event.params['git-email']
          gitRepository = event.params['mme-git-repository']
          gitCommit     = event.params['mme-git-commit']
          gitDirectory  = 'openair-mme'
