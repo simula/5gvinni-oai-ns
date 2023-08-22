@@ -143,6 +143,7 @@ sudo -u {user} -g {group} mkdir -p {homeDirectory}/src
          vduHelper.configureInterface(mmeS10_IfName, configurationS10, 64)
          vduHelper.testNetworking()
          vduHelper.waitForPackageUpdatesToComplete()
+         vduHelper.aptAddRepository('ppa:dreibh/ppa')
          vduHelper.aptInstallPackages([ 'joe', 'mlocate', 'td-system-info',
                                         'yq'
                                       ])
@@ -152,22 +153,20 @@ sudo -u {user} -g {group} mkdir -p {homeDirectory}/src
          vduHelper.beginBlock('Preparing sources')
          vduHelper.fetchGitRepository(gitDirectory, gitRepository, gitCommit)
          vduHelper.executeFromString("""\
-chown -R {user}:{group} {homeDirectory}/src/{gitDirectory} && \
+chown -R {user}:{group} {homeDirectory}/src/{gitDirectory}
 """.format(user          = vduHelper.getUser(),
            group         = vduHelper.getGroup(),
            homeDirectory = vduHelper.getHomeDirectory(),
            gitDirectory  = gitDirectory))
          vduHelper.endBlock()
 
-
          message = vduHelper.endBlock()
-         function_set( { 'outout': message } )
-         set_flag('mmecharm.prepared-mme-build')
+         event.set_results( { 'prepared': True, 'outout': message } )
       except:
          message = vduHelper.endBlockInException()
-         function_fail(message)
+         event.fail(message)
       finally:
-         clear_flag('actions.prepare-mme-build')
+         self.model.unit.status = ActiveStatus()
 
 
    # ###### configure-mme action ########################################

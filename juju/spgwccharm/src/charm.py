@@ -51,117 +51,160 @@ vduHelper = VDUHelper.VDUHelper(1000)   # <<-- Default user ID for "ubuntu"!
 # #### SPGW-C Charm functions                                            ####
 # ###########################################################################
 
-# ###### Installation #######################################################
-@when('sshproxy.configured')
-@when_not('spgwccharm.installed')
-def install_spgwccharm_proxy_charm():
-   set_flag('spgwccharm.installed')
-   vduHelper.setStatus('install_spgwccharm_proxy_charm: SSH proxy charm is READY')
+class SPGWCCharm(CharmBase):
+
+   # ###### Constructor #####################################################
+   def __init__(self, framework, key):
+      super().__init__(framework, key)
+
+      # Listen to charm events
+      self.framework.observe(self.on.config_changed, self.on_config_changed)
+      self.framework.observe(self.on.install, self.on_install)
+      self.framework.observe(self.on.start, self.on_start)
+
+      # Listen to the action events
+      self.framework.observe(self.on.prepare_spgwc_build_action, self.on_prepare_spgwc_build_action)
+      self.framework.observe(self.on.configure_spgwc_action, self.on_configure_spgwc_action)
+      self.framework.observe(self.on.restart_spgwc_action, self.on_restart_spgwc_action)
 
 
-# ###### prepare-spgwc-build function #######################################
-@when('actions.prepare-spgwc-build')
-@when('spgwccharm.installed')
-@when_not('spgwccharm.prepared-spgwc-build')
-def prepare_spgwc_build():
-   vduHelper.beginBlock('prepare_spgwc_build')
-   try:
-
-      # ====== Get SPGW-C parameters ========================================
-      # For a documentation of the installation procedure, see:
-      # https://github.com/OPENAIRINTERFACE/openair-cn-cups/wiki/OpenAirSoftwareSupport#install-spgw-c
-
-      gitName       = function_get('git-name')
-      gitEmail      = function_get('git-email')
-      gitRepository = function_get('spgwc-git-repository')
-      gitCommit     = function_get('spgwc-git-commit')
-      gitDirectory  = 'openair-spgwc'
-
-      # Prepare network configurations:
-      spgwcS11_IfName   = 'ens5'
-      spgwcSXab_IfName  = 'ens4'
-      configurationS11  = vduHelper.makeInterfaceConfiguration(spgwcS11_IfName,  None)
-      configurationSXab = vduHelper.makeInterfaceConfiguration(spgwcSXab_IfName, None)
-
-      # S5S8 dummy interfaces:
-      spgwcS5S8_SGW_IfName  = 'dummy0'
-      configurationS5S8_SGW = vduHelper.makeInterfaceConfiguration(spgwcS5S8_SGW_IfName, IPv4Interface('172.58.58.102/24'), createDummy = True)
-      spgwcS5S8_PGW_IfName  = 'dummy1'
-      configurationS5S8_PGW = vduHelper.makeInterfaceConfiguration(spgwcS5S8_PGW_IfName, IPv4Interface('172.58.58.101/24'), createDummy = True)
-
-      # ====== Prepare system ===============================================
-      vduHelper.beginBlock('Preparing system')
-      vduHelper.configureGit(gitName, gitEmail)
-      vduHelper.configureInterface(spgwcS11_IfName,       configurationS11,       61)
-      vduHelper.configureInterface(spgwcSXab_IfName,      configurationSXab,      62)
-      vduHelper.configureInterface(spgwcS5S8_SGW_IfName,  configurationS5S8_SGW,  63)
-      vduHelper.configureInterface(spgwcS5S8_PGW_IfName,  configurationS5S8_PGW,  64)
-      vduHelper.testNetworking()
-      vduHelper.waitForPackageUpdatesToComplete()
-      vduHelper.endBlock()
-
-      # ====== Prepare sources ==============================================
-      vduHelper.beginBlock('Preparing sources')
-      vduHelper.fetchGitRepository(gitDirectory, gitRepository, gitCommit)
-      vduHelper.endBlock()
+   # ###### Configuration ###################################################
+   def on_config_changed(self, event):
+      """Handle changes in configuration"""
+      self.model.unit.status = ActiveStatus()
 
 
-      message = vduHelper.endBlock()
-      function_set( { 'outout': message } )
-      set_flag('spgwccharm.prepared-spgwc-build')
-   except:
-      message = vduHelper.endBlockInException()
-      function_fail(message)
-   finally:
-      clear_flag('actions.prepare-spgwc-build')
+   # ###### Installation ####################################################
+   def on_install(self, event):
+      """Called when the charm is being installed"""
+      self.model.unit.status = ActiveStatus()
 
 
-# ###### configure-spgwc function ###########################################
-@when('actions.configure-spgwc')
-@when('spgwccharm.prepared-spgwc-build')
-def configure_spgwc():
-   vduHelper.beginBlock('configure_spgwc')
-   try:
+   # ###### Start ###########################################################
+   def on_start(self, event):
+      """Called when the charm is being started"""
+      self.model.unit.status = ActiveStatus()
 
-      # ====== Get SPGW-C parameters ========================================
-      # For a documentation of the installation procedure, see:
-      # https://github.com/OPENAIRINTERFACE/openair-cn-cups/wiki/OpenAirSoftwareSupport#install-spgw-c
 
-      gitDirectory         = 'openair-spgwc'
+   # ###### prepare-spgwc-build action ######################################
+   def on_prepare_spgwc_build_action(self, event):
+      vduHelper.beginBlock('on_prepare_spgwc_build_action')
+      try:
 
-      networkRealm         = function_get('network-realm')
-      networkDNS1_IPv4     = IPv4Address(function_get('network-ipv4-dns1'))
-      networkDNS2_IPv4     = IPv4Address(function_get('network-ipv4-dns2'))
+         # ====== Get SPGW-C parameters =====================================
+         # For a documentation of the installation procedure, see:
+         # https://github.com/OPENAIRINTERFACE/openair-cn-cups/wiki/OpenAirSoftwareSupport#install-spgw-c
 
-      # Prepare network configurations:
-      spgwcSXab_IfName     = 'ens4'
-      spgwcS11_IfName      = 'ens5'
-      spgwcS5S8_SGW_IfName = 'dummy0'
-      spgwcS5S8_PGW_IfName = 'dummy1'
+         gitName       = event.params['git-name']
+         gitEmail      = event.params['git-email']
+         gitRepository = event.params['spgwc-git-repository']
+         gitCommit     = event.params['spgwc-git-commit']
+         gitDirectory  = 'openair-spgwc'
 
-      # ====== Build SPGW-C dependencies ====================================
-      vduHelper.beginBlock('Building SPGW-C dependencies')
-      vduHelper.executeFromString("""\
-export MAKEFLAGS="-j`nproc`" && \\
-cd /home/nornetpp/src/{gitDirectory}/build/scripts && \\
-mkdir -p logs && \\
-./build_spgwc -I -f >logs/build_spgwc-1.log 2>&1
-""".format(gitDirectory = gitDirectory))
-      vduHelper.endBlock()
+         # Prepare network configurations:
+         spgwcS11_IfName   = 'ens5'
+         spgwcSXab_IfName  = 'ens4'
+         configurationS11  = vduHelper.makeInterfaceConfiguration(spgwcS11_IfName,  None)
+         configurationSXab = vduHelper.makeInterfaceConfiguration(spgwcSXab_IfName, None)
 
-      # ====== Build SPGW-C itself ==========================================
-      vduHelper.beginBlock('Building SPGW-C itself')
-      vduHelper.executeFromString("""\
-export MAKEFLAGS="-j`nproc`" && \\
-cd /home/nornetpp/src/{gitDirectory}/build/scripts && \\
-./build_spgwc -c -V -b Debug -j >logs/build_spgwc-2.log 2>&1
-""".format(gitDirectory = gitDirectory))
-      vduHelper.endBlock()
+         # S5S8 dummy interfaces:
+         spgwcS5S8_SGW_IfName  = 'dummy0'
+         configurationS5S8_SGW = vduHelper.makeInterfaceConfiguration(spgwcS5S8_SGW_IfName, IPv4Interface('172.58.58.102/24'), createDummy = True)
+         spgwcS5S8_PGW_IfName  = 'dummy1'
+         configurationS5S8_PGW = vduHelper.makeInterfaceConfiguration(spgwcS5S8_PGW_IfName, IPv4Interface('172.58.58.101/24'), createDummy = True)
 
-      # ====== Configure SPGW-C =============================================
-      vduHelper.beginBlock('Configuring SPGW-C')
-      vduHelper.executeFromString("""\
-cd /home/nornetpp/src/{gitDirectory}/build/scripts && \\
+         # ====== Prepare system ============================================
+         vduHelper.beginBlock('Preparing system')
+         vduHelper.executeFromString("""\
+sudo -u {user} -g {group} mkdir -p {homeDirectory}/src
+""".format(user          = vduHelper.getUser(),
+           group         = vduHelper.getGroup(),
+           homeDirectory = vduHelper.getHomeDirectory(),
+           gitDirectory  = gitDirectory))
+         vduHelper.configureGit(gitName, gitEmail)
+         vduHelper.configureInterface(spgwcS11_IfName,       configurationS11,       61)
+         vduHelper.configureInterface(spgwcSXab_IfName,      configurationSXab,      62)
+         vduHelper.configureInterface(spgwcS5S8_SGW_IfName,  configurationS5S8_SGW,  63)
+         vduHelper.configureInterface(spgwcS5S8_PGW_IfName,  configurationS5S8_PGW,  64)
+         vduHelper.testNetworking()
+         vduHelper.waitForPackageUpdatesToComplete()
+         vduHelper.aptAddRepository('ppa:dreibh/ppa')
+         vduHelper.aptInstallPackages([ 'joe', 'mlocate', 'td-system-info',
+                                        'yq'
+                                      ])
+         vduHelper.endBlock()
+
+         # ====== Prepare sources ===========================================
+         vduHelper.beginBlock('Preparing sources')
+         vduHelper.fetchGitRepository(gitDirectory, gitRepository, gitCommit)
+         vduHelper.executeFromString("""\
+chown -R {user}:{group} {homeDirectory}/src/{gitDirectory}
+""".format(user          = vduHelper.getUser(),
+           group         = vduHelper.getGroup(),
+           homeDirectory = vduHelper.getHomeDirectory(),
+           gitDirectory  = gitDirectory))
+         vduHelper.endBlock()
+
+         message = vduHelper.endBlock()
+         event.set_results( { 'prepared': True, 'outout': message } )
+      except:
+         message = vduHelper.endBlockInException()
+         event.fail(message)
+      finally:
+         self.model.unit.status = ActiveStatus()
+
+
+   # ###### configure-flexran action ########################################
+   def on_configure_flexran_action(self, event):
+      vduHelper.beginBlock('on_configure_flexran_action')
+      try:
+
+         # ====== Get SPGW-C parameters =====================================
+         # For a documentation of the installation procedure, see:
+         # https://github.com/OPENAIRINTERFACE/openair-cn-cups/wiki/OpenAirSoftwareSupport#install-spgw-c
+
+         gitDirectory         = 'openair-spgwc'
+
+         networkRealm         = event.params['network-realm']
+         networkDNS1_IPv4     = IPv4Address(event.params['network-ipv4-dns1'])
+         networkDNS2_IPv4     = IPv4Address(event.params['network-ipv4-dns2'])
+
+         # Prepare network configurations:
+         spgwcSXab_IfName     = 'ens4'
+         spgwcS11_IfName      = 'ens5'
+         spgwcS5S8_SGW_IfName = 'dummy0'
+         spgwcS5S8_PGW_IfName = 'dummy1'
+
+         # ====== Build SPGW-C dependencies =================================
+         vduHelper.beginBlock('Building SPGW-C dependencies')
+         vduHelper.executeFromString("""\
+export MAKEFLAGS="-j`nproc`" && \
+cd /home/{homeDirectory}/src/{gitDirectory}/build/scripts && \
+mkdir -p logs && \
+sudo -u {user} -g {group} --preserve-env=MAKEFLAGS ./build_spgwc -I -f >logs/build_spgwc-1.log 2>&1
+""".format(user          = vduHelper.getUser(),
+           group         = vduHelper.getGroup(),
+           homeDirectory = vduHelper.getHomeDirectory(),
+           gitDirectory  = gitDirectory))
+         vduHelper.endBlock()
+
+         # ====== Build SPGW-C itself =======================================
+         vduHelper.beginBlock('Building SPGW-C itself')
+         vduHelper.executeFromString("""\
+export MAKEFLAGS="-j`nproc`" && \
+cd /home/{homeDirectory}/src/{gitDirectory}/build/scripts && \
+mkdir -p logs && \
+sudo -u {user} -g {group} --preserve-env=MAKEFLAGS ./build_spgwc -c -V -b Debug -j >logs/build_spgwc-2.log 2>&1
+""".format(user          = vduHelper.getUser(),
+           group         = vduHelper.getGroup(),
+           homeDirectory = vduHelper.getHomeDirectory(),
+           gitDirectory  = gitDirectory))
+         vduHelper.endBlock()
+
+         # ====== Configure SPGW-C ==========================================
+         vduHelper.beginBlock('Configuring SPGW-C')
+         vduHelper.executeFromString("""\
+cd /home/{homeDirectory}/src/{gitDirectory}/build/scripts && \\
 INSTANCE=1 && \\
 PREFIX='/usr/local/etc/oai' && \\
 sudo mkdir -m 0777 -p $PREFIX && \\
@@ -180,23 +223,25 @@ SPGWC_CONF[@DEFAULT_APN@]='default.{networkRealm}' && \\
 for K in "${{!SPGWC_CONF[@]}}"; do sudo egrep -lRZ "$K" $PREFIX | xargs -0 -l sudo sed -i -e "s|$K|${{SPGWC_CONF[$K]}}|g" ; ret=$?;[[ ret -ne 0 ]] && echo "Tried to replace $K with ${{SPGWC_CONF[$K]}}" || true ; done && \\
 sudo sed -e "s/APN_NI = \\"default\\"/APN_NI = \\"default.{networkRealm}\\"/g" -i /usr/local/etc/oai/spgw_c.conf && \\
 sudo sed -e "s/APN_NI = \\"apn1\\"/APN_NI = \\"internet.{networkRealm}\\"/g" -i /usr/local/etc/oai/spgw_c.conf
-""".format(
-         gitDirectory         = gitDirectory,
-         networkRealm         = networkRealm,
-         networkDNS1_IPv4     = networkDNS1_IPv4,
-         networkDNS2_IPv4     = networkDNS2_IPv4,
-         spgwcSXab_IfName     = spgwcSXab_IfName,
-         spgwcS11_IfName      = spgwcS11_IfName,
-         spgwcS5S8_SGW_IfName = spgwcS5S8_SGW_IfName,
-         spgwcS5S8_PGW_IfName = spgwcS5S8_PGW_IfName
-      ))
-      vduHelper.endBlock()
+""".format(user                 = vduHelper.getUser(),
+           group                = vduHelper.getGroup(),
+           homeDirectory        = vduHelper.getHomeDirectory(),
+           gitDirectory         = gitDirectory,
+           networkRealm         = networkRealm,
+           networkDNS1_IPv4     = networkDNS1_IPv4,
+           networkDNS2_IPv4     = networkDNS2_IPv4,
+           spgwcSXab_IfName     = spgwcSXab_IfName,
+           spgwcS11_IfName      = spgwcS11_IfName,
+           spgwcS5S8_SGW_IfName = spgwcS5S8_SGW_IfName,
+           spgwcS5S8_PGW_IfName = spgwcS5S8_PGW_IfName
+          ))
+         vduHelper.endBlock()
 
 
-      # ====== Set up SPGW-C service ========================================
-      vduHelper.beginBlock('Setting up SPGW-C service')
-      vduHelper.configureSystemInfo('SPGW-C', 'This is the SPGW-C of the SimulaMet OAI VNF!')
-      vduHelper.createFileFromString('/lib/systemd/system/spgwc.service', """\
+         # ====== Set up SPGW-C service ========================================
+         vduHelper.beginBlock('Setting up SPGW-C service')
+         vduHelper.configureSystemInfo('SPGW-C', 'This is the SPGW-C of the SimulaMet OAI VNF!')
+         vduHelper.createFileFromString('/lib/systemd/system/spgwc.service', """\
 [Unit]
 Description=Serving and Packet Data Network Gateway -- Control Plane (SPGW-C)
 After=ssh.target
@@ -206,56 +251,67 @@ ExecStart=/bin/sh -c 'exec /usr/local/bin/spgwc -c /usr/local/etc/oai/spgw_c.con
 KillMode=process
 Restart=on-failure
 RestartPreventExitStatus=255
-WorkingDirectory=/home/nornetpp/src/{gitDirectory}/build/scripts
+WorkingDirectory=/home/{homeDirectory}/src/{gitDirectory}/build/scripts
 
 [Install]
 WantedBy=multi-user.target
-""".format(gitDirectory = gitDirectory))
+""".format(homeDirectory = vduHelper.getHomeDirectory(),
+           gitDirectory  = gitDirectory))
 
-      vduHelper.createFileFromString('/home/nornetpp/log',
+         vduHelper.createFileFromString(os.path.join(vduHelper.getHomeDirectory(), 'log'),
 """\
 #!/bin/sh
 tail -f /var/log/spgwc.log
 """, True)
 
-      vduHelper.createFileFromString('/home/nornetpp/restart',
+         vduHelper.createFileFromString(os.path.join(vduHelper.getHomeDirectory(), 'restart'),
 """\
 #!/bin/sh
 DIRECTORY=`dirname $0`
-sudo service spgwc restart && $DIRECTORY/log
+service spgwc restart && $DIRECTORY/log
 """, True)
-      vduHelper.runInShell('sudo chown nornetpp:nornetpp /home/nornetpp/log /home/nornetpp/restart')
-      vduHelper.endBlock()
+         vduHelper.runInShell("""\
+chown {user}:{group} {homeDirectory}/log {homeDirectory}/restart
+""".format(user          = vduHelper.getUser(),
+           group         = vduHelper.getGroup(),
+           homeDirectory = vduHelper.getHomeDirectory()))
+         vduHelper.endBlock()
 
-      # ====== Set up sysstat service =======================================
-      vduHelper.installSysStat()
+         # ====== Set up sysstat service ====================================
+         vduHelper.installSysStat()
 
-      # ====== Clean up =====================================================
-      vduHelper.cleanUp()
+         # ====== Clean up ==================================================
+         vduHelper.cleanUp()
 
-      message = vduHelper.endBlock()
-      function_set( { 'outout': message } )
-      set_flag('spgwccharm.configured-spgwc')
-   except:
-      message = vduHelper.endBlockInException()
-      function_fail(message)
-   finally:
-      clear_flag('actions.configure-spgwc')
+         message = vduHelper.endBlock()
+         event.set_results( { 'configured': True, 'outout': message } )
+      except:
+         message = vduHelper.endBlockInException()
+         event.fail(message)
+      finally:
+         self.model.unit.status = ActiveStatus()
 
 
-# ###### restart-spgwc function #############################################
-@when('actions.restart-spgwc')
-@when('spgwccharm.configured-spgwc')
-def restart_spgwc():
-   vduHelper.beginBlock('restart_spgwc')
-   try:
+   # ###### restart-spgwc action ############################################
+   def on_restart_spgwc_action(self, event):
+      vduHelper.beginBlock('on_restart_spgwc_action')
+      try:
 
-      vduHelper.runInShell('sudo service spgwc restart')
+         vduHelper.runInShell('service spgwc restart')
 
-      message = vduHelper.endBlock()
-      function_set( { 'outout': message } )
-   except:
-      message = vduHelper.endBlockInException()
-      function_fail(message)
-   finally:
-      clear_flag('actions.restart-spgwc')
+         message = vduHelper.endBlock()
+         event.set_results( { 'restarted': True, 'outout': message } )
+      except:
+         message = vduHelper.endBlockInException()
+         event.fail(message)
+      finally:
+         self.model.unit.status = ActiveStatus()
+
+
+
+# ###########################################################################
+# #### Main program                                                      ####
+# ###########################################################################
+
+if __name__ == "__main__":
+   main(SPGWCCharm)
