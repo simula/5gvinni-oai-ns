@@ -51,7 +51,7 @@ vduHelper = VDUHelper.VDUHelper(1000)   # <<-- Default user ID for "ubuntu"!
 # #### HSS Charm functions                                               ####
 # ###########################################################################
 
-class FlexRANCharm(CharmBase):
+class HSSCharm(CharmBase):
 
    # ###### Constructor #####################################################
    def __init__(self, framework, key):
@@ -380,3 +380,12 @@ chown {user}:{group} {homeDirectory}/log {homeDirectory}/restart
          event.fail(message)
       finally:
          self.model.unit.status = ActiveStatus()
+
+
+
+# ###########################################################################
+# #### Main program                                                      ####
+# ###########################################################################
+
+if __name__ == "__main__":
+   main(HSSCharm)

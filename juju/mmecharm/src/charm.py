@@ -51,156 +51,200 @@ vduHelper = VDUHelper.VDUHelper(1000)   # <<-- Default user ID for "ubuntu"!
 # #### MME Charm functions                                               ####
 # ###########################################################################
 
-# ###### Installation #######################################################
-@when('sshproxy.configured')
-@when_not('mmecharm.installed')
-def install_mmecharm_proxy_charm():
-   set_flag('mmecharm.installed')
-   vduHelper.setStatus('install_mmecharm_proxy_charm: SSH proxy charm is READY')
+class MMECharm(CharmBase):
+
+   # ###### Constructor #####################################################
+   def __init__(self, framework, key):
+      super().__init__(framework, key)
+
+      # Listen to charm events
+      self.framework.observe(self.on.config_changed, self.on_config_changed)
+      self.framework.observe(self.on.install, self.on_install)
+      self.framework.observe(self.on.start, self.on_start)
+
+      # Listen to the action events
+      self.framework.observe(self.on.prepare_mme_build_action, self.on_prepare_mme_build_action)
+      self.framework.observe(self.on.configure_mme_action, self.on_configure_mme_action)
+      self.framework.observe(self.on.restart_mme_action, self.on_restart_mme_action)
 
 
-# ###### prepare-mme-build function #########################################
-@when('actions.prepare-mme-build')
-@when('mmecharm.installed')
-@when_not('mmecharm.prepared-mme-build')
-def prepare_mme_build():
-   vduHelper.beginBlock('prepare_mme_build')
-   try:
-
-      # ====== Get MME parameters ===========================================
-      # For a documentation of the installation procedure, see:
-      # https://github.com/simula/openairinterface-openair-cn/wiki/OpenAirSoftwareSupport#install-mme
-
-      gitRepository = function_get('mme-git-repository')
-      gitCommit     = function_get('mme-git-commit')
-      gitDirectory  = 'openair-mme'
-
-      mmeS1C_IPv4Interface = IPv4Interface(function_get('mme-S1C-ipv4-interface'))
-      if (function_get('mme-S1C-ipv4-gateway') == None) or (function_get('mme-S1C-ipv4-gateway') == ''):
-         mmeS1C_IPv4Gateway   = None
-      else:
-         mmeS1C_IPv4Gateway   = IPv4Address(function_get('mme-S1C-ipv4-gateway'))
-
-      if function_get('mme-S1C-ipv6-interface') != '':
-         mmeS1C_IPv6Interface = IPv6Interface(function_get('mme-S1C-ipv6-interface'))
-      else:
-         mmeS1C_IPv6Interface = None
-      if (function_get('mme-S1C-ipv6-gateway') == None) or (function_get('mme-S1C-ipv6-gateway') == ''):
-         mmeS1C_IPv6Gateway   = None
-      else:
-         mmeS1C_IPv6Gateway   = IPv6Address(function_get('mme-S1C-ipv6-gateway'))
-
-      # Prepare network configurations:
-      mmeS6a_IfName = 'ens4'
-      mmeS11_IfName = 'ens5'
-      mmeS1C_IfName = 'ens6'
-
-      configurationS6a = vduHelper.makeInterfaceConfiguration(mmeS6a_IfName, None)
-      configurationS11 = vduHelper.makeInterfaceConfiguration(mmeS11_IfName, None)
-      configurationS1C = vduHelper.makeInterfaceConfiguration(mmeS1C_IfName, mmeS1C_IPv4Interface, mmeS1C_IPv4Gateway,
-                                                              mmeS1C_IPv6Interface, mmeS1C_IPv6Gateway)
-
-      # S10 dummy interface:
-      mmeS10_IfName    = 'dummy0'
-      configurationS10 = vduHelper.makeInterfaceConfiguration(mmeS10_IfName, IPv4Interface('192.168.10.110/24'), createDummy = True)
-
-      # ====== Prepare system ===============================================
-      vduHelper.beginBlock('Preparing system')
-      vduHelper.configureInterface(mmeS6a_IfName, configurationS6a, 61)
-      vduHelper.configureInterface(mmeS11_IfName, configurationS11, 62)
-      vduHelper.configureInterface(mmeS1C_IfName, configurationS1C, 63)
-      vduHelper.configureInterface(mmeS10_IfName, configurationS10, 64)
-      vduHelper.testNetworking()
-      vduHelper.waitForPackageUpdatesToComplete()
-      vduHelper.endBlock()
-
-      # ====== Prepare sources ==============================================
-      vduHelper.beginBlock('Preparing sources')
-      vduHelper.fetchGitRepository(gitDirectory, gitRepository, gitCommit)
-      vduHelper.endBlock()
+   # ###### Configuration ###################################################
+   def on_config_changed(self, event):
+      """Handle changes in configuration"""
+      self.model.unit.status = ActiveStatus()
 
 
-      message = vduHelper.endBlock()
-      function_set( { 'outout': message } )
-      set_flag('mmecharm.prepared-mme-build')
-   except:
-      message = vduHelper.endBlockInException()
-      function_fail(message)
-   finally:
-      clear_flag('actions.prepare-mme-build')
+   # ###### Installation ####################################################
+   def on_install(self, event):
+      """Called when the charm is being installed"""
+      self.model.unit.status = ActiveStatus()
 
 
-# ###### configure-mme function #############################################
-@when('actions.configure-mme')
-@when('mmecharm.prepared-mme-build')
-def configure_mme():
-   vduHelper.beginBlock('configure-mme')
-   try:
+   # ###### Start ###########################################################
+   def on_start(self, event):
+      """Called when the charm is being started"""
+      self.model.unit.status = ActiveStatus()
 
-      # ====== Get MME parameters ===========================================
-      # For a documentation of the installation procedure, see:
-      # https://github.com/simula/openairinterface-openair-cn/wiki/OpenAirSoftwareSupport#install-mme
 
-      gitDirectory           = 'openair-mme'
+   # ###### prepare-mme-build action ########################################
+   def on_prepare_mme_build_action(self, event):
+      vduHelper.beginBlock('on_prepare_mme_build_action')
+      try:
 
-      hssS6a_IPv4Address     = IPv4Address(function_get('hss-S6a-address'))
-      mmeS1C_IPv4Interface   = IPv4Interface(function_get('mme-S1C-ipv4-interface'))
-      mmeS11_IPv4Interface   = IPv4Interface(function_get('mme-S11-ipv4-interface'))
-      mmeS10_IPv4Interface   = IPv4Interface('192.168.10.110/24')
-      spwgcS11_IPv4Interface = IPv4Interface(function_get('spgwc-S11-ipv4-interface'))
-      networkRealm           = function_get('network-realm')
-      networkMCC             = int(function_get('network-mcc'))
-      networkMNC             = int(function_get('network-mnc'))
+         # ====== Get MME parameters =======================================
+         # For a documentation of the installation procedure, see:
+         # https://github.com/simula/openairinterface-openair-cn/wiki/OpenAirSoftwareSupport#install-mme
 
-      TAC_SGW_TEST = 7
-      TAC_SGW_0    = 600
-      TAC_MME_0    = 601
-      TAC_MME_1    = 602
+         gitRepository = event.params['mme-git-repository']
+         gitCommit     = event.params['mme-git-commit']
+         gitDirectory  = 'openair-mme'
 
-      tac_sgw_test = '{:04x}'.format(TAC_SGW_TEST)
-      tac_sgw_0    = '{:04x}'.format(TAC_SGW_0)
-      tac_mme_0    = '{:04x}'.format(TAC_MME_0)
-      tac_mme_1    = '{:04x}'.format(TAC_MME_1)
+         mmeS1C_IPv4Interface = IPv4Interface(event.params['mme-S1C-ipv4-interface'])
+         if (event.params['mme-S1C-ipv4-gateway'] == None) or (event.params['mme-S1C-ipv4-gateway'] == ''):
+            mmeS1C_IPv4Gateway   = None
+         else:
+            mmeS1C_IPv4Gateway   = IPv4Address(event.params['mme-S1C-ipv4-gateway'])
 
-      # Prepare network configurations:
-      mmeS6a_IfName = 'ens4'
-      mmeS11_IfName = 'ens5'
-      mmeS1C_IfName = 'ens6'
-      mmeS10_IfName = 'dummy0'
+         if event.params['mme-S1C-ipv6-interface'] != '':
+            mmeS1C_IPv6Interface = IPv6Interface(event.params['mme-S1C-ipv6-interface'])
+         else:
+            mmeS1C_IPv6Interface = None
+         if (event.params['mme-S1C-ipv6-gateway'] == None) or (event.params['mme-S1C-ipv6-gateway'] == ''):
+            mmeS1C_IPv6Gateway   = None
+         else:
+            mmeS1C_IPv6Gateway   = IPv6Address(event.params['mme-S1C-ipv6-gateway'])
 
-      # ====== Build MME dependencies =======================================
-      vduHelper.beginBlock('Building MME dependencies')
-      vduHelper.executeFromString("""\
-export MAKEFLAGS="-j`nproc`" && \\
-cd /home/nornetpp/src/{gitDirectory}/scripts && \\
-mkdir -p logs && \\
-./build_mme --check-installed-software --force >logs/build_mme-1.log 2>&1
-""".format(gitDirectory = gitDirectory))
-      vduHelper.endBlock()
+         # Prepare network configurations:
+         mmeS6a_IfName = 'ens4'
+         mmeS11_IfName = 'ens5'
+         mmeS1C_IfName = 'ens6'
 
-      # ====== Build MME itself =============================================
-      vduHelper.beginBlock('Building MME itself')
-      vduHelper.executeFromString("""\
-export MAKEFLAGS="-j`nproc`" && \\
-cd /home/nornetpp/src/{gitDirectory}/scripts && \\
-./build_mme --clean >logs/build_mme-2.log 2>&1
-""".format(gitDirectory = gitDirectory))
-      vduHelper.endBlock()
+         configurationS6a = vduHelper.makeInterfaceConfiguration(mmeS6a_IfName, None)
+         configurationS11 = vduHelper.makeInterfaceConfiguration(mmeS11_IfName, None)
+         configurationS1C = vduHelper.makeInterfaceConfiguration(mmeS1C_IfName, mmeS1C_IPv4Interface, mmeS1C_IPv4Gateway,
+                                                               mmeS1C_IPv6Interface, mmeS1C_IPv6Gateway)
 
-      # ====== Configure MME ================================================
-      vduHelper.beginBlock('Configuring MME')
-      vduHelper.executeFromString("""\
-export MAKEFLAGS="-j`nproc`" && \\
-cd /home/nornetpp/src/{gitDirectory}/scripts && \\
-echo "127.0.1.1        mme.{networkRealm} mme" | sudo tee -a /etc/hosts && \\
-echo "{hssS6a_IPv4Address}     hss.{networkRealm} hss" | sudo tee -a /etc/hosts && \\
+         # S10 dummy interface:
+         mmeS10_IfName    = 'dummy0'
+         configurationS10 = vduHelper.makeInterfaceConfiguration(mmeS10_IfName, IPv4Interface('192.168.10.110/24'), createDummy = True)
+
+         # ====== Prepare system ===============================================
+         vduHelper.beginBlock('Preparing system')
+         vduHelper.executeFromString("""\
+sudo -u {user} -g {group} mkdir -p {homeDirectory}/src
+""".format(user          = vduHelper.getUser(),
+           group         = vduHelper.getGroup(),
+           homeDirectory = vduHelper.getHomeDirectory(),
+           gitDirectory  = gitDirectory))
+         vduHelper.configureGit(gitName, gitEmail)
+         vduHelper.configureInterface(mmeS6a_IfName, configurationS6a, 61)
+         vduHelper.configureInterface(mmeS11_IfName, configurationS11, 62)
+         vduHelper.configureInterface(mmeS1C_IfName, configurationS1C, 63)
+         vduHelper.configureInterface(mmeS10_IfName, configurationS10, 64)
+         vduHelper.testNetworking()
+         vduHelper.waitForPackageUpdatesToComplete()
+         vduHelper.aptInstallPackages([ 'joe', 'mlocate', 'td-system-info',
+                                        'yq'
+                                      ])
+         vduHelper.endBlock()
+
+         # ====== Prepare sources ==============================================
+         vduHelper.beginBlock('Preparing sources')
+         vduHelper.fetchGitRepository(gitDirectory, gitRepository, gitCommit)
+         vduHelper.executeFromString("""\
+chown -R {user}:{group} {homeDirectory}/src/{gitDirectory} && \
+""".format(user          = vduHelper.getUser(),
+           group         = vduHelper.getGroup(),
+           homeDirectory = vduHelper.getHomeDirectory(),
+           gitDirectory  = gitDirectory))
+         vduHelper.endBlock()
+
+
+         message = vduHelper.endBlock()
+         function_set( { 'outout': message } )
+         set_flag('mmecharm.prepared-mme-build')
+      except:
+         message = vduHelper.endBlockInException()
+         function_fail(message)
+      finally:
+         clear_flag('actions.prepare-mme-build')
+
+
+   # ###### configure-mme action ########################################
+   def on_configure_mme_action(self, event):
+      vduHelper.beginBlock('on_configure_mme_action')
+      try:
+
+         # ====== Get MME parameters ===========================================
+         # For a documentation of the installation procedure, see:
+         # https://github.com/simula/openairinterface-openair-cn/wiki/OpenAirSoftwareSupport#install-mme
+
+         gitDirectory           = 'openair-mme'
+
+         hssS6a_IPv4Address     = IPv4Address(event.params['hss-S6a-address'])
+         mmeS1C_IPv4Interface   = IPv4Interface(event.params['mme-S1C-ipv4-interface'])
+         mmeS11_IPv4Interface   = IPv4Interface(event.params['mme-S11-ipv4-interface'])
+         mmeS10_IPv4Interface   = IPv4Interface('192.168.10.110/24')
+         spwgcS11_IPv4Interface = IPv4Interface(event.params['spgwc-S11-ipv4-interface'])
+         networkRealm           = event.params['network-realm']
+         networkMCC             = int(event.params['network-mcc'])
+         networkMNC             = int(event.params['network-mnc'])
+
+         TAC_SGW_TEST = 7
+         TAC_SGW_0    = 600
+         TAC_MME_0    = 601
+         TAC_MME_1    = 602
+
+         tac_sgw_test = '{:04x}'.format(TAC_SGW_TEST)
+         tac_sgw_0    = '{:04x}'.format(TAC_SGW_0)
+         tac_mme_0    = '{:04x}'.format(TAC_MME_0)
+         tac_mme_1    = '{:04x}'.format(TAC_MME_1)
+
+         # Prepare network configurations:
+         mmeS6a_IfName = 'ens4'
+         mmeS11_IfName = 'ens5'
+         mmeS1C_IfName = 'ens6'
+         mmeS10_IfName = 'dummy0'
+
+         # ====== Build MME dependencies =======================================
+         vduHelper.beginBlock('Building MME dependencies')
+         vduHelper.executeFromString("""\
+export MAKEFLAGS="-j`nproc`" && \
+cd {homeDirectory}/src/{gitDirectory}/scripts && \
+sudo -u {user} -g {group} mkdir -p logs && \
+sudo -u {user} -g {group} --preserve-env=MAKEFLAGS ./build_mme --check-installed-software --force >logs/build_mme-1.log 2>&1
+""".format(user          = vduHelper.getUser(),
+           group         = vduHelper.getGroup(),
+           homeDirectory = vduHelper.getHomeDirectory(),
+           gitDirectory  = gitDirectory))
+         vduHelper.endBlock()
+
+         # ====== Build MME itself =============================================
+         vduHelper.beginBlock('Building MME itself')
+         vduHelper.executeFromString("""\
+export MAKEFLAGS="-j`nproc`" && \
+cd {homeDirectory}/src/{gitDirectory}/scripts && \
+sudo -u {user} -g {group} --preserve-env=MAKEFLAGS ./build_mme --clean >logs/build_mme-2.log 2>&1
+""".format(user          = vduHelper.getUser(),
+           group         = vduHelper.getGroup(),
+           homeDirectory = vduHelper.getHomeDirectory(),
+           gitDirectory  = gitDirectory))
+         vduHelper.endBlock()
+
+         # ====== Configure MME ================================================
+         vduHelper.beginBlock('Configuring MME')
+         vduHelper.executeFromString("""\
+export MAKEFLAGS="-j`nproc`" && \
+cd {homeDirectory}/src/{gitDirectory}/scripts && \
+echo "127.0.1.1        mme.{networkRealm} mme" | tee -a /etc/hosts && \\
+echo "{hssS6a_IPv4Address}     hss.{networkRealm} hss" | tee -a /etc/hosts && \\
 openssl rand -out $HOME/.rnd 128 && \\
 INSTANCE=1 && \\
 PREFIX='/usr/local/etc/oai' && \\
-sudo mkdir -m 0777 -p $PREFIX && \\
-sudo mkdir -m 0777 -p $PREFIX/freeDiameter && \\
-sudo cp ../etc/mme_fd.sprint.conf  $PREFIX/freeDiameter/mme_fd.conf && \\
-sudo cp ../etc/mme.conf $PREFIX && \\
+mkdir -m 0777 -p $PREFIX && \\
+mkdir -m 0777 -p $PREFIX/freeDiameter && \\
+cp ../etc/mme_fd.sprint.conf  $PREFIX/freeDiameter/mme_fd.conf && \\
+cp ../etc/mme.conf $PREFIX && \\
 declare -A MME_CONF && \\
 MME_CONF[@MME_S6A_IP_ADDR@]="127.0.0.11" && \\
 MME_CONF[@INSTANCE@]=$INSTANCE && \\
@@ -243,38 +287,40 @@ MME_CONF[@MCC_MME_1@]={networkMCC} && \\
 MME_CONF[@MNC3_MME_1@]={networkMNC:03d} && \\
 MME_CONF[@TAC-LB_MME_1@]={tac_mme_1_lo} && \\
 MME_CONF[@TAC-HB_MME_1@]={tac_mme_1_hi} && \\
-for K in "${{!MME_CONF[@]}}"; do sudo egrep -lRZ "$K" $PREFIX | xargs -0 -l sudo sed -i -e "s|$K|${{MME_CONF[$K]}}|g" ; ret=$?;[[ ret -ne 0 ]] && echo "Tried to replace $K with ${{MME_CONF[$K]}}" || true ; done && \\
-sudo ./check_mme_s6a_certificate $PREFIX/freeDiameter mme.{networkRealm} >logs/check_mme_s6a_certificate.log 2>&1
-""".format(
-         gitDirectory           = gitDirectory,
-         hssS6a_IPv4Address     = hssS6a_IPv4Address,
-         mmeS1C_IfName          = mmeS1C_IfName,
-         mmeS1C_IPv4Interface   = mmeS1C_IPv4Interface,
-         mmeS11_IfName          = mmeS11_IfName,
-         mmeS11_IPv4Interface   = mmeS11_IPv4Interface,
-         mmeS10_IfName          = mmeS10_IfName,
-         mmeS10_IPv4Interface   = mmeS10_IPv4Interface,
+for K in "${{!MME_CONF[@]}}"; do egrep -lRZ "$K" $PREFIX | xargs -0 -l sed -i -e "s|$K|${{MME_CONF[$K]}}|g" ; ret=$?;[[ ret -ne 0 ]] && echo "Tried to replace $K with ${{MME_CONF[$K]}}" || true ; done && \\
+./check_mme_s6a_certificate $PREFIX/freeDiameter mme.{networkRealm} >logs/check_mme_s6a_certificate.log 2>&1
+""".format(user          = vduHelper.getUser(),
+           group         = vduHelper.getGroup(),
+           homeDirectory = vduHelper.getHomeDirectory(),
+           gitDirectory           = gitDirectory,
+           hssS6a_IPv4Address     = hssS6a_IPv4Address,
+           mmeS1C_IfName          = mmeS1C_IfName,
+           mmeS1C_IPv4Interface   = mmeS1C_IPv4Interface,
+           mmeS11_IfName          = mmeS11_IfName,
+           mmeS11_IPv4Interface   = mmeS11_IPv4Interface,
+           mmeS10_IfName          = mmeS10_IfName,
+           mmeS10_IPv4Interface   = mmeS10_IPv4Interface,
 
-         spwgcS11_IPv4Address   = spwgcS11_IPv4Interface.ip,
-         networkRealm           = networkRealm,
-         networkMCC             = networkMCC,
-         networkMNC             = networkMNC,
+           spwgcS11_IPv4Address   = spwgcS11_IPv4Interface.ip,
+           networkRealm           = networkRealm,
+           networkMCC             = networkMCC,
+           networkMNC             = networkMNC,
 
-         tac_sgw_test_hi        = tac_sgw_test[0:2],
-         tac_sgw_test_lo        = tac_sgw_test[2:4],
-         tac_sgw_0_hi           = tac_sgw_0[0:2],
-         tac_sgw_0_lo           = tac_sgw_0[2:4],
-         tac_mme_0_hi           = tac_mme_0[0:2],
-         tac_mme_0_lo           = tac_mme_0[2:4],
-         tac_mme_1_hi           = tac_mme_1[0:2],
-         tac_mme_1_lo           = tac_mme_1[2:4]
-      ))
-      vduHelper.endBlock()
+           tac_sgw_test_hi        = tac_sgw_test[0:2],
+           tac_sgw_test_lo        = tac_sgw_test[2:4],
+           tac_sgw_0_hi           = tac_sgw_0[0:2],
+           tac_sgw_0_lo           = tac_sgw_0[2:4],
+           tac_mme_0_hi           = tac_mme_0[0:2],
+           tac_mme_0_lo           = tac_mme_0[2:4],
+           tac_mme_1_hi           = tac_mme_1[0:2],
+           tac_mme_1_lo           = tac_mme_1[2:4]
+         ))
+         vduHelper.endBlock()
 
-      # ====== Set up MME service ===========================================
-      vduHelper.beginBlock('Setting up MME service')
-      vduHelper.configureSystemInfo('MME', 'This is the MME of the SimulaMet OAI VNF!')
-      vduHelper.createFileFromString('/lib/systemd/system/mme.service', """\
+         # ====== Set up MME service ===========================================
+         vduHelper.beginBlock('Setting up MME service')
+         vduHelper.configureSystemInfo('MME', 'This is the MME of the SimulaMet OAI VNF!')
+         vduHelper.createFileFromString('/lib/systemd/system/mme.service', """\
 [Unit]
 Description=Mobility Management Entity (MME)
 After=ssh.target
@@ -284,56 +330,67 @@ ExecStart=/bin/sh -c 'exec /usr/local/bin/mme -c /usr/local/etc/oai/mme.conf >>/
 KillMode=process
 Restart=on-failure
 RestartPreventExitStatus=255
-WorkingDirectory=/home/nornetpp/src/{gitDirectory}/scripts
+WorkingDirectory=/home/{homeDirectory}/src/{gitDirectory}/scripts
 
 [Install]
 WantedBy=multi-user.target
-""".format(gitDirectory = gitDirectory))
+""".format(homeDirectory = vduHelper.getHomeDirectory(),
+           gitDirectory  = gitDirectory))
 
-      vduHelper.createFileFromString('/home/nornetpp/log',
+         vduHelper.createFileFromString(os.path.join(vduHelper.getHomeDirectory(), 'log'),
 """\
 #!/bin/sh
 tail -f /var/log/mme.log
 """, True)
 
-      vduHelper.createFileFromString('/home/nornetpp/restart',
+         vduHelper.createFileFromString(os.path.join(vduHelper.getHomeDirectory(), 'restart'),
 """\
 #!/bin/sh
 DIRECTORY=`dirname $0`
-sudo service mme restart && $DIRECTORY/log
+service mme restart && $DIRECTORY/log
 """, True)
-      vduHelper.runInShell('sudo chown nornetpp:nornetpp /home/nornetpp/log /home/nornetpp/restart')
-      vduHelper.endBlock()
+         vduHelper.runInShell("""\
+chown {user}:{group} {homeDirectory}/log {homeDirectory}/restart
+""".format(user          = vduHelper.getUser(),
+           group         = vduHelper.getGroup(),
+           homeDirectory = vduHelper.getHomeDirectory()))
+         vduHelper.endBlock()
 
-      # ====== Set up sysstat service =======================================
-      vduHelper.installSysStat()
+         # ====== Set up sysstat service ====================================
+         vduHelper.installSysStat()
 
-      # ====== Clean up =====================================================
-      vduHelper.cleanUp()
+         # ====== Clean up ==================================================
+         vduHelper.cleanUp()
 
-      message = vduHelper.endBlock()
-      function_set( { 'outout': message } )
-      set_flag('mmecharm.configured-mme')
-   except:
-      message = vduHelper.endBlockInException()
-      function_fail(message)
-   finally:
-      clear_flag('actions.configure-mme')
+         message = vduHelper.endBlock()
+         event.set_results( { 'configured': True, 'outout': message } )
+      except:
+         message = vduHelper.endBlockInException()
+         event.fail(message)
+      finally:
+         self.model.unit.status = ActiveStatus()
 
 
-# ###### restart-mme function ###############################################
-@when('actions.restart-mme')
-@when('mmecharm.configured-mme')
-def restart_mme():
-   vduHelper.beginBlock('restart_mme')
-   try:
+   # ###### restart-mme action ##########################################
+   def on_restart_mme_action(self, event):
+      vduHelper.beginBlock('on_restart_mme_action')
+      try:
 
-      vduHelper.runInShell('sudo service mme restart')
+         vduHelper.runInShell('service mme restart')
 
-      message = vduHelper.endBlock()
-      function_set( { 'outout': message } )
-   except:
-      message = vduHelper.endBlockInException()
-      function_fail(message)
-   finally:
-      clear_flag('actions.restart-mme')
+         message = vduHelper.endBlock()
+         event.set_results( { 'restarted': True, 'outout': message } )
+      except:
+         message = vduHelper.endBlockInException()
+         event.fail(message)
+      finally:
+         self.model.unit.status = ActiveStatus()
+
+
+
+# ###########################################################################
+# #### Main program                                                      ####
+# ###########################################################################
+
+if __name__ == "__main__":
+   main(MMECharm)
