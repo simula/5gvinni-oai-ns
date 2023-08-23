@@ -333,7 +333,7 @@ ExecStart=/bin/sh -c 'exec /usr/local/bin/mme -c /usr/local/etc/oai/mme.conf >>/
 KillMode=process
 Restart=on-failure
 RestartPreventExitStatus=255
-WorkingDirectory=/home/{homeDirectory}/src/{gitDirectory}/scripts
+WorkingDirectory={homeDirectory}/src/{gitDirectory}/scripts
 
 [Install]
 WantedBy=multi-user.target

@@ -200,7 +200,7 @@ chown -R {user}:{group} {homeDirectory}/src/{gitDirectory}
          vduHelper.beginBlock('Building SPGW-U dependencies')
          vduHelper.executeFromString("""\
 export MAKEFLAGS="-j`nproc`" && \
-cd /home/{homeDirectory}/src/{gitDirectory}/build/scripts && \
+cd {homeDirectory}/src/{gitDirectory}/build/scripts && \
 mkdir -p logs && \
 sudo -u {user} -g {group} --preserve-env=MAKEFLAGS ./build_spgwu -I -f >logs/build_spgwu-1.log 2>&1
 """.format(user          = vduHelper.getUser(),
@@ -278,7 +278,7 @@ ExecStart=/bin/sh -c 'exec /usr/local/bin/spgwu -c /usr/local/etc/oai/spgw_u.con
 KillMode=process
 Restart=on-failure
 RestartPreventExitStatus=255
-WorkingDirectory=/home/{homeDirectory}/src/{gitDirectory}/build/scripts
+WorkingDirectory={homeDirectory}/src/{gitDirectory}/build/scripts
 
 [Install]
 WantedBy=multi-user.target

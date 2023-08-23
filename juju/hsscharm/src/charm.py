@@ -238,9 +238,9 @@ cqlsh -e "SELECT COUNT(*) FROM vhss.users_imsi;" {cassandraServerIP} >logs/oai_d
          vduHelper.beginBlock('Building HSS dependencies')
          vduHelper.executeFromString("""\
 export MAKEFLAGS="-j`nproc`" && \\
-cd /home/{homeDirectory}/src/{gitDirectory}/scripts && \\
+cd {homeDirectory}/src/{gitDirectory}/scripts && \\
 mkdir -p logs && \\
-./build_hss_rel14 --check-installed-software --force >logs/build_hss_rel14-1.log 2>&1
+sudo -u {user} -g {group} --preserve-env=MAKEFLAGS ./build_hss_rel14 --check-installed-software --force >logs/build_hss_rel14-1.log 2>&1
 """.format(homeDirectory = vduHelper.getHomeDirectory(),
            gitDirectory  = gitDirectory))
          vduHelper.endBlock()
@@ -249,8 +249,8 @@ mkdir -p logs && \\
          vduHelper.beginBlock('Building HSS itself')
          vduHelper.executeFromString("""\
 export MAKEFLAGS="-j`nproc`" && \\
-cd /home/{homeDirectory}/src/{gitDirectory}/scripts && \\
-./build_hss_rel14 --clean >logs/build_hss_rel14-2.log 2>&1
+cd {homeDirectory}/src/{gitDirectory}/scripts && \\
+sudo -u {user} -g {group} --preserve-env=MAKEFLAGS ./build_hss_rel14 --clean >logs/build_hss_rel14-2.log 2>&1
 service cassandra restart 2>&1 | tee logs/oai_db_check2.log && \\
 t=1 ; while [ $t -le 180 ] ; do echo "Trying $t ..." | tee --append logs/oai_db_check2.log ; if echo "SHOW VERSION;" | cqlsh 172.16.6.129 >>logs/oai_db_check2.log 2>&1 ; then break ; sleep 1 ; fi ; let t=$t+1 ; done && \\
 service cassandra status 2>&1 | tee --append logs/oai_db_check2.log
@@ -263,7 +263,7 @@ service cassandra status 2>&1 | tee --append logs/oai_db_check2.log
          # ====== Provision users and MME ===================================
          vduHelper.beginBlock('Provisioning users and MME')
          vduHelper.executeFromString("""\
-cd /home/{homeDirectory}/src/{gitDirectory}/scripts && \\
+cd {homeDirectory}/src/{gitDirectory}/scripts && \\
 ./data_provisioning_users --apn default.{networkRealm} --apn2 internet.{networkRealm} --key {networkK} --imsi-first {networkIMSIFirst} --msisdn-first {networkMSISDNFirst} --mme-identity mme.{networkRealm} --no-of-users {networkUsers} --realm {networkRealm} --truncate True  --verbose True --cassandra-cluster {cassandraServerIP} >logs/data_provisioning_users.log 2>&1 && \\
 ./data_provisioning_mme --id 3 --mme-identity mme.{networkRealm} --realm {networkRealm} --ue-reachability 1 --truncate True  --verbose True -C {cassandraServerIP} >logs/data_provisioning_mme.log 2>&1
 """.format(homeDirectory      = vduHelper.getHomeDirectory(),
@@ -281,7 +281,7 @@ cd /home/{homeDirectory}/src/{gitDirectory}/scripts && \\
          # ====== Configure HSS =============================================
          vduHelper.beginBlock('Configuring HSS')
          vduHelper.executeFromString("""\
-cd /home/{homeDirectory}/src/{gitDirectory}/scripts && \\
+cd {homeDirectory}/src/{gitDirectory}/scripts && \\
 echo "{hssS6a_IPv4Address}   hss.{networkRealm} hss" | tee -a /etc/hosts && \\
 echo "{mmeS6a_IPv4Address}   mme.{networkRealm} mme" | tee -a /etc/hosts && \\
 openssl rand -out $HOME/.rnd 128 && \\
@@ -333,7 +333,7 @@ ExecStart=/bin/sh -c 'exec /usr/local/bin/oai_hss -j /usr/local/etc/oai/hss_rel1
 KillMode=process
 Restart=on-failure
 RestartPreventExitStatus=255
-WorkingDirectory=/home/{homeDirectory}/src/{gitDirectory}/scripts
+WorkingDirectory={homeDirectory}/src/{gitDirectory}/scripts
 
 [Install]
 WantedBy=multi-user.target

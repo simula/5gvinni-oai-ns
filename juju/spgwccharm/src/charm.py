@@ -181,7 +181,7 @@ chown -R {user}:{group} {homeDirectory}/src/{gitDirectory}
          vduHelper.beginBlock('Building SPGW-C dependencies')
          vduHelper.executeFromString("""\
 export MAKEFLAGS="-j`nproc`" && \
-cd /home/{homeDirectory}/src/{gitDirectory}/build/scripts && \
+cd {homeDirectory}/src/{gitDirectory}/build/scripts && \
 mkdir -p logs && \
 sudo -u {user} -g {group} --preserve-env=MAKEFLAGS ./build_spgwc -I -f >logs/build_spgwc-1.log 2>&1
 """.format(user          = vduHelper.getUser(),
@@ -194,7 +194,7 @@ sudo -u {user} -g {group} --preserve-env=MAKEFLAGS ./build_spgwc -I -f >logs/bui
          vduHelper.beginBlock('Building SPGW-C itself')
          vduHelper.executeFromString("""\
 export MAKEFLAGS="-j`nproc`" && \
-cd /home/{homeDirectory}/src/{gitDirectory}/build/scripts && \
+cd {homeDirectory}/src/{gitDirectory}/build/scripts && \
 mkdir -p logs && \
 sudo -u {user} -g {group} --preserve-env=MAKEFLAGS ./build_spgwc -c -V -b Debug -j >logs/build_spgwc-2.log 2>&1
 """.format(user          = vduHelper.getUser(),
@@ -206,7 +206,7 @@ sudo -u {user} -g {group} --preserve-env=MAKEFLAGS ./build_spgwc -c -V -b Debug 
          # ====== Configure SPGW-C ==========================================
          vduHelper.beginBlock('Configuring SPGW-C')
          vduHelper.executeFromString("""\
-cd /home/{homeDirectory}/src/{gitDirectory}/build/scripts && \\
+cd {homeDirectory}/src/{gitDirectory}/build/scripts && \\
 INSTANCE=1 && \\
 PREFIX='/usr/local/etc/oai' && \\
 sudo mkdir -m 0777 -p $PREFIX && \\
@@ -253,7 +253,7 @@ ExecStart=/bin/sh -c 'exec /usr/local/bin/spgwc -c /usr/local/etc/oai/spgw_c.con
 KillMode=process
 Restart=on-failure
 RestartPreventExitStatus=255
-WorkingDirectory=/home/{homeDirectory}/src/{gitDirectory}/build/scripts
+WorkingDirectory={homeDirectory}/src/{gitDirectory}/build/scripts
 
 [Install]
 WantedBy=multi-user.target
