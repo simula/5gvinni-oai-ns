@@ -241,7 +241,9 @@ export MAKEFLAGS="-j`nproc`" && \\
 cd {homeDirectory}/src/{gitDirectory}/scripts && \\
 mkdir -p logs && \\
 sudo -u {user} -g {group} --preserve-env=MAKEFLAGS ./build_hss_rel14 --check-installed-software --force >logs/build_hss_rel14-1.log 2>&1
-""".format(homeDirectory = vduHelper.getHomeDirectory(),
+""".format(user          = vduHelper.getUser(),
+           group         = vduHelper.getGroup(),
+           homeDirectory = vduHelper.getHomeDirectory(),
            gitDirectory  = gitDirectory))
          vduHelper.endBlock()
 
@@ -254,7 +256,9 @@ sudo -u {user} -g {group} --preserve-env=MAKEFLAGS ./build_hss_rel14 --clean >lo
 service cassandra restart 2>&1 | tee logs/oai_db_check2.log && \\
 t=1 ; while [ $t -le 180 ] ; do echo "Trying $t ..." | tee --append logs/oai_db_check2.log ; if echo "SHOW VERSION;" | cqlsh 172.16.6.129 >>logs/oai_db_check2.log 2>&1 ; then break ; sleep 1 ; fi ; let t=$t+1 ; done && \\
 service cassandra status 2>&1 | tee --append logs/oai_db_check2.log
-""".format(homeDirectory      = vduHelper.getHomeDirectory(),
+""".format(user          = vduHelper.getUser(),
+           group         = vduHelper.getGroup(),
+           homeDirectory      = vduHelper.getHomeDirectory(),
            gitDirectory       = gitDirectory,
            cassandraServerIP  = cassandraServerIP
           ))
@@ -266,7 +270,9 @@ service cassandra status 2>&1 | tee --append logs/oai_db_check2.log
 cd {homeDirectory}/src/{gitDirectory}/scripts && \\
 ./data_provisioning_users --apn default.{networkRealm} --apn2 internet.{networkRealm} --key {networkK} --imsi-first {networkIMSIFirst} --msisdn-first {networkMSISDNFirst} --mme-identity mme.{networkRealm} --no-of-users {networkUsers} --realm {networkRealm} --truncate True  --verbose True --cassandra-cluster {cassandraServerIP} >logs/data_provisioning_users.log 2>&1 && \\
 ./data_provisioning_mme --id 3 --mme-identity mme.{networkRealm} --realm {networkRealm} --ue-reachability 1 --truncate True  --verbose True -C {cassandraServerIP} >logs/data_provisioning_mme.log 2>&1
-""".format(homeDirectory      = vduHelper.getHomeDirectory(),
+""".format(user               = vduHelper.getUser(),
+           group              = vduHelper.getGroup(),
+           homeDirectory      = vduHelper.getHomeDirectory(),
            gitDirectory       = gitDirectory,
            cassandraServerIP  = cassandraServerIP,
            networkRealm       = networkRealm,
@@ -306,7 +312,9 @@ for K in "${{!HSS_CONF[@]}}"; do echo "K=$K ..." && egrep -lRZ "$K" $PREFIX | xa
 ../src/hss_rel14/bin/make_certs.sh hss {networkRealm} $PREFIX && \\
 echo "====== Updating key ... ======" && \\
 oai_hss -j $PREFIX/hss_rel14.json --onlyloadkey >logs/onlyloadkey.log 2>&1
-""".format(homeDirectory      = vduHelper.getHomeDirectory(),
+""".format(user               = vduHelper.getUser(),
+           group              = vduHelper.getGroup(),
+           homeDirectory      = vduHelper.getHomeDirectory(),
            gitDirectory       = gitDirectory,
            cassandraServerIP  = cassandraServerIP,
            hssS6a_IPv4Address = hssS6a_IPv4Address,
