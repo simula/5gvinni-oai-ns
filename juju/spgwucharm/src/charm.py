@@ -240,14 +240,14 @@ SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_SX@]='{spgwuSXab_IfName}' && \\
 SPGWU_CONF[@SGW_INTERFACE_NAME_FOR_SGI@]='{spgwuSGi_IfName}' && \\
 for K in "${{!SPGWU_CONF[@]}}"; do sudo egrep -lRZ "$K" $PREFIX | xargs -0 -l sudo sed -i -e "s|$K|${{SPGWU_CONF[$K]}}|g" ; ret=$?;[[ ret -ne 0 ]] && echo "Tried to replace $K with ${{SPGWU_CONF[$K]}}" || true ; done && \\
 sudo sed -e "s/{{.*IPV4_ADDRESS=\\"192.168.160.100|\\".*;.*}}\|{{.*IPV4_ADDRESS=\\"@SPGWC0_IP_ADDRESS@\\".*;.*}}/{spgwcList}/g" -i /usr/local/etc/oai/spgw_u.conf
-""".format(user              = vduHelper.getUser(),
-           group             = vduHelper.getGroup(),
-           homeDirectory     = vduHelper.getHomeDirectory(),
-           gitDirectory      = gitDirectory,
-           spgwuSXab_IfName  = spgwuSXab_IfName,
-           spgwuS1U_IfName   = spgwuS1U_IfName,
-           spgwuSGi_IfName   = spgwuSGi_IfName,
-           spgwcList         = spgwcList
+""".format(user             = vduHelper.getUser(),
+           group            = vduHelper.getGroup(),
+           homeDirectory    = vduHelper.getHomeDirectory(),
+           gitDirectory     = gitDirectory,
+           spgwuSXab_IfName = spgwuSXab_IfName,
+           spgwuS1U_IfName  = spgwuS1U_IfName,
+           spgwuSGi_IfName  = spgwuSGi_IfName,
+           spgwcList        = spgwcList
          ))
          vduHelper.endBlock()
 
