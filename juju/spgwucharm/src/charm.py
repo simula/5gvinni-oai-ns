@@ -213,7 +213,7 @@ sudo -u {user} -g {group} --preserve-env=MAKEFLAGS ./build_spgwu -I -f >logs/bui
          vduHelper.beginBlock('Building SPGW-U itself')
          vduHelper.executeFromString("""\
 export MAKEFLAGS="-j`nproc`" && \
-cd {homeDirectory}/src/{gitDirectory}/scripts && \
+cd {homeDirectory}/src/{gitDirectory}/build/scripts && \
 sudo -u {user} -g {group} mkdir -p logs && \
 sudo -u {user} -g {group} --preserve-env=MAKEFLAGS ./build_spgwu -c -V -b Debug -j >logs/build_spgwu-2.log 2>&1
 """.format(user          = vduHelper.getUser(),
@@ -226,7 +226,7 @@ sudo -u {user} -g {group} --preserve-env=MAKEFLAGS ./build_spgwu -c -V -b Debug 
          vduHelper.beginBlock('Configuring SPGW-U')
          vduHelper.executeFromString("""\
 export MAKEFLAGS="-j`nproc`" && \
-cd {homeDirectory}/src/{gitDirectory}/scripts && \
+cd {homeDirectory}/src/{gitDirectory}/build/scripts && \
 INSTANCE=1 && \\
 PREFIX='/usr/local/etc/oai' && \\
 sudo mkdir -m 0777 -p $PREFIX && \\
