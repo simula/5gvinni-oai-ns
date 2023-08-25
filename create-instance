@@ -47,34 +47,97 @@ if [ $# -lt 1 ] ; then
    usage
    exit 0
 fi
+
+
+# ====== Obtain list of all NSDs ===========================================
+NSD_LIST=`git ls-files | cut -d/ -f1 | sort -u | grep "[_-]nsd$\\|[_-]ns$"`
+
+# ------ Obtaining a mapping between NSD directory and NSD identifier =====
+declare -A nsdIdentifierArray
+declare -A nsdArray
+declare -A nsdYamlFileArray
+for nsd in ${NSD_LIST} ; do
+   echo -n "${nsd}: "
+   if [ -e "${nsd}/${nsd}.yaml" ] ; then
+      nsdYamlName="${nsd}/${nsd}.yaml"
+   elif [ -e "${nsd}/${nsd}d.yaml" ] ; then
+      nsdYamlName="${nsd}/${nsd}d.yaml"
+   else
+      echo >&2 "ERROR: Unable to find YAML file for ${nsd}!"
+      exit 1
+   fi
+   nsdIdentifier=`grep "^\(    id\|    - id\):" ${nsdYamlName} | tr -d " \t\n" | sed -e "s/^-//g" -e "s/id://"`
+   if [ "${nsdIdentifier}" == "" ] ; then
+      echo >&2 "ERROR: Unable to find identifier for NSD ${nsd} in ${nsdYamlName}!"
+      exit 1
+   fi
+   nsdIdentifierArray[${nsd}]="${nsdIdentifier}"
+   nsdYamlFileArray[${nsd}]="${nsdYamlName}"
+   nsdArray[${nsdIdentifier}]="${nsd}"
+
+   # echo "${nsdArray[${nsdIdentifier}]} <-> ${nsdIdentifierArray[${nsd}]}"
+done
+
+
+# ====== Obtain list of all VNFDs ===========================================
+VNFD_LIST=`git ls-files | cut -d/ -f1 | sort -u | grep "vnfd$\\|vnf$"`
+
+# ------ Obtaining a mapping between VNFD directory and VNFD identifier =====
+declare -A vnfdIdentifierArray
+declare -A vnfdArray
+for vnfd in ${VNFD_LIST} ; do
+   echo -n "${vnfd}: "
+   if [ -e "${vnfd}/${vnfd}.yaml" ] ; then
+      vnfdYamlName="${vnfd}/${vnfd}.yaml"
+   elif [ -e "${vnfd}/${vnfd}d.yaml" ] ; then
+      vnfdYamlName="${vnfd}/${vnfd}d.yaml"
+   else
+      echo >&2 "ERROR: Unable to find YAML file for ${vnfd}!"
+      exit 1
+   fi
+   vnfdIdentifier=`grep "^  id:" ${vnfdYamlName} | tr -d " \t\n" | sed -e "s/id://"`
+   if [ "${vnfdIdentifier}" == "" ] ; then
+      echo >&2 "ERROR: Unable to find identifier for VNFD ${vnfd} in ${vnfdYamlName}!"
+      exit 1
+   fi
+   vnfdIdentifierArray[${vnfd}]="${vnfdIdentifier}"
+   vnfdArray[${vnfdIdentifier}]="${vnfd}"
+
+   echo "${vnfdArray[${vnfdIdentifier}]} <-> ${vnfdIdentifierArray[${vnfd}]}"
+done
+
+
+# ====== Handle parameter files =============================================
 n=0
 while [ $# -gt 0 ] ; do
    # ====== Get parameter file ==============================================
-   PARAMS="$1"
-   if [ ! -e "${PARAMS}" ] ; then
-      echo >&2 "ERROR: Parameter file ${PARAMS} not found!"
+   parameterFile="$1"
+   if [ ! -e "${parameterFile}" ] ; then
+      echo >&2 "ERROR: Parameter file ${parameterFile} not found!"
       usage
       exit 1
    fi
 
    # ====== Extract NSD name from parameter file ============================
-   NSD=`grep -E '#! NSD ' ${PARAMS} | cut -d' ' -f3`
-   if [ "${NSD}" == "" ] ; then
-      echo >&2 "ERROR: The parameter file does not mention the NSD name! (#! NSD <name>)"
+   ns=`echo "${parameterFile}" | sed -e "s/.yaml$//g"`
+   nsdIdentifier=`grep -E '#! NSD ' ${parameterFile} | cut -d' ' -f3`
+   if [ "${nsdIdentifier}" == "" ] ; then
+      echo >&2 "ERROR: The parameter file does not mention the NS identifier! (#! NSD <identifier>)"
       exit 1
    fi
-   NS=`echo "${PARAMS}" | sed -e "s/.yaml$//g"`
-   if [ ! -d "${NSD}" ] ; then
-      NSD=`echo "${NS}" | sed -e "s/-[a-zA-Z0-9]*$/_nsd/g"`
-      if [ ! -d "${NSD}" ] ; then
-        echo >&2 "ERROR: NSD ${NSD} not found!"
-        usage
-        exit 1
-     fi
+   nsd="${nsdArray[${nsdIdentifier}]}"
+   if [ "$nsd" == "" ] ; then
+      echo >&2 "ERROR: Unable to find for NSD for identifier ${nsdIdentifier} in ${nsdArray[@}]}!"
+      exit 1
    fi
-   VNFDs=`grep "vnfd-id:" ${NSD}/${NSD}.yaml | sed -e "s/^.*://g" | sort -u | xargs`
+   nsdYamlFileName="${nsdYamlFileArray[${nsd}]}"
+   vnfdIdentifierList=`grep "vnfd-id:" ${nsdYamlFileName} | sed -e "s/^.*://g" | sort -u | xargs`
+   if [ "{$vnfdIdentifierList}" == "" ] ; then
+      echo >&2 "ERROR: No VNFD-IDs found in NS ${nsd}!"
+      exit 1
+   fi
 
-   echo "NS=$NS NSD=$NSD VNFDs=$VNFDs PARAMS=$PARAMS"
+   echo "NS=${ns} NSD=${nsdIdentifier}->${nsd} vnfdIdentifierList=${vnfdIdentifierList} parameterFile=${parameterFile}"
 
 
    # ====== Build ===========================================================
@@ -86,48 +149,83 @@ while [ $# -gt 0 ] ; do
 
 
    # ====== Clean up ========================================================
-   echo -e "\x1b[34m`date +%FT%H:%M:%S`: Deleting existing setup ${NS} ...\x1b[0m"
-   osm ns-delete --wait ${NS} || true
-   osm nsd-delete ${NSD} || true
-   for vnfd in ${VNFDs} ; do
-      osm vnfd-delete ${vnfd} || true
+   echo -e "\x1b[34m`date +%FT%H:%M:%S`: Deleting existing NS ${ns}, NSD ${nsdIdentifier} and VNFDs ${vnfdIdentifierList} ...\x1b[0m"
+
+   osm ns-delete --wait ${ns} || true
+   osm nsd-delete ${nsdIdentifier} || true
+   for vnfdIdentifier in ${vnfdIdentifierList} ; do
+      osm vnfd-delete ${vnfdIdentifier} || true
    done
 
-   # ====== Create ==========================================================
-   echo -e "\x1b[34m`date +%FT%H:%M:%S`: Creating ${VNFDs} and ${NSD} ...\x1b[0m"
-   for vnfd in ${VNFDs} ; do
-      osm vnfd-create ${vnfd}.tar.gz || true
+
+   # ====== Create/Update ===================================================
+   echo -e "\x1b[34m`date +%FT%H:%M:%S`: Creating VNFDs ${vnfdIdentifierList} and NSD ${nsdIdentifier} ...\x1b[0m"
+
+   # ------ Create/Update VNFDs ---------------------------------------------
+   for vnfdIdentifier in ${vnfdIdentifierList} ; do
+      vnfd="${vnfdArray[${vnfdIdentifier}]}"
+      if [ "${vnfd}" == "" ] ; then
+         echo >&2 "ERROR: Unable to find for VNFD for identifier ${vnfdIdentifier}!"
+         exit 1
+      fi
+      vnfdTarball="${vnfd}.tar.gz"
+      if [ ! -e "${vnfdTarball}" ] ; then
+         echo >&2 "ERROR: VNFD tarball ${vnfdTarball} does not exist!"
+         exit 1
+      fi
+      echo "Creating VNFD ${vnfdIdentifier} from tarball ${vnfdTarball} ..."
+      if ! osm vnfd-create ${vnfdTarball} ; then
+         echo >&2 "ERROR: Creating VNFD failed!"
+         exit 1
+#          echo "Trying update instead ..."
+#          osm vnfd-update ${vnfdIdentifier} --content ${vnfdTarball}
+      fi
    done
-   osm nsd-create ${NSD}.tar.gz || true
+
+   # ------ Create/Update NSD -----------------------------------------------
+   nsdTarball="${nsd}.tar.gz"
+   if [ ! -e "${nsdTarball}" ] ; then
+      echo >&2 "ERROR: NSD tarball ${nsdTarball} does not exist!"
+      exit 1
+   fi
+   echo "Creating NSD ${nsdIdentifier} from tarball ${nsdTarball} ..."
+   if ! osm nsd-create ${nsdTarball} ; then
+      echo >&2 "ERROR: Creating NSD failed!"
+      exit 1
+#       echo "Trying update instead ..."
+#       osm nsd-update ${nsdTarball}
+   fi
 
 
    # ====== Instantiate =====================================================
    echo -e "\x1b[34m`date +%FT%H:%M:%S`: Instantiating ${NS} ...\x1b[0m"
-   if [ -e ${PARAMS} ] ; then
-      config_file_option=" --config_file ${PARAMS}"
+   if [ -e ${parameterFile} ] ; then
+      config_file_option=" --config_file ${parameterFile}"
    else
-      echo >&2 "WARNING: No configuration file ${PARAMS} found!"
+      echo >&2 "WARNING: No configuration file ${parameterFile} found!"
       config_file_option=""
    fi
    osm ns-create \
-      --ns_name ${NS} \
-      --nsd_name ${NSD} \
+      --ns_name ${ns} \
+      --nsd_name ${nsdIdentifier} \
       ${config_file_option} \
       --vim_account ${VIM_ACCOUNT} \
       --ssh_keys ~/.ssh/osm-user.pub
-   # --config '{vld: [ {name: mgmtnet, vim-network-name: osm-ext} ] }'
+      # --config '{vld: [ {name: mgmtnet, vim-network-name: openstack-vms} ] }'
 
 
    # ====== Done! ===========================================================
    echo -e "\x1b[34m`date +%FT%H:%M:%S`: Done!\x1b[0m"
 
-   # osm ns-list --filter=name=${NS}
-   id=`osm ns-list --filter=name=${NS} | grep "| ${NS}" | awk '{ print $4 }'`
-   echo "ID=${id}"
-   sleep 15
-   echo "juju switch ${id}"
-   juju switch ${id}
+   nsIdentifier=`osm ns-list --filter=name=${ns} | grep "| ${ns}" | awk '{ print $4 }'`
+   echo "NS identifier: ${nsIdentifier}"
+   echo "On the OSM Controller, use the following command to switch to the new Juju model:"
+   echo "juju switch ${nsIdentifier}"
 
+   if [ -e /snap/bin/juju ] ; then
+      sleep 15
+      /snap/bin/juju switch ${nsIdentifier}
+   fi
 
    shift
    let n=$n+1
