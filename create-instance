@@ -175,12 +175,12 @@ while [ $# -gt 0 ] ; do
          echo >&2 "ERROR: VNFD tarball ${vnfdTarball} does not exist!"
          exit 1
       fi
-      echo "Creating VNFD ${vnfdIdentifier} from tarball ${vnfdTarball} ..."
+      echo -e "\x1b[37m`date +%FT%H:%M:%S`: Creating VNFD ${vnfdIdentifier} from tarball ${vnfdTarball} ...\x1b[0m"
       if ! osm vnfd-create ${vnfdTarball} ; then
          echo >&2 "ERROR: Creating VNFD failed!"
-         exit 1
-#          echo "Trying update instead ..."
-#          osm vnfd-update ${vnfdIdentifier} --content ${vnfdTarball}
+         # exit 1
+         echo -e "\x1b[37m`date +%FT%H:%M:%S`: Trying update instead ...\x1b[0m"
+         osm vnfd-update ${vnfdIdentifier} --content ${vnfdTarball}
       fi
    done
 
@@ -190,12 +190,12 @@ while [ $# -gt 0 ] ; do
       echo >&2 "ERROR: NSD tarball ${nsdTarball} does not exist!"
       exit 1
    fi
-   echo "Creating NSD ${nsdIdentifier} from tarball ${nsdTarball} ..."
+   echo -e "\x1b[37m`date +%FT%H:%M:%S`: Creating NSD ${nsdIdentifier} from tarball ${nsdTarball} ...\x1b[0m"
    if ! osm nsd-create ${nsdTarball} ; then
       echo >&2 "ERROR: Creating NSD failed!"
-      exit 1
-#       echo "Trying update instead ..."
-#       osm nsd-update ${nsdTarball}
+      # exit 1
+      echo -e "\x1b[37m`date +%FT%H:%M:%S`: Trying update instead ...\x1b[0m"
+      osm nsd-update ${nsdIdentifier} --content ${nsdTarball}
    fi
 
 
