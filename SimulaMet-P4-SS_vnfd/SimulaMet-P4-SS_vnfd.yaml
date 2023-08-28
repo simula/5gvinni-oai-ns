@@ -85,6 +85,11 @@ vnfd:
                 - seq: 1
                   name: prepare-p4ss-build
                   execution-environment-ref: p4sscharm-ee
+                  parameter:
+                    - name: p4ss-git-repository
+                      value: <p4ss_git_repository>
+                    - name: p4ss-git-commit
+                      value: <p4ss_git_commit>
 
                 - seq: 2
                   name: configure-p4ss

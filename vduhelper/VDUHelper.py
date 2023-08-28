@@ -678,6 +678,6 @@ git checkout {gitCommit}""".format(
    # ###### Clean up ########################################################
    def cleanUp(self):
       self.beginBlock('Cleaning up')
-      commands = """updatedb"""
+      commands = """if [ -e /usr/bin/updatedb ] ; then /usr/bin/updatedb ; fi"""
       self.runInShell(commands)
       self.endBlock()

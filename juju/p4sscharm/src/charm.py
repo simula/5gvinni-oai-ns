@@ -129,6 +129,10 @@ sudo -u {user} -g {group} mkdir -p {homeDirectory}/src
          vduHelper.aptInstallPackages([
             'autoconf',
             'automake',
+            'g++',
+            'joe',
+            'make',
+            'mlocate',
             'libboost-dev',
             'libboost-filesystem-dev',
             'libboost-program-options-dev',
@@ -149,6 +153,7 @@ sudo -u {user} -g {group} mkdir -p {homeDirectory}/src
             'protobuf-compiler-grpc',
             'python3-six',
             'python3-thrift',
+            'td-system-info',
             'thrift-compiler'
          ])
          vduHelper.endBlock()
@@ -161,7 +166,7 @@ export MAKEFLAGS="-j`nproc`" && \
 chown -R {user}:{group} {homeDirectory}/src/{gitDirectory} && \
 cd {homeDirectory}/src/{gitDirectory} && \
 sudo -u {user} -g {group} --preserve-env=MAKEFLAGS ./autogen.sh && \
-sudo -u {user} -g {group} --preserve-env=MAKEFLAGS configure --with-pdfixed --enable-debugger --with-thrift --with-nanomsggit
+sudo -u {user} -g {group} --preserve-env=MAKEFLAGS ./configure --with-pdfixed --enable-debugger --with-thrift --with-nanomsggit
 """.format(user          = vduHelper.getUser(),
            group         = vduHelper.getGroup(),
            homeDirectory = vduHelper.getHomeDirectory(),
@@ -182,6 +187,10 @@ sudo -u {user} -g {group} --preserve-env=MAKEFLAGS configure --with-pdfixed --en
    def on_configure_p4ss_action(self, event):
       vduHelper.beginBlock('on_configure_p4ss_action')
       try:
+
+         # ====== Get P4-SS parameters ======================================
+         gitDirectory  = 'bmv2'
+
          # ====== Configure P4-SS ===========================================
          #vduHelper.beginBlock('Configuring P4-SS')
          #vduHelper.configureSwitch('ss0', [ 'ens4', 'ens5' ])
