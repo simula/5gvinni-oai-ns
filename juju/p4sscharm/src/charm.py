@@ -35,6 +35,7 @@ import traceback
 from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
 
 sys.path.append("lib")
+sys.path.append("mod/operator")
 
 from ops.charm import CharmBase
 from ops.main  import main
@@ -126,20 +127,41 @@ sudo -u {user} -g {group} mkdir -p {homeDirectory}/src
          vduHelper.waitForPackageUpdatesToComplete()
          vduHelper.aptAddRepository('ppa:dreibh/ppa')
          vduHelper.aptInstallPackages([
-            # 'p4lang-p4c'
-            'autoconf', 'automake', 'libtool'
+            'autoconf',
+            'automake',
+            'libboost-dev',
+            'libboost-filesystem-dev',
+            'libboost-program-options-dev',
+            'libboost-system-dev',
+            'libboost-thread-dev',
+            'libgmp-dev',
+            'libgrpc++-dev',
+            'libgrpc-dev',
+            'libjudy-dev',
+            'libnanomsg-dev',
+            'libpcap-dev',
+            'libprotobuf-dev',
+            'libprotoc-dev',
+            'libssl-dev',
+            'libthrift-dev',
+            'libtool',
+            'protobuf-compiler',
+            'protobuf-compiler-grpc',
+            'python3-six',
+            'python3-thrift',
+            'thrift-compiler'
          ])
-
          vduHelper.endBlock()
 
          # ====== Prepare sources ===========================================
          vduHelper.beginBlock('Preparing sources')
          vduHelper.fetchGitRepository(gitDirectory, gitRepository, gitCommit)
          vduHelper.executeFromString("""\
+export MAKEFLAGS="-j`nproc`" && \
 chown -R {user}:{group} {homeDirectory}/src/{gitDirectory} && \
 cd {homeDirectory}/src/{gitDirectory} && \
-sudo -u {user} -g {group} git submodule init && \
-sudo -u {user} -g {group} git submodule update
+sudo -u {user} -g {group} --preserve-env=MAKEFLAGS ./autogen.sh && \
+sudo -u {user} -g {group} --preserve-env=MAKEFLAGS configure --with-pdfixed --enable-debugger --with-thrift --with-nanomsggit
 """.format(user          = vduHelper.getUser(),
            group         = vduHelper.getGroup(),
            homeDirectory = vduHelper.getHomeDirectory(),
