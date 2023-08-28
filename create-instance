@@ -57,7 +57,7 @@ declare -A nsdIdentifierArray
 declare -A nsdArray
 declare -A nsdYamlFileArray
 for nsd in ${NSD_LIST} ; do
-   echo -n "${nsd}: "
+   echo -en "${nsd}:\t"
    if [ -e "${nsd}/${nsd}.yaml" ] ; then
       nsdYamlName="${nsd}/${nsd}.yaml"
    elif [ -e "${nsd}/${nsd}d.yaml" ] ; then
@@ -66,7 +66,8 @@ for nsd in ${NSD_LIST} ; do
       echo >&2 "ERROR: Unable to find YAML file for ${nsd}!"
       exit 1
    fi
-   nsdIdentifier=`grep "^\(    id\|    - id\):" ${nsdYamlName} | tr -d " \t\n" | sed -e "s/^-//g" -e "s/id://"`
+   echo -en "(${nsdYamlName})\t"
+   nsdIdentifier=`yq -r ".nsd.nsd[].id" ${nsdYamlName}`
    if [ "${nsdIdentifier}" == "" ] ; then
       echo >&2 "ERROR: Unable to find identifier for NSD ${nsd} in ${nsdYamlName}!"
       exit 1
@@ -75,7 +76,7 @@ for nsd in ${NSD_LIST} ; do
    nsdYamlFileArray[${nsd}]="${nsdYamlName}"
    nsdArray[${nsdIdentifier}]="${nsd}"
 
-   # echo "${nsdArray[${nsdIdentifier}]} <-> ${nsdIdentifierArray[${nsd}]}"
+   echo "${nsdArray[${nsdIdentifier}]} <-> ${nsdIdentifierArray[${nsd}]}"
 done
 
 
@@ -86,7 +87,7 @@ VNFD_LIST=`git ls-files | cut -d/ -f1 | sort -u | grep "vnfd$\\|vnf$"`
 declare -A vnfdIdentifierArray
 declare -A vnfdArray
 for vnfd in ${VNFD_LIST} ; do
-   echo -n "${vnfd}: "
+   echo -en "${vnfd}:\t"
    if [ -e "${vnfd}/${vnfd}.yaml" ] ; then
       vnfdYamlName="${vnfd}/${vnfd}.yaml"
    elif [ -e "${vnfd}/${vnfd}d.yaml" ] ; then
@@ -95,7 +96,8 @@ for vnfd in ${VNFD_LIST} ; do
       echo >&2 "ERROR: Unable to find YAML file for ${vnfd}!"
       exit 1
    fi
-   vnfdIdentifier=`grep "^  id:" ${vnfdYamlName} | tr -d " \t\n" | sed -e "s/id://"`
+   echo -en "${vnfdYamlName}\t"
+   vnfdIdentifier=`yq -r ".vnfd.id" ${vnfdYamlName}`
    if [ "${vnfdIdentifier}" == "" ] ; then
       echo >&2 "ERROR: Unable to find identifier for VNFD ${vnfd} in ${vnfdYamlName}!"
       exit 1
@@ -127,7 +129,7 @@ while [ $# -gt 0 ] ; do
    fi
    nsd="${nsdArray[${nsdIdentifier}]}"
    if [ "$nsd" == "" ] ; then
-      echo >&2 "ERROR: Unable to find for NSD for identifier ${nsdIdentifier} in ${nsdArray[@}]}!"
+      echo >&2 "ERROR: Unable to find NSD for identifier ${nsdIdentifier} in ( ${!nsdArray[@]} )!"
       exit 1
    fi
    nsdYamlFileName="${nsdYamlFileArray[${nsd}]}"
@@ -165,7 +167,7 @@ while [ $# -gt 0 ] ; do
    for vnfdIdentifier in ${vnfdIdentifierList} ; do
       vnfd="${vnfdArray[${vnfdIdentifier}]}"
       if [ "${vnfd}" == "" ] ; then
-         echo >&2 "ERROR: Unable to find for VNFD for identifier ${vnfdIdentifier}!"
+         echo >&2 "ERROR: Unable to find VNFD for identifier ${vnfdIdentifier} in ( ${!vnfdArray[@]} )!"
          exit 1
       fi
       vnfdTarball="${vnfd}.tar.gz"
