@@ -26,6 +26,29 @@
 #
 # Contact: dreibh@simula.no
 
+prepare-p4ss-build:
+  description: Prepares P4-SS sources
+  params:
+    p4ss-git-repository:
+      description: P4-SS Git repository
+      type: string
+      default: https://github.com/simula/behavioral-model
+    p4ss-git-commit:
+      description: P4-SS Git commit
+      type: string
+      default: main
+    git-name:
+      description: Git name
+      type: string
+      default: Thomas Dreibholz
+    git-email:
+      description: Git E-mail
+      type: string
+      default: dreibh@simula.no
+  required:
+    - p4ss-git-repository
+    - p4ss-git-commit
+
 configure-p4ss:
   description: Configures P4-SS
 

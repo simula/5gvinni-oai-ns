@@ -30,7 +30,7 @@ vnfd:
   id: SimulaMet-P4-SS_vnfd
   product-name: SimulaMet-P4-SS_vnfd
   description: SimulaMet P4-SS VNF
-  version: '2.0'
+  version: '3.0'
   provider: Thomas Dreibholz
 
   # ###### External Connection Points #####################################
@@ -51,47 +51,48 @@ vnfd:
       port-security-enabled: false
   mgmt-cp: p4ss-mgmt-cp-ext
 
-  # ###### VNF Definition #################################################
+  # ###### VNF definition ###################################################
   df:
     - id: default-df
       instantiation-level:
         - id: default-instantiation-level
           vdu-level:
             - number-of-instances: 1
-              vdu-id: P4-SS
+              vdu-id: FlexRAN
       vdu-profile:
-        - id: P4-SS
+        - id: FlexRAN
           min-number-of-instances: 1
 
       lcm-operations-configuration:
         operate-vnf-op-config:
           day1-2:
-            - id: P4-SS
+            - id: FlexRAN
+              config-access:
+                ssh-access:
+                  default-user: ubuntu
+                  required: true
 
               # ====== Execution environment ================================
               execution-environment-list:
                 - id: p4sscharm-ee
                   juju:
                     charm: p4sscharm
+                    proxy: false
 
               # ====== Configuration primitives =============================
               initial-config-primitive:
 
-                - seq: '1'
-                  name: config
-                  parameter:
-                    - name: ssh-hostname
-                      value: <rw_mgmt_ip>
-                    - name: ssh-username
-                      value: nornetpp
-                    - name: ssh-password
-                      value: <password>
+                - seq: 1
+                  name: prepare-p4ss-build
+                  execution-environment-ref: p4sscharm-ee
 
-                - seq: '2'
+                - seq: 2
                   name: configure-p4ss
+                  execution-environment-ref: p4sscharm-ee
 
-                - seq: '3'
+                - seq: 3
                   name: restart-p4ss
+                  execution-environment-ref: p4sscharm-ee
 
               # ====== Metrics ==============================================
               metrics:
@@ -120,9 +121,9 @@ vnfd:
 
   # ###### VDU Configuration ################################################
   sw-image-desc:
-    - id: 5gVINNI-OpenStack-Ubuntu-20.04-LTS
-      image: 5gVINNI-OpenStack-Ubuntu-20.04-LTS
-      name: 5gVINNI-OpenStack-Ubuntu-20.04-LTS
+    - id: ubuntu20.04
+      image: ubuntu20.04
+      name: ubuntu20.04
   vdu:
     - cloud-init-file: p4ss-init
       description: P4-SS
@@ -144,7 +145,7 @@ vnfd:
               virtual-interface:
                 type: PARAVIRT
       name: P4-SS
-      sw-image-desc: 5gVINNI-OpenStack-Ubuntu-20.04-LTS
+      sw-image-desc: ubuntu20.04
       virtual-compute-desc: P4-SS-compute
       virtual-storage-desc:
         - P4-SS-storage

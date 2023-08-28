@@ -34,6 +34,8 @@ additionalParamsForVnf:
   - member-vnf-index: '1'
     additionalParams:
       # ====== P4-SS ========================================================
+      p4ss_git_repository: 'https://github.com/simula/behavioral-model'
+      p4ss_git_commit: 'main'
 
       # ====== Other ========================================================
       hostname: 'p4-ss'
@@ -60,8 +62,8 @@ vld:
 
   # ====== Service, Port 2 ==================================================
   - name: Service-Port2
-    vim-network-name: hermod-management        # <<-- VIM Network for service port
+    vim-network-name: 5gvinni-core3-flexran    # <<-- VIM Network for service port
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '1'
         vnfd-connection-point-ref: p4ss-service-port2-cp-ext
-        ip-address: 10.0.225.110
+        ip-address: 192.168.244.110

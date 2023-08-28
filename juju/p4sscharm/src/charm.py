@@ -28,77 +28,142 @@
 #
 # Contact: dreibh@simula.no
 
-
-from charmhelpers.core.hookenv import (
-    function_get,
-    function_fail,
-    function_set,
-    status_set
-)
-from charms.reactive import (
-    clear_flag,
-    set_flag,
-    when,
-    when_not
-)
-import charms.sshproxy
-
+import os
 import subprocess
 import sys
 import traceback
 from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
 
-from . import VDUHelper
+sys.path.append("lib")
 
-vduHelper = VDUHelper.VDUHelper()
+from ops.charm import CharmBase
+from ops.main  import main
+from ops.model import ActiveStatus
+
+
+import VDUHelper
+
+vduHelper = VDUHelper.VDUHelper(1000)   # <<-- Default user ID for "ubuntu"!
 
 
 
 # ###########################################################################
-# #### P4-SS Charm functions                                            ####
+# #### P4-SS Charm functions                                             ####
 # ###########################################################################
 
-# ###### Installation #######################################################
-@when('sshproxy.configured')
-@when_not('p4sscharm.installed')
-def install_p4sscharm_proxy_charm():
-   set_flag('p4sscharm.installed')
-   vduHelper.setStatus('install_p4sscharm_proxy_charm: SSH proxy charm is READY')
+class P4SSCharm(CharmBase):
+
+   # ###### Constructor #####################################################
+   def __init__(self, framework, key):
+      super().__init__(framework, key)
+
+      # Listen to charm events
+      self.framework.observe(self.on.config_changed, self.on_config_changed)
+      self.framework.observe(self.on.install, self.on_install)
+      self.framework.observe(self.on.start, self.on_start)
+
+      # Listen to the action events
+      self.framework.observe(self.on.prepare_p4ss_build_action, self.on_prepare_p4ss_build_action)
+      self.framework.observe(self.on.configure_p4ss_action, self.on_configure_p4ss_action)
+      self.framework.observe(self.on.restart_p4ss_action, self.on_restart_p4ss_action)
 
 
-# ###### configure-p4ss function ###########################################
-@when('actions.configure-p4ss')
-@when('p4sscharm.installed')
-def configure_p4ss():
-   vduHelper.beginBlock('configure_p4ss')
-   try:
+   # ###### Configuration ###################################################
+   def on_config_changed(self, event):
+      """Handle changes in configuration"""
+      self.model.unit.status = ActiveStatus()
 
-      # ====== Prepare system ===============================================
-      vduHelper.beginBlock('Preparing system')
 
-      # Cloud-Init configures all 3 interfaces in Ubuntu 20.04+
-      # => unwanted configuration on ens3 and ens4
-      # Get rid of the Cloud-Init configuration, then configure the
-      # interfaces manually with the correct configuration.
-      vduHelper.runInShell('sudo mv /etc/netplan/50-cloud-init.yaml /home/nornetpp')
-      interfaceConfiguration = vduHelper.makeInterfaceConfiguration('ens3')
-      vduHelper.configureInterface('ens3', interfaceConfiguration, 50)
-      n = 0
-      for interfaceName in [ 'ens4', 'ens5' ]:
-         interfaceConfiguration = vduHelper.makeInterfaceConfiguration(interfaceName, None)
-         vduHelper.configureInterface(interfaceName, interfaceConfiguration, 61 + n)
-         n = n + 1
-      vduHelper.testNetworking()
-      vduHelper.waitForPackageUpdatesToComplete()
-      vduHelper.aptInstallPackages([
-         'p4lang-p4c'
-      ])
-      vduHelper.endBlock()
+   # ###### Installation ####################################################
+   def on_install(self, event):
+      """Called when the charm is being installed"""
+      self.model.unit.status = ActiveStatus()
 
-      # ====== Configure P4-SS =============================================
-      vduHelper.beginBlock('Configuring P4-SS')
-      #vduHelper.configureSwitch('ss0', [ 'ens4', 'ens5' ])
-      #vduHelper.createFileFromString('/etc/rc.local',
+
+   # ###### Start ###########################################################
+   def on_start(self, event):
+      """Called when the charm is being started"""
+      self.model.unit.status = ActiveStatus()
+
+
+   # ###### prepare-p4ss-build action #######################################
+   def on_prepare_p4ss_build_action(self, event):
+      vduHelper.beginBlock('on_prepare_p4ss_build_action')
+      try:
+
+         # ====== Get P4-SS parameters ======================================
+         gitName       = event.params['git-name']
+         gitEmail      = event.params['git-email']
+         gitRepository = event.params['p4ss-git-repository']
+         gitCommit     = event.params['p4ss-git-commit']
+         gitDirectory  = 'bmv2'
+
+         # ====== Prepare system ============================================
+         vduHelper.beginBlock('Preparing system')
+
+         # Prepare network configuration:
+         # Cloud-Init configures all 3 interfaces in Ubuntu 20.04+
+         # => unwanted configuration on ens3 and ens4
+         # Get rid of the Cloud-Init configuration, then configure the
+         # interfaces manually with the correct configuration.
+         vduHelper.runInShell('mv /etc/netplan/50-cloud-init.yaml ' + vduHelper.getHomeDirectory())
+         interfaceConfiguration = vduHelper.makeInterfaceConfiguration('ens3')
+         vduHelper.configureInterface('ens3', interfaceConfiguration, 50)
+         n = 0
+         for interfaceName in [ 'ens4', 'ens5' ]:
+            interfaceConfiguration = vduHelper.makeInterfaceConfiguration(interfaceName, None)
+            vduHelper.configureInterface(interfaceName, interfaceConfiguration, 61 + n)
+            n = n + 1
+         vduHelper.testNetworking()
+
+         vduHelper.executeFromString("""\
+sudo -u {user} -g {group} mkdir -p {homeDirectory}/src
+""".format(user          = vduHelper.getUser(),
+           group         = vduHelper.getGroup(),
+           homeDirectory = vduHelper.getHomeDirectory(),
+           gitDirectory  = gitDirectory))
+         vduHelper.configureGit(gitName, gitEmail)
+         vduHelper.waitForPackageUpdatesToComplete()
+         vduHelper.aptAddRepository('ppa:dreibh/ppa')
+         vduHelper.aptInstallPackages([
+            # 'p4lang-p4c'
+            'autoconf', 'automake', 'libtool'
+         ])
+
+         vduHelper.endBlock()
+
+         # ====== Prepare sources ===========================================
+         vduHelper.beginBlock('Preparing sources')
+         vduHelper.fetchGitRepository(gitDirectory, gitRepository, gitCommit)
+         vduHelper.executeFromString("""\
+chown -R {user}:{group} {homeDirectory}/src/{gitDirectory} && \
+cd {homeDirectory}/src/{gitDirectory} && \
+sudo -u {user} -g {group} git submodule init && \
+sudo -u {user} -g {group} git submodule update
+""".format(user          = vduHelper.getUser(),
+           group         = vduHelper.getGroup(),
+           homeDirectory = vduHelper.getHomeDirectory(),
+           gitDirectory  = gitDirectory))
+         vduHelper.endBlock()
+
+
+         message = vduHelper.endBlock()
+         event.set_results( { 'prepared': True, 'outout': message } )
+      except:
+         message = vduHelper.endBlockInException()
+         event.fail(message)
+      finally:
+         self.model.unit.status = ActiveStatus()
+
+
+   # ###### configure-p4ss action ########################################
+   def on_configure_p4ss_action(self, event):
+      vduHelper.beginBlock('on_configure_p4ss_action')
+      try:
+         # ====== Configure P4-SS ===========================================
+         #vduHelper.beginBlock('Configuring P4-SS')
+         #vduHelper.configureSwitch('ss0', [ 'ens4', 'ens5' ])
+         #vduHelper.createFileFromString('/etc/rc.local',
 #"""\
 ##!/bin/sh
 
@@ -107,15 +172,15 @@ def configure_p4ss():
 ##            network also transporting traffic of the VLs!
 #ovs-ofctl -O OpenFlow15 add-flow ss0 "priority=8000 udp,nw_dst=224.0.0.1,tp_dst=8472 actions=drop"
 #""", True)
-      #vduHelper.runInShell('sudo /etc/rc.local')
-      vduHelper.endBlock()
+         #vduHelper.runInShell('sudo /etc/rc.local')
+         #vduHelper.endBlock()
 
-      # ====== Set up P4-SS service ========================================
-      vduHelper.beginBlock('Setting up P4-SS service')
-      vduHelper.configureSystemInfo('P4-SS', 'This is the SimulaMet P4-SimpleSwitch VNF!')
-      vduHelper.createFileFromString('/lib/systemd/system/p4ss.service', """\
+         # ====== Set up P4-SS service ======================================
+         vduHelper.beginBlock('Setting up P4-SS service')
+         vduHelper.configureSystemInfo('P4-SS', 'This is the SimulaMet P4-SimpleSwitch VNF!')
+         vduHelper.createFileFromString('/lib/systemd/system/p4ss.service', """\
 [Unit]
-Description=FlexRAN Controller
+Description=P4SS Controller
 After=ssh.target
 
 [Service]
@@ -123,57 +188,67 @@ ExecStart=/bin/sh -c 'exec simple_switch --log-console --interface 0@ens4 --inte
 KillMode=process
 Restart=on-failure
 RestartPreventExitStatus=255
-WorkingDirectory=/home/nornetpp
+WorkingDirectory={homeDirectory}
 
 [Install]
 WantedBy=multi-user.target
-""")
+""".format(homeDirectory = vduHelper.getHomeDirectory(),
+           gitDirectory  = gitDirectory))
 
-      vduHelper.createFileFromString('/home/nornetpp/log',
+         vduHelper.createFileFromString(os.path.join(vduHelper.getHomeDirectory(), 'log'),
 """\
 #!/bin/sh
 tail -f /var/log/p4ss.log
 """, True)
 
-      vduHelper.createFileFromString('/home/nornetpp/restart',
+         vduHelper.createFileFromString(os.path.join(vduHelper.getHomeDirectory(), 'restart'),
 """\
 #!/bin/sh
 DIRECTORY=`dirname $0`
-sudo service p4ss restart && $DIRECTORY/log
+service p4ss restart && $DIRECTORY/log
 """, True)
-      vduHelper.runInShell('sudo chown nornetpp:nornetpp /home/nornetpp/log /home/nornetpp/restart')
-      vduHelper.endBlock()
+         vduHelper.runInShell("""\
+chown {user}:{group} {homeDirectory}/log {homeDirectory}/restart
+""".format(user          = vduHelper.getUser(),
+           group         = vduHelper.getGroup(),
+           homeDirectory = vduHelper.getHomeDirectory()))
+         vduHelper.endBlock()
 
-      # ====== Set up sysstat service =======================================
-      vduHelper.installSysStat()
+         # ====== Set up sysstat service ====================================
+         vduHelper.installSysStat()
 
-      # ====== Clean up =====================================================
-      vduHelper.cleanUp()
+         # ====== Clean up ==================================================
+         vduHelper.cleanUp()
 
-      message = vduHelper.endBlock()
-      function_set( { 'outout': message } )
-      set_flag('p4sscharm.configured-p4ss')
-   except:
-      message = vduHelper.endBlockInException()
-      function_fail(message)
-   finally:
-      clear_flag('actions.configure-p4ss')
+         message = vduHelper.endBlock()
+         event.set_results( { 'configured': True, 'outout': message } )
+      except:
+         message = vduHelper.endBlockInException()
+         event.fail(message)
+      finally:
+         self.model.unit.status = ActiveStatus()
 
 
-# ###### restart-p4ss function #############################################
-@when('actions.restart-p4ss')
-@when('p4sscharm.configured-p4ss')
-def restart_p4ss():
-   vduHelper.beginBlock('restart_p4ss')
-   try:
+   # ###### restart-p4ss action #############################################
+   def on_restart_p4ss_action(self, event):
+      vduHelper.beginBlock('on_restart_p4ss_action')
+      try:
 
-      # !!! FIXME! !!!
-      # vduHelper.runInShell('sudo service p4ss restart')
+         # vduHelper.runInShell('service p4ss restart')
 
-      message = vduHelper.endBlock()
-      function_set( { 'outout': message } )
-   except:
-      message = vduHelper.endBlockInException()
-      function_fail(message)
-   finally:
-      clear_flag('actions.restart-p4ss')
+         message = vduHelper.endBlock()
+         event.set_results( { 'restarted': True, 'outout': message } )
+      except:
+         message = vduHelper.endBlockInException()
+         event.fail(message)
+      finally:
+         self.model.unit.status = ActiveStatus()
+
+
+
+# ###########################################################################
+# #### Main program                                                      ####
+# ###########################################################################
+
+if __name__ == "__main__":
+   main(P4SSCharm)
