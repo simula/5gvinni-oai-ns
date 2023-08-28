@@ -499,7 +499,8 @@ network:
       self.beginBlock('Testing networking')
 
       try:
-         commands = 'ping -W{timeout}  -i{interval} -c3 {destination} || ping -W{timeout}  -i{interval} -c3 {destination}'.format(
+         # Try Ping for up to 1 minute ...
+         commands = 'for i in 1 2 3 4 5 6 ; do ping -W{timeout}  -i{interval} -c3 {destination} && break || echo "Sleeping ..." && sleep 10 ; done'.format(
             destination = str(destination),
             timeout     = timeout,
             interval    = interval

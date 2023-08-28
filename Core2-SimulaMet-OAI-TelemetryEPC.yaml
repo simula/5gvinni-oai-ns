@@ -36,7 +36,7 @@ additionalParamsForVnf:
     additionalParams:
       # ====== HSS ==========================================================
       hss_git_repository: 'https://github.com/simula/openairinterface-openair-hss.git'
-      hss_git_commit: 'dreibh/cassandra-build-fix-22oct2020'
+      hss_git_commit: 'dreibh/cassandra-build-fix-v1.1.1'
       hss_S6a_address: '172.16.6.129'
       network_realm: 'simula.nornet'
       network_k: '449C4B91AEACD0ACE182CF3A5A72BFA1'
@@ -47,7 +47,7 @@ additionalParamsForVnf:
 
       # ====== MME ==========================================================
       mme_git_repository: 'https://github.com/simula/openairinterface-openair-mme.git'
-      mme_git_commit: 'dreibh/asn1c-url-fix-14Oct2020'
+      mme_git_commit: 'dreibh/lfds-build-fix-v1.1.0'
       mme_S1C_ipv4_interface: '192.168.247.112/24'
       mme_S1C_ipv4_gateway: '0.0.0.0'
       mme_S1C_ipv6_interface: ''

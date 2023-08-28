@@ -30,8 +30,8 @@ vnfd:
   id: SimulaMet-OAI-HSS_vnfd
   product-name: SimulaMet-OAI-HSS_vnfd
   description: SimulaMet OpenAirInterface HSS VNF
-  version: '2.0'
   provider: Thomas Dreibholz
+  version: 3.0
 
   # ###### External Connection Points #####################################
   ext-cpd:
@@ -61,28 +61,22 @@ vnfd:
         operate-vnf-op-config:
           day1-2:
             - id: HSS
+              config-access:
+                ssh-access:
+                  default-user: ubuntu
+                  required: true
 
               # ====== Execution environment ================================
               execution-environment-list:
                 - id: hsscharm-ee
                   juju:
                     charm: hsscharm
+                    proxy: false
 
               # ====== Configuration primitives =============================
               initial-config-primitive:
 
-                - seq: '1'
-                  name: config
-                  execution-environment-ref: hsscharm-ee
-                  parameter:
-                    - name: ssh-hostname
-                      value: <rw_mgmt_ip>
-                    - name: ssh-username
-                      value: nornetpp
-                    - name: ssh-password
-                      value: <password>
-
-                - seq: '2'
+                - seq: 1
                   name: prepare-cassandra-hss-build
                   execution-environment-ref: hsscharm-ee
                   parameter:
@@ -91,14 +85,14 @@ vnfd:
                     - name: hss-git-commit
                       value: <hss_git_commit>
 
-                - seq: '3'
+                - seq: 2
                   name: configure-cassandra
                   execution-environment-ref: hsscharm-ee
                   parameter:
                     - name: cassandra-server-ip
                       value: 172.16.6.129
 
-                - seq: '4'
+                - seq: 3
                   name: configure-hss
                   execution-environment-ref: hsscharm-ee
                   parameter:
@@ -121,7 +115,7 @@ vnfd:
                     - name: network-users
                       value: <network_users>
 
-                - seq: '5'
+                - seq: 4
                   name: restart-hss
                   execution-environment-ref: hsscharm-ee
 
@@ -149,15 +143,15 @@ vnfd:
 
   # ###### VDU Configuration ################################################
   sw-image-desc:
-    - id: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
-      name: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
-      image: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
+    - id: ubuntu18.04
+      name: ubuntu18.04
+      image: ubuntu18.04
   vdu:
     - id: HSS
       name: HSS
       description: HSS
       cloud-init-file: hss-init
-      sw-image-desc: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
+      sw-image-desc: ubuntu18.04
       virtual-compute-desc: HSS-compute
       virtual-storage-desc:
         - HSS-storage

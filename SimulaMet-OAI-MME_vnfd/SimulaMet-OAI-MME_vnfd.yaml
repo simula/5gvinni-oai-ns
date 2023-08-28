@@ -30,8 +30,8 @@ vnfd:
   id: SimulaMet-OAI-MME_vnfd
   product-name: SimulaMet-OAI-MME_vnfd
   description: SimulaMet OpenAirInterface MME VNF
-  version: '2.0'
   provider: Thomas Dreibholz
+  version: 3.0
 
   # ###### External Connection Points #######################################
   mgmt-cp: mme-mgmt-cp-ext
@@ -70,28 +70,22 @@ vnfd:
         operate-vnf-op-config:
           day1-2:
             - id: MME
+              config-access:
+                ssh-access:
+                  default-user: ubuntu
+                  required: true
 
               # ====== Execution environment ================================
               execution-environment-list:
                 - id: mmecharm-ee
                   juju:
                     charm: mmecharm
+                    proxy: false
 
               # ====== Configuration primitives =============================
               initial-config-primitive:
 
-                - seq: '1'
-                  name: config
-                  execution-environment-ref: mmecharm-ee
-                  parameter:
-                    - name: ssh-hostname
-                      value: <rw_mgmt_ip>
-                    - name: ssh-username
-                      value: nornetpp
-                    - name: ssh-password
-                      value: <password>
-
-                - seq: '2'
+                - seq: 1
                   name: prepare-mme-build
                   execution-environment-ref: mmecharm-ee
                   parameter:
@@ -108,7 +102,7 @@ vnfd:
                     - name: mme-S1C-ipv6-gateway
                       value: <mme_S1C_ipv6_gateway>
 
-                - seq: '3'
+                - seq: 2
                   name: configure-mme
                   execution-environment-ref: mmecharm-ee
                   parameter:
@@ -127,7 +121,7 @@ vnfd:
                     - name: network-mnc
                       value: <network_mnc>
 
-                - seq: '4'
+                - seq: 3
                   name: restart-mme
                   execution-environment-ref: mmecharm-ee
 
@@ -162,15 +156,15 @@ vnfd:
 
   # ###### VDU Configuration ################################################
   sw-image-desc:
-    - id: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
-      name: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
-      image: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
+    - id: ubuntu18.04
+      name: ubuntu18.04
+      image: ubuntu18.04
   vdu:
     - id: MME
       name: MME
       description: MME
       cloud-init-file: mme-init
-      sw-image-desc: 5gVINNI-OpenStack-Ubuntu-18.04-LTS
+      sw-image-desc: ubuntu18.04
       virtual-compute-desc: MME-compute
       virtual-storage-desc:
         - MME-storage
