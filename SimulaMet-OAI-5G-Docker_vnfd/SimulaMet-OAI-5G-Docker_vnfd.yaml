@@ -1,0 +1,156 @@
+vnfd:
+# =====================================================================
+#     #######  #####          #     #   ###   #     # #     #   ###
+#     #       #     #         #     #    #    ##    # ##    #    #
+#     #       #               #     #    #    # #   # # #   #    #
+#      #####  #  ####  #####  #     #    #    #  #  # #  #  #    #
+#           # #     #          #   #     #    #   # # #   # #    #
+#     #     # #     #           # #      #    #    ## #    ##    #
+#      #####   #####             #      ###   #     # #     #   ###
+# =====================================================================
+#
+# SimulaMet OAI-5G-Docker VNF
+# Copyright (C) 2019-2023 by Thomas Dreibholz
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Contact: dreibh@simula.no
+
+  id: SimulaMet-OAI-5G-Docker_vnfd
+  product-name: SimulaMet-OAI-5G-Docker_vnfd
+  description: SimulaMet OpenAirInterface 5G Docker VNF
+  provider: Thomas Dreibholz
+  version: 1.0
+
+  # ###### External Connection Points #######################################
+  mgmt-cp: oai5gdocker-mgmt-cp-ext
+  ext-cpd:
+    - id: oai5gdocker-mgmt-cp-ext
+      int-cpd:
+        cpd: ens3-int
+        vdu-id: OAI5GDocker
+    - id: oai5gdocker-service-cp-ext
+      int-cpd:
+        cpd: ens4-int
+        vdu-id: OAI5GDocker
+      port-security-enabled: false   # FIXME! Is this necessary?
+
+  # ###### VNF definition ###################################################
+  df:
+    - id: default-df
+      instantiation-level:
+        - id: default-instantiation-level
+          vdu-level:
+            - number-of-instances: 1
+              vdu-id: OAI5GDocker
+      vdu-profile:
+        - id: OAI5GDocker
+          min-number-of-instances: 1
+
+      lcm-operations-configuration:
+        operate-vnf-op-config:
+          day1-2:
+            - id: OAI5GDocker
+              config-access:
+                ssh-access:
+                  default-user: ubuntu
+                  required: true
+
+              # ====== Execution environment ================================
+              execution-environment-list:
+                - id: oai5gdockercharm-ee
+                  juju:
+                    charm: oai5gdockercharm
+                    proxy: false
+
+              # ====== Configuration primitives =============================
+              initial-config-primitive:
+
+                - seq: 1
+                  name: prepare-oai5gdocker-build
+                  execution-environment-ref: oai5gdockercharm-ee
+                  parameter:
+                    - name: oai5gdocker-git-repository
+                      value: <oai5gdocker_git_repository>
+                    - name: oai5gdocker-git-commit
+                      value: <oai5gdocker_git_commit>
+
+                - seq: 2
+                  name: configure-oai5gdocker
+                  execution-environment-ref: oai5gdockercharm-ee
+
+                - seq: 3
+                  name: restart-oai5gdocker
+                  execution-environment-ref: oai5gdockercharm-ee
+
+              # ====== Metrics ==============================================
+              metrics:
+                - name: system_random
+                - name: system_uptime
+                - name: system_users
+                - name: cpu_processes
+                - name: cpu_load_1min
+                - name: cpu_load_5min
+                - name: cpu_load_15min
+                - name: memory_ram_usage
+                - name: memory_swap_usage
+                - name: disk_usage
+                - name: network_mgmt_bytes_in
+                - name: network_mgmt_packets_in
+                - name: network_mgmt_bytes_out
+                - name: network_mgmt_packets_out
+                - name: network_service_bytes_in
+                - name: network_service_packets_in
+                - name: network_service_bytes_out
+                - name: network_service_packets_out
+
+
+  # ###### VDU Configuration ################################################
+  sw-image-desc:
+    - id: ubuntu22.04
+      image: ubuntu22.04
+      name: ubuntu22.04
+  vdu:
+    - cloud-init-file: oai5gdocker-init
+      description: OAI5GDocker
+      id: OAI5GDocker
+      int-cpd:
+        - id: ens3-int
+          virtual-network-interface-requirement:
+            - name: ens3
+              virtual-interface:
+                type: PARAVIRT
+        - id: ens4-int
+          virtual-network-interface-requirement:
+            - name: ens4
+              virtual-interface:
+                type: PARAVIRT
+      name: OAI5GDocker
+      sw-image-desc: ubuntu22.04
+      virtual-compute-desc: OAI5GDocker-compute
+      virtual-storage-desc:
+        - OAI5GDocker-storage
+
+  # ====== Compute ========================================================
+  virtual-compute-desc:
+    - id: OAI5GDocker-compute
+      virtual-cpu:
+        num-virtual-cpu: 8
+      virtual-memory:
+        size: 16.0
+
+  # ====== Storage ========================================================
+  virtual-storage-desc:
+    - id: OAI5GDocker-storage
+      size-of-storage: 128

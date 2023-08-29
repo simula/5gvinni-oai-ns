@@ -1,0 +1,56 @@
+# =====================================================================
+#     #######  #####          #     #   ###   #     # #     #   ###
+#     #       #     #         #     #    #    ##    # ##    #    #
+#     #       #               #     #    #    # #   # # #   #    #
+#      #####  #  ####  #####  #     #    #    #  #  # #  #  #    #
+#           # #     #          #   #     #    #   # # #   # #    #
+#     #     # #     #           # #      #    #    ## #    ##    #
+#      #####   #####             #      ###   #     # #     #   ###
+# =====================================================================
+#
+# SimulaMet OAI 5G Docker VNF and NS
+# Copyright (C) 2019-2023 by Thomas Dreibholz
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Contact: dreibh@simula.no
+
+prepare-oai5gdocker-build:
+  description: Prepares OAI 5G Docker sources
+  params:
+    oai5gdocker-git-repository:
+      description: OAI 5G Docker Git repository
+      type: string
+      default: https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-fed.git
+    oai5gdocker-git-commit:
+      description: OAI 5G Docker Git commit
+      type: string
+      default: master
+    git-name:
+      description: Git name
+      type: string
+      default: Thomas Dreibholz
+    git-email:
+      description: Git E-mail
+      type: string
+      default: dreibh@simula.no
+  required:
+    - oai5gdocker-git-repository
+    - oai5gdocker-git-commit
+
+configure-oai5gdocker:
+  description: Configures OAI 5G Docker
+
+restart-oai5gdocker:
+  description: Restarts OAI 5G Docker

@@ -28,3 +28,6 @@
 [submodule "juju/p4ovscharm/mod/operator"]
 	path = juju/p4ovscharm/mod/operator
 	url = https://github.com/canonical/operator
+[submodule "juju/oai5gdockercharm/mod/operator"]
+	path = juju/oai5gdockercharm/mod/operator
+	url = https://github.com/canonical/operator
