@@ -41,6 +41,7 @@
 
 
 declare -a TAGS
+TAG_SPGWU_TINY="v1.5.1"
 TAG_AMF="v1.5.1"
 TAG_SMF="v1.5.1"
 TAG_NRF="v1.5.1"
@@ -54,18 +55,21 @@ TAG_PCF="v1.5.1"
 
 mkdir -p ~/src/oai-cn5g
 cd ~/src/oai-cn5g
-for component in amf smf nrf udr udm ausf   nssf nef pcf ; do
+for component in spgwu-tiny   amf smf nrf udr udm ausf   nssf nef pcf ; do
 
    echo "====== Cloning ${component^^} ======"
 
-   tag=`eval "echo \\\$TAG_${component^^}"`
-   if [ "${tag}" == "" ] ; then
-      echo >&2 "ERROR: Missing tag for ${component^^}!"
-      exit 1
-   fi
-
    if [ ! -d oai-cn5g-${component} ] ; then
-      git clone -b ${tag} --recursive https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-${component}.git oai-cn5g-${component}
+      if [ "${component}" == "spgwu-tiny" ] ; then
+         git clone -b ${TAG_SPGWU_TINY} --recursive https://github.com/OPENAIRINTERFACE/openair-spgwu-tiny.git oai-cn5g-${component}
+      else
+         tag=`eval "echo \\\$TAG_${component^^}"`
+         if [ "${tag}" == "" ] ; then
+            echo >&2 "ERROR: Missing tag for ${component^^}!"
+            exit 1
+         fi
+         git clone -b ${tag} --recursive https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-${component}.git oai-cn5g-${component}
+      fi
       cd oai-cn5g-${component}
    else
       cd oai-cn5g-${component}
@@ -74,9 +78,16 @@ for component in amf smf nrf udr udm ausf   nssf nef pcf ; do
 
    echo "====== Preparing build of ${component^^} ======"
    cd build/scripts/
-   ls -l
+   if [ "${component}" == "spgwu-tiny" ] ; then
+      ./build_spgwu --install-deps --force
+      ./build_spgwu --clean --Verbose --build-type Debug --jobs
+   else
+      ./build_${component} --install-deps --force
+      ./build_${component} --clean --Verbose --build-type Debug --jobs
+   fi
 
 
    echo "====== Finished build of ${component^^} ======"
    cd ~/src/oai-cn5g
+
 done
