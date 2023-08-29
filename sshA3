@@ -4,4 +4,4 @@ HOST="10.132.13.202"
 
 ssh-keygen -q -R ${HOST}
 echo "SSH to SPGW-C in Core #1 ..."
-ssh -CX -oStrictHostKeyChecking=no nornetpp@${HOST}
+ssh -CX -oStrictHostKeyChecking=no ubuntu@${HOST}
