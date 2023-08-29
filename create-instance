@@ -200,7 +200,7 @@ while [ $# -gt 0 ] ; do
 
 
    # ====== Instantiate =====================================================
-   echo -e "\x1b[34m`date +%FT%H:%M:%S`: Instantiating ${NS} ...\x1b[0m"
+   echo -e "\x1b[34m`date +%FT%H:%M:%S`: Instantiating ${ns} ...\x1b[0m"
    if [ -e ${parameterFile} ] ; then
       config_file_option=" --config_file ${parameterFile}"
    else
