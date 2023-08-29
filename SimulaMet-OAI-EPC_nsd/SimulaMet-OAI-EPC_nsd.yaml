@@ -31,20 +31,16 @@ nsd:
     - id: SimulaMet-OAI-EPC_nsd
       name: SimulaMet-OAI-EPC_nsd
       description: SimulaMet OpenAirInterface Evolved Packet Core NS
-      version: '2.0'
+      version: 2.0
       designer: Thomas Dreibholz
 
       # ###### Connections ##################################################
       virtual-link-desc:
         - id: Management
           mgmt-network: 'true'
-          # vim-network-name: osm-management
         - id: S1-C
-          # vim-network-name: simulamet-5gvinni-core1-s1c
         - id: S1-U
-          # vim-network-name: simulamet-5gvinni-core1-s1u
         - id: SGi
-          # vim-network-name: openstack-vms
         - id: S6a
         - id: S11
         - id: SXab
