@@ -123,8 +123,8 @@ services:
             - 38412/sctp
         environment:
             - TZ=Europe/Oslo
-            - MCC=208
-            - MNC=95
+            - MCC=242
+            - MNC=88
             - REGION_ID=128
             - AMF_SET_ID=1
             - SERVED_GUAMI_MCC_0=208
@@ -135,8 +135,8 @@ services:
             - SERVED_GUAMI_MNC_1=11
             - SERVED_GUAMI_REGION_ID_1=10
             - SERVED_GUAMI_AMF_SET_ID_1=1
-            - PLMN_SUPPORT_MCC=208
-            - PLMN_SUPPORT_MNC=95
+            - PLMN_SUPPORT_MCC=242
+            - PLMN_SUPPORT_MNC=88
             - PLMN_SUPPORT_TAC=0xa000
             # Slice 0 (1, 0xFFFFFF)
             - SST_0=1
