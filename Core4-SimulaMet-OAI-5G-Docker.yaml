@@ -34,7 +34,7 @@ additionalParamsForVnf:
   # ====== OAI-5G-Docker ==========================================================
   - member-vnf-index: '1'
     additionalParams:
-      oai5gdocker_git_repository: 'https://github.com/simula/mosaic5g-mosaic5g.git'
+      oai5gdocker_git_repository: 'https://github.com/simula/5gvinni-oai-ns.git'
       oai5gdocker_git_commit: 'master'
 
       password: 'osm4us'
@@ -48,15 +48,12 @@ vld:
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '1'
         vnfd-connection-point-ref: oai5gdocker-mgmt-cp-ext
-        ip-address: 10.132.13.184
+        ip-address: 10.132.13.23
 
   # ====== OAI-5G-Docker ==========================================================
   - name: OAI-5G-Docker
     vim-network-name: 5gvinni-core4-flexran    # <<-- VIM Network for OAI-5G-Docker
-    ip-profile:
-      dhcp-params:
-        enabled: true
     vnfd-connection-point-ref:
       - member-vnf-index-ref: '1'
         vnfd-connection-point-ref: oai5gdocker-service-cp-ext
-        ip-address: 192.168.243.184
+        ip-address: 192.168.243.23

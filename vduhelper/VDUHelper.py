@@ -269,7 +269,8 @@ class VDUHelper:
                                   ipv6Gateway   = None,
                                   metric        = 1,
                                   pdnInterface  = None,
-                                  createDummy   = False):
+                                  createDummy   = False,
+                                  dhcpNoDNS     = False):
 
       # ====== Create header ================================================
       interfaceConfiguration = \
@@ -291,6 +292,9 @@ class VDUHelper:
       networks = []
       if ipv4Interface == None:
          interfaceConfiguration = interfaceConfiguration + '      dhcp4: true\n'
+         if dhcpNoDNS:
+            interfaceConfiguration = interfaceConfiguration + '      dhcp4-overrides:\n' + \
+                                                              '        use-dns: no\n'
       else:
          interfaceConfiguration = interfaceConfiguration + '      dhcp4: false\n'
 

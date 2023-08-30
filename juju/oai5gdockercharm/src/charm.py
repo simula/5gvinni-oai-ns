@@ -96,7 +96,7 @@ class OAI5GDockerCharm(CharmBase):
          gitEmail      = event.params['git-email']
          gitRepository = event.params['oai5gdocker-git-repository']
          gitCommit     = event.params['oai5gdocker-git-commit']
-         gitDirectory  = 'oai-cn5g-fed'
+         gitDirectory  = '5gvinni-oai-ns'
 
          # Prepare network configuration:
          # Cloud-Init configures both interfaces in Ubuntu 20.04+
@@ -106,7 +106,7 @@ class OAI5GDockerCharm(CharmBase):
          vduHelper.runInShell('mv /etc/netplan/50-cloud-init.yaml ' + vduHelper.getHomeDirectory())
          interfaceConfiguration = vduHelper.makeInterfaceConfiguration('ens3')
          vduHelper.configureInterface('ens3', interfaceConfiguration, 50)
-         interfaceConfiguration = vduHelper.makeInterfaceConfiguration('ens4')
+         interfaceConfiguration = vduHelper.makeInterfaceConfiguration('ens4', dhcpNoDNS = True)
          vduHelper.configureInterface('ens4', interfaceConfiguration, 51)
 
          # ====== Prepare system ============================================
@@ -124,7 +124,7 @@ sudo -u {user} -g {group} mkdir -p {homeDirectory}/src
          vduHelper.waitForPackageUpdatesToComplete()
          vduHelper.aptAddRepository('ppa:dreibh/ppa')
          vduHelper.aptInstallPackages([ 'joe', 'mlocate', 'td-system-info',
-                                        'docker.io'
+                                        'docker.io', 'tshark'
                                       ])
 
          vduHelper.endBlock()
@@ -160,16 +160,27 @@ sudo -u {user} -g {group} git submodule update
       try:
 
          # ====== Get OAI 5G Docker parameters ==============================
-         gitDirectory  = 'oai-cn5g-fed'
+         gitDirectory  = '5gvinni-oai-ns'
 
          # ====== Configure OAI 5G Docker ===================================
          vduHelper.beginBlock('Configuring OAI 5G Docker')
+
          vduHelper.executeFromString("""\
 cd {homeDirectory}/src/{gitDirectory}
 """.format(user          = vduHelper.getUser(),
            group         = vduHelper.getGroup(),
            homeDirectory = vduHelper.getHomeDirectory(),
            gitDirectory  = gitDirectory))
+
+         vduHelper.createFileFromString('/etc/rc.local',
+"""\
+#!/bin/sh
+
+sysctl net.ipv4.conf.all.forwarding=1
+iptables -P FORWARD ACCEPT
+""", True)
+         vduHelper.runInShell('sudo /etc/rc.local')
+
          vduHelper.endBlock()
 
          # ====== Set up OAI 5G Docker service ==============================
