@@ -35,7 +35,7 @@ additionalParamsForVnf:
   - member-vnf-index: '1'
     additionalParams:
       oai5gdocker_git_repository: 'https://github.com/simula/5gvinni-oai-ns.git'
-      oai5gdocker_git_commit: 'master'
+      oai5gdocker_git_commit: 'dreibh/vnf-testing'
 
       password: 'osm4us'
 

@@ -124,7 +124,7 @@ sudo -u {user} -g {group} mkdir -p {homeDirectory}/src
          vduHelper.waitForPackageUpdatesToComplete()
          vduHelper.aptAddRepository('ppa:dreibh/ppa')
          vduHelper.aptInstallPackages([ 'joe', 'mlocate', 'td-system-info',
-                                        'docker.io', 'tshark'
+                                        'docker.io', 'docker-compose', 'tshark'
                                       ])
 
          vduHelper.endBlock()
