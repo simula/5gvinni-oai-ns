@@ -1,0 +1,321 @@
+version: '3.8'
+services:
+    mysql:
+        container_name: "mysql"
+        image: mysql:8.0
+        volumes:
+            - ./database/oai_db2.sql:/docker-entrypoint-initdb.d/oai_db.sql
+            - ./healthscripts/mysql-healthcheck2.sh:/tmp/mysql-healthcheck.sh
+        environment:
+            - TZ=Europe/Oslo
+            - MYSQL_DATABASE=oai_db
+            - MYSQL_USER=test
+            - MYSQL_PASSWORD=test
+            - MYSQL_ROOT_PASSWORD=linux
+        healthcheck:
+            test: /bin/bash -c "/tmp/mysql-healthcheck.sh"
+            interval: 10s
+            timeout: 5s
+            retries: 30
+        networks:
+            public_net:
+                ipv4_address: 192.168.243.131
+    oai-udr:
+        container_name: "oai-udr"
+        image: oaisoftwarealliance/oai-udr:v1.5.1
+        expose:
+            - 80/tcp
+            - 8080/tcp
+        environment:
+            - TZ=Europe/Oslo
+            - UDR_NAME=OAI_UDR
+            - UDR_INTERFACE_NAME_FOR_NUDR=eth0
+            - MYSQL_IPV4_ADDRESS=192.168.243.131
+            - MYSQL_USER=test
+            - MYSQL_PASS=test
+            - MYSQL_DB=oai_db
+            - WAIT_MYSQL=120
+            - USE_FQDN_DNS=yes
+            - REGISTER_NRF=yes
+            - NRF_IPV4_ADDRESS=192.168.243.130
+            - NRF_FQDN=oai-nrf
+            # changes for HTTP2
+            - USE_HTTP2=yes
+            - NRF_PORT=8080
+        depends_on:
+            - mysql
+            - oai-nrf
+        networks:
+            public_net:
+                ipv4_address: 192.168.243.136
+    oai-udm:
+        container_name: "oai-udm"
+        image: oaisoftwarealliance/oai-udm:v1.5.1
+        expose:
+            - 80/tcp
+            - 8080/tcp
+        environment:
+            - TZ=Europe/Oslo
+            - UDM_NAME=OAI_UDM
+            - SBI_IF_NAME=eth0
+            - USE_FQDN_DNS=yes
+            - UDR_IP_ADDRESS=192.168.243.136
+            - UDR_PORT=8080
+            - UDR_FQDN=oai-udr
+            - REGISTER_NRF=yes
+            - NRF_IPV4_ADDRESS=192.168.243.130
+            - NRF_FQDN=oai-nrf
+            # changes for HTTP2
+            - USE_HTTP2=yes
+            - NRF_PORT=8080
+        depends_on:
+            - oai-udr
+        networks:
+            public_net:
+                ipv4_address: 192.168.243.137
+    oai-ausf:
+        container_name: "oai-ausf"
+        image: oaisoftwarealliance/oai-ausf:v1.5.1
+        expose:
+            - 80/tcp
+            - 8080/tcp
+        environment:
+            - TZ=Europe/Oslo
+            - AUSF_NAME=OAI_AUSF
+            - SBI_IF_NAME=eth0
+            - USE_FQDN_DNS=yes
+            - UDM_IP_ADDRESS=192.168.243.137
+            - UDM_FQDN=oai-udm
+            - REGISTER_NRF=yes
+            - NRF_IPV4_ADDRESS=192.168.243.130
+            - NRF_FQDN=oai-nrf
+            # changes for HTTP2
+            - USE_HTTP2=yes
+            - UDM_PORT=8080
+            - NRF_PORT=8080
+        depends_on:
+            - oai-udm
+        networks:
+            public_net:
+                ipv4_address: 192.168.243.138
+    oai-nrf:
+        container_name: "oai-nrf"
+        image: oaisoftwarealliance/oai-nrf:v1.5.1
+        expose:
+            - 80/tcp
+            - 8080/tcp
+        environment:
+            - TZ=Europe/Oslo
+            - NRF_INTERFACE_NAME_FOR_SBI=eth0
+            # The default HTTP2 port is 8080 for all network functions
+            # It is shown here as example.
+            # If you wish to change, you have to specify it for each NF
+            - NRF_INTERFACE_HTTP2_PORT_FOR_SBI=8080
+        networks:
+            public_net:
+                ipv4_address: 192.168.243.130
+    oai-amf:
+        container_name: "oai-amf"
+        image: oaisoftwarealliance/oai-amf:v1.5.1
+        expose:
+            - 80/tcp
+            - 8080/tcp
+            - 38412/sctp
+        environment:
+            - TZ=Europe/Oslo
+            - MCC=208
+            - MNC=95
+            - REGION_ID=128
+            - AMF_SET_ID=1
+            - SERVED_GUAMI_MCC_0=208
+            - SERVED_GUAMI_MNC_0=95
+            - SERVED_GUAMI_REGION_ID_0=128
+            - SERVED_GUAMI_AMF_SET_ID_0=1
+            - SERVED_GUAMI_MCC_1=460
+            - SERVED_GUAMI_MNC_1=11
+            - SERVED_GUAMI_REGION_ID_1=10
+            - SERVED_GUAMI_AMF_SET_ID_1=1
+            - PLMN_SUPPORT_MCC=208
+            - PLMN_SUPPORT_MNC=95
+            - PLMN_SUPPORT_TAC=0xa000
+            # Slice 0 (1, 0xFFFFFF)
+            - SST_0=1
+            # At least one slice SHALL be defined.
+            # All the others are optional
+            # Slice 1 (1, 1)
+            - SST_1=1
+            - SD_1=1
+            # Slice 2 (222, 123)
+            - SST_2=222
+            - SD_2=123
+            - AMF_INTERFACE_NAME_FOR_NGAP=eth0
+            - AMF_INTERFACE_NAME_FOR_N11=eth0
+            # One single SMF instance
+            - SMF_INSTANCE_ID_0=1
+            - SMF_FQDN_0=oai-smf
+            - SMF_IPV4_ADDR_0=192.168.243.133
+            - SELECTED_0=true
+            - NF_REGISTRATION=yes
+            - USE_FQDN_DNS=yes
+            - SMF_SELECTION=yes
+            - EXTERNAL_AUSF=yes
+            - EXTERNAL_UDM=no
+            - EXTERNAL_NSSF=no
+            - NRF_IPV4_ADDRESS=192.168.243.130
+            - NRF_FQDN=oai-nrf
+            - AUSF_IPV4_ADDRESS=192.168.243.138
+            - AUSF_FQDN=oai-ausf
+            - UDM_IPV4_ADDRESS=192.168.243.137
+            - UDM_FQDN=oai-udm
+            # changes for HTTP2
+            - USE_HTTP2=yes
+            - NRF_PORT=8080
+            - AUSF_PORT=8080
+            - UDM_PORT=8080
+        depends_on:
+            - mysql
+            - oai-nrf
+            - oai-ausf
+        networks:
+            public_net:
+                ipv4_address: 192.168.243.132
+    oai-smf:
+        container_name: "oai-smf"
+        image: oaisoftwarealliance/oai-smf:v1.5.1
+        expose:
+            - 80/tcp
+            - 8080/tcp
+            - 8805/udp
+        environment:
+            - TZ=Europe/Oslo
+            - SMF_INTERFACE_NAME_FOR_N4=eth0
+            - SMF_INTERFACE_NAME_FOR_SBI=eth0
+            - DEFAULT_DNS_IPV4_ADDRESS=172.21.3.100
+            - DEFAULT_DNS_SEC_IPV4_ADDRESS=8.8.8.8
+            - AMF_IPV4_ADDRESS=192.168.243.132
+            - AMF_FQDN=oai-amf
+            - UDM_IPV4_ADDRESS=192.168.243.137
+            - UDM_FQDN=oai-udm
+            - UPF_IPV4_ADDRESS=192.168.243.134
+            - UPF_FQDN_0=oai-spgwu
+            - NRF_IPV4_ADDRESS=192.168.243.130
+            - NRF_FQDN=oai-nrf
+            - USE_LOCAL_SUBSCRIPTION_INFO=yes  #Set to yes if SMF uses local subscription information instead of from an UDM
+            - REGISTER_NRF=yes
+            - DISCOVER_UPF=yes
+            - USE_FQDN_DNS=yes
+            # changes for HTTP2
+            - HTTP_VERSION=2
+            - AMF_PORT=8080
+            - UDM_PORT=8080
+            - NRF_PORT=8080
+            - UE_MTU=1500
+            # Slice 0 (1, 0xFFFFFF)
+            - DNN_NI0=oai
+            - TYPE0=IPv4
+            - DNN_RANGE0=12.1.1.151 - 12.1.1.253
+            - NSSAI_SST0=1
+            - SESSION_AMBR_UL0=200Mbps
+            - SESSION_AMBR_DL0=400Mbps
+            # Slice 1 (1, 1)
+            - DNN_NI1=oai.ipv4
+            - TYPE1=IPv4
+            - DNN_RANGE1=12.1.1.51 - 12.1.1.150
+            - NSSAI_SST1=1
+            - NSSAI_SD1=1
+            - SESSION_AMBR_UL1=100Mbps
+            - SESSION_AMBR_DL1=200Mbps
+            # Slice 2 (222, 123)
+            - DNN_NI2=default
+            - TYPE2=IPv4
+            - DNN_RANGE2=12.1.1.2 - 12.1.1.50
+            - NSSAI_SST2=222
+            - NSSAI_SD2=123
+            - SESSION_AMBR_UL2=50Mbps
+            - SESSION_AMBR_DL2=100Mbps
+            # Slice 3 for ims
+            - DNN_NI3=ims
+            - TYPE3=IPv4v6
+            - DNN_RANGE3=14.1.1.2 - 14.1.1.253
+            - DEFAULT_CSCF_IPV4_ADDRESS=127.0.0.1  # only needed when ims is being used
+            - ENABLE_USAGE_REPORTING=no # Set yes if UE USAGE REPORTING is to be done at UPF
+        depends_on:
+            - oai-nrf
+            - oai-amf
+        networks:
+            public_net:
+                ipv4_address: 192.168.243.133
+    oai-spgwu:
+        container_name: "oai-spgwu"
+        image: oaisoftwarealliance/oai-spgwu-tiny:v1.5.1
+        expose:
+            - 2152/udp
+            - 8805/udp
+            - 8080/tcp
+        environment:
+            - TZ=Europe/Oslo
+            - SGW_INTERFACE_NAME_FOR_S1U_S12_S4_UP=eth0
+            - SGW_INTERFACE_NAME_FOR_SX=eth0
+            - PGW_INTERFACE_NAME_FOR_SGI=eth0
+            - NETWORK_UE_NAT_OPTION=yes
+            - NETWORK_UE_IP=12.1.1.0/24
+            - ENABLE_5G_FEATURES=yes
+            - REGISTER_NRF=yes
+            - USE_FQDN_NRF=yes
+            - UPF_FQDN_5G=oai-spgwu
+            - NRF_IPV4_ADDRESS=192.168.243.130
+            - NRF_FQDN=oai-nrf
+            # Mandatory to set the NRF PORT to 8080 (it is set to default to 80 otherwise)
+            - HTTP_VERSION=2
+            - NRF_PORT=8080
+            # Slice 0 (1, 0xFFFFFF)
+            - NSSAI_SST_0=1
+            - DNN_0=oai
+            # Slice 1 (1, 1)
+            - NSSAI_SST_1=1
+            - NSSAI_SD_1=1
+            - DNN_1=oai.ipv4
+            # Slice 2 (222, 123)
+            - NSSAI_SST_2=222
+            - NSSAI_SD_2=123
+            - DNN_2=default
+        depends_on:
+            - oai-nrf
+            - oai-smf
+        cap_add:
+            - NET_ADMIN
+            - SYS_ADMIN
+        cap_drop:
+            - ALL
+        privileged: true
+        networks:
+            public_net:
+                ipv4_address: 192.168.243.134
+    oai-ext-dn:
+        privileged: true
+        init: true
+        container_name: oai-ext-dn
+        image: oaisoftwarealliance/trf-gen-cn5g:latest
+        entrypoint: /bin/bash -c \
+              "ip route add 12.1.1.0/24 via 192.168.243.134 dev eth0; ip route; sleep infinity"
+        command: ["/bin/bash", "-c", "trap : SIGTERM SIGINT; sleep infinity & wait"]
+        healthcheck:
+            test: /bin/bash -c "ip r | grep 12.1.1"
+            interval: 10s
+            timeout: 5s
+            retries: 5
+        networks:
+            public_net:
+                ipv4_address: 192.168.243.135
+networks:
+    # public_net:
+    #     external:
+    #         name: demo-oai-public-net
+    public_net:
+        driver: bridge
+        name: demo-oai-public-net
+        ipam:
+            config:
+                - subnet: 192.168.243.128/26
+        driver_opts:
+            com.docker.network.bridge.name: "demo-oai"

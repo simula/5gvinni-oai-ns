@@ -1,11 +1,18 @@
 #!/bin/bash -e
 
+# Documentation:
+# https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-fed/-/blob/master/docs/DEPLOY_HOME.md
+
+
 mkdir -p src
 cd src
 
 if [ ! -d oai-cn5g-fed ] ; then
-   git clone https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-fed.git
+   git clone --recursive https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-fed.git
 fi
 
 sudo sysctl net.ipv4.conf.all.forwarding=1
 sudo iptables -P FORWARD ACCEPT
+
+sudo apt install -y tshark
+
