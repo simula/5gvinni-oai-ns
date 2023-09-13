@@ -127,8 +127,8 @@ services:
             - MNC=88
             - REGION_ID=128
             - AMF_SET_ID=1
-            - SERVED_GUAMI_MCC_0=208
-            - SERVED_GUAMI_MNC_0=95
+            - SERVED_GUAMI_MCC_0=242
+            - SERVED_GUAMI_MNC_0=88
             - SERVED_GUAMI_REGION_ID_0=128
             - SERVED_GUAMI_AMF_SET_ID_0=1
             - SERVED_GUAMI_MCC_1=460
