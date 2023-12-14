@@ -137,7 +137,7 @@ services:
             - SERVED_GUAMI_AMF_SET_ID_1=1
             - PLMN_SUPPORT_MCC=242
             - PLMN_SUPPORT_MNC=88
-            - PLMN_SUPPORT_TAC=0xa000
+            - PLMN_SUPPORT_TAC=0x0001
             # Slice 0 (1, 0xFFFFFF)
             - SST_0=1
             # At least one slice SHALL be defined.
