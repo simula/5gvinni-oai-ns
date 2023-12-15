@@ -6,6 +6,7 @@
 * <https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/radio/rfsimulator/README.md>
 * <https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/doc/RUNMODEM.md>
 * <https://github.com/mrouili/perfEval-5G>
+* <https://www.eventhelix.com/5g/standalone-access-registration/5g-standalone-access-registration.pdf>
 
 
 # Using the gNB
