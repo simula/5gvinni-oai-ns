@@ -1,4 +1,4 @@
-# Documentation
+   # Documentation
 
 * <https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/doc/NR_SA_Tutorial_OAI_CN5G.md>
 * <https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/doc/NR_SA_Tutorial_OAI_nrUE.md>
@@ -23,7 +23,12 @@ ping -c3 -i0.2 10.193.4.119      # Ettus via copper
 ```
 cd ~/src/openairinterface5g
 source oaienv
-./cmake_targets/build_oai -w USRP -c --eNB --gNB --nrUE --build-lib "nrscope" --run-with-gdb RelWithDebInfo
+./cmake_targets/build_oai -w USRP -c --eNB --gNB --nrUE --build-lib "nrqtscope" --run-with-gdb RelWithDebInfo
+
+
+# With most options:
+# ./cmake_targets/build_oai --ninja -w USRP -C --eNB --UE --nrUE --gNB --build-lib "telnetsrv enbscope uescope nrscope nrqtscope" --build-doxygen
+
 ```
 
 Options:
@@ -38,7 +43,7 @@ cd ~/src/openairinterface5g
 source oaienv
 export BUILD_UHD_FROM_SOURCE=True
 export UHD_VERSION=4.6.0.0
-./cmake_targets/build_oai -w USRP -c --eNB --gNB --nrUE --build-lib "nrscope" --run-with-gdb RelWithDebInfo
+./cmake_targets/build_oai -w USRP -c --eNB --gNB --nrUE --build-lib "nrqtscope" --run-with-gdb RelWithDebInfo
 ```
 
 
@@ -159,3 +164,28 @@ Notes:
 
 * The IP address of the gNodeB RFsimulator instance has to be specified here (10.193.4.68 = 5g.fire.smil)!
 * If the gNodeB is started with "-E" option, it must be added here as well!
+
+
+# Using Tracer for Debugging
+
+
+## Documentation
+
+* <https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/common/utils/T/DOC/T/wireshark.md>
+
+## Starting OAI component with Tracer:
+
+Add option: --T_stdout 2
+
+
+## Run Live Tracer:
+
+```
+cd ~/src/openairinterface5g/cmake_targets/ran_build/build/common/utils/T/tracer/
+./macpdu2wireshark -d ../T_messages.txt -live
+```
+
+Use Wireshark:
+
+* Record on loopback interface (lo), UDP traffic for port 9999 (filter: udp.port==9999)
+* Ensure that MAC-NR decoding is enabled (see <https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/common/utils/T/DOC/T/wireshark.md#configure-wireshark-for-nr>)
