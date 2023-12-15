@@ -182,7 +182,7 @@ Add option: --T_stdout 2
 
 ```
 cd ~/src/openairinterface5g/cmake_targets/ran_build/build/common/utils/T/tracer/
-./macpdu2wireshark -d ../T_messages.txt -live
+./macpdu2wireshark -d ~/src/openairinterface5g/common/utils/T/T_messages.txt -live
 ```
 
 Use Wireshark:
