@@ -1,5 +1,7 @@
 # OAI 5G Core Network Topology
 
+![OAI_testbed_logical_topology](OAI_testbed_logical_topology.png)
+
 Service Based Interfaces (SBIs) (i.e. interfaces that are labeled `Nxxx`), are used in the Control Plane in the 5G Network to connect between different Network Functions.
 All Network Functions in the Control Plane in the 5G Network, are using a common bus to exchange control plane messages between each other.
 Each Network Function is using a Service Based Interface (SBI), in order to connect to this common bus.
