@@ -190,8 +190,8 @@ services:
             - TZ=Europe/Oslo
             - SMF_INTERFACE_NAME_FOR_N4=eth0
             - SMF_INTERFACE_NAME_FOR_SBI=eth0
-            - DEFAULT_DNS_IPV4_ADDRESS=172.21.3.100
-            - DEFAULT_DNS_SEC_IPV4_ADDRESS=8.8.8.8
+            - DEFAULT_DNS_IPV4_ADDRESS=10.132.11.7
+            - DEFAULT_DNS_SEC_IPV4_ADDRESS=10.133.11.7
             - AMF_IPV4_ADDRESS=192.168.243.132
             - AMF_FQDN=oai-amf
             - UDM_IPV4_ADDRESS=192.168.243.137
