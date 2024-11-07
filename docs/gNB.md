@@ -16,7 +16,7 @@
 ping -c3 -i0.2 192.168.243.132   # AMF
 ping -c3 -i0.2 192.168.10.2      # Ettus via fibre0
 ping -c3 -i0.2 192.168.20.2      # Ettus via fibre1
-ping -c3 -i0.2 10.193.4.119      # Ettus via copper
+ping -c3 -i0.2 10.132.17.40      # Ettus via copper
 ```
 
 ## Build
