@@ -36,12 +36,22 @@ logging.basicConfig(
 )
 
 # Docker Compose files
-MINI_W_NRF = 'docker-compose-mini-nrf.yaml' 
 MINI_NO_NRF = 'docker-compose-mini-nonrf.yaml'
 BASIC_W_NRF = 'docker-compose-basic-nrf.yaml'
-BASIC_NO_NRF = 'docker-compose-basic-nonrf.yaml'
 BASIC_VPP_W_NRF = 'docker-compose-basic-vpp-nrf.yaml'
-BASIC_VPP_NO_NRF = 'docker-compose-basic-vpp-nonrf.yaml'
+BASIC_VPP_W_NRF_REDIRECT = 'docker-compose-basic-vpp-pcf-redirection.yaml'
+BASIC_VPP_W_NRF_STEERING = 'docker-compose-basic-vpp-pcf-steering.yaml'
+BASIC_EBPF_W_NRF = 'docker-compose-basic-nrf-ebpf.yaml'
+
+COMPOSE_CONF_MAP = {
+    'docker-compose-mini-nrf.yaml': 'conf/mini_nrf_config.yaml',
+    'docker-compose-mini-nonrf.yaml' : 'conf/mini_nonrf_config.yaml',
+    'docker-compose-basic-nrf.yaml' : 'conf/basic_nrf_config.yaml',
+    'docker-compose-basic-vpp-nrf.yaml' : 'conf/basic_vpp_nrf_config.yaml',
+    'docker-compose-basic-nrf-ebpf.yaml' : 'conf/basic_nrf_config_ebpf.yaml',
+    'docker-compose-basic-vpp-pcf-redirection.yaml' : 'conf/redirection_steering_config.yaml',
+    'docker-compose-basic-vpp-pcf-steering.yaml' : 'conf/redirection_steering_config.yaml'
+}
 
 def _parse_args() -> argparse.Namespace:
     """Parse the command line args
@@ -53,9 +63,12 @@ def _parse_args() -> argparse.Namespace:
         python3 core-network.py --type start-mini
         python3 core-network.py --type start-basic
         python3 core-network.py --type start-basic-vpp
+        python3 core-network.py --type start-basic-ebpf
         python3 core-network.py --type stop-mini
         python3 core-network.py --type start-mini --scenario 2
-        python3 core-network.py --type start-basic --scenario 2'''
+        python3 core-network.py --type start-basic --scenario 2
+        python3 core-network.py --type start-vpp-redirection
+        python3 core-network.py --type start-vpp-steering'''
 
     parser = argparse.ArgumentParser(description='OAI 5G CORE NETWORK DEPLOY',
                                     epilog=example_text,
@@ -66,8 +79,9 @@ def _parse_args() -> argparse.Namespace:
         '--type', '-t',
         action='store',
         required=True,
-        choices=['start-mini', 'start-basic', 'start-basic-vpp', 'stop-mini', 'stop-basic', 'stop-basic-vpp'],
-        help='Functional type of 5g core network ("start-mini"|"start-basic"|"start-basic-vpp"|"stop-mini"|"stop-basic"|"stop-basic-vpp")',
+        choices=['start-mini', 'start-basic', 'start-basic-vpp', 'start-basic-ebpf','start-vpp-redirection', 'start-vpp-steering',\
+                 'stop-vpp-redirection', 'stop-vpp-steering','stop-mini', 'stop-basic', 'stop-basic-vpp', 'stop-basic-ebpf'],
+        help='Functional type of 5g core network',
     )
     # Deployment scenario with NRF/ without NRF
     parser.add_argument(
@@ -107,24 +121,26 @@ def deploy(file_name, extra_interface=False):
         cmd = f'docker-compose -f {file_name} up -d mysql'
         res = run_cmd(cmd, False)
         if res is None:
-            exit(f'\033[0;31m Incorrect/Unsupported executing command {cmd}')
+            sys.exit(f'\033[0;31m Incorrect/Unsupported executing command {cmd}')
         print(res)
         # Then we can start the capture on the "demo-oai" interface.
         # When we undeploy, the process will terminate automatically.
         # Explanation of the capture filter:
-        #  - On all containers but oai-ext-dn
-        #   * `not arp`                 --> NO ARP packets
-        #   * `not port 53`             --> NO DNS requests from any container
-        #   * `not port 2152`           --> When running w/ OAI RF simulator, remove all GTP packets
-        #  - On oai-ext-dn container
-        #   * `icmp`                    --> Only ping packets
-        cmd = f'nohup sudo tshark -i demo-oai -f "(not host 192.168.70.135 and not arp and not port 53 and not port 2152) or (host 192.168.70.135 and icmp)" -w {args.capture} > /dev/null 2>&1 &'
+        #   * `sctp`                    --> RAN NGAP packets
+        #   * port 80                   --> Usual HTTP/1 port
+        #   * port 8080                 --> Usual HTTP/2 port
+        #   * port 8805                 --> PFCP traffic
+        #   * `icmp`                    --> ping traffic
+        #   * port 3306                 --> mysql traffic
+        cmd = f'nohup sudo tshark -i demo-oai -f "sctp or port 80 or port 8080 or port 8805 or icmp or port 3306" -w {args.capture} > /dev/null 2>&1 &'
         if extra_interface:
-            cmd = re.sub('-i demo-oai', '-i demo-oai -i cn5g-core', cmd)
-            cmd = re.sub('70', '73', cmd)
+            if file_name == BASIC_VPP_W_NRF:
+                cmd = re.sub('-i demo-oai', '-i demo-oai -i cn5g-core', cmd)
+            if file_name == BASIC_EBPF_W_NRF:
+                cmd = re.sub('-i demo-oai', '-i demo-oai -i demo-n3 -i demo-n6', cmd)
         res = run_cmd(cmd, False)
         if res is None:
-            exit(f'\033[0;31m Incorrect/Unsupported executing command {cmd}')
+            sys.exit(f'\033[0;31m Incorrect/Unsupported executing command {cmd}')
         cmd = f'sleep 20; sudo chmod 666 {args.capture}'
         run_cmd(cmd)
         # Finally deploy the rest of the network functions.
@@ -135,7 +151,7 @@ def deploy(file_name, extra_interface=False):
         cmd = f'sudo chmod 666 {args.capture}'
         run_cmd(cmd)
     if res is None:
-        exit(f'\033[0;31m Incorrect/Unsupported executing command {cmd}')
+        sys.exit(f'\033[0;31m Incorrect/Unsupported executing command {cmd}')
     print(res)
     logging.debug('\033[0;32m OAI 5G Core network started, checking the health status of the containers... takes few secs\033[0m....')
     notSilentForFirstTime = False
@@ -144,7 +160,7 @@ def deploy(file_name, extra_interface=False):
         res = run_cmd(cmd, notSilentForFirstTime)
         notSilentForFirstTime = True
         if res is None:
-            exit(f'\033[0;31m Incorrect/Unsupported executing command "{cmd}"')
+            sys.exit(f'\033[0;31m Incorrect/Unsupported executing command "{cmd}"')
         time.sleep(2)
         cnt = res.count('(healthy)')
         if cnt == ct:
@@ -154,9 +170,11 @@ def deploy(file_name, extra_interface=False):
     if cnt != ct:
         logging.error('\033[0;31m Core network is un-healthy, please see below for more details\033[0m....')
         print(res)
-        exit(-1)
+        sys.exit(-1)
     time.sleep(10)
-    check_config(file_name)
+    status = check_config(file_name)
+    if not status:
+        sys.exit(-1)
 
 def undeploy(file_name):
     """UnDeploy the docker container
@@ -165,15 +183,96 @@ def undeploy(file_name):
         None
     """
     logging.debug('\033[0;34m UnDeploying OAI 5G core components\033[0m....')
-    cmd = f'docker-compose -f {file_name} down -t 0'
+    cmd = f'docker-compose -f {file_name} down -t 30'
     res = run_cmd(cmd, False)
     if res is None:
-        exit(f'\033[0;31m Incorrect/Unsupported executing command {cmd}')
+        sys.exit(f'\033[0;31m Incorrect/Unsupported executing command {cmd}')
     print(res)
     cmd = f'docker volume prune -f'
     run_cmd(cmd, True)
     logging.debug('\033[0;32m OAI 5G core components are UnDeployed\033[0m....')
 
+class CoreNetwork():
+    def __init__(self):
+        self.NRF_IP_ADDRESS='192.168.70.130'
+        self.AMF_IP_ADDRESS='192.168.70.132'
+        self.SMF_IP_ADDRESS='192.168.70.133'
+        self.UPF_IP_ADDRESS='192.168.70.134'
+        self.AUSF_IP_ADDRESS='192.168.70.138'
+        self.UDM_IP_ADDRESS='192.168.70.137'
+        self.UDR_IP_ADDRESS='192.168.70.136'
+
+    def generate_nrf_curl_cmd(self, compose_file):
+        # if not found, there is an exception here, but it is fine because then we have to update our scenarios
+        conf_file = COMPOSE_CONF_MAP[compose_file]
+        with open(conf_file) as f:
+            y = yaml.safe_load(f)
+            http_version = y.get('http_version', 1)
+            nrf_port = 80
+
+            if y.get('nfs') and y['nfs'].get('nrf'):
+                nrf_cfg = y['nfs']['nrf']
+                if nrf_cfg.get('sbi') and nrf_cfg['sbi'].get('port'):
+                    nrf_port = nrf_cfg['sbi']['port']
+
+            cmd = 'curl -s -X GET '
+            if http_version == 2:
+                cmd = cmd + '--http2-prior-knowledge '
+            cmd = cmd + f'http://{self.NRF_IP_ADDRESS}:{nrf_port}/nnrf-nfm/v1/nf-instances?nf-type='
+            return cmd
+
+    def check_ip_addresses(self, compose_file):
+        with open(compose_file) as f:
+            y = yaml.safe_load(f)
+            if y.get('services') and y['services'].get('oai-nrf'):
+                nrf_cfg = y['services']['oai-nrf']
+                if nrf_cfg.get('networks') and nrf_cfg['networks'].get('public_net') and nrf_cfg['networks']['public_net'].get('ipv4_address'):
+                    self.NRF_IP_ADDRESS = nrf_cfg['networks']['public_net'].get('ipv4_address', self.NRF_IP_ADDRESS)
+                else:
+                    cmd = 'docker inspect -f "{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}" oai-nrf'
+                    self.NRF_IP_ADDRESS = run_cmd(cmd, silent=True)
+            if y.get('services') and y['services'].get('oai-amf'):
+                amf_cfg = y['services']['oai-amf']
+                if amf_cfg.get('networks') and amf_cfg['networks'].get('public_net') and amf_cfg['networks']['public_net'].get('ipv4_address'):
+                    self.AMF_IP_ADDRESS = amf_cfg['networks']['public_net'].get('ipv4_address', self.AMF_IP_ADDRESS)
+                else:
+                    cmd = 'docker inspect -f "{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}" oai-amf'
+                    self.AMF_IP_ADDRESS = run_cmd(cmd, silent=True)
+            if y.get('services') and y['services'].get('oai-smf'):
+                smf_cfg = y['services']['oai-smf']
+                if smf_cfg.get('networks') and smf_cfg['networks'].get('public_net') and smf_cfg['networks']['public_net'].get('ipv4_address'):
+                    self.SMF_IP_ADDRESS = smf_cfg['networks']['public_net'].get('ipv4_address', self.SMF_IP_ADDRESS)
+                else:
+                    cmd = 'docker inspect -f "{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}" oai-smf'
+                    self.SMF_IP_ADDRESS = run_cmd(cmd, silent=True)
+            if y.get('services') and y['services'].get('oai-upf'):
+                upf_cfg = y['services']['oai-upf']
+                if upf_cfg.get('networks') and upf_cfg['networks'].get('public_net') and upf_cfg['networks']['public_net'].get('ipv4_address'):
+                    self.UPF_IP_ADDRESS = upf_cfg['networks']['public_net'].get('ipv4_address', self.UPF_IP_ADDRESS)
+                else:
+                    cmd = 'docker inspect -f "{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}" oai-upf'
+                    self.UPF_IP_ADDRESS = run_cmd(cmd, silent=True)
+            if y.get('services') and y['services'].get('oai-ausf'):
+                ausf_cfg = y['services']['oai-ausf']
+                if ausf_cfg.get('networks') and ausf_cfg['networks'].get('public_net') and ausf_cfg['networks']['public_net'].get('ipv4_address'):
+                    self.AUSF_IP_ADDRESS = ausf_cfg['networks']['public_net'].get('ipv4_address', self.AUSF_IP_ADDRESS)
+                else:
+                    cmd = 'docker inspect -f "{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}" oai-ausf'
+                    self.AUSF_IP_ADDRESS = run_cmd(cmd, silent=True)
+            if y.get('services') and y['services'].get('oai-udm'):
+                udm_cfg = y['services']['oai-udm']
+                if udm_cfg.get('networks') and udm_cfg['networks'].get('public_net') and udm_cfg['networks']['public_net'].get('ipv4_address'):
+                    self.UDM_IP_ADDRESS = udm_cfg['networks']['public_net'].get('ipv4_address', self.UDM_IP_ADDRESS)
+                else:
+                    cmd = 'docker inspect -f "{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}" oai-udm'
+                    self.UDM_IP_ADDRESS = run_cmd(cmd, silent=True)
+            if y.get('services') and y['services'].get('oai-udr'):
+                udr_cfg = y['services']['oai-udr']
+                if udr_cfg.get('networks') and udr_cfg['networks'].get('public_net') and udr_cfg['networks']['public_net'].get('ipv4_address'):
+                    self.UDR_IP_ADDRESS = udr_cfg['networks']['public_net'].get('ipv4_address', self.UDR_IP_ADDRESS)
+                else:
+                    cmd = 'docker inspect -f "{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}" oai-udr'
+                    self.UDR_IP_ADDRESS = run_cmd(cmd, silent=True)
 
 def check_config(file_name):
     """Checks the container configurations
@@ -183,35 +282,42 @@ def check_config(file_name):
     """
 
     logging.debug('\033[0;34m Checking if the containers are configured\033[0m....')
+    deployStatus = True
+    cn = CoreNetwork()
+    cn.check_ip_addresses(file_name)
+    curl_cmd = cn.generate_nrf_curl_cmd(file_name)
+
     # With NRF configuration check
     if args.scenario == '1':
         logging.debug('\033[0;34m Checking if AMF, SMF and UPF registered with nrf core network\033[0m....')
-        cmd = 'curl -s -X GET http://192.168.70.130/nnrf-nfm/v1/nf-instances?nf-type="AMF" | grep -o "192.168.70.132"'
+        cmd = f'{curl_cmd}"AMF" | grep -o "{cn.AMF_IP_ADDRESS}"'
         amf_registration_nrf = run_cmd(cmd, False)
         if amf_registration_nrf is not None:
             print(amf_registration_nrf)
-        cmd = 'curl -s -X GET http://192.168.70.130/nnrf-nfm/v1/nf-instances?nf-type="SMF" | grep -o "192.168.70.133"'
+        cmd = f'{curl_cmd}"SMF" | grep -o "{cn.SMF_IP_ADDRESS}"'
         smf_registration_nrf = run_cmd(cmd, False)
         if smf_registration_nrf is not None:
             print(smf_registration_nrf)
-        if file_name == BASIC_VPP_W_NRF:
-            cmd = 'curl -s -X GET http://192.168.70.130/nnrf-nfm/v1/nf-instances?nf-type="UPF" | grep -o "192.168.70.201"'
+        if file_name == BASIC_VPP_W_NRF or file_name == BASIC_VPP_W_NRF_REDIRECT or file_name == BASIC_VPP_W_NRF_STEERING:
+            cmd = f'{curl_cmd}"UPF" | grep -o "192.168.70.201"'
+        elif file_name == BASIC_EBPF_W_NRF:
+            cmd = f'{curl_cmd}"UPF" | grep -o "192.168.70.129"'
         else:
-            cmd = 'curl -s -X GET http://192.168.70.130/nnrf-nfm/v1/nf-instances?nf-type="UPF" | grep -o "192.168.70.134"'
+            cmd = f'{curl_cmd}"UPF" | grep -o "{cn.UPF_IP_ADDRESS}"'
         upf_registration_nrf = run_cmd(cmd, False)
         if upf_registration_nrf is not None:
             print(upf_registration_nrf)
-        if file_name == BASIC_VPP_W_NRF or file_name == BASIC_W_NRF:
+        if file_name == BASIC_VPP_W_NRF or file_name == BASIC_W_NRF or file_name == BASIC_EBPF_W_NRF:
             logging.debug('\033[0;34m Checking if AUSF, UDM and UDR registered with nrf core network\033[0m....')
-            cmd = 'curl -s -X GET http://192.168.70.130/nnrf-nfm/v1/nf-instances?nf-type="AUSF" | grep -o "192.168.70.138"'
+            cmd = f'{curl_cmd}"AUSF" | grep -o "{cn.AUSF_IP_ADDRESS}"'
             ausf_registration_nrf = run_cmd(cmd, False)
             if ausf_registration_nrf is not None:
                 print(ausf_registration_nrf)
-            cmd = 'curl -s -X GET http://192.168.70.130/nnrf-nfm/v1/nf-instances?nf-type="UDM" | grep -o "192.168.70.137"'
+            cmd = f'{curl_cmd}"UDM" | grep -o "{cn.UDM_IP_ADDRESS}"'
             udm_registration_nrf = run_cmd(cmd, False)
             if udm_registration_nrf is not None:
                 print(udm_registration_nrf)
-            cmd = 'curl -s -X GET http://192.168.70.130/nnrf-nfm/v1/nf-instances?nf-type="UDR" | grep -o "192.168.70.136"'
+            cmd = f'{curl_cmd}"UDR" | grep -o "{cn.UDR_IP_ADDRESS}"'
             udr_registration_nrf = run_cmd(cmd, False)
             if udr_registration_nrf is not None:
                 print(udr_registration_nrf)
@@ -222,12 +328,13 @@ def check_config(file_name):
         if amf_registration_nrf is None or smf_registration_nrf is None or upf_registration_nrf is None or \
            ausf_registration_nrf is None or udm_registration_nrf is None or udr_registration_nrf is None:
              logging.error('\033[0;31m Registration problem with NRF, check the reason manually\033[0m....')
+             deployStatus = False
         else:
             if file_name == BASIC_VPP_W_NRF or file_name == BASIC_W_NRF:
                 logging.debug('\033[0;32m AUSF, UDM, UDR, AMF, SMF and UPF are registered to NRF\033[0m....')
             else:
                 logging.debug('\033[0;32m AMF, SMF and UPF are registered to NRF\033[0m....')
-        if file_name == BASIC_VPP_W_NRF:
+        if file_name == BASIC_VPP_W_NRF or file_name == BASIC_VPP_W_NRF_REDIRECT or file_name == BASIC_VPP_W_NRF_STEERING:
             logging.debug('\033[0;34m Checking if SMF is able to connect with UPF\033[0m....')
             cmd1 = 'docker logs oai-smf 2>&1 | grep "Received N4 ASSOCIATION SETUP RESPONSE from an UPF"'
             cmd2 = 'docker logs oai-smf 2>&1 | grep "Node ID Type FQDN: vpp-upf"'
@@ -235,58 +342,58 @@ def check_config(file_name):
             upf_logs2 = run_cmd(cmd2)
             if upf_logs1 is None or upf_logs2 is None:
                 logging.error('\033[0;31m UPF did not answer to N4 Association request from SMF\033[0m....')
-                exit(-1)
+                deployStatus = False
             else:
                 logging.debug('\033[0;32m UPF did answer to N4 Association request from SMF\033[0m....')
             cmd1 = 'docker logs oai-smf 2>&1 | grep "PFCP HEARTBEAT PROCEDURE"'
             upf_logs1 = run_cmd(cmd1)
             if upf_logs1 is None:
                 logging.error('\033[0;31m SMF is NOT receiving heartbeats from UPF\033[0m....')
-                exit(-1)
+                deployStatus = False
             else:
                 logging.debug('\033[0;32m SMF is receiving heartbeats from UPF\033[0m....')
         elif file_name == BASIC_W_NRF:
             logging.debug('\033[0;34m Checking if SMF is able to connect with UPF\033[0m....')
             cmd1 = 'docker logs oai-smf 2>&1 | grep "Received N4 ASSOCIATION SETUP RESPONSE from an UPF"'
-            cmd2 = 'docker logs oai-smf 2>&1 | grep "Node ID Type FQDN: oai-spgwu"'
+            cmd2 = f'docker logs oai-smf 2>&1 | grep "Resolve IP Addr {cn.UPF_IP_ADDRESS}, FQDN oai-upf"'
             upf_logs1 = run_cmd(cmd1)
             upf_logs2 = run_cmd(cmd2)
             if upf_logs1 is None or upf_logs2 is None:
                 logging.error('\033[0;31m UPF did not answer to N4 Association request from SMF\033[0m....')
-                exit(-1)
+                deployStatus = False
             else:
                 logging.debug('\033[0;32m UPF did answer to N4 Association request from SMF\033[0m....')
             cmd1 = 'docker logs oai-smf 2>&1 | grep "PFCP HEARTBEAT PROCEDURE"'
             upf_logs1 = run_cmd(cmd1)
             if upf_logs1 is None:
                 logging.error('\033[0;31m SMF is NOT receiving heartbeats from UPF\033[0m....')
-                exit(-1)
+                deployStatus = False
             else:
                 logging.debug('\033[0;32m SMF is receiving heartbeats from UPF\033[0m....')
         else:
             logging.debug('\033[0;34m Checking if SMF is able to connect with UPF\033[0m....')
-            cmd1 = 'docker logs oai-spgwu 2>&1 | grep "Received SX HEARTBEAT RESPONSE"'
-            cmd2 = 'docker logs oai-spgwu 2>&1 | grep "Received SX HEARTBEAT REQUEST"'
+            cmd1 = 'docker logs oai-upf 2>&1 | grep "Received SX HEARTBEAT RESPONSE"'
+            cmd2 = 'docker logs oai-upf 2>&1 | grep "Received SX HEARTBEAT REQUEST"'
             upf_logs1 = run_cmd(cmd1)
             upf_logs2 = run_cmd(cmd2)
             if upf_logs1 is None and upf_logs2 is None:
                 logging.error('\033[0;31m UPF is NOT receiving heartbeats from SMF\033[0m....')
-                exit(-1)
+                deployStatus = False
             else:
                 logging.debug('\033[0;32m UPF is receiving heartbeats from SMF\033[0m....')
     # With noNRF configuration checks
+    # Only the Mini-No-NRF is supported anymore.
     elif args.scenario == '2':
         logging.debug('\033[0;34m Checking if SMF is able to connect with UPF\033[0m....')
-        if file_name == BASIC_VPP_NO_NRF:
-            cmd1 = 'docker logs oai-smf 2>&1 | grep "Received N4 ASSOCIATION SETUP RESPONSE from an UPF"'
-            cmd2 = 'docker logs oai-smf 2>&1 | grep "Node ID Type FQDN: gw1"'
-            upf_logs1 = run_cmd(cmd1)
-            upf_logs2 = run_cmd(cmd2)
-            if upf_logs1 is None or upf_logs2 is None:
-                logging.error('\033[0;31m UPF did not answer to N4 Association request from SMF\033[0m....')
-                exit(-1)
-            else:
-                logging.debug('\033[0;32m UPF did answer to N4 Association request from SMF\033[0m....')
+        cmd1 = 'docker logs oai-smf 2>&1 | grep "Received N4 ASSOCIATION SETUP RESPONSE from an UPF"'
+        cmd2 = 'docker logs oai-smf 2>&1 | grep "Resolve IP Addr 192.168.70.134, FQDN oai-upf"'
+        upf_logs1 = run_cmd(cmd1)
+        upf_logs2 = run_cmd(cmd2)
+        if upf_logs1 is None or upf_logs2 is None:
+            logging.error('\033[0;31m UPF did not answer to N4 Association request from SMF\033[0m....')
+            deployStatus = False
+        else:
+            logging.debug('\033[0;32m UPF did answer to N4 Association request from SMF\033[0m....')
         status = 0
         for x in range(4):
             cmd = "docker logs oai-smf 2>&1 | grep  'handle_receive(16 bytes)'"
@@ -297,7 +404,13 @@ def check_config(file_name):
                 status += 1
         if status > 2:
             logging.debug('\033[0;32m UPF is receiving heartbeats from SMF\033[0m....')
-    logging.debug('\033[0;32m OAI 5G Core network is configured and healthy\033[0m....')
+        else:
+            deployStatus = False
+    if deployStatus:
+        logging.debug('\033[0;32m OAI 5G Core network is configured and healthy\033[0m....')
+    else:
+        logging.error('\033[0;32m OAI 5G Core network may not be properly deployed\033[0m....')
+    return deployStatus
 
 def run_cmd(cmd, silent=True):
     if not silent:
@@ -306,7 +419,7 @@ def run_cmd(cmd, silent=True):
     try:
         res = subprocess.run(cmd,
                         shell=True, check=True,
-                        stdout=subprocess.PIPE, 
+                        stdout=subprocess.PIPE,
                         universal_newlines=True)
         result = res.stdout.strip()
     except:
@@ -320,7 +433,8 @@ if __name__ == '__main__':
     if args.type == 'start-mini':
         # Mini function with NRF
         if args.scenario == '1':
-            deploy(MINI_W_NRF)
+            logging.error('Mini deployments with NRF are no longer supported')
+            sys.exit(-1)
         # Mini function without NRF
         elif args.scenario == '2':
             deploy(MINI_NO_NRF)
@@ -330,7 +444,6 @@ if __name__ == '__main__':
             deploy(BASIC_W_NRF)
         # Basic function without NRF
         elif args.scenario == '2':
-            #deploy(BASIC_NO_NRF)
             logging.error('Basic deployments without NRF are no longer supported')
             sys.exit(-1)
     elif args.type == 'start-basic-vpp':
@@ -339,21 +452,47 @@ if __name__ == '__main__':
             deploy(BASIC_VPP_W_NRF, True)
         # Basic function without NRF but with VPP-UPF
         elif args.scenario == '2':
-            #deploy(BASIC_VPP_NO_NRF, True)
+            logging.error('Basic deployments without NRF are no longer supported')
+            sys.exit(-1)
+    elif args.type == 'start-basic-ebpf':
+        # Basic function with NRF and UPF-eBPF
+        if args.scenario == '1':
+            deploy(BASIC_EBPF_W_NRF, True)
+        # Basic function without NRF but with UPF-eBPF
+        elif args.scenario == '2':
+            logging.error('Basic deployments without NRF are no longer supported')
+            sys.exit(-1)
+    elif args.type == 'start-vpp-redirection':
+        # Basic function with NRF and VPP-UPF
+        if args.scenario == '1':
+            deploy(BASIC_VPP_W_NRF_REDIRECT, True)
+        # Basic function without NRF but with VPP-UPF
+        elif args.scenario == '2':
+            logging.error('Basic deployments without NRF are no longer supported')
+            sys.exit(-1)
+    elif args.type == 'start-vpp-steering':
+        # Basic function with NRF and VPP-UPF
+        if args.scenario == '1':
+            deploy(BASIC_VPP_W_NRF_STEERING, True)
+        # Basic function without NRF but with VPP-UPF
+        elif args.scenario == '2':
             logging.error('Basic deployments without NRF are no longer supported')
             sys.exit(-1)
     elif args.type == 'stop-mini':
-        if args.scenario == '1':
-            undeploy(MINI_W_NRF)
-        elif args.scenario == '2':
+        if args.scenario == '2':
             undeploy(MINI_NO_NRF)
     elif args.type == 'stop-basic':
         if args.scenario == '1':
             undeploy(BASIC_W_NRF)
-        elif args.scenario == '2':
-            undeploy(BASIC_NO_NRF)
     elif args.type == 'stop-basic-vpp':
         if args.scenario == '1':
             undeploy(BASIC_VPP_W_NRF)
-        elif args.scenario == '2':
-            undeploy(BASIC_VPP_NO_NRF)
+    elif args.type == 'stop-vpp-redirection':
+        if args.scenario == '1':
+            undeploy(BASIC_VPP_W_NRF_REDIRECT)
+    elif args.type == 'stop-vpp-steering':
+        if args.scenario == '1':
+            undeploy(BASIC_VPP_W_NRF_STEERING)
+    elif args.type == 'stop-basic-ebpf':
+        if args.scenario == '1':
+            undeploy(BASIC_EBPF_W_NRF)
