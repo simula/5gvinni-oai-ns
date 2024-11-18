@@ -1,0 +1,13 @@
+#!/bin/bash -eu
+
+# Assuming Ettus N310!
+
+ping -c3 -i0.2 192.168.243.132   # AMF
+ping -c3 -i0.2 192.168.10.2      # Ettus via fibre0
+ping -c3 -i0.2 192.168.20.2      # Ettus via fibre1
+ping -c3 -i0.2 10.132.17.40      # Ettus via copper
+
+cd ~/src/openairinterface5g
+source oaienv
+cd cmake_targets/ran_build/build
+sudo nice -n -19 ./nr-softmodem -O ../../../targets/PROJECTS/GENERIC-NR-5GC/CONF/gnb.band78.sa.fr1.106PRB.2x2.usrpn310.conf --gNBs.[0].min_rxtxtime 6 --sa --usrp-tx-thread-config 1
