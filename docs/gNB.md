@@ -24,11 +24,11 @@ ping -c3 -i0.2 10.132.17.40      # Ettus via copper
 ```
 cd ~/src/openairinterface5g
 source oaienv
-./cmake_targets/build_oai -w USRP -c --eNB --gNB --nrUE --build-lib "nrqtscope" --run-with-gdb RelWithDebInfo
+./cmake_targets/build_oai -w USRP -c --eNB --gNB --nrUE --run-with-gdb RelWithDebInfo
 
 
 # With most options:
-# ./cmake_targets/build_oai --ninja -w USRP -C --eNB --UE --nrUE --gNB --build-lib "telnetsrv enbscope uescope nrscope nrqtscope" --build-doxygen
+# ./cmake_targets/build_oai --ninja -w USRP -C --eNB --UE --nrUE --gNB --build-lib "telnetsrv enbscope uescope nrscope" --build-doxygen
 
 ```
 
@@ -43,8 +43,8 @@ Options:
 cd ~/src/openairinterface5g
 source oaienv
 export BUILD_UHD_FROM_SOURCE=True
-export UHD_VERSION=4.6.0.0
-./cmake_targets/build_oai -w USRP -c --eNB --gNB --nrUE --build-lib "nrqtscope" --run-with-gdb RelWithDebInfo
+export UHD_VERSION=4.7.0.0
+./cmake_targets/build_oai -w USRP -c --eNB --gNB --nrUE --run-with-gdb RelWithDebInfo
 ```
 
 
