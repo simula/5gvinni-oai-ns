@@ -77,11 +77,11 @@ CREATE TABLE `AccessAndMobilitySubscriptionData` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 INSERT INTO `AccessAndMobilitySubscriptionData` (`ueid`, `servingPlmnid`, `nssai`) VALUES
-('242881234500125', '24288','{\"defaultSingleNssais\": [{\"sst\": 1, \"sd\": \"1\"}]}'),
-('242881234500126', '24288','{\"defaultSingleNssais\": [{\"sst\": 1, \"sd\": \"1\"}]}'),
-('242881234500127', '24288','{\"defaultSingleNssais\": [{\"sst\": 1, \"sd\": \"1\"}]}'),
-('242881234500128', '24288','{\"defaultSingleNssais\": [{\"sst\": 1, \"sd\": \"1\"}]}'),
-('242881234500129', '24288','{\"defaultSingleNssais\": [{\"sst\": 1, \"sd\": \"1\"}]}');
+('242881234500125', '24288','{\"defaultSingleNssais\": [{\"sst\": 1, \"sd\": \"000001\"}]}'),
+('242881234500126', '24288','{\"defaultSingleNssais\": [{\"sst\": 1, \"sd\": \"000001\"}]}'),
+('242881234500127', '24288','{\"defaultSingleNssais\": [{\"sst\": 1, \"sd\": \"000001\"}]}'),
+('242881234500128', '24288','{\"defaultSingleNssais\": [{\"sst\": 1, \"sd\": \"000001\"}]}'),
+('242881234500129', '24288','{\"defaultSingleNssais\": [{\"sst\": 1, \"sd\": \"000001\"}]}');
 -- --------------------------------------------------------
 
 --
@@ -310,10 +310,10 @@ CREATE TABLE `SessionManagementSubscriptionData` (
 -- Dumping data for table `SessionManagementSubscriptionData`
 --
 
-INSERT INTO `SessionManagementSubscriptionData` (`ueid`, `servingPlmnid`, `singleNssai`, `dnnConfigurations`) VALUES
-('242881234500031', '24288', '{\"sst\": 222, \"sd\": \"123\"}','{\"default\":{\"pduSessionTypes\":{ \"defaultSessionType\": \"IPV4\"},\"sscModes\": {\"defaultSscMode\": \"SSC_MODE_1\"},\"5gQosProfile\": {\"5qi\": 6,\"arp\":{\"priorityLevel\": 1,\"preemptCap\": \"NOT_PREEMPT\",\"preemptVuln\":\"NOT_PREEMPTABLE\"},\"priorityLevel\":1},\"sessionAmbr\":{\"uplink\":\"100Mbps\", \"downlink\":\"100Mbps\"},\"staticIpAddress\":[{\"ipv4Addr\": \"12.1.1.4\"}]}}');
-INSERT INTO `SessionManagementSubscriptionData` (`ueid`, `servingPlmnid`, `singleNssai`, `dnnConfigurations`) VALUES
-('242881234500032', '24288', '{\"sst\": 222, \"sd\": \"123\"}','{\"default\":{\"pduSessionTypes\":{ \"defaultSessionType\": \"IPV4\"},\"sscModes\": {\"defaultSscMode\": \"SSC_MODE_1\"},\"5gQosProfile\": {\"5qi\": 6,\"arp\":{\"priorityLevel\": 1,\"preemptCap\": \"NOT_PREEMPT\",\"preemptVuln\":\"NOT_PREEMPTABLE\"},\"priorityLevel\":1},\"sessionAmbr\":{\"uplink\":\"100Mbps\", \"downlink\":\"100Mbps\"}}}');
+INSERT INTO `SessionManagementSubscriptionData` (`ueid`, `servingPlmnid`, `singleNssai`, `dnnConfigurations`) VALUES 
+('242881234500031', '24288', '{\"sst\": 222, \"sd\": \"00007B\"}','{\"default\":{\"pduSessionTypes\":{ \"defaultSessionType\": \"IPV4\"},\"sscModes\": {\"defaultSscMode\": \"SSC_MODE_1\"},\"5gQosProfile\": {\"5qi\": 6,\"arp\":{\"priorityLevel\": 1,\"preemptCap\": \"NOT_PREEMPT\",\"preemptVuln\":\"NOT_PREEMPTABLE\"},\"priorityLevel\":1},\"sessionAmbr\":{\"uplink\":\"100Mbps\", \"downlink\":\"100Mbps\"},\"staticIpAddress\":[{\"ipv4Addr\": \"12.1.1.4\"}]}}');
+INSERT INTO `SessionManagementSubscriptionData` (`ueid`, `servingPlmnid`, `singleNssai`, `dnnConfigurations`) VALUES 
+('242881234500032', '24288', '{\"sst\": 222, \"sd\": \"00007B\"}','{\"default\":{\"pduSessionTypes\":{ \"defaultSessionType\": \"IPV4\"},\"sscModes\": {\"defaultSscMode\": \"SSC_MODE_1\"},\"5gQosProfile\": {\"5qi\": 6,\"arp\":{\"priorityLevel\": 1,\"preemptCap\": \"NOT_PREEMPT\",\"preemptVuln\":\"NOT_PREEMPTABLE\"},\"priorityLevel\":1},\"sessionAmbr\":{\"uplink\":\"100Mbps\", \"downlink\":\"100Mbps\"}}}');
 -- --------------------------------------------------------
 
 --
