@@ -3,6 +3,7 @@
 @InitialContextSetup@ngap.procedureCode == 14@[30583,43690,11051][7967,7196,6939]
 @InitialUEMessage@ngap.procedureCode == 15@[39064,43690,17990][7967,7196,6939]
 @NGSetup@ngap.procedureCode == 21@[43690,43690,32639][7967,7196,6939]
+@PDUSessionResourceRelease@ngap.procedureCode == 28@[43690,21331,8224][7967,7196,6939]
 @PDUSessionResourceSetup@ngap.procedureCode == 29@[38036,43690,22359][7967,7196,6939]
 @UEContextRelease@ngap.procedureCode == 41@[43690,35209,35209][7967,7196,6939]
 @UEContextReleaseRequest@ngap.procedureCode == 42@[48316,28270,20560][7967,7196,6939]
