@@ -39,7 +39,7 @@ Each Network Function is using a Service Based Interface (SBI), in order to conn
 	 - source: https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-udm/-/tree/v2.1.0?ref_type=tags
 
 
-## In detail for the RAN
+## In detail for the RAN 
 
 - source: [https://gitlab.eurecom.fr/oai/openairinterface5g](https://gitlab.eurecom.fr/oai/openairinterface5g)
 - We use the latest weekly tag. Latest version we tested `2024.w03`.
