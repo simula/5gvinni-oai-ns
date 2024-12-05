@@ -10,34 +10,33 @@ Each Network Function is using a Service Based Interface (SBI), in order to conn
 
  - **MYSQL**: 
 	 - image: mysql:8.0
-	 - build file: https://github.com/docker-library/mysql/blob/3e6dfd03b956727c7fb5b30360512a11751a3e9d/8.0/Dockerfile.oracle
+	 - build file: [https://github.com/docker-library/mysql/blob/3e6dfd03b956727c7fb5b30360512a11751a3e9d/8.0/Dockerfile.oracle](https://github.com/docker-library/mysql/blob/090eb25ac69bca920fc5320484bc35aac92a8143/8.0/Dockerfile.oracle)
 	 - It is needed for the `oai-udr` network function. Not part of a typical 5G core.
  - **oai-udr**: 
-	 - image: oaisoftwarealliance/oai-udr:v1.5.1
-	 - source: https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-udr/-/tree/89a82cc065c17faf2fe113bda0b9f9bae9f3d7da
+	 - image: oaisoftwarealliance/oai-udr:v2.1.0
+	 - source: [https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-udr/-/tree/89a82cc065c17faf2fe113bda0b9f9bae9f3d7da](https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-udr/-/tree/v2.1.0?ref_type=tags)
  - **oai-ausf**
-	 - image: oaisoftwarealliance/oai-ausf:v1.5.1
-	 - source: https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-ausf/-/tree/v1.5.1?ref_type=tags
+	 - image: oaisoftwarealliance/oai-ausf:v2.1.0
+	 - source: [https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-ausf/-/tree/v2.1.0?ref_type=tags](https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-ausf/-/tree/v2.1.0?ref_type=tags)
  - **oai-nrf**:
-	 - image: oaisoftwarealliance/oai-nrf:v1.5.1
-	 - source: https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-nrf/-/tree/v1.5.1?ref_type=tags
+	 - image: oaisoftwarealliance/oai-nrf:v2.1.0
+	 - source: [https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-nrf/-/tree/v2.1.0?ref_type=tags](https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-nrf/-/tree/v2.1.0?ref_type=tags)
  - **oai-amf**
-	 - image:  oaisoftwarealliance/oai-amf:v1.5.1
-	 - source: https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-amf/-/tree/v1.5.1?ref_type=tags
- - **oai-upf (oai-spgwu)** (<font style="color:red"> to be replaced with `oai-cn5g-upf` </font>)
-	 - image: oaisoftwarealliance/oai-spgwu-tiny:v1.5.1
-	 - current source: https://github.com/OPENAIRINTERFACE/openair-spgwu-tiny/tree/v1.5.1
-	 - future source: https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-upf
- - **oai-ext-dn**:
+	 - image:  oaisoftwarealliance/oai-amf:v2.1.0
+	 - source: [https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-amf/-/tree/v2.1.0?ref_type=tags](https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-amf/-/tree/v2.1.0?ref_type=tags)
+ - **oai-upf**
+	 - image: oaisoftwarealliance/oai-upf:v2.1.0
+	 - source: [https://github.com/OPENAIRINTERFACE/openair-spgwu-tiny/tree/v2.1.0](https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-upf/-/tree/v2.1.0?ref_type=tags)
+- **oai-ext-dn**:
 	 - image: oaisoftwarealliance/trf-gen-cn5g:latest
-	 - source: https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-fed/-/blob/v1.5.1/ci-scripts/Dockerfile.traffic.generator.ubuntu?ref_type=tags
+	 - source: [https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-fed/-/blob/v2.1.0/ci-scripts/Dockerfile.traffic.generator.ubuntu?ref_type=tags](https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-fed/-/blob/v2.1.0/ci-scripts/Dockerfile.traffic.generator.ubuntu?ref_type=tags)
 	 - It is just a traffic generator. It is not needed in the core.
  - **oai-smf**
-	 - image: oaisoftwarealliance/oai-smf:v1.5.1
-	 - source: https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-smf/-/tree/v1.5.1?ref_type=tags
+	 - image: oaisoftwarealliance/oai-smf:v2.1.0
+	 - source: [https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-smf/-/tree/v2.1.0?ref_type=tags](https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-smf/-/tree/v2.1.0?ref_type=tags)
  - **oai-udm**
-	 - image: oaisoftwarealliance/oai-udm:v1.5.1
-	 - source: https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-udm/-/tree/v1.5.1?ref_type=tags
+	 - image: oaisoftwarealliance/oai-udm:v2.1.0
+	 - source: [https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-udm/-/tree/v2.1.0?ref_type=tags](https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-udm/-/tree/v2.1.0?ref_type=tags)
 
 
 ## In detail for the RAN
