@@ -42,7 +42,7 @@ Each Network Function is using a Service Based Interface (SBI), in order to conn
 ## In detail for the RAN 
 
 - source: [https://gitlab.eurecom.fr/oai/openairinterface5g](https://gitlab.eurecom.fr/oai/openairinterface5g)
-- We use the latest weekly tag. Latest version we tested `2024.w03`.
+- We use the latest weekly tag. Latest version we tested `2024.w15`.
 - We modify some parameters like MCC / MNC and IP addresses.
 
 
