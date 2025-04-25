@@ -78,3 +78,8 @@ Helper scripts: sshC1 ... sshC4 for SSH to HSS, MME, SPGW-C and SPGW-U
    juju destroy-model --force -y <ID>
 
    Important: --force may be necessary of NS removal is blocking due to problems removing the Juju model.
+
+# Acknowledgment
+
+This research was conducted as part of the “Raksha: 5G Security for Critical Communications” project, funded by the Research Council of Norway under the "IKTPLUSS-IKT og digital innovasjon" program (grant agreement No. 312122), https://prosjektbanken.forskningsradet.no/en/project/FORISS/312122
+
