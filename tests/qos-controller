@@ -5,7 +5,7 @@
 # HENCSAT-QoS-Controller -router "Access to Public Data Network" -sshuser nornetpp -sshhost localhost  -sshport 2909
 
 PROXY="oesthorn.nntb.no,nornetpp@frigg.simula.nornet"
-SPGW_U="10.208.0.213"
+SPGW_U="10.132.13.213"
 ssh -J $PROXY nornetpp@$SPGW_U hostname
 ./HENCSAT-QoS-Controller \
    -router "SPGW-U QoS Control" \

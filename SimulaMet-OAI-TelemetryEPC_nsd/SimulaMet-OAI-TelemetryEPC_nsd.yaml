@@ -1,3 +1,4 @@
+nsd:
 # =====================================================================
 #     #######  #####          #     #   ###   #     # #     #   ###
 #     #       #     #         #     #    #    ##    # ##    #    #
@@ -9,7 +10,7 @@
 # =====================================================================
 #
 # SimulaMet OpenAirInterface Evolved Packet Core NS
-# Copyright (C) 2019-2020 by Thomas Dreibholz
+# Copyright (C) 2021-2023 by Thomas Dreibholz
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -26,103 +27,193 @@
 #
 # Contact: dreibh@simula.no
 
-nsd:nsd-catalog:
   nsd:
     - id: SimulaMet-OAI-TelemetryEPC_nsd
       name: SimulaMet-OAI-TelemetryEPC_nsd
-      short-name: SimulaMet-OAI-TelemetryEPC_nsd
       description: SimulaMet OpenAirInterface Evolved Packet Core NS with P4 Telemetry
-      vendor: Thomas Dreibholz
-      version: '1.0'
-      logo: NorNet.png
+      version: 3.0
+      designer: Thomas Dreibholz
 
-      # ###### VNFDs that are part of this NSD ##############################
-      constituent-vnfd:
-        - member-vnf-index: 1
-          vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
-        - vnfd-id-ref: SimulaMet-P4-OvS_vnfd
-          member-vnf-index: '2'
-        - vnfd-id-ref: SimulaMet-P4-OvS_vnfd
-          member-vnf-index: '3'
-
-      # ###### VLDs #########################################################
-      vld:
-        # ====== Management =================================================
-        - id: SimulaMet-OAI-TelemetryEPC_nsd-Management
-          name: SimulaMet-OAI-TelemetryEPC_nsd-Management
-          short-name: SimulaMet-OAI-TelemetryEPC_nsd-Management
-          mgmt-network: 'true'
-          type: ELAN
-          vim-network-name: mgmt
-          vnfd-connection-point-ref:
-            - member-vnf-index-ref: 1
-              vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
-              vnfd-connection-point-ref: mme-mgmt-cp
-            - member-vnf-index-ref: 1
-              vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
-              vnfd-connection-point-ref: hss-mgmt-cp
-            - member-vnf-index-ref: 1
-              vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
-              vnfd-connection-point-ref: spgwc-mgmt-cp
-            - member-vnf-index-ref: 1
-              vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
-              vnfd-connection-point-ref: spgwu-mgmt-cp
-            - vnfd-id-ref: SimulaMet-P4-OvS_vnfd
-              member-vnf-index-ref: '2'
-              vnfd-connection-point-ref: p4ovs-mgmt-cp
-            - vnfd-id-ref: SimulaMet-P4-OvS_vnfd
-              member-vnf-index-ref: '3'
-              vnfd-connection-point-ref: p4ovs-mgmt-cp
-
-        # ====== S1-C =======================================================
-        - id: SimulaMet-OAI-TelemetryEPC_nsd-S1C
-          name: SimulaMet-OAI-TelemetryEPC_nsd-S1C
-          short-name: SimulaMet-OAI-TelemetryEPC_nsd-S1C
-          type: ELAN
-          vim-network-name: nornet-simula
-          vnfd-connection-point-ref:
-            - member-vnf-index-ref: 1
-              vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
-              vnfd-connection-point-ref: mme-s1c-cp
-
-        # ====== S1-U =======================================================
-        - id: SimulaMet-OAI-TelemetryEPC_nsd-S1U
-          name: SimulaMet-OAI-TelemetryEPC_nsd-S1U
-          short-name: SimulaMet-OAI-TelemetryEPC_nsd-S1U
-          type: ELAN
-          vim-network-name: nornet-simula
-          vnfd-connection-point-ref:
-            - vnfd-id-ref: SimulaMet-P4-OvS_vnfd
-              member-vnf-index-ref: '2'
-              vnfd-connection-point-ref: p4ovs-service-port1-cp
+      # ###### Connections ##################################################
+      virtual-link-desc:
+        - id: Management
+          mgmt-network: "true"
+          vim-network-name: osm-management
+        - id: S1C
+        - id: s1c-switch-link
+        - id: S1U
         - id: s1u-switch-link
-          name: s1u-switch-link
-          short-name: s1u-switch-link
-          vnfd-connection-point-ref:
-            - member-vnf-index-ref: 1
-              vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
-              vnfd-connection-point-ref: spgwu-s1u-cp
-            - vnfd-id-ref: SimulaMet-P4-OvS_vnfd
-              member-vnf-index-ref: '2'
-              vnfd-connection-point-ref: p4ovs-service-port2-cp
-
-        # ====== SGi ========================================================
-        - id: SimulaMet-OAI-TelemetryEPC_nsd-SGi
-          name: SimulaMet-OAI-TelemetryEPC_nsd-SGi
-          short-name: SimulaMet-OAI-TelemetryEPC_nsd-SGi
-          type: ELAN
-          vim-network-name: nornet-simula
-          vnfd-connection-point-ref:
-            - vnfd-id-ref: SimulaMet-P4-OvS_vnfd
-              member-vnf-index-ref: '3'
-              vnfd-connection-point-ref: p4ovs-service-port1-cp
+        - id: SGi
         - id: sgi-switch-link
-          name: sgi-switch-link
-          short-name: sgi-switch-link
-          vnfd-connection-point-ref:
-            - member-vnf-index-ref: 1
-              vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
-              vnfd-connection-point-ref: spgwu-sgi-cp
-            - vnfd-id-ref: SimulaMet-P4-OvS_vnfd
-              member-vnf-index-ref: '3'
-              vnfd-connection-point-ref: p4ovs-service-port2-cp
+        - id: FlexRAN
+        - id: flexran-switch-link
+        - id: S6a
+        - id: S11
+        - id: SXab
+
+      # ###### Used VNFDs ###################################################
+      vnfd-id:
+        - SimulaMet-OAI-HSS_vnfd
+        - SimulaMet-OAI-MME_vnfd
+        - SimulaMet-OAI-SPGW-C_vnfd
+        - SimulaMet-OAI-SPGW-U_vnfd
+        - SimulaMet-FlexRAN_vnfd
+        - SimulaMet-P4-SS_vnfd
+
+      # ###### NS Definition ################################################
+      df:
+        - id: default-df
+          vnf-profile:
+
+            # ====== HSS ====================================================
+            - id: '1'
+              virtual-link-connectivity:
+                - constituent-cpd-id:
+                    - constituent-base-element-id: '1'
+                      constituent-cpd-id: hss-mgmt-cp-ext
+                  virtual-link-profile-id: Management
+                - constituent-cpd-id:
+                    - constituent-base-element-id: '2'
+                      constituent-cpd-id: hss-s6a-cp-ext
+                  virtual-link-profile-id: S6a
+              vnfd-id: SimulaMet-OAI-HSS_vnfd
+
+            # ====== MME ====================================================
+            - id: '2'
+              virtual-link-connectivity:
+                - constituent-cpd-id:
+                    - constituent-base-element-id: '1'
+                      constituent-cpd-id: mme-mgmt-cp-ext
+                  virtual-link-profile-id: Management
+                - constituent-cpd-id:
+                    - constituent-base-element-id: '2'
+                      constituent-cpd-id: mme-s6a-cp-ext
+                  virtual-link-profile-id: S6a
+                - constituent-cpd-id:
+                    - constituent-base-element-id: '3'
+                      constituent-cpd-id: mme-s11-cp-ext
+                  virtual-link-profile-id: S11
+                - constituent-cpd-id:
+                    - constituent-base-element-id: '4'
+                      constituent-cpd-id: mme-s1c-cp-ext
+                  virtual-link-profile-id: s1c-switch-link
+              vnfd-id: SimulaMet-OAI-MME_vnfd
+
+            # ====== SPGW-C =================================================
+            - id: '3'
+              virtual-link-connectivity:
+                - constituent-cpd-id:
+                    - constituent-base-element-id: '1'
+                      constituent-cpd-id: spgwc-mgmt-cp-ext
+                  virtual-link-profile-id: Management
+                - constituent-cpd-id:
+                    - constituent-base-element-id: '2'
+                      constituent-cpd-id: spgwc-sxab-cp-ext
+                  virtual-link-profile-id: SXab
+                - constituent-cpd-id:
+                    - constituent-base-element-id: '3'
+                      constituent-cpd-id: spgwc-s11-cp-ext
+                  virtual-link-profile-id: S11
+              vnfd-id: SimulaMet-OAI-SPGW-C_vnfd
+
+            # ====== SPGW-U =================================================
+            - id: '4'
+              virtual-link-connectivity:
+                - constituent-cpd-id:
+                    - constituent-base-element-id: '1'
+                      constituent-cpd-id: spgwu-mgmt-cp-ext
+                  virtual-link-profile-id: Management
+                - constituent-cpd-id:
+                    - constituent-base-element-id: '2'
+                      constituent-cpd-id: spgwu-sxab-cp-ext
+                  virtual-link-profile-id: SXab
+                - constituent-cpd-id:
+                    - constituent-base-element-id: '3'
+                      constituent-cpd-id: spgwu-s1u-cp-ext
+                  virtual-link-profile-id: s1u-switch-link
+                - constituent-cpd-id:
+                    - constituent-base-element-id: '4'
+                      constituent-cpd-id: spgwu-sgi-cp-ext
+                  virtual-link-profile-id: sgi-switch-link
+              vnfd-id: SimulaMet-OAI-SPGW-U_vnfd
+
+            # ====== S1-U Switch ============================================
+            - id: "5"
+              virtual-link-connectivity:
+                - constituent-cpd-id:
+                    - constituent-base-element-id: "1"
+                      constituent-cpd-id: p4ss-mgmt-cp-ext
+                  virtual-link-profile-id: Management
+                - constituent-cpd-id:
+                    - constituent-base-element-id: "2"
+                      constituent-cpd-id: p4ss-service-port1-cp-ext
+                  virtual-link-profile-id: S1U
+                - constituent-cpd-id:
+                    - constituent-base-element-id: "3"
+                      constituent-cpd-id: p4ss-service-port2-cp-ext
+                  virtual-link-profile-id: s1u-switch-link
+              vnfd-id: SimulaMet-P4-SS_vnfd
+
+            # ====== SGi Switch =============================================
+            - id: "6"
+              virtual-link-connectivity:
+                - constituent-cpd-id:
+                    - constituent-base-element-id: "1"
+                      constituent-cpd-id: p4ss-mgmt-cp-ext
+                  virtual-link-profile-id: Management
+                - constituent-cpd-id:
+                    - constituent-base-element-id: "2"
+                      constituent-cpd-id: p4ss-service-port1-cp-ext
+                  virtual-link-profile-id: SGi
+                - constituent-cpd-id:
+                    - constituent-base-element-id: "3"
+                      constituent-cpd-id: p4ss-service-port2-cp-ext
+                  virtual-link-profile-id: sgi-switch-link
+              vnfd-id: SimulaMet-P4-SS_vnfd
+
+            # ====== S1-C Switch ============================================
+            - id: "7"
+              virtual-link-connectivity:
+                - constituent-cpd-id:
+                    - constituent-base-element-id: "1"
+                      constituent-cpd-id: p4ss-mgmt-cp-ext
+                  virtual-link-profile-id: Management
+                - constituent-cpd-id:
+                    - constituent-base-element-id: "2"
+                      constituent-cpd-id: p4ss-service-port1-cp-ext
+                  virtual-link-profile-id: S1C
+                - constituent-cpd-id:
+                    - constituent-base-element-id: "3"
+                      constituent-cpd-id: p4ss-service-port2-cp-ext
+                  virtual-link-profile-id: s1c-switch-link
+              vnfd-id: SimulaMet-P4-SS_vnfd
+
+            # ====== FlexRAN Switch =========================================
+            - id: "8"
+              virtual-link-connectivity:
+                - constituent-cpd-id:
+                    - constituent-base-element-id: "1"
+                      constituent-cpd-id: p4ss-mgmt-cp-ext
+                  virtual-link-profile-id: Management
+                - constituent-cpd-id:
+                    - constituent-base-element-id: "2"
+                      constituent-cpd-id: p4ss-service-port1-cp-ext
+                  virtual-link-profile-id: FlexRAN
+                - constituent-cpd-id:
+                    - constituent-base-element-id: "3"
+                      constituent-cpd-id: p4ss-service-port2-cp-ext
+                  virtual-link-profile-id: flexran-switch-link
+              vnfd-id: SimulaMet-P4-SS_vnfd
+
+            # ====== FlexRAN ================================================
+            - id: "9"
+              virtual-link-connectivity:
+                - constituent-cpd-id:
+                    - constituent-base-element-id: "1"
+                      constituent-cpd-id: flexran-mgmt-cp-ext
+                  virtual-link-profile-id: Management
+                - constituent-cpd-id:
+                    - constituent-base-element-id: "2"
+                      constituent-cpd-id: flexran-service-cp-ext
+                  virtual-link-profile-id: flexran-switch-link
+              vnfd-id: SimulaMet-FlexRAN_vnfd

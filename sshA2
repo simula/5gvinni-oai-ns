@@ -1,7 +1,7 @@
 #!/bin/sh
 
-HOST="10.208.0.201"
+HOST="10.132.13.201"
 
 ssh-keygen -q -R ${HOST}
-echo "SSH to MME in Test Core ..."
-ssh -CX -oStrictHostKeyChecking=no nornetpp@${HOST}
+echo "SSH to MME in Core #1 ..."
+ssh -CX -oStrictHostKeyChecking=no ubuntu@${HOST}

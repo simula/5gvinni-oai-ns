@@ -1,0 +1,21 @@
+#!/bin/bash -e
+
+sudo service spgwc stop
+
+sudo rm -rf /usr/local
+sudo mkdir -p /usr/local/bin
+
+sudo apt install -fy
+sudo updatedb
+
+
+# ------ Fetching Git repository openair-spgwc -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+time bash -c "cd /home/nornetpp/src && \
+if [ ! -d \"openair-spgwc\" ] ; then git clone --quiet https://github.com/simula/openairinterface-openair-spgwc.git openair-spgwc && cd openair-spgwc ; else cd openair-spgwc && git pull ; fi && \
+git checkout 2020.w36"
+# ------ Building SPGW-C dependencies ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+time bash -c "echo \"ZXhwb3J0IE1BS0VGTEFHUz0iLWpgbnByb2NgIiAmJiBcCmNkIC9ob21lL25vcm5ldHBwL3NyYy9vcGVuYWlyLXNwZ3djL2J1aWxkL3NjcmlwdHMgJiYgXApta2RpciAtcCBsb2dzICYmIFwKLi9idWlsZF9zcGd3YyAtSSAtZiA+bG9ncy9idWlsZF9zcGd3Yy0xLmxvZyAyPiYxCg==\" | base64 -d | /bin/bash -x"
+# ------ Building SPGW-C itself ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+time bash -c "echo \"ZXhwb3J0IE1BS0VGTEFHUz0iLWpgbnByb2NgIiAmJiBcCmNkIC9ob21lL25vcm5ldHBwL3NyYy9vcGVuYWlyLXNwZ3djL2J1aWxkL3NjcmlwdHMgJiYgXAouL2J1aWxkX3NwZ3djIC1jIC1WIC1iIERlYnVnIC1qID5sb2dzL2J1aWxkX3NwZ3djLTIubG9nIDI+JjEK\" | base64 -d | /bin/bash -x"
+# ------ Configuring SPGW-C --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+time bash -c "echo \"Y2QgL2hvbWUvbm9ybmV0cHAvc3JjL29wZW5haXItc3Bnd2MvYnVpbGQvc2NyaXB0cyAmJiBcCklOU1RBTkNFPTEgJiYgXApQUkVGSVg9Jy91c3IvbG9jYWwvZXRjL29haScgJiYgXApzdWRvIG1rZGlyIC1tIDA3NzcgLXAgJFBSRUZJWCAmJiBcCnN1ZG8gY3AgLi4vLi4vZXRjL3NwZ3dfYy5jb25mICRQUkVGSVggJiYgXApkZWNsYXJlIC1BIFNQR1dDX0NPTkYgJiYgXApTUEdXQ19DT05GW0BJTlNUQU5DRUBdPSRJTlNUQU5DRSAmJiBcClNQR1dDX0NPTkZbQFBSRUZJWEBdPSRQUkVGSVggJiYgXApTUEdXQ19DT05GW0BQSURfRElSRUNUT1JZQF09Jy92YXIvcnVuJyAmJiBcClNQR1dDX0NPTkZbQFNHV19JTlRFUkZBQ0VfTkFNRV9GT1JfUzExQF09J2VuczUnICYmIFwKU1BHV0NfQ09ORltAU0dXX0lOVEVSRkFDRV9OQU1FX0ZPUl9TNV9TOF9DUEBdPSdkdW1teTAnICYmIFwKU1BHV0NfQ09ORltAU0dXX0lQX0ZPUl9TNV9TOF9DUEBdPScxNzIuNTguNTguMTAyJyAmJiBcClNQR1dDX0NPTkZbQFBHV19JTlRFUkZBQ0VfTkFNRV9GT1JfUzVfUzhfQ1BAXT0nZHVtbXkxJyAmJiBcClNQR1dDX0NPTkZbQFBHV19JUF9GT1JfUzVfUzhfQ1BAXT0nMTcyLjU4LjU4LjEwMScgJiYgXApTUEdXQ19DT05GW0BQR1dfSU5URVJGQUNFX05BTUVfRk9SX1NYQF09J2VuczQnICYmIFwKU1BHV0NfQ09ORltAVUVfSVBfQUREUkVTU19QT09MQF09JzEyLjEuMS4yIC0gMTIuMS4xLjEyOCcgJiYgXApTUEdXQ19DT05GW0BQVVNIX1BST1RPQ09MX09QVElPTkBdPSdubycgJiYgXApTUEdXQ19DT05GW0BERUZBVUxUX0ROU19JUFY0X0FERFJFU1NAXT0nMTAuMS4xLjEnICYmIFwKU1BHV0NfQ09ORltAREVGQVVMVF9ETlNfU0VDX0lQVjRfQUREUkVTU0BdPScxMC4xLjIuMScgJiYgXApTUEdXQ19DT05GW0BERUZBVUxUX0FQTkBdPSdkZWZhdWx0LnNpbXVsYS5ub3JuZXQnICYmIFwKZm9yIEsgaW4gIiR7IVNQR1dDX0NPTkZbQF19IjsgZG8gc3VkbyBlZ3JlcCAtbFJaICIkSyIgJFBSRUZJWCB8IHhhcmdzIC0wIC1sIHN1ZG8gc2VkIC1pIC1lICJzfCRLfCR7U1BHV0NfQ09ORlskS119fGciIDsgcmV0PSQ/O1tbIHJldCAtbmUgMCBdXSAmJiBlY2hvICJUcmllZCB0byByZXBsYWNlICRLIHdpdGggJHtTUEdXQ19DT05GWyRLXX0iIHx8IHRydWUgOyBkb25lICYmIFwKc3VkbyBzZWQgLWUgInMvQVBOX05JID0gXCJkZWZhdWx0XCIvQVBOX05JID0gXCJkZWZhdWx0LnNpbXVsYS5ub3JuZXRcIi9nIiAtaSAvdXNyL2xvY2FsL2V0Yy9vYWkvc3Bnd19jLmNvbmYgJiYgXApzdWRvIHNlZCAtZSAicy9BUE5fTkkgPSBcImFwbjFcIi9BUE5fTkkgPSBcImludGVybmV0LnNpbXVsYS5ub3JuZXRcIi9nIiAtaSAvdXNyL2xvY2FsL2V0Yy9vYWkvc3Bnd19jLmNvbmYK\" | base64 -d | /bin/bash -x"

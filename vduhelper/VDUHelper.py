@@ -11,7 +11,7 @@
 # =====================================================================
 #
 # SimulaMet OpenAirInterface Evolved Packet Core NS
-# Copyright (C) 2019-2020 by Thomas Dreibholz
+# Copyright (C) 2019-2023 by Thomas Dreibholz
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,14 +29,36 @@
 # Contact: dreibh@simula.no
 
 import base64
+import grp
 import ipaddress
 import logging
-import logging.config
 import os
+import pwd
 import subprocess
 import shutil
 import sys
 import traceback
+
+
+# ###########################################################################
+# #### Colored Log Formatter class                                       ####
+# ###########################################################################
+
+class ColouredLogFormatter(logging.Formatter):
+   formatString = '%(asctime)s.%(msecs)03d [%(levelname)s] %(message)s'   # (%(filename)s:%(lineno)d)
+   FORMATS = {
+      logging.CRITICAL: '\x1b[37;41;1m' + formatString + '\x1b[0m',
+      logging.ERROR:    '\x1b[31m' + formatString + '\x1b[0m',
+      logging.WARNING:  '\x1b[33m' + formatString + '\x1b[0m',
+      logging.INFO:     '\x1b[34m' + formatString + '\x1b[0m',
+      logging.DEBUG:    '\x1b[37m' + formatString + '\x1b[0m'
+    }
+
+   def format(self, record):
+      logFormatter = self.FORMATS.get(record.levelno)
+      formatter = logging.Formatter(logFormatter)
+      return formatter.format(record)
+
 
 
 # ###########################################################################
@@ -45,35 +67,66 @@ import traceback
 
 class VDUHelper:
    # ###### Constructor #####################################################
-   def __init__(self, testMode = False):
+   def __init__(self, uid = os.getuid(), testMode = False):
       # ====== Initialise object ============================================
-      self.testMode   = testMode
-      self.blockStack = []
-      self.lastError  = None
-
-      if self.testMode == False:
-         import charmhelpers.core.hookenv
-         self.hookenv_module = charmhelpers.core.hookenv
-         import charms.sshproxy
-         self.sshproxy_module = charms.sshproxy
+      self.testMode      = testMode
+      self.blockStack    = []
+      self.lastError     = None
 
       # ====== Initialise logger ============================================
       self.logger = logging.getLogger(__name__)
+      streamHandler = logging.StreamHandler()
+      streamHandler.setFormatter(ColouredLogFormatter())
+      self.logger.addHandler(streamHandler)
+      self.logger.setLevel(logging.DEBUG)   # <<-- Enabling verbose output!
+
+      # ------ TEST ONLY! ---------------------------------
+      # self.logger.critical('critical message')
+      # self.logger.error('error message')
+      # self.logger.warning('warning message')
+      # self.logger.info('info message')
+      # self.logger.debug('debug message')
+      # ---------------------------------------------------
+
       if self.testMode == False:
-         self.logger.error('Starting')
+         self.logger.info('Starting')
       else:
-         self.logger.error('Starting in Test Mode!')
+         self.logger.info('Starting in Test Mode!')
+
+      # ====== Initialise home helper variables =============================
+      self.logger.debug('Examining environment ...')
+      self.UserID = uid
+      pw = pwd.getpwuid(self.UserID)
+      self.User          = pw.pw_name
+      self.GroupID       = pw.pw_gid
+      self.Group         = grp.getgrgid(self.GroupID).gr_name
+      self.HomeDirectory = pw.pw_dir
+      self.logger.debug('User: ' + self.User + ' (ID ' + str(self.UserID) + ')' +
+                        ', Group: ' + self.Group + ' (ID ' + str(self.GroupID) + ')' +
+                        ', Home Directory: ' + self.HomeDirectory)
+
+
+   # ###### Get home directory ##############################################
+   def getHomeDirectory(self):
+      return self.HomeDirectory
+
+
+   # ###### Get user ########################################################
+   def getUser(self):
+      return self.User
+
+
+   # ###### Get group #######################################################
+   def getGroup(self):
+      return self.Group
 
 
    # ###### Begin block #####################################################
    def setStatus(self, message, isError = False):
-      # print('Status: ' + message)
       if isError:
          self.logger.error(message)
       else:
-         self.logger.debug(message)
-      if self.testMode == False:
-         self.hookenv_module.status_set('active', message)
+         self.logger.info(message)
 
 
    # ###### Begin block #####################################################
@@ -131,9 +184,8 @@ class VDUHelper:
    def execute(self, commands):
       # ====== Run via SSH ==================================================
       if self.testMode == False:
-         print('Shell: ' + commands)
          self.logger.debug('Shell: ' + commands)
-         self.sshproxy_module._run(commands)
+         subprocess.run(commands, shell = True, check = True)
 
       # ====== Test Mode ====================================================
       else:
@@ -146,9 +198,6 @@ class VDUHelper:
             n = 0
          sys.stdout.write('\x1b[34m# ------' + label + ('-' * n) + '\x1b[0m\n')
          sys.stdout.write('time bash -c "' + commands + '"\n')
-
-         # commands = 'echo "' + commands + '"'
-         # subprocess.check_call(commands, shell=True)
 
 
    # ###### Run shell commands and handle exceptions ########################
@@ -171,12 +220,12 @@ class VDUHelper:
 
       contentBase64 = self.makeBase64(contentString)
       try:
-         commands = 'echo \\\"{contentBase64}\\\" | base64 -d | sudo tee {fileName}'.format(
+         commands = 'echo "{contentBase64}" | base64 -d | tee {fileName}'.format(
                        fileName = fileName, contentBase64 = contentBase64)
          if makeExecutable == False:
-            commands = commands + ' && \\\nsudo chmod +x {fileName}'.format(fileName = fileName)
+            commands = commands + ' && \\\nchmod +x {fileName}'.format(fileName = fileName)
          if setOwnerTo != None:
-            commands = commands + ' && \\\nsudo chown {setOwnerTo} {fileName}'.format(fileName = fileName, setOwnerTo = setOwnerTo)
+            commands = commands + ' && \\\nchown {setOwnerTo} {fileName}'.format(fileName = fileName, setOwnerTo = setOwnerTo)
          self.runInShell(commands)
       except:
          self.endBlock(False)
@@ -189,7 +238,7 @@ class VDUHelper:
    def executeFromString(self, commandLineString):
       commandLineBase64 = self.makeBase64(commandLineString)
       try:
-         commands = 'echo \\\"{commandLineBase64}\\\" | base64 -d | /bin/bash -x'.format(
+         commands = 'echo "{commandLineBase64}" | base64 -d | /bin/bash -x'.format(
                        commandLineBase64 = commandLineBase64)
          self.runInShell(commands)
       except:
@@ -205,20 +254,23 @@ class VDUHelper:
       # VDU's shell by using "base64 -d".
 
       if string != None:
-         return base64.b64encode(string.encode('utf-8')).decode('ascii')
+         b64 = base64.b64encode(string.encode('utf-8')).decode('ascii')
+         self.logger.debug('makeBase64("' + string + '")="' + b64 + '"')
+         return b64
       return None
 
 
-   # ######  Get /etc/network/interfaces setup for interface #################
+   # ###### Prepare Netplan configuration for interface #####################
    def makeInterfaceConfiguration(self,
                                   interfaceName,
-                                  ipv4Interface = ipaddress.IPv4Interface('0.0.0.0/0'),
+                                  ipv4Interface = None,
                                   ipv4Gateway   = None,
                                   ipv6Interface = None,
                                   ipv6Gateway   = None,
                                   metric        = 1,
                                   pdnInterface  = None,
-                                  createDummy   = False):
+                                  createDummy   = False,
+                                  dhcpNoDNS     = False):
 
       # ====== Create header ================================================
       interfaceConfiguration = \
@@ -238,8 +290,11 @@ class VDUHelper:
 
       # ====== Addressing ===================================================
       networks = []
-      if ipv4Interface == ipaddress.IPv4Interface('0.0.0.0/0'):
+      if ipv4Interface == None:
          interfaceConfiguration = interfaceConfiguration + '      dhcp4: true\n'
+         if dhcpNoDNS:
+            interfaceConfiguration = interfaceConfiguration + '      dhcp4-overrides:\n' + \
+                                                              '        use-dns: no\n'
       else:
          interfaceConfiguration = interfaceConfiguration + '      dhcp4: false\n'
 
@@ -249,10 +304,10 @@ class VDUHelper:
          interfaceConfiguration = interfaceConfiguration + '      dhcp6: false\n'
          interfaceConfiguration = interfaceConfiguration + '      accept-ra: no\n'
 
-      if ( (ipv4Interface != ipaddress.IPv4Interface('0.0.0.0/0')) or
+      if ( (ipv4Interface != None) or
            ((ipv6Interface == None) and (ipv6Interface == ipaddress.IPv6Interface('::/0'))) ):
 
-         if ( ((ipv4Interface != None) and (ipv4Interface != ipaddress.IPv4Interface('0.0.0.0/0'))) or
+         if ( ((ipv4Interface != None) and (ipv4Interface != None)) or
               ((ipv6Interface != None) and (ipv6Interface == ipaddress.IPv6Interface('::/0'))) ):
             interfaceConfiguration = interfaceConfiguration + '      addresses:\n'
 
@@ -298,7 +353,7 @@ class VDUHelper:
       return [ interfaceConfiguration, postUpRules, preDownRules ]
 
 
-   # ###### Get IP routing rules for PDN interface ##########################
+   # ###### Prepare IP routing rules configuration for interface ############
    def makeRoutingRules(self, pdnInterface, interfaceName, networks, gateways):
       # ------ Create post-up rules -----------------------------------------
       postUp = \
@@ -320,7 +375,7 @@ class VDUHelper:
 
       # ------ Create pre-down rules ----------------------------------------
       preDown = \
-         '#\\x21/bin/sh\n' + \
+         '#\x21/bin/sh\n' + \
          'if [ "$IFACE" = "' + interfaceName + '" ] ; then\n'
       for gateway in gateways:
          preDown = preDown + \
@@ -356,7 +411,7 @@ class VDUHelper:
 
          self.createFileFromString('/etc/netplan/{interfaceName}.yaml'.format(interfaceName = interfaceName),
                                    interfaceConfiguration[0])
-         self.runInShell('sudo netplan apply')
+         self.runInShell('netplan apply')
       except:
          self.endBlock(False)
          raise
@@ -405,7 +460,7 @@ network:
       try:
          self.createFileFromString('/etc/netplan/{switchName}.yaml'.format(switchName = switchName),
                                    switchConfiguration)
-         self.runInShell('sudo netplan apply')
+         self.runInShell('netplan apply')
       except:
          self.endBlock(False)
          raise
@@ -419,10 +474,10 @@ network:
 
       contentBase64 = self.makeBase64(contentString)
       try:
-         commands = 'echo \\\"{contentBase64}\\\" | base64 -d | sudo tee {fileName}'.format(
+         commands = 'echo "{contentBase64}" | base64 -d | tee {fileName}'.format(
                        fileName = fileName, contentBase64 = contentBase64)
          if makeExecutable == True:
-            commands = commands + ' && \\\nsudo chmod +x {fileName}'.format(fileName = fileName)
+            commands = commands + ' && \\\nchmod +x {fileName}'.format(fileName = fileName)
          self.runInShell(commands)
       except:
          self.endBlock(False)
@@ -435,7 +490,7 @@ network:
    def executeFromString(self, commandLineString):
       commandLineBase64 = self.makeBase64(commandLineString)
       try:
-         commands = 'echo \\\"{commandLineBase64}\\\" | base64 -d | /bin/bash -x'.format(
+         commands = 'echo "{commandLineBase64}" | base64 -d | /bin/bash -x'.format(
                        commandLineBase64 = commandLineBase64)
          self.runInShell(commands)
       except:
@@ -448,7 +503,8 @@ network:
       self.beginBlock('Testing networking')
 
       try:
-         commands = 'ping -W{timeout}  -i{interval} -c3 {destination}'.format(
+         # Try Ping for up to 1 minute ...
+         commands = 'for i in 1 2 3 4 5 6 ; do ping -W{timeout}  -i{interval} -c3 {destination} && break || echo "Sleeping ..." && sleep 10 ; done'.format(
             destination = str(destination),
             timeout     = timeout,
             interval    = interval
@@ -468,7 +524,7 @@ network:
       try:
          # Trying the most straightforward solution: explicitly calling the
          # updater script, to make sure it finishes!
-         self.runInShell('sudo /usr/lib/apt/apt.systemd.daily')
+         self.runInShell('/usr/lib/apt/apt.systemd.daily')
       except:
          self.endBlock(False)
          raise
@@ -476,14 +532,20 @@ network:
       self.endBlock()
 
 
+   # ###### Add APT repository ##############################################
+   def aptAddRepository(self, repository):
+      commands = 'apt-add-repository -ny ' + repository
+      self.runInShell(commands)
+
+
    # ###### Install packages with APT #######################################
    def aptInstallPackages(self, packages, update = True):
       if len(packages) > 0:
          if update == True:
-            commands = 'sudo apt update && \\\n'
+            commands = 'apt update && \\\n'
          else:
             commands = ''
-         commands = commands + 'sudo env DEBIAN_FRONTEND=noninteractive apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends'
+         commands = commands + 'env DEBIAN_FRONTEND=noninteractive apt install -y -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --no-install-recommends'
          for package in packages:
             commands = commands + ' ' + package
          self.runInShell(commands)
@@ -491,7 +553,7 @@ network:
 
    # ###### Install packages with PIP #######################################
    def pipInstallPackages(self, packages, pipVersion = 3):
-      commands = 'sudo '
+      commands = ''
       if pipVersion == None:
          commands = commands + 'pip '
       else:
@@ -505,7 +567,9 @@ network:
    # ###### Write .gitconfig ################################################
    def configureGit(self, name, email):
       self.beginBlock('Configuring Git')
-      self.createFileFromString('/home/nornetpp/.gitconfig', """\
+
+      gitConfig = os.path.join(self.HomeDirectory, '.gitconfig')
+      self.createFileFromString(gitConfig, """\
 [user]
         name = {name}
         email = {email}
@@ -513,10 +577,8 @@ network:
         default = simple
 [color]
         ui = auto
-[credential]
-        helper = store
 """.format(name = name, email = email))
-      self.runInShell('sudo chown nornetpp:nornetpp /home/nornetpp/.gitconfig')
+      self.runInShell('chown ' + self.User + ':' + self.Group + ' ' + gitConfig)
       self.endBlock()
 
 
@@ -586,12 +648,12 @@ exit 1   # With exit code 1, no further files in /etc/system-info.d are processe
 
    # ###### Install SysStat #################################################
    def installSysStat(self):
-      self.beginBlock('Setting up sysstat service')
+      self.beginBlock('Setting up SysStat service')
       self.aptInstallPackages([ 'sysstat' ], False)
       self.executeFromString("""\
-sudo sed -e "s/^ENABLED=.*$/ENABLED=\\"true\\"/g" -i /etc/default/sysstat && \\
-sudo sed -e "s/^SADC_OPTIONS=.*$/SADC_OPTIONS=\\"-S ALL\\"/g" -i /etc/sysstat/sysstat && \\
-sudo service sysstat restart""")
+sed -e "s/^ENABLED=.*$/ENABLED=\"true\"/g" -i /etc/default/sysstat && \
+sed -e "s/^SADC_OPTIONS=.*$/SADC_OPTIONS=\\"-S ALL\\"/g" -i /etc/sysstat/sysstat && \
+service sysstat restart""")
       self.endBlock()
 
 
@@ -601,9 +663,10 @@ sudo service sysstat restart""")
 
       try:
          commands = """\
-cd /home/nornetpp/src && \\
-if [ ! -d \\\"{gitDirectory}\\\" ] ; then git clone --quiet {gitRepository} {gitDirectory} && cd {gitDirectory} ; else cd {gitDirectory} && git pull ; fi && \\
+cd {homeDirectory}/src && \
+if [ ! -d "{gitDirectory}" ] ; then git clone --quiet {gitRepository} {gitDirectory} && cd {gitDirectory} ; else cd {gitDirectory} && git pull ; fi && \
 git checkout {gitCommit}""".format(
+            homeDirectory    = self.HomeDirectory,
             gitRepository    = gitRepository,
             gitDirectory     = gitDirectory,
             gitCommit        = gitCommit
@@ -619,6 +682,6 @@ git checkout {gitCommit}""".format(
    # ###### Clean up ########################################################
    def cleanUp(self):
       self.beginBlock('Cleaning up')
-      commands = """sudo updatedb"""
+      commands = """if [ -e /usr/bin/updatedb ] ; then /usr/bin/updatedb ; fi"""
       self.runInShell(commands)
       self.endBlock()

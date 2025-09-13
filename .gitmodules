@@ -7,3 +7,27 @@
 [submodule "vmimage-builder-scripts"]
 	path = vmimage-builder-scripts
 	url = https://github.com/simula/nornet-vmimage-builder-scripts.git
+[submodule "juju/flexrancharm/mod/operator"]
+	path = juju/flexrancharm/mod/operator
+	url = https://github.com/canonical/operator
+[submodule "juju/hsscharm/mod/operator"]
+	path = juju/hsscharm/mod/operator
+	url = https://github.com/canonical/operator
+[submodule "juju/mmecharm/mod/operator"]
+	path = juju/mmecharm/mod/operator
+	url = https://github.com/canonical/operator
+[submodule "juju/spgwucharm/mod/operator"]
+	path = juju/spgwucharm/mod/operator
+	url = https://github.com/canonical/operator
+[submodule "juju/spgwccharm/mod/operator"]
+	path = juju/spgwccharm/mod/operator
+	url = https://github.com/canonical/operator
+[submodule "juju/p4sscharm/mod/operator"]
+	path = juju/p4sscharm/mod/operator
+	url = https://github.com/canonical/operator
+[submodule "juju/p4ovscharm/mod/operator"]
+	path = juju/p4ovscharm/mod/operator
+	url = https://github.com/canonical/operator
+[submodule "juju/oai5gdockercharm/mod/operator"]
+	path = juju/oai5gdockercharm/mod/operator
+	url = https://github.com/canonical/operator

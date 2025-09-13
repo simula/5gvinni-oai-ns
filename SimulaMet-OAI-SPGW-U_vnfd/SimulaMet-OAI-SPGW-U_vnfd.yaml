@@ -1,0 +1,198 @@
+vnfd:
+# =====================================================================
+#     #######  #####          #     #   ###   #     # #     #   ###
+#     #       #     #         #     #    #    ##    # ##    #    #
+#     #       #               #     #    #    # #   # # #   #    #
+#      #####  #  ####  #####  #     #    #    #  #  # #  #  #    #
+#           # #     #          #   #     #    #   # # #   # #    #
+#     #     # #     #           # #      #    #    ## #    ##    #
+#      #####   #####             #      ###   #     # #     #   ###
+# =====================================================================
+#
+# SimulaMet OpenAirInterface Evolved Packet Core VNF
+# Copyright (C) 2019-2023 by Thomas Dreibholz
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Contact: dreibh@simula.no
+
+  id: SimulaMet-OAI-SPGW-U_vnfd
+  product-name: SimulaMet-OAI-SPGW-U_vnfd
+  description: SimulaMet OpenAirInterface SPGW-U VNF
+  provider: Thomas Dreibholz
+  version: 3.0
+
+  # ###### External Connection Points #######################################
+  ext-cpd:
+    - id: spgwu-mgmt-cp-ext
+      int-cpd:
+        cpd: ens3-int
+        vdu-id: SPGWU
+    - id: spgwu-sxab-cp-ext
+      int-cpd:
+        cpd: ens4-int
+        vdu-id: SPGWU
+    - id: spgwu-s1u-cp-ext
+      int-cpd:
+        cpd: ens5-int
+        vdu-id: SPGWU
+      port-security-enabled: false
+    - id: spgwu-sgi-cp-ext
+      int-cpd:
+        cpd: ens6-int
+        vdu-id: SPGWU
+      port-security-enabled: false
+  mgmt-cp: spgwu-mgmt-cp-ext
+
+  # ###### VNF Definition ###################################################
+  df:
+    - id: default-df
+      instantiation-level:
+        - id: default-instantiation-level
+          vdu-level:
+            - number-of-instances: 1
+              vdu-id: SPGWU
+      vdu-profile:
+        - id: SPGWU
+          min-number-of-instances: 1
+
+      lcm-operations-configuration:
+        operate-vnf-op-config:
+          day1-2:
+            - id: SPGWU
+              config-access:
+                ssh-access:
+                  default-user: ubuntu
+                  required: true
+
+              # ====== Execution environment ================================
+              execution-environment-list:
+                - id: spgwucharm-ee
+                  juju:
+                    charm: spgwucharm
+                    proxy: false
+
+              # ====== Configuration primitives =============================
+              initial-config-primitive:
+
+                - seq: 1
+                  name: prepare-spgwu-build
+                  execution-environment-ref: spgwucharm-ee
+                  parameter:
+                    - name: spgwu-git-repository
+                      value: <spgwu_git_repository>
+                    - name: spgwu-git-commit
+                      value: <spgwu_git_commit>
+                    - name: spgwu-S1U-ipv4-interface
+                      value: <spgwu_S1U_ipv4_interface>
+                    - name: spgwu-S1U-ipv4-gateway
+                      value: <spgwu_S1U_ipv4_gateway>
+                    - name: spgwu-SGi-ipv4-interface
+                      value: <spgwu_SGi_ipv4_interface>
+                    - name: spgwu-SGi-ipv4-gateway
+                      value: <spgwu_SGi_ipv4_gateway>
+                    - name: spgwu-SGi-ipv6-interface
+                      value: <spgwu_SGi_ipv6_interface>
+                    - name: spgwu-SGi-ipv6-gateway
+                      value: <spgwu_SGi_ipv6_gateway>
+
+                - seq: 2
+                  name: configure-spgwu
+                  execution-environment-ref: spgwucharm-ee
+                  parameter:
+                    - name: spgwu-spgwc-list
+                      value: <spgwu_spgwc_list>
+
+                - seq: 3
+                  name: restart-spgwu
+                  execution-environment-ref: spgwucharm-ee
+
+              # ====== Metrics ==============================================
+              metrics:
+                - name: system_random
+                - name: system_uptime
+                - name: system_users
+                - name: cpu_processes
+                - name: cpu_load_current
+                - name: cpu_load_1min
+                - name: cpu_load_5min
+                - name: cpu_load_15min
+                - name: memory_ram_usage
+                - name: memory_swap_usage
+                - name: disk_usage
+                - name: network_mgmt_bytes_in
+                - name: network_mgmt_packets_in
+                - name: network_mgmt_bytes_out
+                - name: network_mgmt_packets_out
+                - name: network_SXab_bytes_in
+                - name: network_SXab_packets_in
+                - name: network_SXab_bytes_out
+                - name: network_SXab_packets_out
+                - name: network_S1U_bytes_in
+                - name: network_S1U_packets_in
+                - name: network_S1U_bytes_out
+                - name: network_S1U_packets_out
+                - name: network_SGi_bytes_in
+                - name: network_SGi_packets_in
+                - name: network_SGi_bytes_out
+                - name: network_SGi_packets_out
+
+  # ###### VDU Configuration ################################################
+  sw-image-desc:
+    - id: ubuntu18.04
+      name: ubuntu18.04
+      image: ubuntu18.04
+  vdu:
+    - id: SPGWU
+      name: SPGWU
+      description: SPGWU
+      cloud-init-file: spgwu-init
+      sw-image-desc: ubuntu18.04
+      virtual-compute-desc: SPGWU-compute
+      virtual-storage-desc:
+        - SPGWU-storage
+      int-cpd:
+        - id: ens3-int
+          virtual-network-interface-requirement:
+            - name: ens3
+              virtual-interface:
+                type: PARAVIRT
+        - id: ens4-int
+          virtual-network-interface-requirement:
+            - name: ens4
+              virtual-interface:
+                type: PARAVIRT
+        - id: ens5-int
+          virtual-network-interface-requirement:
+            - name: ens5
+              virtual-interface:
+                type: PARAVIRT
+        - id: ens6-int
+          virtual-network-interface-requirement:
+            - name: ens6
+              virtual-interface:
+                type: PARAVIRT
+
+  # ====== Compute ==========================================================
+  virtual-compute-desc:
+    - id: SPGWU-compute
+      virtual-cpu:
+        num-virtual-cpu: 4
+      virtual-memory:
+        size: 3.0
+
+  # ====== Storage ==========================================================
+  virtual-storage-desc:
+    - id: SPGWU-storage
+      size-of-storage: 64

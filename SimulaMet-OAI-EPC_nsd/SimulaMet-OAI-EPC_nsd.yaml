@@ -1,3 +1,4 @@
+nsd:
 # =====================================================================
 #     #######  #####          #     #   ###   #     # #     #   ###
 #     #       #     #         #     #    #    ##    # ##    #    #
@@ -9,7 +10,7 @@
 # =====================================================================
 #
 # SimulaMet OpenAirInterface Evolved Packet Core NS
-# Copyright (C) 2019-2020 by Thomas Dreibholz
+# Copyright (C) 2019-2023 by Thomas Dreibholz
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -26,75 +27,104 @@
 #
 # Contact: dreibh@simula.no
 
-nsd:nsd-catalog:
   nsd:
     - id: SimulaMet-OAI-EPC_nsd
       name: SimulaMet-OAI-EPC_nsd
-      short-name: SimulaMet-OAI-EPC_nsd
       description: SimulaMet OpenAirInterface Evolved Packet Core NS
-      vendor: Thomas Dreibholz
-      version: '1.0'
-      logo: NorNet.png
+      version: 2.0
+      designer: Thomas Dreibholz
 
-      # ###### VNFDs that are part of this NSD ##############################
-      constituent-vnfd:
-        - member-vnf-index: 1
-          vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
-
-      # ###### VLDs #########################################################
-      vld:
-        # ====== Management =================================================
-        - id: SimulaMet-OAI-EPC_nsd-Management
-          name: SimulaMet-OAI-EPC_nsd-Management
-          short-name: SimulaMet-OAI-EPC_nsd-Management
+      # ###### Connections ##################################################
+      virtual-link-desc:
+        - id: Management
           mgmt-network: 'true'
-          type: ELAN
-          vim-network-name: mgmt
-          vnfd-connection-point-ref:
-            - member-vnf-index-ref: 1
-              vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
-              vnfd-connection-point-ref: mme-mgmt-cp
-            - member-vnf-index-ref: 1
-              vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
-              vnfd-connection-point-ref: hss-mgmt-cp
-            - member-vnf-index-ref: 1
-              vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
-              vnfd-connection-point-ref: spgwc-mgmt-cp
-            - member-vnf-index-ref: 1
-              vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
-              vnfd-connection-point-ref: spgwu-mgmt-cp
+        - id: S1-C
+        - id: S1-U
+        - id: SGi
+        - id: S6a
+        - id: S11
+        - id: SXab
 
-        # ====== S1-C =======================================================
-        - id: SimulaMet-OAI-EPC_nsd-S1C
-          name: SimulaMet-OAI-EPC_nsd-S1C
-          short-name: SimulaMet-OAI-EPC_nsd-S1C
-          type: ELAN
-          vim-network-name: nornet-simula
-          vnfd-connection-point-ref:
-            - member-vnf-index-ref: 1
-              vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
-              vnfd-connection-point-ref: mme-s1c-cp
-              #ip-address: 192.168.247.102
+      # ###### Used VNFDs ###################################################
+      vnfd-id:
+        - SimulaMet-OAI-HSS_vnfd
+        - SimulaMet-OAI-MME_vnfd
+        - SimulaMet-OAI-SPGW-C_vnfd
+        - SimulaMet-OAI-SPGW-U_vnfd
 
-        # ====== S1-U =======================================================
-        - id: SimulaMet-OAI-EPC_nsd-S1U
-          name: SimulaMet-OAI-EPC_nsd-S1U
-          short-name: SimulaMet-OAI-EPC_nsd-S1U
-          type: ELAN
-          vim-network-name: nornet-simula
-          vnfd-connection-point-ref:
-            - member-vnf-index-ref: 1
-              vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
-              vnfd-connection-point-ref: spgwu-s1u-cp
-              #ip-address: 192.168.248.159
+      # ###### NS Definition ################################################
+      df:
+        - id: default-df
+          vnf-profile:
 
-        # ====== SGi ========================================================
-        - id: SimulaMet-OAI-EPC_nsd-SGi
-          name: SimulaMet-OAI-EPC_nsd-SGi
-          short-name: SimulaMet-OAI-EPC_nsd-SGi
-          type: ELAN
-          vim-network-name: nornet-simula
-          vnfd-connection-point-ref:
-            - member-vnf-index-ref: 1
-              vnfd-id-ref: SimulaMet-OAI-EPC_vnfd
-              vnfd-connection-point-ref: spgwu-sgi-cp
+            # ====== HSS ====================================================
+            - id: '1'
+              virtual-link-connectivity:
+                - constituent-cpd-id:
+                    - constituent-base-element-id: '1'
+                      constituent-cpd-id: hss-mgmt-cp-ext
+                  virtual-link-profile-id: Management
+                - constituent-cpd-id:
+                    - constituent-base-element-id: '2'
+                      constituent-cpd-id: hss-s6a-cp-ext
+                  virtual-link-profile-id: S6a
+              vnfd-id: SimulaMet-OAI-HSS_vnfd
+
+            # ====== MME ====================================================
+            - id: '2'
+              virtual-link-connectivity:
+                - constituent-cpd-id:
+                    - constituent-base-element-id: '1'
+                      constituent-cpd-id: mme-mgmt-cp-ext
+                  virtual-link-profile-id: Management
+                - constituent-cpd-id:
+                    - constituent-base-element-id: '2'
+                      constituent-cpd-id: mme-s6a-cp-ext
+                  virtual-link-profile-id: S6a
+                - constituent-cpd-id:
+                    - constituent-base-element-id: '3'
+                      constituent-cpd-id: mme-s11-cp-ext
+                  virtual-link-profile-id: S11
+                - constituent-cpd-id:
+                    - constituent-base-element-id: '4'
+                      constituent-cpd-id: mme-s1c-cp-ext
+                  virtual-link-profile-id: S1-C
+              vnfd-id: SimulaMet-OAI-MME_vnfd
+
+            # ====== SPGW-C =================================================
+            - id: '3'
+              virtual-link-connectivity:
+                - constituent-cpd-id:
+                    - constituent-base-element-id: '1'
+                      constituent-cpd-id: spgwc-mgmt-cp-ext
+                  virtual-link-profile-id: Management
+                - constituent-cpd-id:
+                    - constituent-base-element-id: '2'
+                      constituent-cpd-id: spgwc-sxab-cp-ext
+                  virtual-link-profile-id: SXab
+                - constituent-cpd-id:
+                    - constituent-base-element-id: '3'
+                      constituent-cpd-id: spgwc-s11-cp-ext
+                  virtual-link-profile-id: S11
+              vnfd-id: SimulaMet-OAI-SPGW-C_vnfd
+
+            # ====== SPGW-U =================================================
+            - id: '4'
+              virtual-link-connectivity:
+                - constituent-cpd-id:
+                    - constituent-base-element-id: '1'
+                      constituent-cpd-id: spgwu-mgmt-cp-ext
+                  virtual-link-profile-id: Management
+                - constituent-cpd-id:
+                    - constituent-base-element-id: '2'
+                      constituent-cpd-id: spgwu-sxab-cp-ext
+                  virtual-link-profile-id: SXab
+                - constituent-cpd-id:
+                    - constituent-base-element-id: '3'
+                      constituent-cpd-id: spgwu-s1u-cp-ext
+                  virtual-link-profile-id: S1-U
+                - constituent-cpd-id:
+                    - constituent-base-element-id: '4'
+                      constituent-cpd-id: spgwu-sgi-cp-ext
+                  virtual-link-profile-id: SGi
+              vnfd-id: SimulaMet-OAI-SPGW-U_vnfd

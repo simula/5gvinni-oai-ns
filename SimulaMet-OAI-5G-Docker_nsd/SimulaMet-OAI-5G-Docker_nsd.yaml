@@ -1,0 +1,62 @@
+# =====================================================================
+#     #######  #####          #     #   ###   #     # #     #   ###
+#     #       #     #         #     #    #    ##    # ##    #    #
+#     #       #               #     #    #    # #   # # #   #    #
+#      #####  #  ####  #####  #     #    #    #  #  # #  #  #    #
+#           # #     #          #   #     #    #   # # #   # #    #
+#     #     # #     #           # #      #    #    ## #    ##    #
+#      #####   #####             #      ###   #     # #     #   ###
+# =====================================================================
+#
+# SimulaMet OAI-5G-Docker NS
+# Copyright (C) 2019-2023 by Thomas Dreibholz
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Contact: dreibh@simula.no
+
+nsd:
+  nsd:
+    - id: SimulaMet-OAI-5G-Docker_nsd
+      name: SimulaMet-OAI-5G-Docker_nsd
+      description: SimulaMet OpenAirInterface 5G Docker NS
+      designer: Thomas Dreibholz
+      version: 1.0
+
+      # ###### Connections ##################################################
+      virtual-link-desc:
+        - id: Management
+          mgmt-network: 'true'
+          vim-network-name: osm-management
+        - id: OAI-5G-Docker
+
+      # ###### Used VNFDs ###################################################
+      vnfd-id:
+        - SimulaMet-OAI-5G-Docker_vnfd
+
+      # ###### NS Definition ################################################
+      df:
+        - id: default-df
+          vnf-profile:
+            - id: '1'
+              virtual-link-connectivity:
+                - constituent-cpd-id:
+                    - constituent-base-element-id: '1'
+                      constituent-cpd-id: oai5gdocker-mgmt-cp-ext
+                  virtual-link-profile-id: Management
+                - constituent-cpd-id:
+                    - constituent-base-element-id: '1'
+                      constituent-cpd-id: oai5gdocker-service-cp-ext
+                  virtual-link-profile-id: OAI-5G-Docker
+              vnfd-id: SimulaMet-OAI-5G-Docker_vnfd

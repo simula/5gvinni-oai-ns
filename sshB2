@@ -1,0 +1,7 @@
+#!/bin/sh
+
+HOST="10.132.13.211"
+
+ssh-keygen -q -R ${HOST}
+echo "SSH to MME in Core #2 ..."
+ssh -CX -oStrictHostKeyChecking=no ubuntu@${HOST}

@@ -1,0 +1,17 @@
+#!/bin/bash -ex
+
+# Work-around for installation issue:
+# https://app.slack.com/client/TA2TL9TB2/CA6UEUSBT/thread/CA6UEUSBT-1644503663.275889
+
+
+# Clone the master branch of the OSM devops repo
+git clone http://osm.etsi.org/gerrit/osm/devops.git
+# Install the monitoring component
+devops/installers/k8s/install_osm_k8s_monitoring.sh
+
+# Update the OSM grafana configuration (name of a datasource)
+kubectl -n osm apply -f devops/installers/docker/osm_pods/grafana.yaml
+
+# Restart the grafana pod to take changes
+export GRAFANA_POD=$(kubectl get pods -n osm -l "app=grafana" -o jsonpath="{.items[0].metadata.name}")
+kubectl -n osm delete pod $GRAFANA_POD

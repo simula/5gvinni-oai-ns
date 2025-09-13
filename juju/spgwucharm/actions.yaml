@@ -9,7 +9,7 @@
 # =====================================================================
 #
 # SimulaMet OpenAirInterface Evolved Packet Core VNF and NS
-# Copyright (C) 2019-2020 by Thomas Dreibholz
+# Copyright (C) 2019-2023 by Thomas Dreibholz
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -44,15 +44,15 @@ prepare-spgwu-build:
     spgwu-S1U-ipv4-gateway:
       description: SPGW-U S1U IPv4 gateway
       type: string
-      default: 0.0.0.0
+      default: ''
     spgwu-SGi-ipv4-interface:
       description: SPGW-U SGi IPv4 interface
       type: string
-      default: 10.254.1.203/24
+      default: 10.132.12.230/24
     spgwu-SGi-ipv4-gateway:
       description: SPGW-U SGi IPv4 gateway
       type: string
-      default: 10.254.1.1
+      default: 10.132.12.1
     spgwu-SGi-ipv6-interface:
       description: SPGW-U SGi IPv6 interface
       type: string
@@ -61,6 +61,14 @@ prepare-spgwu-build:
       description: SPGW-U SGi IPv6 gateway
       type: string
       default: 3ffe::1
+    git-name:
+      description: Git name
+      type: string
+      default: Thomas Dreibholz
+    git-email:
+      description: Git E-mail
+      type: string
+      default: dreibh@simula.no
   required:
     - spgwu-git-repository
     - spgwu-git-commit

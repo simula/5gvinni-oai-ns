@@ -9,7 +9,7 @@
 # =====================================================================
 #
 # SimulaMet P4-OvS VNF and NS
-# Copyright (C) 2021 by Thomas Dreibholz
+# Copyright (C) 2021-2023 by Thomas Dreibholz
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,13 +28,6 @@
 
 configure-p4ovs:
   description: Configures P4-OvS
-  #params:
-    #network-users:
-      #description: Number of users
-      #type: string
-      #default: '1024'
-  #required:
-    #- network-users
 
 restart-p4ovs:
   description: Restarts P4-OvS

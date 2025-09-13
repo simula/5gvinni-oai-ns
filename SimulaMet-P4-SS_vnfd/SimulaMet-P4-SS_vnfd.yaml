@@ -1,0 +1,169 @@
+# =====================================================================
+#     #######  #####          #     #   ###   #     # #     #   ###
+#     #       #     #         #     #    #    ##    # ##    #    #
+#     #       #               #     #    #    # #   # # #   #    #
+#      #####  #  ####  #####  #     #    #    #  #  # #  #  #    #
+#           # #     #          #   #     #    #   # # #   # #    #
+#     #     # #     #           # #      #    #    ## #    ##    #
+#      #####   #####             #      ###   #     # #     #   ###
+# =====================================================================
+#
+# SimulaMet P4SS VNF
+# Copyright (C) 2019-2023 by Thomas Dreibholz
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Contact: dreibh@simula.no
+
+vnfd:
+  id: SimulaMet-P4-SS_vnfd
+  product-name: SimulaMet-P4-SS_vnfd
+  description: SimulaMet P4-SS VNF
+  provider: Thomas Dreibholz
+  version: 3.0
+
+  # ###### External Connection Points #####################################
+  mgmt-cp: p4ss-mgmt-cp-ext
+  ext-cpd:
+    - id: p4ss-mgmt-cp-ext
+      int-cpd:
+        cpd: ens3-int
+        vdu-id: P4SS
+    - id: p4ss-service-port1-cp-ext
+      int-cpd:
+        cpd: ens4-int
+        vdu-id: P4SS
+      port-security-enabled: false
+    - id: p4ss-service-port2-cp-ext
+      int-cpd:
+        cpd: ens5-int
+        vdu-id: P4SS
+      port-security-enabled: false
+
+  # ###### VNF definition ###################################################
+  df:
+    - id: default-df
+      instantiation-level:
+        - id: default-instantiation-level
+          vdu-level:
+            - number-of-instances: 1
+              vdu-id: P4SS
+      vdu-profile:
+        - id: P4SS
+          min-number-of-instances: 1
+
+      lcm-operations-configuration:
+        operate-vnf-op-config:
+          day1-2:
+            - id: P4SS
+              config-access:
+                ssh-access:
+                  default-user: ubuntu
+                  required: true
+
+              # ====== Execution environment ================================
+              execution-environment-list:
+                - id: p4sscharm-ee
+                  juju:
+                    charm: p4sscharm
+                    proxy: false
+
+              # ====== Configuration primitives =============================
+              initial-config-primitive:
+
+                - seq: 1
+                  name: prepare-p4ss-build
+                  execution-environment-ref: p4sscharm-ee
+                  parameter:
+                    - name: p4ss-git-repository
+                      value: <p4ss_git_repository>
+                    - name: p4ss-git-commit
+                      value: <p4ss_git_commit>
+
+                - seq: 2
+                  name: configure-p4ss
+                  execution-environment-ref: p4sscharm-ee
+
+                - seq: 3
+                  name: restart-p4ss
+                  execution-environment-ref: p4sscharm-ee
+
+              # ====== Metrics ==============================================
+              metrics:
+                - name: system_random
+                - name: system_uptime
+                - name: system_users
+                - name: cpu_processes
+                - name: cpu_load_1min
+                - name: cpu_load_5min
+                - name: cpu_load_15min
+                - name: memory_ram_usage
+                - name: memory_swap_usage
+                - name: disk_usage
+                - name: network_mgmt_bytes_in
+                - name: network_mgmt_packets_in
+                - name: network_mgmt_bytes_out
+                - name: network_mgmt_packets_out
+                - name: network_service_port1_bytes_in
+                - name: network_service_port1_packets_in
+                - name: network_service_port1_bytes_out
+                - name: network_service_port1_packets_out
+                - name: network_service_port2_bytes_in
+                - name: network_service_port2_packets_in
+                - name: network_service_port2_bytes_out
+                - name: network_service_port2_packets_out
+
+  # ###### VDU Configuration ################################################
+  sw-image-desc:
+    - id: ubuntu20.04
+      image: ubuntu20.04
+      name: ubuntu20.04
+  vdu:
+    - cloud-init-file: p4ss-init
+      description: P4 SS
+      id: P4SS
+      int-cpd:
+        - id: ens3-int
+          virtual-network-interface-requirement:
+            - name: ens3
+              virtual-interface:
+                type: PARAVIRT
+        - id: ens4-int
+          virtual-network-interface-requirement:
+            - name: ens4
+              virtual-interface:
+                type: PARAVIRT
+        - id: ens5-int
+          virtual-network-interface-requirement:
+            - name: ens5
+              virtual-interface:
+                type: PARAVIRT
+      name: P4SS
+      sw-image-desc: ubuntu20.04
+      virtual-compute-desc: P4SS-compute
+      virtual-storage-desc:
+        - P4SS-storage
+
+  # ====== Compute ========================================================
+  virtual-compute-desc:
+    - id: P4SS-compute
+      virtual-cpu:
+        num-virtual-cpu: 4
+      virtual-memory:
+        size: 4.0
+
+  # ====== Storage ========================================================
+  virtual-storage-desc:
+    - id: P4SS-storage
+      size-of-storage: 64

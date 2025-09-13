@@ -1,7 +1,7 @@
 #!/bin/sh
 
-HOST="10.208.0.218"
+HOST="10.132.13.204"
 
 ssh-keygen -q -R ${HOST}
 echo "SSH to FlexRAN Controller ..."
-ssh -CX -oStrictHostKeyChecking=no nornetpp@${HOST}
+ssh -CX -oStrictHostKeyChecking=no ubuntu@${HOST}

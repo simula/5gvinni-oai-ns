@@ -1,0 +1,7 @@
+#!/bin/sh
+
+HOST="10.132.13.230"
+
+ssh-keygen -q -R ${HOST}
+echo "SSH to HSS in Core #4 ..."
+ssh -CX -oStrictHostKeyChecking=no ubuntu@${HOST}

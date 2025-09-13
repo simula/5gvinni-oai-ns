@@ -1,0 +1,93 @@
+#!/bin/bash -e
+
+# apt install -y docker.io
+#
+# # !!! git clone -b <prefered_branch or develop> https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-amf.git /openair-amf
+# git clone -b v1.5.1 https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-amf.git /openair-amf
+#
+# # !!! docker run --privileged -d --name oai-amf-development --volume openair-amf:/openair-amf  ubuntu:bionic sleep infinity
+# docker run --privileged -d --name oai-amf-development --volume openair-amf:/openair-amf  ubuntu:jammy sleep infinity
+#
+# docker exec -it oai-amf-development bash
+# # below command is same for all network functions
+# sudo apt update && apt install psmisc software-properties-common git vim nano joe gnupg
+# # now you can peform the build
+# cd /openair-amf/build/scripts
+# /build_amf --install-deps --force
+# /build_amf --clean --Verbose --build-type Debug --jobs
+
+
+
+
+# apt install -y docker.io
+
+
+# Required:
+# * Access and Mobility Management Function (AMF)
+# * Authentication Server Management Function (AUSF)
+# * Network Repository Function (NRF)
+# * Session Management Function (SMF)
+# * Unified Data Management (UDM)
+#   - Simple Implementation based on our 4G CUPS component (SPGWU-TINY)
+#   - VPP-Based Implementation (UPF-VPP)
+# * Unified Data Repository (UDR)
+
+# Not required for now:
+# * Network Slicing Selection Function (NSSF)
+# * Network Data Analytics Function (NWDAF)
+# * Unstructured Data Storage Function (UDSF)
+# * Network Exposure Function (NEF)
+# * Policy Control Function (PCF)
+
+
+declare -a TAGS
+TAG_SPGWU_TINY="v1.5.1"
+TAG_AMF="v1.5.1"
+TAG_SMF="v1.5.1"
+TAG_NRF="v1.5.1"
+TAG_UDM="v1.5.1"
+TAG_UDR="v1.5.1"
+TAG_AUSF="v1.5.1"
+TAG_NSSF="v1.5.1"
+TAG_NEF="v1.5.1"
+TAG_PCF="v1.5.1"
+
+
+mkdir -p ~/src/oai-cn5g
+cd ~/src/oai-cn5g
+for component in spgwu-tiny   amf smf nrf udr udm ausf   nssf nef pcf ; do
+
+   echo "====== Cloning ${component^^} ======"
+
+   if [ ! -d oai-cn5g-${component} ] ; then
+      if [ "${component}" == "spgwu-tiny" ] ; then
+         git clone -b ${TAG_SPGWU_TINY} --recursive https://github.com/OPENAIRINTERFACE/openair-spgwu-tiny.git oai-cn5g-${component}
+      else
+         tag=`eval "echo \\\$TAG_${component^^}"`
+         if [ "${tag}" == "" ] ; then
+            echo >&2 "ERROR: Missing tag for ${component^^}!"
+            exit 1
+         fi
+         git clone -b ${tag} --recursive https://gitlab.eurecom.fr/oai/cn5g/oai-cn5g-${component}.git oai-cn5g-${component}
+      fi
+      cd oai-cn5g-${component}
+   else
+      cd oai-cn5g-${component}
+   fi
+
+
+   echo "====== Preparing build of ${component^^} ======"
+   cd build/scripts/
+   if [ "${component}" == "spgwu-tiny" ] ; then
+      ./build_spgwu --install-deps --force
+      ./build_spgwu --clean --Verbose --build-type Debug --jobs
+   else
+      ./build_${component} --install-deps --force
+      ./build_${component} --clean --Verbose --build-type Debug --jobs
+   fi
+
+
+   echo "====== Finished build of ${component^^} ======"
+   cd ~/src/oai-cn5g
+
+done

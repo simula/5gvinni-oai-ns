@@ -1,7 +1,0 @@
-#!/bin/sh
-
-HOST="10.208.0.210"
-
-ssh-keygen -q -R ${HOST}
-echo "SSH to HSS in Core #1 ..."
-ssh -CX -oStrictHostKeyChecking=no nornetpp@${HOST}

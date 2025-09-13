@@ -1,0 +1,63 @@
+# =====================================================================
+#     #######  #####          #     #   ###   #     # #     #   ###
+#     #       #     #         #     #    #    ##    # ##    #    #
+#     #       #               #     #    #    # #   # # #   #    #
+#      #####  #  ####  #####  #     #    #    #  #  # #  #  #    #
+#           # #     #          #   #     #    #   # # #   # #    #
+#     #     # #     #           # #      #    #    ## #    ##    #
+#      #####   #####             #      ###   #     # #     #   ###
+# =====================================================================
+#
+# SimulaMet FlexRAN VNF and NS
+# Copyright (C) 2019-2023 by Thomas Dreibholz
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Contact: dreibh@simula.no
+
+# The following line tells "create-instance" the name of the NSD:
+#! NSD SimulaMet-FlexRAN_nsd
+
+# ###### VNF Parameters #####################################################
+additionalParamsForVnf:
+  # ====== FlexRAN ==========================================================
+  - member-vnf-index: '1'
+    additionalParams:
+      flexran_git_repository: 'https://github.com/simula/mosaic5g-mosaic5g.git'
+      flexran_git_commit: 'master'
+      flexran_service_ipv4_interface: '192.168.246.100/24'
+      flexran_service_ipv4_gateway: '0.0.0.0'
+      flexran_service_ipv6_interface: ''
+      flexran_service_ipv6_gateway: ''
+
+      password: 'osm4us'
+
+
+# ###### Addresses ##########################################################
+vld:
+  # ====== Management =======================================================
+  - name: Management
+    vim-network-name: osm-management
+    vnfd-connection-point-ref:
+      - member-vnf-index-ref: '1'
+        vnfd-connection-point-ref: flexran-mgmt-cp-ext
+        ip-address: 10.132.13.204
+
+  # ====== FlexRAN ==========================================================
+  - name: FlexRAN
+    vim-network-name: 5gvinni-core1-flexran
+    vnfd-connection-point-ref:
+      - member-vnf-index-ref: '1'
+        vnfd-connection-point-ref: flexran-service-cp-ext
+        ip-address: 192.168.246.100
